@@ -2,7 +2,6 @@ graph TD
     %% Define Styles
     classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;
     classDef startEnd fill:#d4edda,stroke:#28a745,stroke-width:2px;
-    classDef linkNode fill:#e2f0d9,stroke:#385723,stroke-width:1px;
 
     %% Nodes
     Start([Week 1/2 Kickoff]) :::startEnd
@@ -19,7 +18,7 @@ graph TD
     subgraph LLM [4. Model Prompting & Inference]
         SelectSQL[Select Diverse SQL Complexity Levels]
         PromptQwen[Prompt Qwen 2.5 Coder]
-        PromptBase[Prompt Baselines: GPT-5 / Sonnet 4.6](baseline_model_prompt.md)
+        PromptBase[Prompt Baselines: GPT-5 / Sonnet 4.6]
     end
     
     subgraph Evaluation [5. Comparison & Analytics]
@@ -50,7 +49,8 @@ graph TD
     Metrics --> Visuals
     Visuals --> End
 
-    %% Hyperlinks for Interactive Rendering
+    %% Hyperlinks & Local Repo Files
     click Spider "https://yale-lily.github.io/spider" "Go to Spider Project"
     click Bird "https://bird-bench.github.io/" "Go to BIRD Bench"
     click HF "https://huggingface.co/datasets/xlangai/spider/viewer/spider" "Open HF Viewer"
+    click PromptBase "baseline_model_prompt.md" "Open Baseline Model Prompts"
