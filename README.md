@@ -1,3 +1,4 @@
+```mermaid
 graph TD
     %% Define Styles
     classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;
@@ -54,3 +55,4 @@ graph TD
     click Bird "https://bird-bench.github.io/" "Go to BIRD Bench"
     click HF "https://huggingface.co/datasets/xlangai/spider/viewer/spider" "Open HF Viewer"
     click PromptBase "baseline_model_prompt.md" "Open Baseline Model Prompts"
+```
