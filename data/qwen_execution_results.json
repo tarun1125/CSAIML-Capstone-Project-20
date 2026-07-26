@@ -1,0 +1,86 @@
+[
+  {
+    "id": "easy-1",
+    "question": "How many singers are there?",
+    "query": "db.singers.count_documents({})",
+    "status": "FAIL",
+    "error": "'int' object is not iterable"
+  },
+  {
+    "id": "easy-2",
+    "question": "What are the names of singers from France?",
+    "query": "db.singers.find({\"country\": \"France\"})",
+    "status": "PASS",
+    "result": []
+  },
+  {
+    "id": "easy-3",
+    "question": "Find the maximum weight of all pets.",
+    "query": "db.pets.aggregate([{\"$group\": {\"_id\": None, \"max_weight\": {\"$max\": \"$weight\"}}}])",
+    "status": "PASS",
+    "result": []
+  },
+  {
+    "id": "medium-1",
+    "question": "What are the names and ages of singers, ordered by age?",
+    "query": "db.singers.find({}, {\"name\": 1, \"age\": 1}).sort(\"age\")",
+    "status": "PASS",
+    "result": []
+  },
+  {
+    "id": "medium-2",
+    "question": "How many concerts were held in each stadium?",
+    "query": "db.concerts.aggregate([ { $group: { _id: \"$stadium_id\", count: { $sum: 1 } } } ])",
+    "status": "FAIL",
+    "error": "invalid syntax (<string>, line 1)"
+  },
+  {
+    "id": "medium-3",
+    "question": "Find pet types that have more than one pet, with their counts.",
+    "query": "db.pets.aggregate([ {\"$group\": {\"_id\": \"$pet_type\", \"count\": {\"$sum\": 1}}}, {\"$match\": {\"count\": {\"$gt\": 1}}}, {\"$sort\": {\"count\": -1}} ])",
+    "status": "PASS",
+    "result": []
+  },
+  {
+    "id": "high-1",
+    "question": "What are the names of singers who performed in a concert in 2014?",
+    "query": "db.singers.find({\"concerts.year\": \"2014\"})",
+    "status": "PASS",
+    "result": []
+  },
+  {
+    "id": "high-2",
+    "question": "Find the first names of students who have a dog as a pet.",
+    "query": "db.students.find({\"has_pet.pet_type\": \"dog\"})",
+    "status": "PASS",
+    "result": []
+  },
+  {
+    "id": "high-3",
+    "question": "For each country of origin, find the average miles per gallon of cars.",
+    "query": "db.cars.aggregate([ { $group: { _id: \"$origin\", avg_mpg: { $avg: \"$mpg\" } } } ])",
+    "status": "FAIL",
+    "error": "invalid syntax (<string>, line 1)"
+  },
+  {
+    "id": "complex-1",
+    "question": "Find singers who have not participated in any concert.",
+    "query": "db.singers.find({\"singer_id\": {\"$nin\": [x[\"singer_id\"] for x in db.singer_concerts.distinct(\"singer_id\")]}})",
+    "status": "PASS",
+    "result": []
+  },
+  {
+    "id": "complex-2",
+    "question": "Find students who have more friends than the average number of friends per student.",
+    "query": "db.students.aggregate([ { \"$group\": { \"_id\": null, \"avg_friends\": {\"$avg\": \"$friends\"} } }, { \"$project\": { \"_id\": 0, \"students_with_more_friends\": {\"$gt\": [\"$friends\", \"$avg_friends\"]} } }, { \"$match\": { \"students_with_more_friends\": true } } ])",
+    "status": "FAIL",
+    "error": "name 'null' is not defined"
+  },
+  {
+    "id": "complex-3",
+    "question": "For each maker, find the model with the highest horsepower.",
+    "query": "db.cars.aggregate([ { $group: { _id: \"$maker\", max_horsepower: { $max: \"$horsepower\" }, models: { $push: \"$model\" } } }, { $project: { maker: \"$_id\", max_horsepower: \"$max_horsepower\", models: { $slice: [\"$models\", -1] } } } ])",
+    "status": "FAIL",
+    "error": "invalid syntax (<string>, line 1)"
+  }
+]
