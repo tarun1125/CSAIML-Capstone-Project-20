@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "question": "How many singers are there?",
+    "normalized_query": "db.singer.count_documents({})"
+  },
+  {
+    "id": 2,
+    "question": "What are the names of singers from France?",
+    "normalized_query": "db.singer.find({\"Country\": \"France\"}, {\"_id\": 0, \"Name\": 1})"
+  },
+  {
+    "id": 3,
+    "question": "Find the maximum weight of all pets.",
+    "normalized_query": "db.Pets.aggregate([{\"$group\": {\"_id\": null, \"max_weight\": {\"$max\": \"$weight\"}}}, {\"$project\": {\"_id\": 0, \"max_weight\": 1}}])"
+  },
+  {
+    "id": 4,
+    "question": "What are the names and ages of singers, ordered by age?",
+    "normalized_query": "db.singer.find({}, {\"_id\": 0, \"Name\": 1, \"Age\": 1}).sort({\"Age\": 1})"
+  },
+  {
+    "id": 5,
+    "question": "How many concerts were held in each stadium?",
+    "normalized_query": "db.concert.aggregate([{\"$group\": {\"_id\": \"$Stadium_ID\", \"concert_count\": {\"$sum\": 1}}}, {\"$sort\": {\"_id\": 1}}])"
+  },
+  {
+    "id": 6,
+    "question": "Find pet types that have more than one pet, with their counts.",
+    "normalized_query": "db.Pets.aggregate([{\"$group\": {\"_id\": \"$PetType\", \"count\": {\"$sum\": 1}}}, {\"$match\": {\"count\": {\"$gt\": 1}}}, {\"$sort\": {\"count\": -1, \"_id\": 1}}])"
+  },
+  {
+    "id": 7,
+    "question": "What are the names of singers who performed in a concert in 2014?",
+    "normalized_query": "db.singer_in_concert.aggregate([{\"$lookup\": {\"from\": \"concert\", \"localField\": \"concert_ID\", \"foreignField\": \"concert_ID\", \"as\": \"concert\"}}, {\"$unwind\": \"$concert\"}, {\"$match\": {\"concert.Year\": \"2014\"}}, {\"$lookup\": {\"from\": \"singer\", \"localField\": \"Singer_ID\", \"foreignField\": \"Singer_ID\", \"as\": \"singer\"}}, {\"$unwind\": \"$singer\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$singer.Name\"}}, {\"$sort\": {\"Name\": 1}}])"
+  },
+  {
+    "id": 8,
+    "question": "Find the first names of students who have a dog as a pet.",
+    "normalized_query": "db.Has_Pet.aggregate([{\"$lookup\": {\"from\": \"Pets\", \"localField\": \"PetID\", \"foreignField\": \"PetID\", \"as\": \"pet\"}}, {\"$unwind\": \"$pet\"}, {\"$match\": {\"pet.PetType\": \"dog\"}}, {\"$lookup\": {\"from\": \"Student\", \"localField\": \"StuID\", \"foreignField\": \"StuID\", \"as\": \"student\"}}, {\"$unwind\": \"$student\"}, {\"$project\": {\"_id\": 0, \"Fname\": \"$student.Fname\"}}, {\"$sort\": {\"Fname\": 1}}])"
+  },
+  {
+    "id": 9,
+    "question": "For each country of origin, find the average miles per gallon of cars.",
+    "normalized_query": "db.car_data.aggregate([{\"$lookup\": {\"from\": \"model_list\", \"localField\": \"Id\", \"foreignField\": \"ModelId\", \"as\": \"model\"}}, {\"$unwind\": \"$model\"}, {\"$lookup\": {\"from\": \"car_makers\", \"localField\": \"model.Maker\", \"foreignField\": \"Id\", \"as\": \"maker\"}}, {\"$unwind\": \"$maker\"}, {\"$lookup\": {\"from\": \"countries\", \"localField\": \"maker.Country\", \"foreignField\": \"CountryId\", \"as\": \"country\"}}, {\"$unwind\": \"$country\"}, {\"$group\": {\"_id\": \"$country.CountryName\", \"average_mpg\": {\"$avg\": {\"$toDouble\": \"$MPG\"}}}}, {\"$sort\": {\"_id\": 1}}])"
+  },
+  {
+    "id": 10,
+    "question": "Find singers who have not participated in any concert.",
+    "normalized_query": "db.singer.aggregate([{\"$lookup\": {\"from\": \"singer_in_concert\", \"localField\": \"Singer_ID\", \"foreignField\": \"Singer_ID\", \"as\": \"concerts\"}}, {\"$match\": {\"concerts\": {\"$eq\": []}}}, {\"$project\": {\"_id\": 0, \"Name\": 1}}, {\"$sort\": {\"Name\": 1}}])"
+  },
+  {
+    "id": 11,
+    "question": "Find students who have more friends than the average number of friends per student.",
+    "normalized_query": "db.Friend.aggregate([{\"$group\": {\"_id\": \"$student_id\", \"friend_count\": {\"$sum\": 1}}}, {\"$group\": {\"_id\": null, \"avg_friends\": {\"$avg\": \"$friend_count\"}, \"students\": {\"$push\": {\"student_id\": \"$_id\", \"friend_count\": \"$friend_count\"}}}}, {\"$unwind\": \"$students\"}, {\"$match\": {\"$expr\": {\"$gt\": [\"$students.friend_count\", \"$avg_friends\"]}}}, {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"students.student_id\", \"foreignField\": \"ID\", \"as\": \"student\"}}, {\"$unwind\": \"$student\"}, {\"$project\": {\"_id\": 0, \"name\": \"$student.name\"}}, {\"$sort\": {\"name\": 1}}])"
+  },
+  {
+    "id": 12,
+    "question": "For each maker, find the model with the highest horsepower.",
+    "normalized_query": "db.car_data.aggregate([{\"$lookup\": {\"from\": \"model_list\", \"localField\": \"Id\", \"foreignField\": \"ModelId\", \"as\": \"model\"}}, {\"$unwind\": \"$model\"}, {\"$lookup\": {\"from\": \"car_makers\", \"localField\": \"model.Maker\", \"foreignField\": \"Id\", \"as\": \"maker\"}}, {\"$unwind\": \"$maker\"}, {\"$addFields\": {\"HorsepowerNum\": {\"$toInt\": \"$Horsepower\"}}}, {\"$sort\": {\"maker.Maker\": 1, \"HorsepowerNum\": -1}}, {\"$group\": {\"_id\": \"$maker.Maker\", \"model\": {\"$first\": \"$model.Model\"}, \"horsepower\": {\"$first\": \"$HorsepowerNum\"}}}, {\"$sort\": {\"_id\": 1}}])"
+  }
+]

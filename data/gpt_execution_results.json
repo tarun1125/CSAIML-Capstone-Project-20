@@ -3,8 +3,8 @@
     "id": 1,
     "question": "How many singers are there?",
     "query": "db.singers.count_documents({})",
-    "status": "FAIL",
-    "error": "'int' object is not iterable"
+    "status": "PASS",
+    "result": 0
   },
   {
     "id": 2,
