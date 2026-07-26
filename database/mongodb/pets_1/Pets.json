@@ -1,0 +1,20 @@
+[
+  {
+    "PetID": 2001,
+    "PetType": "cat",
+    "pet_age": 3,
+    "weight": 12.0
+  },
+  {
+    "PetID": 2002,
+    "PetType": "dog",
+    "pet_age": 2,
+    "weight": 13.4
+  },
+  {
+    "PetID": 2003,
+    "PetType": "dog",
+    "pet_age": 1,
+    "weight": 9.3
+  }
+]

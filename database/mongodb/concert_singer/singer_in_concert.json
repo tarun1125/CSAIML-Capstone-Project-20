@@ -1,0 +1,42 @@
+[
+  {
+    "concert_ID": 1,
+    "Singer_ID": "2"
+  },
+  {
+    "concert_ID": 1,
+    "Singer_ID": "3"
+  },
+  {
+    "concert_ID": 1,
+    "Singer_ID": "5"
+  },
+  {
+    "concert_ID": 2,
+    "Singer_ID": "3"
+  },
+  {
+    "concert_ID": 2,
+    "Singer_ID": "6"
+  },
+  {
+    "concert_ID": 3,
+    "Singer_ID": "5"
+  },
+  {
+    "concert_ID": 4,
+    "Singer_ID": "4"
+  },
+  {
+    "concert_ID": 5,
+    "Singer_ID": "6"
+  },
+  {
+    "concert_ID": 5,
+    "Singer_ID": "3"
+  },
+  {
+    "concert_ID": 6,
+    "Singer_ID": "2"
+  }
+]

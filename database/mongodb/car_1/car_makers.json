@@ -1,0 +1,134 @@
+[
+  {
+    "Id": 1,
+    "Maker": "amc",
+    "FullName": "American Motor Company",
+    "Country": "1"
+  },
+  {
+    "Id": 2,
+    "Maker": "volkswagen",
+    "FullName": "Volkswagen",
+    "Country": "2"
+  },
+  {
+    "Id": 3,
+    "Maker": "bmw",
+    "FullName": "BMW",
+    "Country": "2"
+  },
+  {
+    "Id": 4,
+    "Maker": "gm",
+    "FullName": "General Motors",
+    "Country": "1"
+  },
+  {
+    "Id": 5,
+    "Maker": "ford",
+    "FullName": "Ford Motor Company",
+    "Country": "1"
+  },
+  {
+    "Id": 6,
+    "Maker": "chrysler",
+    "FullName": "Chrysler",
+    "Country": "1"
+  },
+  {
+    "Id": 7,
+    "Maker": "citroen",
+    "FullName": "Citroen",
+    "Country": "3"
+  },
+  {
+    "Id": 8,
+    "Maker": "nissan",
+    "FullName": "Nissan Motors",
+    "Country": "4"
+  },
+  {
+    "Id": 9,
+    "Maker": "fiat",
+    "FullName": "Fiat",
+    "Country": "5"
+  },
+  {
+    "Id": 11,
+    "Maker": "honda",
+    "FullName": "Honda",
+    "Country": "4"
+  },
+  {
+    "Id": 12,
+    "Maker": "mazda",
+    "FullName": "Mazda",
+    "Country": "4"
+  },
+  {
+    "Id": 13,
+    "Maker": "daimler benz",
+    "FullName": "Daimler Benz",
+    "Country": "2"
+  },
+  {
+    "Id": 14,
+    "Maker": "opel",
+    "FullName": "Opel",
+    "Country": "2"
+  },
+  {
+    "Id": 15,
+    "Maker": "peugeaut",
+    "FullName": "Peugeaut",
+    "Country": "3"
+  },
+  {
+    "Id": 16,
+    "Maker": "renault",
+    "FullName": "Renault",
+    "Country": "3"
+  },
+  {
+    "Id": 17,
+    "Maker": "saab",
+    "FullName": "Saab",
+    "Country": "6"
+  },
+  {
+    "Id": 18,
+    "Maker": "subaru",
+    "FullName": "Subaru",
+    "Country": "4"
+  },
+  {
+    "Id": 19,
+    "Maker": "toyota",
+    "FullName": "Toyota",
+    "Country": "4"
+  },
+  {
+    "Id": 20,
+    "Maker": "triumph",
+    "FullName": "Triumph",
+    "Country": "7"
+  },
+  {
+    "Id": 21,
+    "Maker": "volvo",
+    "FullName": "Volvo",
+    "Country": "6"
+  },
+  {
+    "Id": 22,
+    "Maker": "kia",
+    "FullName": "Kia Motors",
+    "Country": "8"
+  },
+  {
+    "Id": 23,
+    "Maker": "hyundai",
+    "FullName": "Hyundai",
+    "Country": "8"
+  }
+]

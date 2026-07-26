@@ -1,0 +1,7 @@
+atlas-credentials.env
+
+# Ignore local database fixtures and binaries
+*.sqlite
+*.sqlite3
+*.db
+*.db3

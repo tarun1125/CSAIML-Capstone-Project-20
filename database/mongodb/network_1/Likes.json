@@ -1,0 +1,42 @@
+[
+  {
+    "student_id": 1689,
+    "liked_id": 1709
+  },
+  {
+    "student_id": 1709,
+    "liked_id": 1689
+  },
+  {
+    "student_id": 1782,
+    "liked_id": 1709
+  },
+  {
+    "student_id": 1911,
+    "liked_id": 1247
+  },
+  {
+    "student_id": 1247,
+    "liked_id": 1468
+  },
+  {
+    "student_id": 1641,
+    "liked_id": 1468
+  },
+  {
+    "student_id": 1316,
+    "liked_id": 1304
+  },
+  {
+    "student_id": 1501,
+    "liked_id": 1934
+  },
+  {
+    "student_id": 1934,
+    "liked_id": 1501
+  },
+  {
+    "student_id": 1025,
+    "liked_id": 1101
+  }
+]
