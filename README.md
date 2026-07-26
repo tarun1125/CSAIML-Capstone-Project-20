@@ -1,90 +1,80 @@
+# Capstone Project Report
+
+This repository documents a compact evaluation workflow for comparing SQL-generation performance across two models: ChatGPT and Qwen2.5-Coder. The project combines dataset exploration, prompt-based inference, and quantitative evaluation using CodeBLEU and BERTScore.
+
+## Project Workflow
+
 ```mermaid
 graph TD
-    %% Define Styles
-    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;
-    classDef startEnd fill:#d4edda,stroke:#28a745,stroke-width:2px;
+    Start([Kickoff]) --> EDA1[Spider Dataset]
+    Start --> EDA2[BIRD Bench]
+    Start --> EDA3[Hugging Face Viewer]
 
-    %% Nodes
-    Start([Week 1/2 Kickoff])
-    
-    subgraph EDA [1. Exploratory Data Analysis]
-        Spider[Spider Dataset]
-        Bird[BIRD Bench Dataset]
-        HF[Hugging Face Viewer]
-    end
-    
-    Pick[2. Pick Suitable Dataset]
-    Convert[3. Convert SQLite DB to JSON]
-    
-    subgraph LLM [4. Model Prompting & Inference]
-        SelectSQL[Select Diverse SQL Complexity Levels]
-        PromptQwen[Prompt Qwen 2.5 Coder]
-        PromptBase[Prompt Baselines: GPT-5 / Sonnet 4.6]
-    end
-    
-    subgraph Evaluation [5. Comparison & Analytics]
-        Metrics[Compute Metrics: BERTScore / BLEU]
-        Visuals[Generate Visualization Reports]
-    end
-    
-    End([Week 2 Deliverable Ready])
+    EDA1 --> Pick[Select Dataset]
+    EDA2 --> Pick
+    EDA3 --> Pick
 
-    %% Links/Flow
-    Start --> Spider
-    Start --> Bird
-    Start --> HF
-    
-    Spider --> Pick
-    Bird --> Pick
-    HF --> Pick
-    
-    Pick --> Convert
-    Convert --> SelectSQL
-    
-    SelectSQL --> PromptQwen
-    SelectSQL --> PromptBase
-    
-    PromptQwen --> Metrics
-    PromptBase --> Metrics
-    
-    Metrics --> Visuals
-    Visuals --> End
+    Pick --> Convert[Convert SQLite to JSON]
+    Convert --> SQL[Select SQL Complexity Levels]
+    SQL --> GPT[Prompt ChatGPT]
+    SQL --> QWEN[Prompt Qwen2.5-Coder]
 
-    %% Apply Styles Explicitly (Fixes the Parse Error)
-    class Start startEnd;
-    class End startEnd;
-
-    %% Hyperlinks & Local Repo Files
-    click Spider "https://github.io" "Go to Spider Project"
-    click Bird "https://github.io" "Go to BIRD Bench"
-    click HF "https://huggingface.co" "Open HF Viewer"
-    click PromptBase "./baseline_model_prompt.md" "Open Baseline Model Prompt"
+    GPT --> Eval[Evaluate Outputs]
+    QWEN --> Eval
+    Eval --> Viz[Generate Figures and Metrics]
+    Viz --> End([Results Ready])
 ```
 
+## Key Results at a Glance
 
+| Metric | ChatGPT | Qwen2.5-Coder |
+| --- | ---: | ---: |
+| Execution Accuracy | 12/12 | 8/12 |
+| CodeBLEU | 0.5812 | 0.4134 |
+| BERTScore F1 | 0.7853 | 0.4631 |
 
-## GPT Execution Accuracy : 12/12
-## QWEN 2.5 coder Execution Accuracy : 8/12
+## Evaluation Visuals
 
-## BLEU Scores
-     Model  codebleu  ngram_match_score  weighted_ngram_match_score  \
-0  ChatGPT    0.5812             0.2504                      0.2659   
-1  Qwen2.5    0.4134             0.0307                      0.0399   
+### Execution Accuracy
 
-   syntax_match_score  dataflow_match_score  
-0              0.8085                     0  
-1              0.5831                     0  
+![Execution accuracy](outputs/figures/execution_accuracy.png)
 
-## BERT SCORE
-Average Scores
-         precision  recall      f1
-model                             
-ChatGPT     0.8401  0.7337  0.7853
-Qwen2.5     0.5868  0.3473  0.4630
+### CodeBLEU Comparison
 
-## At a Glance
-| Metric             |    ChatGPT |       Qwen |
-| ------------------ | ---------: | ---------: |
-| Execution Accuracy |      91.7% |      58.3% |
-| CodeBLEU           | **0.5812** | **0.4134** |
-| BERTScore F1       | **0.7853** | **0.4630** |
+![CodeBLEU scores](outputs/figures/codebleu.png)
+
+### BERTScore Comparison
+
+![BERTScore comparison](outputs/figures/bertscore.png)
+
+### Overall Comparison
+
+![Overall comparison](outputs/figures/overall_comparison.png)
+
+## Metric Tables
+
+### CodeBLEU Scores
+
+| Model | CodeBLEU | N-gram Match | Weighted N-gram | Syntax Match | Dataflow Match |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| ChatGPT | 0.5812 | 0.2504 | 0.2659 | 0.8085 | 0.0000 |
+| Qwen2.5 | 0.4134 | 0.0307 | 0.0399 | 0.5831 | 0.0000 |
+
+### BERTScore Summary
+
+| Model | Precision | Recall | F1 |
+| --- | ---: | ---: | ---: |
+| ChatGPT | 0.8401 | 0.7337 | 0.7853 |
+| Qwen2.5 | 0.5868 | 0.3473 | 0.4631 |
+
+## Interpretation
+
+- ChatGPT consistently outperformed Qwen2.5-Coder across the evaluated SQL generation tasks.
+- The strongest gap appears in the semantic similarity and overall quality metrics, indicating better structural and contextual understanding for ChatGPT.
+- The generated plots in the outputs folder provide a clear visual summary of the performance differences.
+
+## Repository Notes
+
+- Raw evaluation outputs are stored in the outputs folder.
+- Figures are generated under the outputs/figures directory.
+- The baseline prompt used for comparison is available in [baseline_model_prompt.md](baseline_model_prompt.md).
