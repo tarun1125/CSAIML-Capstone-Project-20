@@ -58,5 +58,5 @@ graph TD
     click Spider "https://github.io" "Go to Spider Project"
     click Bird "https://github.io" "Go to BIRD Bench"
     click HF "https://huggingface.co" "Open HF Viewer"
-    click PromptBase "baseline_model_prompt.md" "Open Baseline Model Prompts"
+    click PromptBase "./baseline_model_prompt.md" "Open Baseline Model Prompt"
 ```

@@ -1,0 +1,102 @@
+[
+  {
+    "id": "easy-1",
+    "generated_query": "list(db.singers.find({}).count())",
+    "latency_s": 0.972
+  },
+  {
+    "id": "easy-2",
+    "generated_query": "list(db.singers.find({\"country\": \"France\"}))",
+    "latency_s": 0.915
+  },
+  {
+    "id": "easy-3",
+    "generated_query": "list(db.pets.aggregate([{\"$group\": {\"_id\": None, \"max_weight\": {\"$max\": \"$weight\"}}}]))[0]['max_weight']",
+    "latency_s": 0.967
+  },
+  {
+    "id": "easy-4",
+    "generated_query": "list(set([car['maker'] for car in db.cars.find()]))",
+    "latency_s": 0.995
+  },
+  {
+    "id": "easy-5",
+    "generated_query": "list(db.concerts.find({\"year\": \"2014\"}, {\"theme\": 1}))",
+    "latency_s": 0.735
+  },
+  {
+    "id": "medium-1",
+    "generated_query": "",
+    "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6a65bc92-27fc0ef70278e50e530f511a;8112d342-7ee6-435a-bbde-9eeea3735869)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage."
+  },
+  {
+    "id": "medium-2",
+    "generated_query": "",
+    "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6a65bc92-391faac63c0359eb6cf3b44b;cdd18690-9adb-4a29-acc6-084ae0ab607a)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage."
+  },
+  {
+    "id": "medium-3",
+    "generated_query": "",
+    "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6a65bc93-0784e022137b19412c67d874;c5ff1ee9-729f-4d58-9beb-7de2ef50a18b)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage."
+  },
+  {
+    "id": "medium-4",
+    "generated_query": "",
+    "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6a65bc93-69c1fcd700c679cd06245fb6;13e9c526-eb23-459c-917a-4eed845908c0)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage."
+  },
+  {
+    "id": "medium-5",
+    "generated_query": "",
+    "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6a65bc93-2b21d9ea15234656614f8a06;2ee4cb48-de81-4f7c-b432-fbae94f67cd1)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage."
+  },
+  {
+    "id": "high-1",
+    "generated_query": "",
+    "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6a65bc93-6ac1582828df660e332a91ff;698ad573-2e21-4941-a14f-cb8449eb2227)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage."
+  },
+  {
+    "id": "high-2",
+    "generated_query": "",
+    "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6a65bc94-7c03508228f6bb074c389887;842d49ae-8cb3-413e-b9f2-6d3c2c40ac40)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage."
+  },
+  {
+    "id": "high-3",
+    "generated_query": "",
+    "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6a65bc94-733c6b14706d3c3c361de5fc;2991d7b4-4041-4bff-a979-0a8e033ebca3)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage."
+  },
+  {
+    "id": "high-4",
+    "generated_query": "",
+    "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6a65bc94-327e1a7404637d9c43374417;4f272278-7467-49cc-a914-75ae0595ad80)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage."
+  },
+  {
+    "id": "high-5",
+    "generated_query": "",
+    "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6a65bc95-5eb7a1e51f311f950aa93098;941aa768-b4f3-4894-9bc3-1b953b219190)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage."
+  },
+  {
+    "id": "complex-1",
+    "generated_query": "",
+    "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6a65bc95-44fed343721845b34e91ace9;ddcb005d-aa66-4f40-883d-b7f6630c9b12)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage."
+  },
+  {
+    "id": "complex-2",
+    "generated_query": "",
+    "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6a65bc95-05ebf0fe030283a1068f23b9;bbb32170-1c09-488e-af34-65923b6d80b5)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage."
+  },
+  {
+    "id": "complex-3",
+    "generated_query": "",
+    "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6a65bc95-64ece1471ba36f1228a935cc;12176579-ce31-423e-b72b-cedef7781865)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage."
+  },
+  {
+    "id": "complex-4",
+    "generated_query": "",
+    "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6a65bc96-47a6087d5e61ae4a7aaa526d;15a31983-1497-4f38-8f0b-0735bd331a27)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage."
+  },
+  {
+    "id": "complex-5",
+    "generated_query": "",
+    "error": "Client error '402 Payment Required' for url 'https://router.huggingface.co/v1/chat/completions' (Request ID: Root=1-6a65bc96-41993e6a2eedaae137801505;8d942213-b2b0-485a-8c9c-bd5c3318478c)\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402\n\nYou have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage."
+  }
+]
