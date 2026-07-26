@@ -1,11 +1,10 @@
-```mermaid
 graph TD
     %% Define Styles
     classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;
     classDef startEnd fill:#d4edda,stroke:#28a745,stroke-width:2px;
 
     %% Nodes
-    Start([Week 1/2 Kickoff]) :::startEnd
+    Start([Week 1/2 Kickoff])
     
     subgraph EDA [1. Exploratory Data Analysis]
         Spider[Spider Dataset]
@@ -27,7 +26,7 @@ graph TD
         Visuals[Generate Visualization Reports]
     end
     
-    End([Week 2 Deliverable Ready]) :::startEnd
+    End([Week 2 Deliverable Ready])
 
     %% Links/Flow
     Start --> Spider
@@ -50,9 +49,12 @@ graph TD
     Metrics --> Visuals
     Visuals --> End
 
+    %% Apply Styles Explicitly (Fixes the Parse Error)
+    class Start startEnd;
+    class End startEnd;
+
     %% Hyperlinks & Local Repo Files
-    click Spider "https://yale-lily.github.io/spider" "Go to Spider Project"
-    click Bird "https://bird-bench.github.io/" "Go to BIRD Bench"
-    click HF "https://huggingface.co/datasets/xlangai/spider/viewer/spider" "Open HF Viewer"
+    click Spider "https://github.io" "Go to Spider Project"
+    click Bird "https://github.io" "Go to BIRD Bench"
+    click HF "https://huggingface.co" "Open HF Viewer"
     click PromptBase "baseline_model_prompt.md" "Open Baseline Model Prompts"
-```
