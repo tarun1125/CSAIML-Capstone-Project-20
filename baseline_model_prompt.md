@@ -16,4 +16,4 @@ python or any markdown
 ## Q. 10-12
 
 # Results:
-[Baseline Model Results - NL to MongoDB Query](baseline_test_cases.json)
+[Baseline Model Results - NL to MongoDB Query](/data/baseline_test_cases.json)

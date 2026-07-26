@@ -1,0 +1,86 @@
+[
+  {
+    "id": 1,
+    "question": "How many singers are there?",
+    "query": "db.singers.count_documents({})",
+    "status": "FAIL",
+    "error": "'int' object is not iterable"
+  },
+  {
+    "id": 2,
+    "question": "What are the names of singers from France?",
+    "query": "db.singers.find({\"country\": \"France\"}, {\"_id\": 0, \"name\": 1})",
+    "status": "PASS",
+    "result": []
+  },
+  {
+    "id": 3,
+    "question": "Find the maximum weight of all pets",
+    "query": "db.pets.aggregate([{\"$group\": {\"_id\": None, \"max_weight\": {\"$max\": \"$weight\"}}}])",
+    "status": "PASS",
+    "result": []
+  },
+  {
+    "id": 4,
+    "question": "What are the names and ages of singers, ordered by age?",
+    "query": "db.singers.find({}, {\"_id\": 0, \"name\": 1, \"age\": 1}).sort(\"age\", 1)",
+    "status": "PASS",
+    "result": []
+  },
+  {
+    "id": 5,
+    "question": "How many concerts were held in each stadium?",
+    "query": "db.concerts.aggregate([{\"$group\": {\"_id\": \"$stadium_id\", \"concert_count\": {\"$sum\": 1}}}])",
+    "status": "PASS",
+    "result": []
+  },
+  {
+    "id": 6,
+    "question": "Find pet types that have more than one pet, with their counts.",
+    "query": "db.pets.aggregate([{\"$group\": {\"_id\": \"$pet_type\", \"count\": {\"$sum\": 1}}}, {\"$match\": {\"count\": {\"$gt\": 1}}}])",
+    "status": "PASS",
+    "result": []
+  },
+  {
+    "id": 7,
+    "question": "What are the names of singers who performed in a concert in 2014?",
+    "query": "db.singer_concerts.aggregate([{\"$lookup\": {\"from\": \"concerts\", \"localField\": \"concert_id\", \"foreignField\": \"concert_id\", \"as\": \"concert\"}}, {\"$unwind\": \"$concert\"}, {\"$match\": {\"concert.year\": \"2014\"}}, {\"$lookup\": {\"from\": \"singers\", \"localField\": \"singer_id\", \"foreignField\": \"singer_id\", \"as\": \"singer\"}}, {\"$unwind\": \"$singer\"}, {\"$project\": {\"_id\": 0, \"name\": \"$singer.name\"}}])",
+    "status": "PASS",
+    "result": []
+  },
+  {
+    "id": 8,
+    "question": "Find the first names of students who have a dog as a pet.",
+    "query": "db.has_pet.aggregate([{\"$lookup\": {\"from\": \"pets\", \"localField\": \"pet_id\", \"foreignField\": \"pet_id\", \"as\": \"pet\"}}, {\"$unwind\": \"$pet\"}, {\"$match\": {\"pet.pet_type\": \"dog\"}}, {\"$lookup\": {\"from\": \"students\", \"localField\": \"stu_id\", \"foreignField\": \"stu_id\", \"as\": \"student\"}}, {\"$unwind\": \"$student\"}, {\"$project\": {\"_id\": 0, \"fname\": \"$student.fname\"}}])",
+    "status": "PASS",
+    "result": []
+  },
+  {
+    "id": 9,
+    "question": "For each country of origin, find the average miles per gallon of cars.",
+    "query": "db.cars.aggregate([{\"$group\": {\"_id\": \"$origin\", \"average_mpg\": {\"$avg\": \"$mpg\"}}}])",
+    "status": "PASS",
+    "result": []
+  },
+  {
+    "id": 10,
+    "question": "Find singers who have not participated in any concert.",
+    "query": "db.singers.aggregate([{\"$lookup\": {\"from\": \"singer_concerts\", \"localField\": \"singer_id\", \"foreignField\": \"singer_id\", \"as\": \"concerts\"}}, {\"$match\": {\"concerts\": {\"$size\": 0}}}, {\"$project\": {\"_id\": 0, \"name\": 1}}])",
+    "status": "PASS",
+    "result": []
+  },
+  {
+    "id": 11,
+    "question": "Find students who have more friends than the average number of friends per student.",
+    "query": "db.friends.aggregate([{\"$group\": {\"_id\": \"$student_id\", \"friend_count\": {\"$sum\": 1}}}, {\"$group\": {\"_id\": None, \"avg_friends\": {\"$avg\": \"$friend_count\"}, \"students\": {\"$push\": {\"student_id\": \"$_id\", \"friend_count\": \"$friend_count\"}}}}, {\"$unwind\": \"$students\"}, {\"$match\": {\"$expr\": {\"$gt\": [\"$students.friend_count\", \"$avg_friends\"]}}}, {\"$lookup\": {\"from\": \"highschoolers\", \"localField\": \"students.student_id\", \"foreignField\": \"id\", \"as\": \"student\"}}, {\"$unwind\": \"$student\"}, {\"$project\": {\"_id\": 0, \"name\": \"$student.name\"}}])",
+    "status": "PASS",
+    "result": []
+  },
+  {
+    "id": 12,
+    "question": "For each maker, find the model with the highest horsepower.",
+    "query": "db.cars.aggregate([{\"$sort\": {\"maker\": 1, \"horsepower\": -1}}, {\"$group\": {\"_id\": \"$maker\", \"model\": {\"$first\": \"$model\"}, \"horsepower\": {\"$first\": \"$horsepower\"}}}])",
+    "status": "PASS",
+    "result": []
+  }
+]

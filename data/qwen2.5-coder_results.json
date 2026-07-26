@@ -1,0 +1,74 @@
+[
+  {
+    "id": "easy-1",
+    "question": "How many singers are there?",
+    "generated_query": "db.singers.count_documents({})",
+    "latency_s": 13.326
+  },
+  {
+    "id": "easy-2",
+    "question": "What are the names of singers from France?",
+    "generated_query": "db.singers.find({\"country\": \"France\"})",
+    "latency_s": 11.691
+  },
+  {
+    "id": "easy-3",
+    "question": "Find the maximum weight of all pets.",
+    "generated_query": "db.pets.aggregate([{\"$group\": {\"_id\": None, \"max_weight\": {\"$max\": \"$weight\"}}}])",
+    "latency_s": 24.285
+  },
+  {
+    "id": "medium-1",
+    "question": "What are the names and ages of singers, ordered by age?",
+    "generated_query": "db.singers.find({}, {\"name\": 1, \"age\": 1}).sort(\"age\")",
+    "latency_s": 19.083
+  },
+  {
+    "id": "medium-2",
+    "question": "How many concerts were held in each stadium?",
+    "generated_query": "db.concerts.aggregate([\n  {\n    $group: {\n      _id: \"$stadium_id\",\n      count: { $sum: 1 }\n    }\n  }\n])",
+    "latency_s": 30.418
+  },
+  {
+    "id": "medium-3",
+    "question": "Find pet types that have more than one pet, with their counts.",
+    "generated_query": "db.pets.aggregate([\n  {\"$group\": {\"_id\": \"$pet_type\", \"count\": {\"$sum\": 1}}},\n  {\"$match\": {\"count\": {\"$gt\": 1}}},\n  {\"$sort\": {\"count\": -1}}\n])",
+    "latency_s": 44.0
+  },
+  {
+    "id": "high-1",
+    "question": "What are the names of singers who performed in a concert in 2014?",
+    "generated_query": "db.singers.find({\"concerts.year\": \"2014\"})",
+    "latency_s": 14.437
+  },
+  {
+    "id": "high-2",
+    "question": "Find the first names of students who have a dog as a pet.",
+    "generated_query": "db.students.find({\"has_pet.pet_type\": \"dog\"})",
+    "latency_s": 12.507
+  },
+  {
+    "id": "high-3",
+    "question": "For each country of origin, find the average miles per gallon of cars.",
+    "generated_query": "db.cars.aggregate([\n  {\n    $group: {\n      _id: \"$origin\",\n      avg_mpg: { $avg: \"$mpg\" }\n    }\n  }\n])",
+    "latency_s": 31.498
+  },
+  {
+    "id": "complex-1",
+    "question": "Find singers who have not participated in any concert.",
+    "generated_query": "db.singers.find({\"singer_id\": {\"$nin\": [x[\"singer_id\"] for x in db.singer_concerts.distinct(\"singer_id\")]}})",
+    "latency_s": 30.97
+  },
+  {
+    "id": "complex-2",
+    "question": "Find students who have more friends than the average number of friends per student.",
+    "generated_query": "db.students.aggregate([\n  {\n    \"$group\": {\n      \"_id\": null,\n      \"avg_friends\": {\"$avg\": \"$friends\"}\n    }\n  },\n  {\n    \"$project\": {\n      \"_id\": 0,\n      \"students_with_more_friends\": {\"$gt\": [\"$friends\", \"$avg_friends\"]}\n    }\n  },\n  {\n    \"$match\": {\n      \"students_with_more_friends\": true\n    }\n  }\n])",
+    "latency_s": 70.236
+  },
+  {
+    "id": "complex-3",
+    "question": "For each maker, find the model with the highest horsepower.",
+    "generated_query": "db.cars.aggregate([\n  {\n    $group: {\n      _id: \"$maker\",\n      max_horsepower: { $max: \"$horsepower\" },\n      models: { $push: \"$model\" }\n    }\n  },\n  {\n    $project: {\n      maker: \"$_id\",\n      max_horsepower: \"$max_horsepower\",\n      models: { $slice: [\"$models\", -1] }\n    }\n  }\n])",
+    "latency_s": 72.652
+  }
+]
