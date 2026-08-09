@@ -1,0 +1,383 @@
+[
+  {
+    "id": "concert_singer.stadium",
+    "database": "concert_singer",
+    "collection": "stadium",
+    "fields": {
+      "Stadium_ID": "int",
+      "Location": "str",
+      "Name": "str",
+      "Capacity": "int",
+      "Highest": "int",
+      "Lowest": "int",
+      "Average": "int"
+    },
+    "doc_count": 9,
+    "text": "database: concert_singer\ncollection: stadium\nfields: Stadium_ID (int), Location (str), Name (str), Capacity (int), Highest (int), Lowest (int), Average (int)"
+  },
+  {
+    "id": "concert_singer.concert",
+    "database": "concert_singer",
+    "collection": "concert",
+    "fields": {
+      "concert_ID": "int",
+      "concert_Name": "str",
+      "Theme": "str",
+      "Stadium_ID": "str",
+      "Year": "str"
+    },
+    "doc_count": 6,
+    "text": "database: concert_singer\ncollection: concert\nfields: concert_ID (int), concert_Name (str), Theme (str), Stadium_ID (str), Year (str)"
+  },
+  {
+    "id": "concert_singer.singer",
+    "database": "concert_singer",
+    "collection": "singer",
+    "fields": {
+      "Singer_ID": "int",
+      "Name": "str",
+      "Country": "str",
+      "Song_Name": "str",
+      "Song_release_year": "str",
+      "Age": "int",
+      "Is_male": "str"
+    },
+    "doc_count": 6,
+    "text": "database: concert_singer\ncollection: singer\nfields: Singer_ID (int), Name (str), Country (str), Song_Name (str), Song_release_year (str), Age (int), Is_male (str)"
+  },
+  {
+    "id": "concert_singer.singer_in_concert",
+    "database": "concert_singer",
+    "collection": "singer_in_concert",
+    "fields": {
+      "concert_ID": "int",
+      "Singer_ID": "str"
+    },
+    "doc_count": 10,
+    "text": "database: concert_singer\ncollection: singer_in_concert\nfields: concert_ID (int), Singer_ID (str)"
+  },
+  {
+    "id": "pets_1.Student",
+    "database": "pets_1",
+    "collection": "Student",
+    "fields": {
+      "StuID": "int",
+      "LName": "str",
+      "Fname": "str",
+      "Age": "int",
+      "Sex": "str",
+      "Major": "int",
+      "Advisor": "int",
+      "city_code": "str"
+    },
+    "doc_count": 34,
+    "text": "database: pets_1\ncollection: Student\nfields: StuID (int), LName (str), Fname (str), Age (int), Sex (str), Major (int), Advisor (int), city_code (str)"
+  },
+  {
+    "id": "pets_1.Has_Pet",
+    "database": "pets_1",
+    "collection": "Has_Pet",
+    "fields": {
+      "StuID": "int",
+      "PetID": "int"
+    },
+    "doc_count": 3,
+    "text": "database: pets_1\ncollection: Has_Pet\nfields: StuID (int), PetID (int)"
+  },
+  {
+    "id": "pets_1.Pets",
+    "database": "pets_1",
+    "collection": "Pets",
+    "fields": {
+      "PetID": "int",
+      "PetType": "str",
+      "pet_age": "int",
+      "weight": "float"
+    },
+    "doc_count": 3,
+    "text": "database: pets_1\ncollection: Pets\nfields: PetID (int), PetType (str), pet_age (int), weight (float)"
+  },
+  {
+    "id": "network_1.Friend",
+    "database": "network_1",
+    "collection": "Friend",
+    "fields": {
+      "student_id": "int",
+      "friend_id": "int"
+    },
+    "doc_count": 20,
+    "text": "database: network_1\ncollection: Friend\nfields: student_id (int), friend_id (int)"
+  },
+  {
+    "id": "network_1.Highschooler",
+    "database": "network_1",
+    "collection": "Highschooler",
+    "fields": {
+      "ID": "int",
+      "name": "str",
+      "grade": "int"
+    },
+    "doc_count": 16,
+    "text": "database: network_1\ncollection: Highschooler\nfields: ID (int), name (str), grade (int)"
+  },
+  {
+    "id": "network_1.Likes",
+    "database": "network_1",
+    "collection": "Likes",
+    "fields": {
+      "student_id": "int",
+      "liked_id": "int"
+    },
+    "doc_count": 10,
+    "text": "database: network_1\ncollection: Likes\nfields: student_id (int), liked_id (int)"
+  },
+  {
+    "id": "car_1.continents",
+    "database": "car_1",
+    "collection": "continents",
+    "fields": {
+      "ContId": "int",
+      "Continent": "str"
+    },
+    "doc_count": 5,
+    "text": "database: car_1\ncollection: continents\nfields: ContId (int), Continent (str)"
+  },
+  {
+    "id": "car_1.car_makers",
+    "database": "car_1",
+    "collection": "car_makers",
+    "fields": {
+      "Id": "int",
+      "Maker": "str",
+      "FullName": "str",
+      "Country": "str"
+    },
+    "doc_count": 22,
+    "text": "database: car_1\ncollection: car_makers\nfields: Id (int), Maker (str), FullName (str), Country (str)"
+  },
+  {
+    "id": "car_1.countries",
+    "database": "car_1",
+    "collection": "countries",
+    "fields": {
+      "CountryId": "int",
+      "CountryName": "str",
+      "Continent": "int"
+    },
+    "doc_count": 15,
+    "text": "database: car_1\ncollection: countries\nfields: CountryId (int), CountryName (str), Continent (int)"
+  },
+  {
+    "id": "car_1.model_list.json",
+    "database": "car_1",
+    "collection": "model_list.json",
+    "fields": {
+      "ModelId": "int",
+      "Maker": "int",
+      "Model": "str"
+    },
+    "doc_count": 36,
+    "text": "database: car_1\ncollection: model_list.json\nfields: ModelId (int), Maker (int), Model (str)"
+  },
+  {
+    "id": "car_1.cars_data",
+    "database": "car_1",
+    "collection": "cars_data",
+    "fields": {
+      "Id": "int",
+      "MPG": "str",
+      "Cylinders": "int",
+      "Edispl": "float",
+      "Horsepower": "str",
+      "Weight": "int",
+      "Accelerate": "float",
+      "Year": "int"
+    },
+    "doc_count": 406,
+    "text": "database: car_1\ncollection: cars_data\nfields: Id (int), MPG (str), Cylinders (int), Edispl (float), Horsepower (str), Weight (int), Accelerate (float), Year (int)"
+  },
+  {
+    "id": "car_1.car_names",
+    "database": "car_1",
+    "collection": "car_names",
+    "fields": {
+      "MakeId": "int",
+      "Model": "str",
+      "Make": "str"
+    },
+    "doc_count": 406,
+    "text": "database: car_1\ncollection: car_names\nfields: MakeId (int), Model (str), Make (str)"
+  },
+  {
+    "id": "world_1.city",
+    "database": "world_1",
+    "collection": "city",
+    "fields": {
+      "ID": "int",
+      "Name": "str",
+      "CountryCode": "str",
+      "District": "str",
+      "Population": "int"
+    },
+    "doc_count": 4079,
+    "text": "database: world_1\ncollection: city\nfields: ID (int), Name (str), CountryCode (str), District (str), Population (int)"
+  },
+  {
+    "id": "world_1.country",
+    "database": "world_1",
+    "collection": "country",
+    "fields": {
+      "Code": "str",
+      "Name": "str",
+      "Continent": "str",
+      "Region": "str",
+      "SurfaceArea": "float",
+      "IndepYear": "int, nullable",
+      "Population": "int",
+      "LifeExpectancy": "float, nullable",
+      "GNP": "float",
+      "GNPOld": "float, nullable",
+      "LocalName": "str",
+      "GovernmentForm": "str",
+      "HeadOfState": "str, nullable",
+      "Capital": "int, nullable",
+      "Code2": "str"
+    },
+    "doc_count": 239,
+    "text": "database: world_1\ncollection: country\nfields: Code (str), Name (str), Continent (str), Region (str), SurfaceArea (float), IndepYear (int, nullable), Population (int), LifeExpectancy (float, nullable), GNP (float), GNPOld (float, nullable), LocalName (str), GovernmentForm (str), HeadOfState (str, nullable), Capital (int, nullable), Code2 (str)"
+  },
+  {
+    "id": "world_1.countrylanguage",
+    "database": "world_1",
+    "collection": "countrylanguage",
+    "fields": {
+      "CountryCode": "str",
+      "Language": "str",
+      "IsOfficial": "str",
+      "Percentage": "float"
+    },
+    "doc_count": 984,
+    "text": "database: world_1\ncollection: countrylanguage\nfields: CountryCode (str), Language (str), IsOfficial (str), Percentage (float)"
+  },
+  {
+    "id": "dog_kennels.Breeds",
+    "database": "dog_kennels",
+    "collection": "Breeds",
+    "fields": {
+      "breed_code": "str",
+      "breed_name": "str"
+    },
+    "doc_count": 3,
+    "text": "database: dog_kennels\ncollection: Breeds\nfields: breed_code (str), breed_name (str)"
+  },
+  {
+    "id": "dog_kennels.Charges",
+    "database": "dog_kennels",
+    "collection": "Charges",
+    "fields": {
+      "charge_id": "int",
+      "charge_type": "str",
+      "charge_amount": "int"
+    },
+    "doc_count": 3,
+    "text": "database: dog_kennels\ncollection: Charges\nfields: charge_id (int), charge_type (str), charge_amount (int)"
+  },
+  {
+    "id": "dog_kennels.Sizes",
+    "database": "dog_kennels",
+    "collection": "Sizes",
+    "fields": {
+      "size_code": "str",
+      "size_description": "str"
+    },
+    "doc_count": 3,
+    "text": "database: dog_kennels\ncollection: Sizes\nfields: size_code (str), size_description (str)"
+  },
+  {
+    "id": "dog_kennels.Treatment_Types",
+    "database": "dog_kennels",
+    "collection": "Treatment_Types",
+    "fields": {
+      "treatment_type_code": "str",
+      "treatment_type_description": "str"
+    },
+    "doc_count": 3,
+    "text": "database: dog_kennels\ncollection: Treatment_Types\nfields: treatment_type_code (str), treatment_type_description (str)"
+  },
+  {
+    "id": "dog_kennels.Owners",
+    "database": "dog_kennels",
+    "collection": "Owners",
+    "fields": {
+      "owner_id": "int",
+      "first_name": "str",
+      "last_name": "str",
+      "street": "str",
+      "city": "str",
+      "state": "str",
+      "zip_code": "str",
+      "email_address": "str",
+      "home_phone": "str",
+      "cell_number": "str"
+    },
+    "doc_count": 15,
+    "text": "database: dog_kennels\ncollection: Owners\nfields: owner_id (int), first_name (str), last_name (str), street (str), city (str), state (str), zip_code (str), email_address (str), home_phone (str), cell_number (str)"
+  },
+  {
+    "id": "dog_kennels.Dogs",
+    "database": "dog_kennels",
+    "collection": "Dogs",
+    "fields": {
+      "dog_id": "int",
+      "owner_id": "int",
+      "abandoned_yn": "str",
+      "breed_code": "str",
+      "size_code": "str",
+      "name": "str",
+      "age": "str",
+      "date_of_birth": "str",
+      "gender": "str",
+      "weight": "str",
+      "date_arrived": "str",
+      "date_adopted": "str",
+      "date_departed": "str"
+    },
+    "doc_count": 15,
+    "text": "database: dog_kennels\ncollection: Dogs\nfields: dog_id (int), owner_id (int), abandoned_yn (str), breed_code (str), size_code (str), name (str), age (str), date_of_birth (str), gender (str), weight (str), date_arrived (str), date_adopted (str), date_departed (str)"
+  },
+  {
+    "id": "dog_kennels.Professionals",
+    "database": "dog_kennels",
+    "collection": "Professionals",
+    "fields": {
+      "professional_id": "int",
+      "role_code": "str",
+      "first_name": "str",
+      "street": "str",
+      "city": "str",
+      "state": "str",
+      "zip_code": "str",
+      "last_name": "str",
+      "email_address": "str",
+      "home_phone": "str",
+      "cell_number": "str"
+    },
+    "doc_count": 15,
+    "text": "database: dog_kennels\ncollection: Professionals\nfields: professional_id (int), role_code (str), first_name (str), street (str), city (str), state (str), zip_code (str), last_name (str), email_address (str), home_phone (str), cell_number (str)"
+  },
+  {
+    "id": "dog_kennels.Treatments",
+    "database": "dog_kennels",
+    "collection": "Treatments",
+    "fields": {
+      "treatment_id": "int",
+      "dog_id": "int",
+      "professional_id": "int",
+      "treatment_type_code": "str",
+      "date_of_treatment": "str",
+      "cost_of_treatment": "int"
+    },
+    "doc_count": 15,
+    "text": "database: dog_kennels\ncollection: Treatments\nfields: treatment_id (int), dog_id (int), professional_id (int), treatment_type_code (str), date_of_treatment (str), cost_of_treatment (int)"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "breed_code": "ESK",
+    "breed_name": "Eskimo"
+  },
+  {
+    "breed_code": "HUS",
+    "breed_name": "Husky"
+  },
+  {
+    "breed_code": "BUL",
+    "breed_name": "Bulldog"
+  }
+]
