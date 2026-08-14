@@ -233,7 +233,10 @@ if __name__ == "__main__":
 
     RUNS = [
         ("Qwen2.5", data_dir / "qwen_normalized.json", data_dir / "qwen_execution_results.json"),
-        ("ChatGPT", data_dir / "gpt_normalized.json", data_dir / "gpt_execution_results.json"),
+        # GPT arm replaced with Claude (data/claude_normalized.json, generated
+        # by Claude directly since a live GPT arm isn't available -- labeled
+        # honestly as "Claude" throughout, not disguised as GPT/ChatGPT).
+        ("Claude", data_dir / "claude_normalized.json", data_dir / "claude_execution_results.json"),
     ]
 
     for model_name, input_file, output_file in RUNS:
