@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 
-from execute_queries import connect, safe_eval_query, is_empty
+from execute_queries import connect, safe_eval_query, is_empty, to_json_safe
 
 
 def main():
@@ -51,6 +51,12 @@ def main():
                 pass
             elif not isinstance(result, list):
                 result = list(result)
+
+            converted = []
+            result = to_json_safe(result, converted)
+            if converted:
+                print(f"[gold] id={case_id} converted {len(converted)} BSON value(s) "
+                      f"to JSON-safe form for storage: {sorted(set(converted))}")
 
             record["status"] = "PASS"
             record["result"] = result

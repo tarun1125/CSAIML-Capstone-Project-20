@@ -17,8 +17,10 @@
 
 import ast
 import json
+from datetime import date, datetime
 from pathlib import Path
 
+from bson import ObjectId
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 
@@ -89,6 +91,35 @@ def safe_eval_query(query: str, db):
     if not ok:
         raise ValueError(f"REJECTED by safety check ({reason})")
     return eval(query)  # guarded by check_query_is_safe() above
+
+
+# ---------------------------------------------------------------------------
+# JSON-safety for real Mongo results
+#
+# A query that runs successfully and returns real documents comes back with
+# BSON-native types json.dump() can't handle on its own -- most commonly
+# ObjectId on every document's own "_id" (none of the seed data sets a
+# custom _id, so Atlas auto-assigns one on import; any find()/aggregate()
+# that doesn't explicitly project _id away will carry one). Converting here,
+# right where the result is captured, means a case that genuinely succeeded
+# stays scored as a genuine success -- it doesn't get thrown away as a fake
+# FAIL just because the value needs a string form to write to disk.
+# ---------------------------------------------------------------------------
+
+def to_json_safe(value, _converted=None):
+    if _converted is None:
+        _converted = []
+    if isinstance(value, ObjectId):
+        _converted.append("ObjectId")
+        return str(value)
+    if isinstance(value, (datetime, date)):
+        _converted.append(type(value).__name__)
+        return value.isoformat()
+    if isinstance(value, dict):
+        return {k: to_json_safe(v, _converted) for k, v in value.items()}
+    if isinstance(value, list):
+        return [to_json_safe(v, _converted) for v in value]
+    return value
 
 
 # ---------------------------------------------------------------------------
@@ -168,6 +199,13 @@ def run_model(client: MongoClient, model_name: str, input_file: Path,
                 pass
             elif not isinstance(result, list):
                 result = list(result)
+
+            converted = []
+            result = to_json_safe(result, converted)
+            if converted:
+                print(f"[{model_name}] id={case_id} converted {len(converted)} "
+                      f"BSON value(s) to JSON-safe form for storage: "
+                      f"{sorted(set(converted))}")
 
             record["status"] = "PASS"           # ran without error (old meaning of PASS)
             record["result"] = result

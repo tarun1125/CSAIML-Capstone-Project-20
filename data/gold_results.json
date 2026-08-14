@@ -2063,5 +2063,2997 @@
         "maker_count": 9
       }
     ]
+  },
+  {
+    "id": "wl-e1",
+    "question": "What are the names of all the countries that became independent after 1950?",
+    "database": "world_1",
+    "query": "db.country.find({\"IndepYear\": {\"$gt\": 1950}}, {\"_id\": 0, \"Name\": 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "Angola"
+      },
+      {
+        "Name": "United Arab Emirates"
+      },
+      {
+        "Name": "Armenia"
+      },
+      {
+        "Name": "Antigua and Barbuda"
+      },
+      {
+        "Name": "Azerbaijan"
+      },
+      {
+        "Name": "Burundi"
+      },
+      {
+        "Name": "Benin"
+      },
+      {
+        "Name": "Burkina Faso"
+      },
+      {
+        "Name": "Bangladesh"
+      },
+      {
+        "Name": "Bahrain"
+      },
+      {
+        "Name": "Bahamas"
+      },
+      {
+        "Name": "Bosnia and Herzegovina"
+      },
+      {
+        "Name": "Belarus"
+      },
+      {
+        "Name": "Belize"
+      },
+      {
+        "Name": "Barbados"
+      },
+      {
+        "Name": "Brunei"
+      },
+      {
+        "Name": "Botswana"
+      },
+      {
+        "Name": "Central African Republic"
+      },
+      {
+        "Name": "C\u00f4te d\u2019Ivoire"
+      },
+      {
+        "Name": "Cameroon"
+      },
+      {
+        "Name": "Congo, The Democratic Republic of the"
+      },
+      {
+        "Name": "Congo"
+      },
+      {
+        "Name": "Comoros"
+      },
+      {
+        "Name": "Cape Verde"
+      },
+      {
+        "Name": "Cyprus"
+      },
+      {
+        "Name": "Czech Republic"
+      },
+      {
+        "Name": "Germany"
+      },
+      {
+        "Name": "Djibouti"
+      },
+      {
+        "Name": "Dominica"
+      },
+      {
+        "Name": "Algeria"
+      },
+      {
+        "Name": "Eritrea"
+      },
+      {
+        "Name": "Estonia"
+      },
+      {
+        "Name": "Fiji Islands"
+      },
+      {
+        "Name": "Micronesia, Federated States of"
+      },
+      {
+        "Name": "Gabon"
+      },
+      {
+        "Name": "Georgia"
+      },
+      {
+        "Name": "Ghana"
+      },
+      {
+        "Name": "Guinea"
+      },
+      {
+        "Name": "Gambia"
+      },
+      {
+        "Name": "Guinea-Bissau"
+      },
+      {
+        "Name": "Equatorial Guinea"
+      },
+      {
+        "Name": "Grenada"
+      },
+      {
+        "Name": "Guyana"
+      },
+      {
+        "Name": "Croatia"
+      },
+      {
+        "Name": "Jamaica"
+      },
+      {
+        "Name": "Kazakstan"
+      },
+      {
+        "Name": "Kenya"
+      },
+      {
+        "Name": "Kyrgyzstan"
+      },
+      {
+        "Name": "Cambodia"
+      },
+      {
+        "Name": "Kiribati"
+      },
+      {
+        "Name": "Saint Kitts and Nevis"
+      },
+      {
+        "Name": "Kuwait"
+      },
+      {
+        "Name": "Laos"
+      },
+      {
+        "Name": "Libyan Arab Jamahiriya"
+      },
+      {
+        "Name": "Saint Lucia"
+      },
+      {
+        "Name": "Lesotho"
+      },
+      {
+        "Name": "Lithuania"
+      },
+      {
+        "Name": "Latvia"
+      },
+      {
+        "Name": "Morocco"
+      },
+      {
+        "Name": "Moldova"
+      },
+      {
+        "Name": "Madagascar"
+      },
+      {
+        "Name": "Maldives"
+      },
+      {
+        "Name": "Marshall Islands"
+      },
+      {
+        "Name": "Macedonia"
+      },
+      {
+        "Name": "Mali"
+      },
+      {
+        "Name": "Malta"
+      },
+      {
+        "Name": "Mozambique"
+      },
+      {
+        "Name": "Mauritania"
+      },
+      {
+        "Name": "Mauritius"
+      },
+      {
+        "Name": "Malawi"
+      },
+      {
+        "Name": "Malaysia"
+      },
+      {
+        "Name": "Namibia"
+      },
+      {
+        "Name": "Niger"
+      },
+      {
+        "Name": "Nigeria"
+      },
+      {
+        "Name": "Nauru"
+      },
+      {
+        "Name": "Oman"
+      },
+      {
+        "Name": "Palau"
+      },
+      {
+        "Name": "Papua New Guinea"
+      },
+      {
+        "Name": "Qatar"
+      },
+      {
+        "Name": "Russian Federation"
+      },
+      {
+        "Name": "Rwanda"
+      },
+      {
+        "Name": "Sudan"
+      },
+      {
+        "Name": "Senegal"
+      },
+      {
+        "Name": "Singapore"
+      },
+      {
+        "Name": "Solomon Islands"
+      },
+      {
+        "Name": "Sierra Leone"
+      },
+      {
+        "Name": "Somalia"
+      },
+      {
+        "Name": "Sao Tome and Principe"
+      },
+      {
+        "Name": "Suriname"
+      },
+      {
+        "Name": "Slovakia"
+      },
+      {
+        "Name": "Slovenia"
+      },
+      {
+        "Name": "Swaziland"
+      },
+      {
+        "Name": "Seychelles"
+      },
+      {
+        "Name": "Chad"
+      },
+      {
+        "Name": "Togo"
+      },
+      {
+        "Name": "Tajikistan"
+      },
+      {
+        "Name": "Turkmenistan"
+      },
+      {
+        "Name": "Tonga"
+      },
+      {
+        "Name": "Trinidad and Tobago"
+      },
+      {
+        "Name": "Tunisia"
+      },
+      {
+        "Name": "Tuvalu"
+      },
+      {
+        "Name": "Tanzania"
+      },
+      {
+        "Name": "Uganda"
+      },
+      {
+        "Name": "Ukraine"
+      },
+      {
+        "Name": "Uzbekistan"
+      },
+      {
+        "Name": "Saint Vincent and the Grenadines"
+      },
+      {
+        "Name": "Vanuatu"
+      },
+      {
+        "Name": "Samoa"
+      },
+      {
+        "Name": "Zambia"
+      },
+      {
+        "Name": "Zimbabwe"
+      }
+    ]
+  },
+  {
+    "id": "wl-e2",
+    "question": "How many countries have a republic as their form of government?",
+    "database": "world_1",
+    "query": "db.country.count_documents({\"GovernmentForm\": \"Republic\"})",
+    "status": "PASS",
+    "result": 122
+  },
+  {
+    "id": "wl-e3",
+    "question": "Which continent is Anguilla in?",
+    "database": "world_1",
+    "query": "db.country.find({\"Name\": \"Anguilla\"}, {\"_id\": 0, \"Continent\": 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Continent": "North America"
+      }
+    ]
+  },
+  {
+    "id": "wl-e4",
+    "question": "What are the population and life expectancy of Brazil?",
+    "database": "world_1",
+    "query": "db.country.find({\"Name\": \"Brazil\"}, {\"_id\": 0, \"Population\": 1, \"LifeExpectancy\": 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Population": 170115000,
+        "LifeExpectancy": 62.9
+      }
+    ]
+  },
+  {
+    "id": "wl-e5",
+    "question": "How many people live in the Gelderland district?",
+    "database": "world_1",
+    "query": "db.city.aggregate([{\"$match\": {\"District\": \"Gelderland\"}}, {\"$group\": {\"_id\": None, \"total_population\": {\"$sum\": \"$Population\"}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "total_population": 545548
+      }
+    ]
+  },
+  {
+    "id": "wl-e6",
+    "question": "What are the names and surface areas of the 5 largest countries by area?",
+    "database": "world_1",
+    "query": "db.country.find({}, {\"_id\": 0, \"Name\": 1, \"SurfaceArea\": 1}).sort([(\"SurfaceArea\", -1)]).limit(5)",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "Russian Federation",
+        "SurfaceArea": 17075400
+      },
+      {
+        "Name": "Antarctica",
+        "SurfaceArea": 13120000
+      },
+      {
+        "Name": "Canada",
+        "SurfaceArea": 9970610
+      },
+      {
+        "Name": "China",
+        "SurfaceArea": 9572900
+      },
+      {
+        "Name": "United States",
+        "SurfaceArea": 9363520
+      }
+    ]
+  },
+  {
+    "id": "wl-e7",
+    "question": "What are the codes of countries that do not speak English?",
+    "database": "world_1",
+    "query": "db.countrylanguage.aggregate([{\"$group\": {\"_id\": \"$CountryCode\", \"languages\": {\"$push\": \"$Language\"}}}, {\"$match\": {\"languages\": {\"$ne\": \"English\"}}}, {\"$project\": {\"_id\": 0, \"CountryCode\": \"$_id\"}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "CountryCode": "IND"
+      },
+      {
+        "CountryCode": "KIR"
+      },
+      {
+        "CountryCode": "GLP"
+      },
+      {
+        "CountryCode": "MRT"
+      },
+      {
+        "CountryCode": "COM"
+      },
+      {
+        "CountryCode": "SLB"
+      },
+      {
+        "CountryCode": "TJK"
+      },
+      {
+        "CountryCode": "PHL"
+      },
+      {
+        "CountryCode": "BIH"
+      },
+      {
+        "CountryCode": "MTQ"
+      },
+      {
+        "CountryCode": "HND"
+      },
+      {
+        "CountryCode": "SPM"
+      },
+      {
+        "CountryCode": "REU"
+      },
+      {
+        "CountryCode": "HTI"
+      },
+      {
+        "CountryCode": "OMN"
+      },
+      {
+        "CountryCode": "BEL"
+      },
+      {
+        "CountryCode": "LKA"
+      },
+      {
+        "CountryCode": "AFG"
+      },
+      {
+        "CountryCode": "COG"
+      },
+      {
+        "CountryCode": "DOM"
+      },
+      {
+        "CountryCode": "HUN"
+      },
+      {
+        "CountryCode": "CHL"
+      },
+      {
+        "CountryCode": "FRA"
+      },
+      {
+        "CountryCode": "LBY"
+      },
+      {
+        "CountryCode": "ROM"
+      },
+      {
+        "CountryCode": "SJM"
+      },
+      {
+        "CountryCode": "ISR"
+      },
+      {
+        "CountryCode": "NPL"
+      },
+      {
+        "CountryCode": "SDN"
+      },
+      {
+        "CountryCode": "SGP"
+      },
+      {
+        "CountryCode": "GUY"
+      },
+      {
+        "CountryCode": "SUR"
+      },
+      {
+        "CountryCode": "ESH"
+      },
+      {
+        "CountryCode": "GRD"
+      },
+      {
+        "CountryCode": "GEO"
+      },
+      {
+        "CountryCode": "TCD"
+      },
+      {
+        "CountryCode": "PNG"
+      },
+      {
+        "CountryCode": "CYP"
+      },
+      {
+        "CountryCode": "MDA"
+      },
+      {
+        "CountryCode": "MWI"
+      },
+      {
+        "CountryCode": "ECU"
+      },
+      {
+        "CountryCode": "EGY"
+      },
+      {
+        "CountryCode": "ERI"
+      },
+      {
+        "CountryCode": "MAR"
+      },
+      {
+        "CountryCode": "SWE"
+      },
+      {
+        "CountryCode": "FIN"
+      },
+      {
+        "CountryCode": "STP"
+      },
+      {
+        "CountryCode": "MYT"
+      },
+      {
+        "CountryCode": "MEX"
+      },
+      {
+        "CountryCode": "DJI"
+      },
+      {
+        "CountryCode": "ESP"
+      },
+      {
+        "CountryCode": "CPV"
+      },
+      {
+        "CountryCode": "YUG"
+      },
+      {
+        "CountryCode": "FSM"
+      },
+      {
+        "CountryCode": "BGR"
+      },
+      {
+        "CountryCode": "BWA"
+      },
+      {
+        "CountryCode": "GIN"
+      },
+      {
+        "CountryCode": "CIV"
+      },
+      {
+        "CountryCode": "SLV"
+      },
+      {
+        "CountryCode": "BEN"
+      },
+      {
+        "CountryCode": "PYF"
+      },
+      {
+        "CountryCode": "MNG"
+      },
+      {
+        "CountryCode": "TMP"
+      },
+      {
+        "CountryCode": "NER"
+      },
+      {
+        "CountryCode": "SVK"
+      },
+      {
+        "CountryCode": "BOL"
+      },
+      {
+        "CountryCode": "URY"
+      },
+      {
+        "CountryCode": "LAO"
+      },
+      {
+        "CountryCode": "MDG"
+      },
+      {
+        "CountryCode": "NIC"
+      },
+      {
+        "CountryCode": "BDI"
+      },
+      {
+        "CountryCode": "LUX"
+      },
+      {
+        "CountryCode": "RWA"
+      },
+      {
+        "CountryCode": "ITA"
+      },
+      {
+        "CountryCode": "SEN"
+      },
+      {
+        "CountryCode": "UGA"
+      },
+      {
+        "CountryCode": "AND"
+      },
+      {
+        "CountryCode": "SYR"
+      },
+      {
+        "CountryCode": "KAZ"
+      },
+      {
+        "CountryCode": "BTN"
+      },
+      {
+        "CountryCode": "SAU"
+      },
+      {
+        "CountryCode": "DZA"
+      },
+      {
+        "CountryCode": "SWZ"
+      },
+      {
+        "CountryCode": "ZMB"
+      },
+      {
+        "CountryCode": "DMA"
+      },
+      {
+        "CountryCode": "SOM"
+      },
+      {
+        "CountryCode": "COL"
+      },
+      {
+        "CountryCode": "EST"
+      },
+      {
+        "CountryCode": "TUN"
+      },
+      {
+        "CountryCode": "LVA"
+      },
+      {
+        "CountryCode": "GMB"
+      },
+      {
+        "CountryCode": "CAF"
+      },
+      {
+        "CountryCode": "BLR"
+      },
+      {
+        "CountryCode": "GHA"
+      },
+      {
+        "CountryCode": "MOZ"
+      },
+      {
+        "CountryCode": "VEN"
+      },
+      {
+        "CountryCode": "KOR"
+      },
+      {
+        "CountryCode": "ARM"
+      },
+      {
+        "CountryCode": "MMR"
+      },
+      {
+        "CountryCode": "UZB"
+      },
+      {
+        "CountryCode": "ALB"
+      },
+      {
+        "CountryCode": "COD"
+      },
+      {
+        "CountryCode": "KGZ"
+      },
+      {
+        "CountryCode": "HRV"
+      },
+      {
+        "CountryCode": "QAT"
+      },
+      {
+        "CountryCode": "PER"
+      },
+      {
+        "CountryCode": "CMR"
+      },
+      {
+        "CountryCode": "AZE"
+      },
+      {
+        "CountryCode": "VAT"
+      },
+      {
+        "CountryCode": "ETH"
+      },
+      {
+        "CountryCode": "GRL"
+      },
+      {
+        "CountryCode": "LIE"
+      },
+      {
+        "CountryCode": "LBR"
+      },
+      {
+        "CountryCode": "CHE"
+      },
+      {
+        "CountryCode": "CRI"
+      },
+      {
+        "CountryCode": "PRT"
+      },
+      {
+        "CountryCode": "PRY"
+      },
+      {
+        "CountryCode": "VNM"
+      },
+      {
+        "CountryCode": "MUS"
+      },
+      {
+        "CountryCode": "GNB"
+      },
+      {
+        "CountryCode": "LTU"
+      },
+      {
+        "CountryCode": "THA"
+      },
+      {
+        "CountryCode": "PAK"
+      },
+      {
+        "CountryCode": "TUR"
+      },
+      {
+        "CountryCode": "NCL"
+      },
+      {
+        "CountryCode": "RUS"
+      },
+      {
+        "CountryCode": "WLF"
+      },
+      {
+        "CountryCode": "TWN"
+      },
+      {
+        "CountryCode": "TGO"
+      },
+      {
+        "CountryCode": "JAM"
+      },
+      {
+        "CountryCode": "DEU"
+      },
+      {
+        "CountryCode": "GNQ"
+      },
+      {
+        "CountryCode": "SVN"
+      },
+      {
+        "CountryCode": "JOR"
+      },
+      {
+        "CountryCode": "IDN"
+      },
+      {
+        "CountryCode": "SLE"
+      },
+      {
+        "CountryCode": "BGD"
+      },
+      {
+        "CountryCode": "BRA"
+      },
+      {
+        "CountryCode": "NLD"
+      },
+      {
+        "CountryCode": "MLI"
+      },
+      {
+        "CountryCode": "NAM"
+      },
+      {
+        "CountryCode": "IRN"
+      },
+      {
+        "CountryCode": "POL"
+      },
+      {
+        "CountryCode": "CZE"
+      },
+      {
+        "CountryCode": "BHS"
+      },
+      {
+        "CountryCode": "GAB"
+      },
+      {
+        "CountryCode": "YEM"
+      },
+      {
+        "CountryCode": "TZA"
+      },
+      {
+        "CountryCode": "FRO"
+      },
+      {
+        "CountryCode": "PCN"
+      },
+      {
+        "CountryCode": "AGO"
+      },
+      {
+        "CountryCode": "MKD"
+      },
+      {
+        "CountryCode": "GRC"
+      },
+      {
+        "CountryCode": "LBN"
+      },
+      {
+        "CountryCode": "PRK"
+      },
+      {
+        "CountryCode": "PSE"
+      },
+      {
+        "CountryCode": "GUF"
+      },
+      {
+        "CountryCode": "PAN"
+      },
+      {
+        "CountryCode": "GTM"
+      },
+      {
+        "CountryCode": "ARE"
+      },
+      {
+        "CountryCode": "KHM"
+      },
+      {
+        "CountryCode": "IRQ"
+      },
+      {
+        "CountryCode": "ARG"
+      },
+      {
+        "CountryCode": "BFA"
+      },
+      {
+        "CountryCode": "CHN"
+      },
+      {
+        "CountryCode": "KEN"
+      },
+      {
+        "CountryCode": "NGA"
+      },
+      {
+        "CountryCode": "SMR"
+      },
+      {
+        "CountryCode": "UKR"
+      },
+      {
+        "CountryCode": "AUT"
+      },
+      {
+        "CountryCode": "FJI"
+      },
+      {
+        "CountryCode": "TKM"
+      },
+      {
+        "CountryCode": "CUB"
+      }
+    ]
+  },
+  {
+    "id": "wl-m1",
+    "question": "Which region is the city Kabul located in?",
+    "database": "world_1",
+    "query": "db.city.aggregate([{\"$match\": {\"Name\": \"Kabul\"}}, {\"$lookup\": {\"from\": \"country\", \"localField\": \"CountryCode\", \"foreignField\": \"Code\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$project\": {\"_id\": 0, \"Region\": \"$c.Region\"}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "Region": "Southern and Central Asia"
+      }
+    ]
+  },
+  {
+    "id": "wl-m2",
+    "question": "Which language is the most popular in Aruba?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{\"$match\": {\"Name\": \"Aruba\"}}, {\"$lookup\": {\"from\": \"countrylanguage\", \"localField\": \"Code\", \"foreignField\": \"CountryCode\", \"as\": \"langs\"}}, {\"$unwind\": \"$langs\"}, {\"$sort\": {\"langs.Percentage\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"Language\": \"$langs.Language\"}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "Language": "Papiamento"
+      }
+    ]
+  },
+  {
+    "id": "wl-m3",
+    "question": "How many official languages does Afghanistan have?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{\"$match\": {\"Name\": \"Afghanistan\"}}, {\"$lookup\": {\"from\": \"countrylanguage\", \"localField\": \"Code\", \"foreignField\": \"CountryCode\", \"as\": \"langs\"}}, {\"$unwind\": \"$langs\"}, {\"$match\": {\"langs.IsOfficial\": \"T\"}}, {\"$count\": \"official_language_count\"}])",
+    "status": "PASS",
+    "result": [
+      {
+        "official_language_count": 2
+      }
+    ]
+  },
+  {
+    "id": "wl-m4",
+    "question": "What is the name of the country that speaks the largest number of languages?",
+    "database": "world_1",
+    "query": "db.countrylanguage.aggregate([{\"$group\": {\"_id\": \"$CountryCode\", \"lang_count\": {\"$sum\": 1}}}, {\"$sort\": {\"lang_count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"country\", \"localField\": \"_id\", \"foreignField\": \"Code\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$c.Name\"}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "India"
+      }
+    ]
+  },
+  {
+    "id": "wl-m5",
+    "question": "What is the average life expectancy for countries in the Central Africa region?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{\"$match\": {\"Region\": \"Central Africa\"}}, {\"$group\": {\"_id\": None, \"avg_life_expectancy\": {\"$avg\": \"$LifeExpectancy\"}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "avg_life_expectancy": 50.31111111111111
+      }
+    ]
+  },
+  {
+    "id": "wl-m6",
+    "question": "Find the city with the largest population where English is spoken.",
+    "database": "world_1",
+    "query": "db.city.aggregate([{\"$lookup\": {\"from\": \"countrylanguage\", \"localField\": \"CountryCode\", \"foreignField\": \"CountryCode\", \"as\": \"langs\"}}, {\"$match\": {\"langs.Language\": \"English\"}}, {\"$sort\": {\"Population\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"Name\": 1, \"Population\": 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "New York",
+        "Population": 8008278
+      }
+    ]
+  },
+  {
+    "id": "wl-h1",
+    "question": "Return the country name and number of languages spoken for each country that speaks at least 3 languages.",
+    "database": "world_1",
+    "query": "db.countrylanguage.aggregate([{\"$group\": {\"_id\": \"$CountryCode\", \"lang_count\": {\"$sum\": 1}}}, {\"$match\": {\"lang_count\": {\"$gt\": 2}}}, {\"$lookup\": {\"from\": \"country\", \"localField\": \"_id\", \"foreignField\": \"Code\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$c.Name\", \"lang_count\": 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "lang_count": 6,
+        "Name": "Panama"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Honduras"
+      },
+      {
+        "lang_count": 5,
+        "Name": "R\u00e9union"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Congo"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Afghanistan"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Sri Lanka"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Belgium"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Solomon Islands"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Comoros"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Mauritania"
+      },
+      {
+        "lang_count": 12,
+        "Name": "India"
+      },
+      {
+        "lang_count": 10,
+        "Name": "Philippines"
+      },
+      {
+        "lang_count": 7,
+        "Name": "Denmark"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Tajikistan"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Chad"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Guam"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Georgia"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Malawi"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Moldova"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Chile"
+      },
+      {
+        "lang_count": 6,
+        "Name": "France"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Romania"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Hungary"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Japan"
+      },
+      {
+        "lang_count": 7,
+        "Name": "Nepal"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Israel"
+      },
+      {
+        "lang_count": 10,
+        "Name": "Sudan"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Guyana"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Singapore"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Botswana"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Bulgaria"
+      },
+      {
+        "lang_count": 7,
+        "Name": "Guinea"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Spain"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Yugoslavia"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Micronesia, Federated States of"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Lesotho"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Mongolia"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Niger"
+      },
+      {
+        "lang_count": 7,
+        "Name": "Benin"
+      },
+      {
+        "lang_count": 5,
+        "Name": "C\u00f4te d\u2019Ivoire"
+      },
+      {
+        "lang_count": 3,
+        "Name": "French Polynesia"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Eritrea"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Seychelles"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Finland"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Djibouti"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Mexico"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Mayotte"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Malaysia"
+      },
+      {
+        "lang_count": 3,
+        "Name": "United Kingdom"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Sweden"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Trinidad and Tobago"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Andorra"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Macao"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Bhutan"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Kazakstan"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Colombia"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Estonia"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Latvia"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Tunisia"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Zambia"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Australia"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Burundi"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Nicaragua"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Luxembourg"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Slovakia"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Bolivia"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Laos"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Samoa"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Senegal"
+      },
+      {
+        "lang_count": 10,
+        "Name": "Uganda"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Italy"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Peru"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Uzbekistan"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Zimbabwe"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Myanmar"
+      },
+      {
+        "lang_count": 7,
+        "Name": "Kyrgyzstan"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Albania"
+      },
+      {
+        "lang_count": 10,
+        "Name": "Congo, The Democratic Republic of the"
+      },
+      {
+        "lang_count": 3,
+        "Name": "American Samoa"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Monaco"
+      },
+      {
+        "lang_count": 7,
+        "Name": "Ethiopia"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Cameroon"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Azerbaijan"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Belarus"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Belize"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Ghana"
+      },
+      {
+        "lang_count": 10,
+        "Name": "Mozambique"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Venezuela"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Gambia"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Central African Republic"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Norway"
+      },
+      {
+        "lang_count": 12,
+        "Name": "Russian Federation"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Taiwan"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Lithuania"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Turkey"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Thailand"
+      },
+      {
+        "lang_count": 3,
+        "Name": "New Caledonia"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Mauritius"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Guinea-Bissau"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Pakistan"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Jordan"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Slovenia"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Togo"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Northern Mariana Islands"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Germany"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Vanuatu"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Costa Rica"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Netherlands Antilles"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Switzerland"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Paraguay"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Virgin Islands, U.S."
+      },
+      {
+        "lang_count": 3,
+        "Name": "Liechtenstein"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Liberia"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Nauru"
+      },
+      {
+        "lang_count": 9,
+        "Name": "Vietnam"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Poland"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Mali"
+      },
+      {
+        "lang_count": 10,
+        "Name": "Iran"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Namibia"
+      },
+      {
+        "lang_count": 11,
+        "Name": "Tanzania"
+      },
+      {
+        "lang_count": 11,
+        "Name": "South Africa"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Palau"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Gabon"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Tuvalu"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Czech Republic"
+      },
+      {
+        "lang_count": 9,
+        "Name": "Indonesia"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Sierra Leone"
+      },
+      {
+        "lang_count": 7,
+        "Name": "Bangladesh"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Netherlands"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Brazil"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Aruba"
+      },
+      {
+        "lang_count": 10,
+        "Name": "Nigeria"
+      },
+      {
+        "lang_count": 7,
+        "Name": "Ukraine"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Austria"
+      },
+      {
+        "lang_count": 12,
+        "Name": "China"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Argentina"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Burkina Faso"
+      },
+      {
+        "lang_count": 12,
+        "Name": "Canada"
+      },
+      {
+        "lang_count": 10,
+        "Name": "Kenya"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Turkmenistan"
+      },
+      {
+        "lang_count": 9,
+        "Name": "Angola"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Macedonia"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Lebanon"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Hong Kong"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Cambodia"
+      },
+      {
+        "lang_count": 12,
+        "Name": "United States"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Iraq"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Brunei"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Guatemala"
+      }
+    ]
+  },
+  {
+    "id": "wl-h2",
+    "question": "Which languages are spoken by only one country among republic governments?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{\"$match\": {\"GovernmentForm\": \"Republic\"}}, {\"$lookup\": {\"from\": \"countrylanguage\", \"localField\": \"Code\", \"foreignField\": \"CountryCode\", \"as\": \"langs\"}}, {\"$unwind\": \"$langs\"}, {\"$group\": {\"_id\": \"$langs.Language\", \"country_count\": {\"$sum\": 1}}}, {\"$match\": {\"country_count\": 1}}, {\"$project\": {\"_id\": 0, \"Language\": \"$_id\"}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "Language": "Burmese"
+      },
+      {
+        "Language": "Sindhi"
+      },
+      {
+        "Language": "Kotokoli"
+      },
+      {
+        "Language": "Bubi"
+      },
+      {
+        "Language": "Kekch\u00ed"
+      },
+      {
+        "Language": "Madura"
+      },
+      {
+        "Language": "Gisu"
+      },
+      {
+        "Language": "Minangkabau"
+      },
+      {
+        "Language": "Urdu"
+      },
+      {
+        "Language": "Dhivehi"
+      },
+      {
+        "Language": "Turkmenian"
+      },
+      {
+        "Language": "Paiwan"
+      },
+      {
+        "Language": "Yao"
+      },
+      {
+        "Language": "Masana"
+      },
+      {
+        "Language": "Kikuyu"
+      },
+      {
+        "Language": "Pangasinan"
+      },
+      {
+        "Language": "Tikar"
+      },
+      {
+        "Language": "Ga-adangme"
+      },
+      {
+        "Language": "Silesiana"
+      },
+      {
+        "Language": "Shan"
+      },
+      {
+        "Language": "Saraiki"
+      },
+      {
+        "Language": "Czech and Moravian"
+      },
+      {
+        "Language": "Teso"
+      },
+      {
+        "Language": "Chewa"
+      },
+      {
+        "Language": "Chaga and Pare"
+      },
+      {
+        "Language": "Caprivi"
+      },
+      {
+        "Language": "Songhai-zerma"
+      },
+      {
+        "Language": "Karen"
+      },
+      {
+        "Language": "Latvian"
+      },
+      {
+        "Language": "Fon"
+      },
+      {
+        "Language": "Nyaneka-nkhumbi"
+      },
+      {
+        "Language": "Ilocano"
+      },
+      {
+        "Language": "Garifuna"
+      },
+      {
+        "Language": "Bicol"
+      },
+      {
+        "Language": "Dyula"
+      },
+      {
+        "Language": "Bariba"
+      },
+      {
+        "Language": "Luimbe-nganguela"
+      },
+      {
+        "Language": "Nyamwesi"
+      },
+      {
+        "Language": "Icelandic"
+      },
+      {
+        "Language": "Northsotho"
+      },
+      {
+        "Language": "Mandara"
+      },
+      {
+        "Language": "Ngoni"
+      },
+      {
+        "Language": "Songhai"
+      },
+      {
+        "Language": "Rakhine"
+      },
+      {
+        "Language": "Tukulor"
+      },
+      {
+        "Language": "Philippene Languages"
+      },
+      {
+        "Language": "Luvale"
+      },
+      {
+        "Language": "Punu"
+      },
+      {
+        "Language": "Haya"
+      },
+      {
+        "Language": "Southsotho"
+      },
+      {
+        "Language": "Bambara"
+      },
+      {
+        "Language": "Bamileke-bamum"
+      },
+      {
+        "Language": "Chakma"
+      },
+      {
+        "Language": "Mam"
+      },
+      {
+        "Language": "Batakki"
+      },
+      {
+        "Language": "Kachin"
+      },
+      {
+        "Language": "Limba"
+      },
+      {
+        "Language": "Hakka"
+      },
+      {
+        "Language": "Soga"
+      },
+      {
+        "Language": "Soqutri"
+      },
+      {
+        "Language": "Marma"
+      },
+      {
+        "Language": "Lozi"
+      },
+      {
+        "Language": "Luba"
+      },
+      {
+        "Language": "Comorian-madagassi"
+      },
+      {
+        "Language": "Mpongwe"
+      },
+      {
+        "Language": "Sinaberberi"
+      },
+      {
+        "Language": "[South]Mande"
+      },
+      {
+        "Language": "Moravian"
+      },
+      {
+        "Language": "Persian"
+      },
+      {
+        "Language": "Maranao"
+      },
+      {
+        "Language": "Bhojpuri"
+      },
+      {
+        "Language": "Bajad"
+      },
+      {
+        "Language": "Haiti Creole"
+      },
+      {
+        "Language": "Gio"
+      },
+      {
+        "Language": "Ovambo"
+      },
+      {
+        "Language": "Assyrian"
+      },
+      {
+        "Language": "Mongolian"
+      },
+      {
+        "Language": "Chin"
+      },
+      {
+        "Language": "Tigre"
+      },
+      {
+        "Language": "Serer"
+      },
+      {
+        "Language": "Arabic-French-English"
+      },
+      {
+        "Language": "Kayah"
+      },
+      {
+        "Language": "Mboshi"
+      },
+      {
+        "Language": "Zande"
+      },
+      {
+        "Language": "Cakchiquel"
+      },
+      {
+        "Language": "Irish"
+      },
+      {
+        "Language": "Sango"
+      },
+      {
+        "Language": "Friuli"
+      },
+      {
+        "Language": "Buryat"
+      },
+      {
+        "Language": "Shambala"
+      },
+      {
+        "Language": "Javanese"
+      },
+      {
+        "Language": "Sranantonga"
+      },
+      {
+        "Language": "Mbundu"
+      },
+      {
+        "Language": "Hassaniya"
+      },
+      {
+        "Language": "Balante"
+      },
+      {
+        "Language": "Grebo"
+      },
+      {
+        "Language": "Thai"
+      },
+      {
+        "Language": "Kono-vai"
+      },
+      {
+        "Language": "Luguru"
+      },
+      {
+        "Language": "Brahui"
+      },
+      {
+        "Language": "Luchazi"
+      },
+      {
+        "Language": "Tripuri"
+      },
+      {
+        "Language": "Watyi"
+      },
+      {
+        "Language": "Gur"
+      },
+      {
+        "Language": "Marendje"
+      },
+      {
+        "Language": "Kalenjin"
+      },
+      {
+        "Language": "Naudemba"
+      },
+      {
+        "Language": "Sunda"
+      },
+      {
+        "Language": "Comorian-French"
+      },
+      {
+        "Language": "Tswa"
+      },
+      {
+        "Language": "Mano"
+      },
+      {
+        "Language": "Lugbara"
+      },
+      {
+        "Language": "Saho"
+      },
+      {
+        "Language": "Masai"
+      },
+      {
+        "Language": "Comorian"
+      },
+      {
+        "Language": "Swedish"
+      },
+      {
+        "Language": "Kiga"
+      },
+      {
+        "Language": "Sena"
+      },
+      {
+        "Language": "Bassa"
+      },
+      {
+        "Language": "Ane"
+      },
+      {
+        "Language": "Senufo and Minianka"
+      },
+      {
+        "Language": "Hindko"
+      },
+      {
+        "Language": "Balochi"
+      },
+      {
+        "Language": "Banda"
+      },
+      {
+        "Language": "Palau"
+      },
+      {
+        "Language": "Moba"
+      },
+      {
+        "Language": "Gogo"
+      },
+      {
+        "Language": "Seselwa"
+      },
+      {
+        "Language": "Saame"
+      },
+      {
+        "Language": "Mixed Languages"
+      },
+      {
+        "Language": "Mende"
+      },
+      {
+        "Language": "Gorane"
+      },
+      {
+        "Language": "Walaita"
+      },
+      {
+        "Language": "Cuna"
+      },
+      {
+        "Language": "Garo"
+      },
+      {
+        "Language": "Lao"
+      },
+      {
+        "Language": "Ha"
+      },
+      {
+        "Language": "Mayo-kebbi"
+      },
+      {
+        "Language": "Ambo"
+      },
+      {
+        "Language": "Amhara"
+      },
+      {
+        "Language": "Gusii"
+      },
+      {
+        "Language": "Zenaga"
+      },
+      {
+        "Language": "Kavango"
+      },
+      {
+        "Language": "Sumo"
+      },
+      {
+        "Language": "Hebrew"
+      },
+      {
+        "Language": "Nauru"
+      },
+      {
+        "Language": "Maka"
+      },
+      {
+        "Language": "Susu"
+      },
+      {
+        "Language": "Cebuano"
+      },
+      {
+        "Language": "Berberi"
+      },
+      {
+        "Language": "Maguindanao"
+      },
+      {
+        "Language": "Karakalpak"
+      },
+      {
+        "Language": "Xhosa"
+      },
+      {
+        "Language": "Boa"
+      },
+      {
+        "Language": "Bislama"
+      },
+      {
+        "Language": "Min"
+      },
+      {
+        "Language": "Mandarin Chinese"
+      },
+      {
+        "Language": "Adja"
+      },
+      {
+        "Language": "Hadjarai"
+      },
+      {
+        "Language": "Herero"
+      },
+      {
+        "Language": "Makonde"
+      },
+      {
+        "Language": "Nyakusa"
+      },
+      {
+        "Language": "Ukrainian and Russian"
+      },
+      {
+        "Language": "Gbaya"
+      },
+      {
+        "Language": "Khasi"
+      },
+      {
+        "Language": "Dorbet"
+      },
+      {
+        "Language": "Kamba"
+      },
+      {
+        "Language": "Marathi"
+      },
+      {
+        "Language": "Bengali"
+      },
+      {
+        "Language": "Hiligaynon"
+      },
+      {
+        "Language": "Fijian"
+      },
+      {
+        "Language": "Gurage"
+      },
+      {
+        "Language": "Pilipino"
+      },
+      {
+        "Language": "Araucan"
+      },
+      {
+        "Language": "Dariganga"
+      },
+      {
+        "Language": "Tongan"
+      },
+      {
+        "Language": "Bali"
+      },
+      {
+        "Language": "Mandjia"
+      },
+      {
+        "Language": "Kanem-bornu"
+      },
+      {
+        "Language": "Temne"
+      },
+      {
+        "Language": "Korean"
+      },
+      {
+        "Language": "Guaym\u00ed"
+      },
+      {
+        "Language": "Quich\u00e9"
+      },
+      {
+        "Language": "Marshallese"
+      },
+      {
+        "Language": "Acholi"
+      },
+      {
+        "Language": "Chichewa"
+      },
+      {
+        "Language": "Ngala and Bangi"
+      },
+      {
+        "Language": "Nkole"
+      },
+      {
+        "Language": "Sidamo"
+      },
+      {
+        "Language": "Dagara"
+      },
+      {
+        "Language": "Osseetti"
+      },
+      {
+        "Language": "Mongo"
+      },
+      {
+        "Language": "Ami"
+      },
+      {
+        "Language": "Sardinian"
+      },
+      {
+        "Language": "Waray-waray"
+      },
+      {
+        "Language": "Arabic-French"
+      },
+      {
+        "Language": "Chuabo"
+      },
+      {
+        "Language": "Pampango"
+      },
+      {
+        "Language": "Lango"
+      },
+      {
+        "Language": "Czech"
+      },
+      {
+        "Language": "Georgiana"
+      },
+      {
+        "Language": "Kirundi"
+      },
+      {
+        "Language": "Santhali"
+      },
+      {
+        "Language": "Comorian-Arabic"
+      },
+      {
+        "Language": "Embera"
+      },
+      {
+        "Language": "Kuranko"
+      },
+      {
+        "Language": "Nahua"
+      },
+      {
+        "Language": "Ovimbundu"
+      },
+      {
+        "Language": "Duala"
+      },
+      {
+        "Language": "Kissi"
+      },
+      {
+        "Language": "Rundi"
+      },
+      {
+        "Language": "Ronga"
+      },
+      {
+        "Language": "Mon-khmer"
+      },
+      {
+        "Language": "Kanuri"
+      },
+      {
+        "Language": "Comorian-Swahili"
+      },
+      {
+        "Language": "Luhya"
+      },
+      {
+        "Language": "Punjabi"
+      },
+      {
+        "Language": "Hehet"
+      },
+      {
+        "Language": "Venda"
+      },
+      {
+        "Language": "Banja"
+      },
+      {
+        "Language": "Bugi"
+      },
+      {
+        "Language": "Hadareb"
+      },
+      {
+        "Language": "Mon"
+      },
+      {
+        "Language": "Mandyako"
+      },
+      {
+        "Language": "Nyika"
+      },
+      {
+        "Language": "Tandjile"
+      },
+      {
+        "Language": "Oromo"
+      },
+      {
+        "Language": "Bullom-sherbro"
+      },
+      {
+        "Language": "Maltese"
+      },
+      {
+        "Language": "Atayal"
+      },
+      {
+        "Language": "Ganda"
+      },
+      {
+        "Language": "Meru"
+      },
+      {
+        "Language": "Singali"
+      },
+      {
+        "Language": "Kirgiz"
+      },
+      {
+        "Language": "Hausa"
+      },
+      {
+        "Language": "Turkana"
+      },
+      {
+        "Language": "Luo"
+      },
+      {
+        "Language": "Nsenga"
+      },
+      {
+        "Language": "Abhyasi"
+      },
+      {
+        "Language": "Gagauzi"
+      },
+      {
+        "Language": "Swazi"
+      },
+      {
+        "Language": "Ngbaka"
+      },
+      {
+        "Language": "Aizo"
+      },
+      {
+        "Language": "Mbum"
+      },
+      {
+        "Language": "Bilin"
+      },
+      {
+        "Language": "Rapa nui"
+      },
+      {
+        "Language": "Bemba"
+      },
+      {
+        "Language": "Punu-sira-nzebi"
+      },
+      {
+        "Language": "Kaby\u00e9"
+      },
+      {
+        "Language": "Ouaddai"
+      },
+      {
+        "Language": "Zulu"
+      },
+      {
+        "Language": "Khoekhoe"
+      },
+      {
+        "Language": "Makua"
+      },
+      {
+        "Language": "Busansi"
+      },
+      {
+        "Language": "Nama"
+      },
+      {
+        "Language": "Lao-Soung"
+      },
+      {
+        "Language": "Pashto"
+      },
+      {
+        "Language": "Somba"
+      }
+    ]
+  },
+  {
+    "id": "wl-h3",
+    "question": "What is the total population and average surface area of countries in North America with a surface area bigger than 3000?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{\"$match\": {\"Continent\": \"North America\", \"SurfaceArea\": {\"$gt\": 3000}}}, {\"$group\": {\"_id\": None, \"total_population\": {\"$sum\": \"$Population\"}, \"avg_surface_area\": {\"$avg\": \"$SurfaceArea\"}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "total_population": 480753000,
+        "avg_surface_area": 1344763.7222222222
+      }
+    ]
+  },
+  {
+    "id": "wl-c1",
+    "question": "Which countries have a greater surface area than every country in Oceania?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{\"$lookup\": {\"from\": \"country\", \"pipeline\": [{\"$match\": {\"Continent\": \"Oceania\"}}, {\"$group\": {\"_id\": None, \"max_area\": {\"$max\": \"$SurfaceArea\"}}}], \"as\": \"threshold\"}}, {\"$unwind\": \"$threshold\"}, {\"$match\": {\"$expr\": {\"$gt\": [\"$SurfaceArea\", \"$threshold.max_area\"]}}}, {\"$project\": {\"_id\": 0, \"Name\": 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "Antarctica"
+      },
+      {
+        "Name": "Brazil"
+      },
+      {
+        "Name": "Canada"
+      },
+      {
+        "Name": "China"
+      },
+      {
+        "Name": "Russian Federation"
+      },
+      {
+        "Name": "United States"
+      }
+    ]
+  },
+  {
+    "id": "dk-e1",
+    "question": "What is the average age of all the dogs?",
+    "database": "dog_kennels",
+    "query": "db.Dogs.aggregate([{\"$addFields\": {\"age_num\": {\"$toInt\": \"$age\"}}}, {\"$group\": {\"_id\": None, \"avg_age\": {\"$avg\": \"$age_num\"}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "avg_age": 5.066666666666666
+      }
+    ]
+  },
+  {
+    "id": "dk-e2",
+    "question": "What is the age of the oldest dog?",
+    "database": "dog_kennels",
+    "query": "db.Dogs.aggregate([{\"$addFields\": {\"age_num\": {\"$toInt\": \"$age\"}}}, {\"$group\": {\"_id\": None, \"max_age\": {\"$max\": \"$age_num\"}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "max_age": 9
+      }
+    ]
+  },
+  {
+    "id": "dk-e3",
+    "question": "How many dogs went through any treatment?",
+    "database": "dog_kennels",
+    "query": "db.Treatments.distinct(\"dog_id\")",
+    "status": "PASS",
+    "result": [
+      1,
+      2,
+      4,
+      7,
+      10,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  {
+    "id": "dk-e4",
+    "question": "How much does each charge type cost? List both the charge type and amount.",
+    "database": "dog_kennels",
+    "query": "db.Charges.find({}, {\"_id\": 0, \"charge_type\": 1, \"charge_amount\": 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "charge_type": "Daily Accommodation",
+        "charge_amount": 98
+      },
+      {
+        "charge_type": "Drugs",
+        "charge_amount": 322
+      },
+      {
+        "charge_type": "Health Check",
+        "charge_amount": 640
+      }
+    ]
+  },
+  {
+    "id": "dk-e5",
+    "question": "What is the most expensive charge amount?",
+    "database": "dog_kennels",
+    "query": "db.Charges.aggregate([{\"$group\": {\"_id\": None, \"max_charge\": {\"$max\": \"$charge_amount\"}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "max_charge": 640
+      }
+    ]
+  },
+  {
+    "id": "dk-e6",
+    "question": "List the email, cell phone, and home phone of all the professionals.",
+    "database": "dog_kennels",
+    "query": "db.Professionals.find({}, {\"_id\": 0, \"email_address\": 1, \"cell_number\": 1, \"home_phone\": 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "email_address": "deanna.schuster@example.com",
+        "home_phone": "+71(6)2898266914",
+        "cell_number": "(275)939-2435x80863"
+      },
+      {
+        "email_address": "lucile.shanahan@example.org",
+        "home_phone": "+02(1)0259033559",
+        "cell_number": "889-940-2676"
+      },
+      {
+        "email_address": "uboehm@example.org",
+        "home_phone": "325-155-0801x7005",
+        "cell_number": "(369)908-7311x065"
+      },
+      {
+        "email_address": "lourdes.lowe@example.net",
+        "home_phone": "312.216.3352",
+        "cell_number": "00230569697"
+      },
+      {
+        "email_address": "mekhi.little@example.org",
+        "home_phone": "1-609-566-2752x25197",
+        "cell_number": "011.193.9081x3186"
+      },
+      {
+        "email_address": "jacynthe.mclaughlin@example.net",
+        "home_phone": "+43(5)1132733868",
+        "cell_number": "139-321-7313"
+      },
+      {
+        "email_address": "lambert62@example.org",
+        "home_phone": "022.529.0550x1319",
+        "cell_number": "499-434-0215x1628"
+      },
+      {
+        "email_address": "goyette.roosevelt@example.net",
+        "home_phone": "891.475.2256",
+        "cell_number": "328.842.3792"
+      },
+      {
+        "email_address": "schneider.kathryne@example.org",
+        "home_phone": "320-508-6023",
+        "cell_number": "962-983-8109x3509"
+      },
+      {
+        "email_address": "jerrod.bahringer@example.org",
+        "home_phone": "(230)338-3342x585",
+        "cell_number": "461-801-2600"
+      },
+      {
+        "email_address": "west.eula@example.net",
+        "home_phone": "(920)304-4499x59146",
+        "cell_number": "609-405-2990"
+      },
+      {
+        "email_address": "marquardt.furman@example.org",
+        "home_phone": "246-951-0080x76716",
+        "cell_number": "1-181-670-9466"
+      },
+      {
+        "email_address": "delphine29@example.com",
+        "home_phone": "346.594.3739",
+        "cell_number": "880-659-7577x736"
+      },
+      {
+        "email_address": "cole.margarita@example.org",
+        "home_phone": "971.048.3763x9404",
+        "cell_number": "1-185-137-1945x409"
+      },
+      {
+        "email_address": "jeichmann@example.com",
+        "home_phone": "1-138-287-3775",
+        "cell_number": "1-258-285-4707x8020"
+      }
+    ]
+  },
+  {
+    "id": "dk-e7",
+    "question": "List the dog name, age, and weight of dogs that have been abandoned.",
+    "database": "dog_kennels",
+    "query": "db.Dogs.find({\"abandoned_yn\": \"1\"}, {\"_id\": 0, \"name\": 1, \"age\": 1, \"weight\": 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "name": "Kacey",
+        "age": "6",
+        "weight": "7.57"
+      },
+      {
+        "name": "Lyric",
+        "age": "4",
+        "weight": "4.36"
+      },
+      {
+        "name": "Evangeline",
+        "age": "1",
+        "weight": "4.01"
+      }
+    ]
+  },
+  {
+    "id": "dk-m1",
+    "question": "Which professionals live in the state of Hawaii or the state of Wisconsin? List their emails.",
+    "database": "dog_kennels",
+    "query": "db.Professionals.find({\"state\": {\"$in\": [\"Hawaii\", \"Wisconsin\"]}}, {\"_id\": 0, \"email_address\": 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "email_address": "uboehm@example.org"
+      },
+      {
+        "email_address": "mekhi.little@example.org"
+      }
+    ]
+  },
+  {
+    "id": "dk-m2",
+    "question": "What is the name of the breed with the most dogs?",
+    "database": "dog_kennels",
+    "query": "db.Dogs.aggregate([{\"$group\": {\"_id\": \"$breed_code\", \"dog_count\": {\"$sum\": 1}}}, {\"$sort\": {\"dog_count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"Breeds\", \"localField\": \"_id\", \"foreignField\": \"breed_code\", \"as\": \"b\"}}, {\"$unwind\": \"$b\"}, {\"$project\": {\"_id\": 0, \"breed_name\": \"$b.breed_name\"}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "breed_name": "Bulldog"
+      }
+    ]
+  },
+  {
+    "id": "dk-m3",
+    "question": "Which owner owns the most dogs? List the owner id, first name, and last name.",
+    "database": "dog_kennels",
+    "query": "db.Dogs.aggregate([{\"$group\": {\"_id\": \"$owner_id\", \"dog_count\": {\"$sum\": 1}}}, {\"$sort\": {\"dog_count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"Owners\", \"localField\": \"_id\", \"foreignField\": \"owner_id\", \"as\": \"o\"}}, {\"$unwind\": \"$o\"}, {\"$project\": {\"_id\": 0, \"owner_id\": \"$_id\", \"first_name\": \"$o.first_name\", \"last_name\": \"$o.last_name\"}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "owner_id": 14,
+        "first_name": "Rachelle",
+        "last_name": "Funk"
+      }
+    ]
+  },
+  {
+    "id": "dk-m4",
+    "question": "Which professionals have done at least two treatments? List the professional's id, role, and first name.",
+    "database": "dog_kennels",
+    "query": "db.Treatments.aggregate([{\"$group\": {\"_id\": \"$professional_id\", \"treatment_count\": {\"$sum\": 1}}}, {\"$match\": {\"treatment_count\": {\"$gte\": 2}}}, {\"$lookup\": {\"from\": \"Professionals\", \"localField\": \"_id\", \"foreignField\": \"professional_id\", \"as\": \"p\"}}, {\"$unwind\": \"$p\"}, {\"$project\": {\"_id\": 0, \"professional_id\": \"$_id\", \"role_code\": \"$p.role_code\", \"first_name\": \"$p.first_name\"}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "professional_id": 10,
+        "role_code": "Employee",
+        "first_name": "Domenica"
+      },
+      {
+        "professional_id": 4,
+        "role_code": "Veterenarian",
+        "first_name": "Vernice"
+      },
+      {
+        "professional_id": 6,
+        "role_code": "Veterenarian",
+        "first_name": "Ruben"
+      },
+      {
+        "professional_id": 5,
+        "role_code": "Veterenarian",
+        "first_name": "Danny"
+      },
+      {
+        "professional_id": 8,
+        "role_code": "Employee",
+        "first_name": "Karley"
+      },
+      {
+        "professional_id": 7,
+        "role_code": "Veterenarian",
+        "first_name": "Velva"
+      },
+      {
+        "professional_id": 14,
+        "role_code": "Employee",
+        "first_name": "Sigurd"
+      },
+      {
+        "professional_id": 9,
+        "role_code": "Veterenarian",
+        "first_name": "Monte"
+      }
+    ]
+  },
+  {
+    "id": "dk-m5",
+    "question": "What is the description of the treatment type that costs the least money in total?",
+    "database": "dog_kennels",
+    "query": "db.Treatments.aggregate([{\"$group\": {\"_id\": \"$treatment_type_code\", \"total_cost\": {\"$sum\": \"$cost_of_treatment\"}}}, {\"$sort\": {\"total_cost\": 1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"Treatment_Types\", \"localField\": \"_id\", \"foreignField\": \"treatment_type_code\", \"as\": \"t\"}}, {\"$unwind\": \"$t\"}, {\"$project\": {\"_id\": 0, \"treatment_type_description\": \"$t.treatment_type_description\"}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "treatment_type_description": "Take for a Walk"
+      }
+    ]
+  },
+  {
+    "id": "dk-m6",
+    "question": "List each owner's first name, last name, and the size code of their dog.",
+    "database": "dog_kennels",
+    "query": "db.Owners.aggregate([{\"$lookup\": {\"from\": \"Dogs\", \"localField\": \"owner_id\", \"foreignField\": \"owner_id\", \"as\": \"d\"}}, {\"$unwind\": \"$d\"}, {\"$project\": {\"_id\": 0, \"first_name\": 1, \"last_name\": 1, \"size_code\": \"$d.size_code\"}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "first_name": "Nora",
+        "last_name": "Haley",
+        "size_code": "MED"
+      },
+      {
+        "first_name": "Melisa",
+        "last_name": "DuBuque",
+        "size_code": "MED"
+      },
+      {
+        "first_name": "Jaclyn",
+        "last_name": "Stoltenberg",
+        "size_code": "LGE"
+      },
+      {
+        "first_name": "Jaclyn",
+        "last_name": "Stoltenberg",
+        "size_code": "MED"
+      },
+      {
+        "first_name": "Johann",
+        "last_name": "Fisher",
+        "size_code": "MED"
+      },
+      {
+        "first_name": "Kade",
+        "last_name": "Rippin",
+        "size_code": "MED"
+      },
+      {
+        "first_name": "Emelie",
+        "last_name": "Mertz",
+        "size_code": "MED"
+      },
+      {
+        "first_name": "Rolando",
+        "last_name": "Prohaska",
+        "size_code": "SML"
+      },
+      {
+        "first_name": "Lorenz",
+        "last_name": "Nicolas",
+        "size_code": "MED"
+      },
+      {
+        "first_name": "Gay",
+        "last_name": "Feil",
+        "size_code": "LGE"
+      },
+      {
+        "first_name": "Orlando",
+        "last_name": "Price",
+        "size_code": "MED"
+      },
+      {
+        "first_name": "Cindy",
+        "last_name": "Schmitt",
+        "size_code": "LGE"
+      },
+      {
+        "first_name": "Rachelle",
+        "last_name": "Funk",
+        "size_code": "LGE"
+      },
+      {
+        "first_name": "Rachelle",
+        "last_name": "Funk",
+        "size_code": "SML"
+      },
+      {
+        "first_name": "Rachelle",
+        "last_name": "Funk",
+        "size_code": "MED"
+      }
+    ]
+  },
+  {
+    "id": "dk-h1",
+    "question": "Which states have both owners and professionals living there?",
+    "database": "dog_kennels",
+    "query": "db.Owners.aggregate([{\"$group\": {\"_id\": \"$state\"}}, {\"$lookup\": {\"from\": \"Professionals\", \"localField\": \"_id\", \"foreignField\": \"state\", \"as\": \"p\"}}, {\"$match\": {\"p\": {\"$ne\": []}}}, {\"$project\": {\"_id\": 0, \"state\": \"$_id\"}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "state": "Mississippi"
+      },
+      {
+        "state": "Indiana"
+      },
+      {
+        "state": "Wisconsin"
+      }
+    ]
+  },
+  {
+    "id": "dk-h2",
+    "question": "Which owner has paid the largest amount of money in total for their dogs' treatments? Show the owner id and zip code.",
+    "database": "dog_kennels",
+    "query": "db.Dogs.aggregate([{\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"dog_id\", \"foreignField\": \"dog_id\", \"as\": \"t\"}}, {\"$unwind\": \"$t\"}, {\"$group\": {\"_id\": \"$owner_id\", \"total_cost\": {\"$sum\": \"$t.cost_of_treatment\"}}}, {\"$sort\": {\"total_cost\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"Owners\", \"localField\": \"_id\", \"foreignField\": \"owner_id\", \"as\": \"o\"}}, {\"$unwind\": \"$o\"}, {\"$project\": {\"_id\": 0, \"owner_id\": \"$_id\", \"zip_code\": \"$o.zip_code\"}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "owner_id": 3,
+        "zip_code": "02647"
+      }
+    ]
+  },
+  {
+    "id": "dk-h3",
+    "question": "How many professionals did not operate any treatment on dogs?",
+    "database": "dog_kennels",
+    "query": "db.Professionals.aggregate([{\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"professional_id\", \"foreignField\": \"professional_id\", \"as\": \"t\"}}, {\"$match\": {\"t\": []}}, {\"$count\": \"professional_count\"}])",
+    "status": "PASS",
+    "result": [
+      {
+        "professional_count": 7
+      }
+    ]
+  },
+  {
+    "id": "dk-c1",
+    "question": "Which dogs have not cost their owner more than 1000 in total treatment cost? List the dog names.",
+    "database": "dog_kennels",
+    "query": "db.Dogs.aggregate([{\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"dog_id\", \"foreignField\": \"dog_id\", \"as\": \"t\"}}, {\"$addFields\": {\"total_cost\": {\"$sum\": \"$t.cost_of_treatment\"}}}, {\"$match\": {\"total_cost\": {\"$lte\": 1000}}}, {\"$project\": {\"_id\": 0, \"name\": 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "name": "Mavis"
+      },
+      {
+        "name": "Houston"
+      },
+      {
+        "name": "Jeffrey"
+      },
+      {
+        "name": "Merritt"
+      },
+      {
+        "name": "George"
+      },
+      {
+        "name": "Bessie"
+      },
+      {
+        "name": "Betty"
+      },
+      {
+        "name": "Jesus"
+      }
+    ]
+  },
+  {
+    "id": "dk-c2",
+    "question": "Which first names are used for professionals or owners but not used as dog names?",
+    "database": "dog_kennels",
+    "query": "db.Professionals.aggregate([{\"$project\": {\"_id\": 0, \"first_name\": 1}}, {\"$unionWith\": {\"coll\": \"Owners\", \"pipeline\": [{\"$project\": {\"_id\": 0, \"first_name\": 1}}]}}, {\"$group\": {\"_id\": \"$first_name\"}}, {\"$lookup\": {\"from\": \"Dogs\", \"localField\": \"_id\", \"foreignField\": \"name\", \"as\": \"d\"}}, {\"$match\": {\"d\": []}}, {\"$project\": {\"_id\": 0, \"first_name\": \"$_id\"}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "first_name": "Taryn"
+      },
+      {
+        "first_name": "Jayson"
+      },
+      {
+        "first_name": "Brady"
+      },
+      {
+        "first_name": "Karley"
+      },
+      {
+        "first_name": "Winfield"
+      },
+      {
+        "first_name": "Nora"
+      },
+      {
+        "first_name": "Cindy"
+      },
+      {
+        "first_name": "Emelie"
+      },
+      {
+        "first_name": "Orlando"
+      },
+      {
+        "first_name": "Gay"
+      },
+      {
+        "first_name": "Kade"
+      },
+      {
+        "first_name": "Ruben"
+      },
+      {
+        "first_name": "Johann"
+      },
+      {
+        "first_name": "Lorenz"
+      },
+      {
+        "first_name": "Vernice"
+      },
+      {
+        "first_name": "Velva"
+      },
+      {
+        "first_name": "Adelle"
+      },
+      {
+        "first_name": "Olaf"
+      },
+      {
+        "first_name": "Melisa"
+      },
+      {
+        "first_name": "Ericka"
+      },
+      {
+        "first_name": "Sigurd"
+      },
+      {
+        "first_name": "Danny"
+      },
+      {
+        "first_name": "Monte"
+      },
+      {
+        "first_name": "Rolando"
+      },
+      {
+        "first_name": "Lesly"
+      },
+      {
+        "first_name": "Tre"
+      },
+      {
+        "first_name": "Jaclyn"
+      },
+      {
+        "first_name": "Domenica"
+      },
+      {
+        "first_name": "Heather"
+      },
+      {
+        "first_name": "Rachelle"
+      }
+    ]
   }
 ]

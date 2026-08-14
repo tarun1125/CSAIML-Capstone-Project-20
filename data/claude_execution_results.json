@@ -1,0 +1,5601 @@
+[
+  {
+    "id": 1,
+    "question": "How many singers are there?",
+    "database": "concert_singer",
+    "query": "db.singer.count_documents({})",
+    "status": "PASS",
+    "result": 6,
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": 2,
+    "question": "What are the names of singers from France?",
+    "database": "concert_singer",
+    "query": "db.singer.find({'Country': 'France'}, {'_id': 0, 'Name': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "Justin Brown"
+      },
+      {
+        "Name": "Rose White"
+      },
+      {
+        "Name": "John Nizinik"
+      },
+      {
+        "Name": "Tribal King"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": 4,
+    "question": "What are the names and ages of singers, ordered by age?",
+    "database": "concert_singer",
+    "query": "db.singer.find({}, {'_id': 0, 'Name': 1, 'Age': 1}).sort('Age', 1)",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "Tribal King",
+        "Age": 25
+      },
+      {
+        "Name": "Justin Brown",
+        "Age": 29
+      },
+      {
+        "Name": "Timbaland",
+        "Age": 32
+      },
+      {
+        "Name": "Rose White",
+        "Age": 41
+      },
+      {
+        "Name": "John Nizinik",
+        "Age": 43
+      },
+      {
+        "Name": "Joe Sharp",
+        "Age": 52
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": 5,
+    "question": "How many concerts were held in each stadium?",
+    "database": "concert_singer",
+    "query": "db.concert.aggregate([{'$group': {'_id': '$Stadium_ID', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "9",
+        "count": 1
+      },
+      {
+        "_id": "1",
+        "count": 1
+      },
+      {
+        "_id": "10",
+        "count": 1
+      },
+      {
+        "_id": "2",
+        "count": 2
+      },
+      {
+        "_id": "7",
+        "count": 1
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": 7,
+    "question": "What are the names of singers who performed in a concert in 2014?",
+    "database": "concert_singer",
+    "query": "db.concert.aggregate([{'$match': {'Year': '2014'}}, {'$lookup': {'from': 'singer_in_concert', 'localField': 'concert_ID', 'foreignField': 'concert_ID', 'as': 'sic'}}, {'$unwind': '$sic'}, {'$addFields': {'singer_id_int': {'$toInt': '$sic.Singer_ID'}}}, {'$lookup': {'from': 'singer', 'localField': 'singer_id_int', 'foreignField': 'Singer_ID', 'as': 'singer'}}, {'$unwind': '$singer'}, {'$group': {'_id': '$singer.Name'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "Timbaland"
+      },
+      {
+        "_id": "John Nizinik"
+      },
+      {
+        "_id": "Tribal King"
+      },
+      {
+        "_id": "Justin Brown"
+      },
+      {
+        "_id": "Rose White"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": 10,
+    "question": "Find singers who have not participated in any concert.",
+    "database": "concert_singer",
+    "query": "db.singer.aggregate([{'$lookup': {'from': 'singer_in_concert', 'let': {'sid': {'$toString': '$Singer_ID'}}, 'pipeline': [{'$match': {'$expr': {'$eq': ['$Singer_ID', '$$sid']}}}], 'as': 'sic'}}, {'$match': {'sic': []}}, {'$project': {'_id': 0, 'Name': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "Joe Sharp"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-e1",
+    "question": "List the names of all singers.",
+    "database": "concert_singer",
+    "query": "db.singer.find({}, {'_id': 0, 'Name': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "Joe Sharp"
+      },
+      {
+        "Name": "Timbaland"
+      },
+      {
+        "Name": "Justin Brown"
+      },
+      {
+        "Name": "Rose White"
+      },
+      {
+        "Name": "John Nizinik"
+      },
+      {
+        "Name": "Tribal King"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-e2",
+    "question": "How many stadiums are there?",
+    "database": "concert_singer",
+    "query": "db.stadium.count_documents({})",
+    "status": "PASS",
+    "result": 9,
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-e3",
+    "question": "List the names of all concerts.",
+    "database": "concert_singer",
+    "query": "db.concert.find({}, {'_id': 0, 'concert_Name': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "concert_Name": "Auditions"
+      },
+      {
+        "concert_Name": "Super bootcamp"
+      },
+      {
+        "concert_Name": "Home Visits"
+      },
+      {
+        "concert_Name": "Week 1"
+      },
+      {
+        "concert_Name": "Week 1"
+      },
+      {
+        "concert_Name": "Week 2"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-e4",
+    "question": "Find the names and ages of singers older than 40.",
+    "database": "concert_singer",
+    "query": "db.singer.find({'Age': {'$gt': 40}}, {'_id': 0, 'Name': 1, 'Age': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "Joe Sharp",
+        "Age": 52
+      },
+      {
+        "Name": "Rose White",
+        "Age": 41
+      },
+      {
+        "Name": "John Nizinik",
+        "Age": 43
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-e5",
+    "question": "What are the names of the male singers?",
+    "database": "concert_singer",
+    "query": "db.singer.find({'Is_male': 'T'}, {'_id': 0, 'Name': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "Timbaland"
+      },
+      {
+        "Name": "Justin Brown"
+      },
+      {
+        "Name": "John Nizinik"
+      },
+      {
+        "Name": "Tribal King"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-e6",
+    "question": "List the names of stadiums with a capacity greater than 10000.",
+    "database": "concert_singer",
+    "query": "db.stadium.find({'Capacity': {'$gt': 10000}}, {'_id': 0, 'Name': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "Stark's Park"
+      },
+      {
+        "Name": "Somerset Park"
+      },
+      {
+        "Name": "Hampden Park"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-e7",
+    "question": "Which concerts happened in the year 2015?",
+    "database": "concert_singer",
+    "query": "db.concert.find({'Year': '2015'}, {'_id': 0, 'concert_Name': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "concert_Name": "Home Visits"
+      },
+      {
+        "concert_Name": "Week 1"
+      },
+      {
+        "concert_Name": "Week 2"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-e8",
+    "question": "Find the singer whose song is named 'Love'.",
+    "database": "concert_singer",
+    "query": "db.singer.find({'Song_Name': 'Love'}, {'_id': 0, 'Name': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "Tribal King"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-e9",
+    "question": "List the names of singers who are not from France.",
+    "database": "concert_singer",
+    "query": "db.singer.find({'Country': {'$ne': 'France'}}, {'_id': 0, 'Name': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "Joe Sharp"
+      },
+      {
+        "Name": "Timbaland"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-e10",
+    "question": "What is the theme of the concert called 'Super bootcamp'?",
+    "database": "concert_singer",
+    "query": "db.concert.find({'concert_Name': 'Super bootcamp'}, {'_id': 0, 'Theme': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Theme": "Free choice 2"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-m1",
+    "question": "What is the average age of singers?",
+    "database": "concert_singer",
+    "query": "db.singer.aggregate([{'$group': {'_id': None, 'avg_age': {'$avg': '$Age'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "avg_age": 37.0
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-m2",
+    "question": "What is the total capacity of all stadiums combined?",
+    "database": "concert_singer",
+    "query": "db.stadium.aggregate([{'$group': {'_id': None, 'total_capacity': {'$sum': '$Capacity'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "total_capacity": 95595
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-m3",
+    "question": "List the top 3 stadiums by capacity, largest first.",
+    "database": "concert_singer",
+    "query": "db.stadium.find({}, {'_id': 0, 'Name': 1, 'Capacity': 1}).sort('Capacity', -1).limit(3)",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "Hampden Park",
+        "Capacity": 52500
+      },
+      {
+        "Name": "Somerset Park",
+        "Capacity": 11998
+      },
+      {
+        "Name": "Stark's Park",
+        "Capacity": 10104
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-m4",
+    "question": "How many concerts were held in each year?",
+    "database": "concert_singer",
+    "query": "db.concert.aggregate([{'$group': {'_id': '$Year', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "2014",
+        "count": 3
+      },
+      {
+        "_id": "2015",
+        "count": 3
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-m5",
+    "question": "What is the age of the youngest singer?",
+    "database": "concert_singer",
+    "query": "db.singer.find({}, {'_id': 0, 'Age': 1}).sort('Age', 1).limit(1)",
+    "status": "PASS",
+    "result": [
+      {
+        "Age": 25
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-m6",
+    "question": "List the distinct countries singers come from, in alphabetical order.",
+    "database": "concert_singer",
+    "query": "sorted(db.singer.distinct('Country'))",
+    "status": "FAIL",
+    "error": "REJECTED by safety check (unexpected name: sorted)",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-m7",
+    "question": "How many singers are there for each country?",
+    "database": "concert_singer",
+    "query": "db.singer.aggregate([{'$group': {'_id': '$Country', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "United States",
+        "count": 1
+      },
+      {
+        "_id": "France",
+        "count": 4
+      },
+      {
+        "_id": "Netherlands",
+        "count": 1
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-m8",
+    "question": "What is the average stadium capacity?",
+    "database": "concert_singer",
+    "query": "db.stadium.aggregate([{'$group': {'_id': None, 'avg_capacity': {'$avg': '$Capacity'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "avg_capacity": 10621.666666666666
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-h1",
+    "question": "How many concerts were held at each stadium? Include the stadium name.",
+    "database": "concert_singer",
+    "query": "db.concert.aggregate([{'$addFields': {'stadium_id_int': {'$toInt': '$Stadium_ID'}}}, {'$lookup': {'from': 'stadium', 'localField': 'stadium_id_int', 'foreignField': 'Stadium_ID', 'as': 'stad'}}, {'$unwind': '$stad'}, {'$group': {'_id': '$stad.Name', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "Recreation Park",
+        "count": 1
+      },
+      {
+        "_id": "Stark's Park",
+        "count": 1
+      },
+      {
+        "_id": "Somerset Park",
+        "count": 2
+      },
+      {
+        "_id": "Glebe Park",
+        "count": 1
+      },
+      {
+        "_id": "Balmoor",
+        "count": 1
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-h2",
+    "question": "List the names of singers who performed in the concert called 'Auditions'.",
+    "database": "concert_singer",
+    "query": "db.concert.aggregate([{'$match': {'concert_Name': 'Auditions'}}, {'$lookup': {'from': 'singer_in_concert', 'localField': 'concert_ID', 'foreignField': 'concert_ID', 'as': 'sic'}}, {'$unwind': '$sic'}, {'$addFields': {'singer_id_int': {'$toInt': '$sic.Singer_ID'}}}, {'$lookup': {'from': 'singer', 'localField': 'singer_id_int', 'foreignField': 'Singer_ID', 'as': 'singer'}}, {'$unwind': '$singer'}, {'$project': {'_id': 0, 'Name': '$singer.Name'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "Timbaland"
+      },
+      {
+        "Name": "Justin Brown"
+      },
+      {
+        "Name": "John Nizinik"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-c1",
+    "question": "List the names of singers and the stadium name where they performed, for concerts held in 2015.",
+    "database": "concert_singer",
+    "query": "db.concert.aggregate([{'$match': {'Year': '2015'}}, {'$addFields': {'stadium_id_int': {'$toInt': '$Stadium_ID'}}}, {'$lookup': {'from': 'stadium', 'localField': 'stadium_id_int', 'foreignField': 'Stadium_ID', 'as': 'stad'}}, {'$unwind': '$stad'}, {'$lookup': {'from': 'singer_in_concert', 'localField': 'concert_ID', 'foreignField': 'concert_ID', 'as': 'sic'}}, {'$unwind': '$sic'}, {'$addFields': {'singer_id_int': {'$toInt': '$sic.Singer_ID'}}}, {'$lookup': {'from': 'singer', 'localField': 'singer_id_int', 'foreignField': 'Singer_ID', 'as': 'singer'}}, {'$unwind': '$singer'}, {'$project': {'_id': 0, 'singer_name': '$singer.Name', 'stadium_name': '$stad.Name'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "singer_name": "John Nizinik",
+        "stadium_name": "Somerset Park"
+      },
+      {
+        "singer_name": "Tribal King",
+        "stadium_name": "Balmoor"
+      },
+      {
+        "singer_name": "Justin Brown",
+        "stadium_name": "Balmoor"
+      },
+      {
+        "singer_name": "Timbaland",
+        "stadium_name": "Recreation Park"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": 3,
+    "question": "Find the maximum weight of all pets.",
+    "database": "pets_1",
+    "query": "db.Pets.aggregate([{'$group': {'_id': None, 'max_weight': {'$max': '$weight'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "max_weight": 13.4
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": 6,
+    "question": "Find pet types that have more than one pet, with their counts.",
+    "database": "pets_1",
+    "query": "db.Pets.aggregate([{'$group': {'_id': '$PetType', 'count': {'$sum': 1}}}, {'$match': {'count': {'$gt': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "dog",
+        "count": 2
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": 8,
+    "question": "Find the first names of students who have a dog as a pet.",
+    "database": "pets_1",
+    "query": "db.Has_Pet.aggregate([{'$lookup': {'from': 'Pets', 'localField': 'PetID', 'foreignField': 'PetID', 'as': 'pet'}}, {'$unwind': '$pet'}, {'$match': {'pet.PetType': 'dog'}}, {'$lookup': {'from': 'Student', 'localField': 'StuID', 'foreignField': 'StuID', 'as': 'stu'}}, {'$unwind': '$stu'}, {'$project': {'_id': 0, 'Fname': '$stu.Fname'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "Fname": "Tracy"
+      },
+      {
+        "Fname": "Tracy"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "pt-e1",
+    "question": "How many students are there?",
+    "database": "pets_1",
+    "query": "db.Student.count_documents({})",
+    "status": "PASS",
+    "result": 34,
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "pt-e2",
+    "question": "List the first names of female students.",
+    "database": "pets_1",
+    "query": "db.Student.find({'Sex': 'F'}, {'_id': 0, 'Fname': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Fname": "Linda"
+      },
+      {
+        "Fname": "Tracy"
+      },
+      {
+        "Fname": "Shiela"
+      },
+      {
+        "Fname": "Lisa"
+      },
+      {
+        "Fname": "Jandy"
+      },
+      {
+        "Fname": "Susan"
+      },
+      {
+        "Fname": "Stacy"
+      },
+      {
+        "Fname": "Lisa"
+      },
+      {
+        "Fname": "Sarah"
+      },
+      {
+        "Fname": "Sarah"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "pt-e3",
+    "question": "Find the first and last names of students younger than 18.",
+    "database": "pets_1",
+    "query": "db.Student.find({'Age': {'$lt': 18}}, {'_id': 0, 'Fname': 1, 'LName': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "LName": "Lee",
+        "Fname": "Derek"
+      },
+      {
+        "LName": "Lee",
+        "Fname": "Susan"
+      },
+      {
+        "LName": "Schwartz",
+        "Fname": "Mark"
+      },
+      {
+        "LName": "Woods",
+        "Fname": "Michael"
+      },
+      {
+        "LName": "Han",
+        "Fname": "Jun"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "pt-e4",
+    "question": "What is the last name of the student with StuID 1010?",
+    "database": "pets_1",
+    "query": "db.Student.find({'StuID': 1010}, {'_id': 0, 'LName': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "LName": "Lee"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "pt-e5",
+    "question": "List the first names of students majoring in 600.",
+    "database": "pets_1",
+    "query": "db.Student.find({'Major': 600}, {'_id': 0, 'Fname': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Fname": "Linda"
+      },
+      {
+        "Fname": "Tracy"
+      },
+      {
+        "Fname": "Shiela"
+      },
+      {
+        "Fname": "Dinesh"
+      },
+      {
+        "Fname": "Paul"
+      },
+      {
+        "Fname": "Andy"
+      },
+      {
+        "Fname": "Lisa"
+      },
+      {
+        "Fname": "Jandy"
+      },
+      {
+        "Fname": "Eric"
+      },
+      {
+        "Fname": "Derek"
+      },
+      {
+        "Fname": "David"
+      },
+      {
+        "Fname": "Steven"
+      },
+      {
+        "Fname": "Charles"
+      },
+      {
+        "Fname": "Susan"
+      },
+      {
+        "Fname": "Mark"
+      },
+      {
+        "Fname": "Bruce"
+      },
+      {
+        "Fname": "Michael"
+      },
+      {
+        "Fname": "Arthur"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "pt-e6",
+    "question": "Which students live in city code 'PIT'? Give their first names.",
+    "database": "pets_1",
+    "query": "db.Student.find({'city_code': 'PIT'}, {'_id': 0, 'Fname': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Fname": "Lisa"
+      },
+      {
+        "Fname": "Steven"
+      },
+      {
+        "Fname": "Michael"
+      },
+      {
+        "Fname": "Mark"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "pt-e7",
+    "question": "List all the pet types in the database.",
+    "database": "pets_1",
+    "query": "db.Pets.distinct('PetType')",
+    "status": "PASS",
+    "result": [
+      "cat",
+      "dog"
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-e8",
+    "question": "What is the age of the cat?",
+    "database": "pets_1",
+    "query": "db.Pets.find({'PetType': 'cat'}, {'_id': 0, 'pet_age': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "pet_age": 3
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "pt-e9",
+    "question": "Find students whose advisor is 1148.",
+    "database": "pets_1",
+    "query": "db.Student.find({'Advisor': 1148}, {'_id': 0, 'Fname': 1, 'LName': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "LName": "Schultz",
+        "Fname": "Andy"
+      },
+      {
+        "LName": "Adams",
+        "Fname": "David"
+      },
+      {
+        "LName": "Wilson",
+        "Fname": "Bruce"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "pt-m1",
+    "question": "How many students are there in each major?",
+    "database": "pets_1",
+    "query": "db.Student.aggregate([{'$group': {'_id': '$Major', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": 540,
+        "count": 2
+      },
+      {
+        "_id": 100,
+        "count": 1
+      },
+      {
+        "_id": 600,
+        "count": 18
+      },
+      {
+        "_id": 550,
+        "count": 5
+      },
+      {
+        "_id": 50,
+        "count": 2
+      },
+      {
+        "_id": 520,
+        "count": 6
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "pt-m2",
+    "question": "What is the average age of students?",
+    "database": "pets_1",
+    "query": "db.Student.aggregate([{'$group': {'_id': None, 'avg_age': {'$avg': '$Age'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "avg_age": 19.558823529411764
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-m3",
+    "question": "List the 5 oldest students, oldest first, with their ages.",
+    "database": "pets_1",
+    "query": "db.Student.find({}, {'_id': 0, 'Fname': 1, 'LName': 1, 'Age': 1}).sort('Age', -1).limit(5)",
+    "status": "PASS",
+    "result": [
+      {
+        "LName": "Wilson",
+        "Fname": "Bruce",
+        "Age": 27
+      },
+      {
+        "LName": "Schmidt",
+        "Fname": "Sarah",
+        "Age": 26
+      },
+      {
+        "LName": "Gompers",
+        "Fname": "Paul",
+        "Age": 26
+      },
+      {
+        "LName": "Thornton",
+        "Fname": "Ian",
+        "Age": 22
+      },
+      {
+        "LName": "Adams",
+        "Fname": "David",
+        "Age": 22
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-m4",
+    "question": "How many distinct city codes are represented among students?",
+    "database": "pets_1",
+    "query": "len(db.Student.distinct('city_code'))",
+    "status": "FAIL",
+    "error": "REJECTED by safety check (unexpected name: len)",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-m5",
+    "question": "Which advisor has the most advisees, and how many do they have?",
+    "database": "pets_1",
+    "query": "db.Student.aggregate([{'$group': {'_id': '$Advisor', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": 2192,
+        "count": 4
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "pt-m6",
+    "question": "What is the average weight of pets?",
+    "database": "pets_1",
+    "query": "db.Pets.aggregate([{'$group': {'_id': None, 'avg_weight': {'$avg': '$weight'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "avg_weight": 11.566666666666668
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-h1",
+    "question": "What are the first and last names of students who own a cat?",
+    "database": "pets_1",
+    "query": "db.Has_Pet.aggregate([{'$lookup': {'from': 'Pets', 'localField': 'PetID', 'foreignField': 'PetID', 'as': 'pet'}}, {'$unwind': '$pet'}, {'$match': {'pet.PetType': 'cat'}}, {'$lookup': {'from': 'Student', 'localField': 'StuID', 'foreignField': 'StuID', 'as': 'stu'}}, {'$unwind': '$stu'}, {'$project': {'_id': 0, 'Fname': '$stu.Fname', 'LName': '$stu.LName'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "Fname": "Linda",
+        "LName": "Smith"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "pt-h2",
+    "question": "For each pet type, what is the average weight?",
+    "database": "pets_1",
+    "query": "db.Pets.aggregate([{'$group': {'_id': '$PetType', 'avg_weight': {'$avg': '$weight'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "dog",
+        "avg_weight": 11.350000000000001
+      },
+      {
+        "_id": "cat",
+        "avg_weight": 12.0
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": 11,
+    "question": "Find students who have more friends than the average number of friends per student.",
+    "database": "network_1",
+    "query": "db.Friend.aggregate([{'$group': {'_id': '$student_id', 'friend_count': {'$sum': 1}}}, {'$group': {'_id': None, 'avg_friends': {'$avg': '$friend_count'}, 'docs': {'$push': {'student_id': '$_id', 'friend_count': '$friend_count'}}}}, {'$unwind': '$docs'}, {'$match': {'$expr': {'$gt': ['$docs.friend_count', '$avg_friends']}}}, {'$replaceRoot': {'newRoot': '$docs'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "student_id": 1247,
+        "friend_count": 2
+      },
+      {
+        "student_id": 1782,
+        "friend_count": 3
+      },
+      {
+        "student_id": 1510,
+        "friend_count": 2
+      },
+      {
+        "student_id": 1468,
+        "friend_count": 2
+      },
+      {
+        "student_id": 1689,
+        "friend_count": 2
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-e1",
+    "question": "How many highschoolers are there?",
+    "database": "network_1",
+    "query": "db.Highschooler.count_documents({})",
+    "status": "PASS",
+    "result": 16,
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "nw-e2",
+    "question": "List the names of highschoolers in grade 9.",
+    "database": "network_1",
+    "query": "db.Highschooler.find({'grade': 9}, {'_id': 0, 'name': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "name": "Jordan"
+      },
+      {
+        "name": "Gabriel"
+      },
+      {
+        "name": "Tiffany"
+      },
+      {
+        "name": "Cassandra"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "nw-e3",
+    "question": "What is the name of the highschooler with ID 1911?",
+    "database": "network_1",
+    "query": "db.Highschooler.find({'ID': 1911}, {'_id': 0, 'name': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "name": "Gabriel"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "nw-e4",
+    "question": "List the names of highschoolers in grade 12.",
+    "database": "network_1",
+    "query": "db.Highschooler.find({'grade': 12}, {'_id': 0, 'name': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "name": "Jordan"
+      },
+      {
+        "name": "John"
+      },
+      {
+        "name": "Kyle"
+      },
+      {
+        "name": "Logan"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "nw-e5",
+    "question": "How many friendship pairs are recorded?",
+    "database": "network_1",
+    "query": "db.Friend.count_documents({})",
+    "status": "PASS",
+    "result": 20,
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "nw-e6",
+    "question": "How many 'likes' relationships are there?",
+    "database": "network_1",
+    "query": "db.Likes.count_documents({})",
+    "status": "PASS",
+    "result": 10,
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "nw-e7",
+    "question": "List highschoolers named 'Gabriel'.",
+    "database": "network_1",
+    "query": "db.Highschooler.find({'name': 'Gabriel'}, {'_id': 0, 'ID': 1, 'name': 1, 'grade': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "ID": 1689,
+        "name": "Gabriel",
+        "grade": 9
+      },
+      {
+        "ID": 1911,
+        "name": "Gabriel",
+        "grade": 11
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-m1",
+    "question": "How many highschoolers are there in each grade?",
+    "database": "network_1",
+    "query": "db.Highschooler.aggregate([{'$group': {'_id': '$grade', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": 10,
+        "count": 4
+      },
+      {
+        "_id": 11,
+        "count": 4
+      },
+      {
+        "_id": 9,
+        "count": 4
+      },
+      {
+        "_id": 12,
+        "count": 4
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "nw-m2",
+    "question": "What is the average grade of highschoolers?",
+    "database": "network_1",
+    "query": "db.Highschooler.aggregate([{'$group': {'_id': None, 'avg_grade': {'$avg': '$grade'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "avg_grade": 10.5
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-m3",
+    "question": "Which student IDs appear most often as the 'student_id' side of a friendship, and how many friends do they list?",
+    "database": "network_1",
+    "query": "db.Friend.aggregate([{'$group': {'_id': '$student_id', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": 1782,
+        "count": 3
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-m4",
+    "question": "List the highschooler names sorted alphabetically.",
+    "database": "network_1",
+    "query": "db.Highschooler.find({}, {'_id': 0, 'name': 1}).sort('name', 1)",
+    "status": "PASS",
+    "result": [
+      {
+        "name": "Alexis"
+      },
+      {
+        "name": "Andrew"
+      },
+      {
+        "name": "Austin"
+      },
+      {
+        "name": "Brittany"
+      },
+      {
+        "name": "Cassandra"
+      },
+      {
+        "name": "Gabriel"
+      },
+      {
+        "name": "Gabriel"
+      },
+      {
+        "name": "Haley"
+      },
+      {
+        "name": "Jessica"
+      },
+      {
+        "name": "John"
+      },
+      {
+        "name": "Jordan"
+      },
+      {
+        "name": "Jordan"
+      },
+      {
+        "name": "Kris"
+      },
+      {
+        "name": "Kyle"
+      },
+      {
+        "name": "Logan"
+      },
+      {
+        "name": "Tiffany"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "nw-h1",
+    "question": "List the names of highschoolers who appear as the 'student_id' side of at least one friendship.",
+    "database": "network_1",
+    "query": "db.Friend.aggregate([{'$group': {'_id': '$student_id'}}, {'$lookup': {'from': 'Highschooler', 'localField': '_id', 'foreignField': 'ID', 'as': 'hs'}}, {'$unwind': '$hs'}, {'$project': {'_id': 0, 'name': '$hs.name'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "name": "Gabriel"
+      },
+      {
+        "name": "Jordan"
+      },
+      {
+        "name": "Gabriel"
+      },
+      {
+        "name": "Cassandra"
+      },
+      {
+        "name": "Austin"
+      },
+      {
+        "name": "Kyle"
+      },
+      {
+        "name": "Tiffany"
+      },
+      {
+        "name": "Kris"
+      },
+      {
+        "name": "Andrew"
+      },
+      {
+        "name": "Haley"
+      },
+      {
+        "name": "Jessica"
+      },
+      {
+        "name": "Jordan"
+      },
+      {
+        "name": "Logan"
+      },
+      {
+        "name": "Alexis"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "nw-h2",
+    "question": "How many friends does each highschooler have, by name?",
+    "database": "network_1",
+    "query": "db.Friend.aggregate([{'$group': {'_id': '$student_id', 'friend_count': {'$sum': 1}}}, {'$lookup': {'from': 'Highschooler', 'localField': '_id', 'foreignField': 'ID', 'as': 'hs'}}, {'$unwind': '$hs'}, {'$project': {'_id': 0, 'name': '$hs.name', 'friend_count': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "friend_count": 2,
+        "name": "Gabriel"
+      },
+      {
+        "friend_count": 1,
+        "name": "Kyle"
+      },
+      {
+        "friend_count": 2,
+        "name": "Alexis"
+      },
+      {
+        "friend_count": 1,
+        "name": "Jordan"
+      },
+      {
+        "friend_count": 2,
+        "name": "Jordan"
+      },
+      {
+        "friend_count": 1,
+        "name": "Logan"
+      },
+      {
+        "friend_count": 1,
+        "name": "Haley"
+      },
+      {
+        "friend_count": 3,
+        "name": "Andrew"
+      },
+      {
+        "friend_count": 1,
+        "name": "Tiffany"
+      },
+      {
+        "friend_count": 2,
+        "name": "Kris"
+      },
+      {
+        "friend_count": 1,
+        "name": "Jessica"
+      },
+      {
+        "friend_count": 1,
+        "name": "Cassandra"
+      },
+      {
+        "friend_count": 1,
+        "name": "Gabriel"
+      },
+      {
+        "friend_count": 1,
+        "name": "Austin"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "nw-c1",
+    "question": "List the names of highschoolers who are friends with someone in grade 12.",
+    "database": "network_1",
+    "query": "db.Friend.aggregate([{'$lookup': {'from': 'Highschooler', 'localField': 'friend_id', 'foreignField': 'ID', 'as': 'fr'}}, {'$unwind': '$fr'}, {'$match': {'fr.grade': 12}}, {'$lookup': {'from': 'Highschooler', 'localField': 'student_id', 'foreignField': 'ID', 'as': 'stu'}}, {'$unwind': '$stu'}, {'$group': {'_id': '$stu.name'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "Jessica"
+      },
+      {
+        "_id": "Jordan"
+      },
+      {
+        "_id": "Austin"
+      },
+      {
+        "_id": "Andrew"
+      },
+      {
+        "_id": "Kyle"
+      },
+      {
+        "_id": "Logan"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": 9,
+    "question": "For each country of origin, find the average miles per gallon of cars.",
+    "database": "car_1",
+    "query": "db.cars_data.aggregate([{'$lookup': {'from': 'model_list.json', 'localField': 'Id', 'foreignField': 'ModelId', 'as': 'ml'}}, {'$unwind': '$ml'}, {'$lookup': {'from': 'car_makers', 'localField': 'ml.Maker', 'foreignField': 'Id', 'as': 'mk'}}, {'$unwind': '$mk'}, {'$addFields': {'country_id': {'$toInt': '$mk.Country'}}}, {'$lookup': {'from': 'countries', 'localField': 'country_id', 'foreignField': 'CountryId', 'as': 'ctry'}}, {'$unwind': '$ctry'}, {'$addFields': {'mpg_num': {'$toDouble': '$MPG'}}}, {'$group': {'_id': '$ctry.CountryName', 'avg_mpg': {'$avg': '$mpg_num'}}}])",
+    "status": "FAIL",
+    "error": "PlanExecutor error during aggregation :: caused by :: Failed to parse number 'null' in $convert with no onError value: Did not consume any digits, full error: {'ok': 0.0, 'errmsg': \"PlanExecutor error during aggregation :: caused by :: Failed to parse number 'null' in $convert with no onError value: Did not consume any digits\", 'code': 241, 'codeName': 'ConversionFailure', '$clusterTime': {'clusterTime': Timestamp(1786729838, 13), 'signature': {'hash': b'\\xf2\\xa3\\x9c\\x0e6\\xbf\\xf5\\rd\\xa6\\xc2E>\\x87<N\\x92Y$\\xcd', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1786729838, 13)}",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": 12,
+    "question": "For each maker, find the model with the highest horsepower.",
+    "database": "car_1",
+    "query": "db.cars_data.aggregate([{'$addFields': {'hp_num': {'$toDouble': '$Horsepower'}}}, {'$lookup': {'from': 'model_list.json', 'localField': 'Id', 'foreignField': 'ModelId', 'as': 'ml'}}, {'$unwind': '$ml'}, {'$lookup': {'from': 'car_makers', 'localField': 'ml.Maker', 'foreignField': 'Id', 'as': 'mk'}}, {'$unwind': '$mk'}, {'$sort': {'hp_num': -1}}, {'$group': {'_id': '$mk.FullName', 'model': {'$first': '$ml.Model'}, 'horsepower': {'$first': '$hp_num'}}}])",
+    "status": "FAIL",
+    "error": "PlanExecutor error during aggregation :: caused by :: Failed to parse number 'null' in $convert with no onError value: Did not consume any digits, full error: {'ok': 0.0, 'errmsg': \"PlanExecutor error during aggregation :: caused by :: Failed to parse number 'null' in $convert with no onError value: Did not consume any digits\", 'code': 241, 'codeName': 'ConversionFailure', '$clusterTime': {'clusterTime': Timestamp(1786729838, 13), 'signature': {'hash': b'\\xf2\\xa3\\x9c\\x0e6\\xbf\\xf5\\rd\\xa6\\xc2E>\\x87<N\\x92Y$\\xcd', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1786729838, 13)}",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-e1",
+    "question": "How many cars are in the database?",
+    "database": "car_1",
+    "query": "db.cars_data.count_documents({})",
+    "status": "PASS",
+    "result": 406,
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-e2",
+    "question": "List the full names of all Renault cars.",
+    "database": "car_1",
+    "query": "db.car_names.find({'Make': {'$regex': 'renault', '$options': 'i'}}, {'_id': 0, 'Make': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Make": "renault 12 (sw)"
+      },
+      {
+        "Make": "renault 12tl"
+      },
+      {
+        "Make": "renault 5 gtl"
+      },
+      {
+        "Make": "renault lecar deluxe"
+      },
+      {
+        "Make": "renault 18i"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-e3",
+    "question": "List the full names of all car makers.",
+    "database": "car_1",
+    "query": "db.car_makers.find({}, {'_id': 0, 'FullName': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "FullName": "American Motor Company"
+      },
+      {
+        "FullName": "Volkswagen"
+      },
+      {
+        "FullName": "BMW"
+      },
+      {
+        "FullName": "General Motors"
+      },
+      {
+        "FullName": "Ford Motor Company"
+      },
+      {
+        "FullName": "Chrysler"
+      },
+      {
+        "FullName": "Citroen"
+      },
+      {
+        "FullName": "Nissan Motors"
+      },
+      {
+        "FullName": "Fiat"
+      },
+      {
+        "FullName": "Honda"
+      },
+      {
+        "FullName": "Mazda"
+      },
+      {
+        "FullName": "Daimler Benz"
+      },
+      {
+        "FullName": "Opel"
+      },
+      {
+        "FullName": "Peugeaut"
+      },
+      {
+        "FullName": "Renault"
+      },
+      {
+        "FullName": "Saab"
+      },
+      {
+        "FullName": "Subaru"
+      },
+      {
+        "FullName": "Toyota"
+      },
+      {
+        "FullName": "Triumph"
+      },
+      {
+        "FullName": "Volvo"
+      },
+      {
+        "FullName": "Kia Motors"
+      },
+      {
+        "FullName": "Hyundai"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-e4",
+    "question": "List all continents in the database.",
+    "database": "car_1",
+    "query": "db.continents.find({}, {'_id': 0, 'Continent': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Continent": "america"
+      },
+      {
+        "Continent": "europe"
+      },
+      {
+        "Continent": "asia"
+      },
+      {
+        "Continent": "africa"
+      },
+      {
+        "Continent": "australia"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-e5",
+    "question": "List all country names in the database.",
+    "database": "car_1",
+    "query": "db.countries.find({}, {'_id': 0, 'CountryName': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "CountryName": "usa"
+      },
+      {
+        "CountryName": "germany"
+      },
+      {
+        "CountryName": "france"
+      },
+      {
+        "CountryName": "japan"
+      },
+      {
+        "CountryName": "italy"
+      },
+      {
+        "CountryName": "sweden"
+      },
+      {
+        "CountryName": "uk"
+      },
+      {
+        "CountryName": "korea"
+      },
+      {
+        "CountryName": "russia"
+      },
+      {
+        "CountryName": "nigeria"
+      },
+      {
+        "CountryName": "australia"
+      },
+      {
+        "CountryName": "new zealand"
+      },
+      {
+        "CountryName": "egypt"
+      },
+      {
+        "CountryName": "mexico"
+      },
+      {
+        "CountryName": "brazil"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-e6",
+    "question": "How many cars have exactly 3 cylinders?",
+    "database": "car_1",
+    "query": "db.cars_data.count_documents({'Cylinders': 3})",
+    "status": "PASS",
+    "result": 4,
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-e7",
+    "question": "How many cars were produced in 1982?",
+    "database": "car_1",
+    "query": "db.cars_data.count_documents({'Year': 1982})",
+    "status": "PASS",
+    "result": 31,
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-e8",
+    "question": "What is the make of the car with Id 100?",
+    "database": "car_1",
+    "query": "db.car_names.find({'MakeId': 100}, {'_id': 0, 'Make': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Make": "ford ltd"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-e9",
+    "question": "List all model names produced by maker id 6.",
+    "database": "car_1",
+    "query": "db['model_list.json'].find({'Maker': 6}, {'_id': 0, 'Model': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Model": "chrysler"
+      },
+      {
+        "Model": "dodge"
+      },
+      {
+        "Model": "plymouth"
+      },
+      {
+        "Model": "jeep"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-e10",
+    "question": "How many cars have exactly 8 cylinders?",
+    "database": "car_1",
+    "query": "db.cars_data.count_documents({'Cylinders': 8})",
+    "status": "PASS",
+    "result": 108,
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-m1",
+    "question": "How many distinct models are listed in the model_list table?",
+    "database": "car_1",
+    "query": "len(db['model_list.json'].distinct('Model'))",
+    "status": "FAIL",
+    "error": "REJECTED by safety check (unexpected name: len)",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-m2",
+    "question": "How many cars were produced each year?",
+    "database": "car_1",
+    "query": "db.cars_data.aggregate([{'$group': {'_id': '$Year', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": 1975,
+        "count": 30
+      },
+      {
+        "_id": 1979,
+        "count": 29
+      },
+      {
+        "_id": 1973,
+        "count": 40
+      },
+      {
+        "_id": 1974,
+        "count": 27
+      },
+      {
+        "_id": 1970,
+        "count": 35
+      },
+      {
+        "_id": 1972,
+        "count": 28
+      },
+      {
+        "_id": 1976,
+        "count": 34
+      },
+      {
+        "_id": 1971,
+        "count": 29
+      },
+      {
+        "_id": 1980,
+        "count": 29
+      },
+      {
+        "_id": 1981,
+        "count": 30
+      },
+      {
+        "_id": 1977,
+        "count": 28
+      },
+      {
+        "_id": 1978,
+        "count": 36
+      },
+      {
+        "_id": 1982,
+        "count": 31
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-m3",
+    "question": "What is the average weight of all cars?",
+    "database": "car_1",
+    "query": "db.cars_data.aggregate([{'$group': {'_id': None, 'avg_weight': {'$avg': '$Weight'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "avg_weight": 2979.4137931034484
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-m4",
+    "question": "What are the 5 heaviest cars? Report Id and Weight.",
+    "database": "car_1",
+    "query": "db.cars_data.find({}, {'_id': 0, 'Id': 1, 'Weight': 1}).sort('Weight', -1).limit(5)",
+    "status": "PASS",
+    "result": [
+      {
+        "Id": 52,
+        "Weight": 5140
+      },
+      {
+        "Id": 111,
+        "Weight": 4997
+      },
+      {
+        "Id": 50,
+        "Weight": 4955
+      },
+      {
+        "Id": 98,
+        "Weight": 4952
+      },
+      {
+        "Id": 103,
+        "Weight": 4951
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-m5",
+    "question": "How many car makers are registered under each country code?",
+    "database": "car_1",
+    "query": "db.car_makers.aggregate([{'$group': {'_id': '$Country', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "7",
+        "count": 1
+      },
+      {
+        "_id": "5",
+        "count": 1
+      },
+      {
+        "_id": "2",
+        "count": 4
+      },
+      {
+        "_id": "6",
+        "count": 2
+      },
+      {
+        "_id": "8",
+        "count": 2
+      },
+      {
+        "_id": "4",
+        "count": 5
+      },
+      {
+        "_id": "3",
+        "count": 3
+      },
+      {
+        "_id": "1",
+        "count": 4
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-m6",
+    "question": "What is the maximum acceleration time recorded?",
+    "database": "car_1",
+    "query": "db.cars_data.aggregate([{'$group': {'_id': None, 'max_accel': {'$max': '$Accelerate'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "max_accel": 24.8
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-m7",
+    "question": "How many models does each maker have?",
+    "database": "car_1",
+    "query": "db['model_list.json'].aggregate([{'$group': {'_id': '$Maker', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": 15,
+        "count": 1
+      },
+      {
+        "_id": 20,
+        "count": 1
+      },
+      {
+        "_id": 14,
+        "count": 1
+      },
+      {
+        "_id": 9,
+        "count": 1
+      },
+      {
+        "_id": 16,
+        "count": 1
+      },
+      {
+        "_id": 19,
+        "count": 2
+      },
+      {
+        "_id": 3,
+        "count": 1
+      },
+      {
+        "_id": 21,
+        "count": 1
+      },
+      {
+        "_id": 12,
+        "count": 1
+      },
+      {
+        "_id": 17,
+        "count": 1
+      },
+      {
+        "_id": 7,
+        "count": 1
+      },
+      {
+        "_id": 2,
+        "count": 2
+      },
+      {
+        "_id": 13,
+        "count": 2
+      },
+      {
+        "_id": 22,
+        "count": 1
+      },
+      {
+        "_id": 23,
+        "count": 1
+      },
+      {
+        "_id": 5,
+        "count": 3
+      },
+      {
+        "_id": 10,
+        "count": 1
+      },
+      {
+        "_id": 4,
+        "count": 5
+      },
+      {
+        "_id": 6,
+        "count": 4
+      },
+      {
+        "_id": 18,
+        "count": 1
+      },
+      {
+        "_id": 8,
+        "count": 2
+      },
+      {
+        "_id": 1,
+        "count": 1
+      },
+      {
+        "_id": 11,
+        "count": 1
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-h1",
+    "question": "List car makers with more than 2 models. Report the full name and the model count.",
+    "database": "car_1",
+    "query": "db['model_list.json'].aggregate([{'$group': {'_id': '$Maker', 'count': {'$sum': 1}}}, {'$match': {'count': {'$gt': 2}}}, {'$lookup': {'from': 'car_makers', 'localField': '_id', 'foreignField': 'Id', 'as': 'mk'}}, {'$unwind': '$mk'}, {'$project': {'_id': 0, 'FullName': '$mk.FullName', 'model_count': '$count'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "FullName": "Ford Motor Company",
+        "model_count": 3
+      },
+      {
+        "FullName": "Chrysler",
+        "model_count": 4
+      },
+      {
+        "FullName": "General Motors",
+        "model_count": 5
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-h2",
+    "question": "List all Volvo cars produced between 1977 and 1981 inclusive. Report the name of the car and the year.",
+    "database": "car_1",
+    "query": "db.car_names.aggregate([{'$match': {'Make': {'$regex': 'volvo', '$options': 'i'}}}, {'$lookup': {'from': 'cars_data', 'localField': 'MakeId', 'foreignField': 'Id', 'as': 'cd'}}, {'$unwind': '$cd'}, {'$match': {'cd.Year': {'$gte': 1977, '$lte': 1981}}}, {'$project': {'_id': 0, 'Make': 1, 'Year': '$cd.Year'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "Make": "volvo 264gl",
+        "Year": 1978
+      },
+      {
+        "Make": "volvo diesel",
+        "Year": 1981
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-h3",
+    "question": "Report all Asian automakers: their full name and country name.",
+    "database": "car_1",
+    "query": "db.car_makers.aggregate([{'$addFields': {'country_id': {'$toInt': '$Country'}}}, {'$lookup': {'from': 'countries', 'localField': 'country_id', 'foreignField': 'CountryId', 'as': 'ctry'}}, {'$unwind': '$ctry'}, {'$addFields': {'continent_id': '$ctry.Continent'}}, {'$lookup': {'from': 'continents', 'localField': 'continent_id', 'foreignField': 'ContId', 'as': 'cont'}}, {'$unwind': '$cont'}, {'$match': {'cont.Continent': 'asia'}}, {'$project': {'_id': 0, 'FullName': 1, 'CountryName': '$ctry.CountryName'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "FullName": "Nissan Motors",
+        "CountryName": "japan"
+      },
+      {
+        "FullName": "Honda",
+        "CountryName": "japan"
+      },
+      {
+        "FullName": "Mazda",
+        "CountryName": "japan"
+      },
+      {
+        "FullName": "Subaru",
+        "CountryName": "japan"
+      },
+      {
+        "FullName": "Toyota",
+        "CountryName": "japan"
+      },
+      {
+        "FullName": "Kia Motors",
+        "CountryName": "korea"
+      },
+      {
+        "FullName": "Hyundai",
+        "CountryName": "korea"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-c1",
+    "question": "For each Saab released after 1978, report the full name, the year, and the ratio of weight to horsepower.",
+    "database": "car_1",
+    "query": "db.car_names.aggregate([{'$match': {'Make': {'$regex': 'saab', '$options': 'i'}}}, {'$lookup': {'from': 'cars_data', 'localField': 'MakeId', 'foreignField': 'Id', 'as': 'cd'}}, {'$unwind': '$cd'}, {'$match': {'cd.Year': {'$gt': 1978}}}, {'$addFields': {'hp_num': {'$toDouble': '$cd.Horsepower'}}}, {'$project': {'_id': 0, 'Make': 1, 'Year': '$cd.Year', 'weight_hp_ratio': {'$divide': ['$cd.Weight', '$hp_num']}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "Make": "saab 900s",
+        "Year": 1981,
+        "weight_hp_ratio": 25.454545454545453
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-c2",
+    "question": "Find how many different car makers produced a vehicle heavier than 4000 lbs.",
+    "database": "car_1",
+    "query": "db.cars_data.aggregate([{'$match': {'Weight': {'$gt': 4000}}}, {'$lookup': {'from': 'model_list.json', 'localField': 'Id', 'foreignField': 'ModelId', 'as': 'ml'}}, {'$unwind': '$ml'}, {'$group': {'_id': '$ml.Maker'}}, {'$count': 'maker_count'}])",
+    "status": "PASS",
+    "result": [
+      {
+        "maker_count": 9
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "wl-e1",
+    "question": "What are the names of all the countries that became independent after 1950?",
+    "database": "world_1",
+    "query": "db.country.find({'IndepYear': {'$gt': 1950}}, {'_id': 0, 'Name': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "Angola"
+      },
+      {
+        "Name": "United Arab Emirates"
+      },
+      {
+        "Name": "Armenia"
+      },
+      {
+        "Name": "Antigua and Barbuda"
+      },
+      {
+        "Name": "Azerbaijan"
+      },
+      {
+        "Name": "Burundi"
+      },
+      {
+        "Name": "Benin"
+      },
+      {
+        "Name": "Burkina Faso"
+      },
+      {
+        "Name": "Bangladesh"
+      },
+      {
+        "Name": "Bahrain"
+      },
+      {
+        "Name": "Bahamas"
+      },
+      {
+        "Name": "Bosnia and Herzegovina"
+      },
+      {
+        "Name": "Belarus"
+      },
+      {
+        "Name": "Belize"
+      },
+      {
+        "Name": "Barbados"
+      },
+      {
+        "Name": "Brunei"
+      },
+      {
+        "Name": "Botswana"
+      },
+      {
+        "Name": "Central African Republic"
+      },
+      {
+        "Name": "C\u00f4te d\u2019Ivoire"
+      },
+      {
+        "Name": "Cameroon"
+      },
+      {
+        "Name": "Congo, The Democratic Republic of the"
+      },
+      {
+        "Name": "Congo"
+      },
+      {
+        "Name": "Comoros"
+      },
+      {
+        "Name": "Cape Verde"
+      },
+      {
+        "Name": "Cyprus"
+      },
+      {
+        "Name": "Czech Republic"
+      },
+      {
+        "Name": "Germany"
+      },
+      {
+        "Name": "Djibouti"
+      },
+      {
+        "Name": "Dominica"
+      },
+      {
+        "Name": "Algeria"
+      },
+      {
+        "Name": "Eritrea"
+      },
+      {
+        "Name": "Estonia"
+      },
+      {
+        "Name": "Fiji Islands"
+      },
+      {
+        "Name": "Micronesia, Federated States of"
+      },
+      {
+        "Name": "Gabon"
+      },
+      {
+        "Name": "Georgia"
+      },
+      {
+        "Name": "Ghana"
+      },
+      {
+        "Name": "Guinea"
+      },
+      {
+        "Name": "Gambia"
+      },
+      {
+        "Name": "Guinea-Bissau"
+      },
+      {
+        "Name": "Equatorial Guinea"
+      },
+      {
+        "Name": "Grenada"
+      },
+      {
+        "Name": "Guyana"
+      },
+      {
+        "Name": "Croatia"
+      },
+      {
+        "Name": "Jamaica"
+      },
+      {
+        "Name": "Kazakstan"
+      },
+      {
+        "Name": "Kenya"
+      },
+      {
+        "Name": "Kyrgyzstan"
+      },
+      {
+        "Name": "Cambodia"
+      },
+      {
+        "Name": "Kiribati"
+      },
+      {
+        "Name": "Saint Kitts and Nevis"
+      },
+      {
+        "Name": "Kuwait"
+      },
+      {
+        "Name": "Laos"
+      },
+      {
+        "Name": "Libyan Arab Jamahiriya"
+      },
+      {
+        "Name": "Saint Lucia"
+      },
+      {
+        "Name": "Lesotho"
+      },
+      {
+        "Name": "Lithuania"
+      },
+      {
+        "Name": "Latvia"
+      },
+      {
+        "Name": "Morocco"
+      },
+      {
+        "Name": "Moldova"
+      },
+      {
+        "Name": "Madagascar"
+      },
+      {
+        "Name": "Maldives"
+      },
+      {
+        "Name": "Marshall Islands"
+      },
+      {
+        "Name": "Macedonia"
+      },
+      {
+        "Name": "Mali"
+      },
+      {
+        "Name": "Malta"
+      },
+      {
+        "Name": "Mozambique"
+      },
+      {
+        "Name": "Mauritania"
+      },
+      {
+        "Name": "Mauritius"
+      },
+      {
+        "Name": "Malawi"
+      },
+      {
+        "Name": "Malaysia"
+      },
+      {
+        "Name": "Namibia"
+      },
+      {
+        "Name": "Niger"
+      },
+      {
+        "Name": "Nigeria"
+      },
+      {
+        "Name": "Nauru"
+      },
+      {
+        "Name": "Oman"
+      },
+      {
+        "Name": "Palau"
+      },
+      {
+        "Name": "Papua New Guinea"
+      },
+      {
+        "Name": "Qatar"
+      },
+      {
+        "Name": "Russian Federation"
+      },
+      {
+        "Name": "Rwanda"
+      },
+      {
+        "Name": "Sudan"
+      },
+      {
+        "Name": "Senegal"
+      },
+      {
+        "Name": "Singapore"
+      },
+      {
+        "Name": "Solomon Islands"
+      },
+      {
+        "Name": "Sierra Leone"
+      },
+      {
+        "Name": "Somalia"
+      },
+      {
+        "Name": "Sao Tome and Principe"
+      },
+      {
+        "Name": "Suriname"
+      },
+      {
+        "Name": "Slovakia"
+      },
+      {
+        "Name": "Slovenia"
+      },
+      {
+        "Name": "Swaziland"
+      },
+      {
+        "Name": "Seychelles"
+      },
+      {
+        "Name": "Chad"
+      },
+      {
+        "Name": "Togo"
+      },
+      {
+        "Name": "Tajikistan"
+      },
+      {
+        "Name": "Turkmenistan"
+      },
+      {
+        "Name": "Tonga"
+      },
+      {
+        "Name": "Trinidad and Tobago"
+      },
+      {
+        "Name": "Tunisia"
+      },
+      {
+        "Name": "Tuvalu"
+      },
+      {
+        "Name": "Tanzania"
+      },
+      {
+        "Name": "Uganda"
+      },
+      {
+        "Name": "Ukraine"
+      },
+      {
+        "Name": "Uzbekistan"
+      },
+      {
+        "Name": "Saint Vincent and the Grenadines"
+      },
+      {
+        "Name": "Vanuatu"
+      },
+      {
+        "Name": "Samoa"
+      },
+      {
+        "Name": "Zambia"
+      },
+      {
+        "Name": "Zimbabwe"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "wl-e2",
+    "question": "How many countries have a republic as their form of government?",
+    "database": "world_1",
+    "query": "db.country.count_documents({'GovernmentForm': {'$regex': 'republic', '$options': 'i'}})",
+    "status": "PASS",
+    "result": 143,
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-e3",
+    "question": "Which continent is Anguilla in?",
+    "database": "world_1",
+    "query": "db.country.find({'Name': 'Anguilla'}, {'_id': 0, 'Continent': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Continent": "North America"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "wl-e4",
+    "question": "What are the population and life expectancy of Brazil?",
+    "database": "world_1",
+    "query": "db.country.find({'Name': 'Brazil'}, {'_id': 0, 'Population': 1, 'LifeExpectancy': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "Population": 170115000,
+        "LifeExpectancy": 62.9
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "wl-e5",
+    "question": "How many people live in the Gelderland district?",
+    "database": "world_1",
+    "query": "db.city.aggregate([{'$match': {'District': 'Gelderland'}}, {'$group': {'_id': None, 'total_population': {'$sum': '$Population'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "total_population": 545548
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "wl-e6",
+    "question": "What are the names and surface areas of the 5 largest countries by area?",
+    "database": "world_1",
+    "query": "db.country.find({}, {'_id': 0, 'Name': 1, 'SurfaceArea': 1}).sort('SurfaceArea', -1).limit(5)",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "Russian Federation",
+        "SurfaceArea": 17075400
+      },
+      {
+        "Name": "Antarctica",
+        "SurfaceArea": 13120000
+      },
+      {
+        "Name": "Canada",
+        "SurfaceArea": 9970610
+      },
+      {
+        "Name": "China",
+        "SurfaceArea": 9572900
+      },
+      {
+        "Name": "United States",
+        "SurfaceArea": 9363520
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "wl-e7",
+    "question": "What are the codes of countries that do not speak English?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{'$lookup': {'from': 'countrylanguage', 'let': {'code': '$Code'}, 'pipeline': [{'$match': {'$expr': {'$and': [{'$eq': ['$CountryCode', '$$code']}, {'$eq': ['$Language', 'English']}]}}}], 'as': 'eng'}}, {'$match': {'eng': []}}, {'$project': {'_id': 0, 'Code': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "Code": "AFG"
+      },
+      {
+        "Code": "AGO"
+      },
+      {
+        "Code": "ALB"
+      },
+      {
+        "Code": "AND"
+      },
+      {
+        "Code": "ARE"
+      },
+      {
+        "Code": "ARG"
+      },
+      {
+        "Code": "ARM"
+      },
+      {
+        "Code": "ATA"
+      },
+      {
+        "Code": "ATF"
+      },
+      {
+        "Code": "AUT"
+      },
+      {
+        "Code": "AZE"
+      },
+      {
+        "Code": "BDI"
+      },
+      {
+        "Code": "BEL"
+      },
+      {
+        "Code": "BEN"
+      },
+      {
+        "Code": "BFA"
+      },
+      {
+        "Code": "BGD"
+      },
+      {
+        "Code": "BGR"
+      },
+      {
+        "Code": "BHS"
+      },
+      {
+        "Code": "BIH"
+      },
+      {
+        "Code": "BLR"
+      },
+      {
+        "Code": "BOL"
+      },
+      {
+        "Code": "BRA"
+      },
+      {
+        "Code": "BTN"
+      },
+      {
+        "Code": "BVT"
+      },
+      {
+        "Code": "BWA"
+      },
+      {
+        "Code": "CAF"
+      },
+      {
+        "Code": "CHE"
+      },
+      {
+        "Code": "CHL"
+      },
+      {
+        "Code": "CHN"
+      },
+      {
+        "Code": "CIV"
+      },
+      {
+        "Code": "CMR"
+      },
+      {
+        "Code": "COD"
+      },
+      {
+        "Code": "COG"
+      },
+      {
+        "Code": "COL"
+      },
+      {
+        "Code": "COM"
+      },
+      {
+        "Code": "CPV"
+      },
+      {
+        "Code": "CRI"
+      },
+      {
+        "Code": "CUB"
+      },
+      {
+        "Code": "CYP"
+      },
+      {
+        "Code": "CZE"
+      },
+      {
+        "Code": "DEU"
+      },
+      {
+        "Code": "DJI"
+      },
+      {
+        "Code": "DMA"
+      },
+      {
+        "Code": "DOM"
+      },
+      {
+        "Code": "DZA"
+      },
+      {
+        "Code": "ECU"
+      },
+      {
+        "Code": "EGY"
+      },
+      {
+        "Code": "ERI"
+      },
+      {
+        "Code": "ESH"
+      },
+      {
+        "Code": "ESP"
+      },
+      {
+        "Code": "EST"
+      },
+      {
+        "Code": "ETH"
+      },
+      {
+        "Code": "FIN"
+      },
+      {
+        "Code": "FJI"
+      },
+      {
+        "Code": "FRA"
+      },
+      {
+        "Code": "FRO"
+      },
+      {
+        "Code": "FSM"
+      },
+      {
+        "Code": "GAB"
+      },
+      {
+        "Code": "GEO"
+      },
+      {
+        "Code": "GHA"
+      },
+      {
+        "Code": "GIN"
+      },
+      {
+        "Code": "GLP"
+      },
+      {
+        "Code": "GMB"
+      },
+      {
+        "Code": "GNB"
+      },
+      {
+        "Code": "GNQ"
+      },
+      {
+        "Code": "GRC"
+      },
+      {
+        "Code": "GRD"
+      },
+      {
+        "Code": "GRL"
+      },
+      {
+        "Code": "GTM"
+      },
+      {
+        "Code": "GUF"
+      },
+      {
+        "Code": "GUY"
+      },
+      {
+        "Code": "HMD"
+      },
+      {
+        "Code": "HND"
+      },
+      {
+        "Code": "HRV"
+      },
+      {
+        "Code": "HTI"
+      },
+      {
+        "Code": "HUN"
+      },
+      {
+        "Code": "IDN"
+      },
+      {
+        "Code": "IND"
+      },
+      {
+        "Code": "IOT"
+      },
+      {
+        "Code": "IRN"
+      },
+      {
+        "Code": "IRQ"
+      },
+      {
+        "Code": "ISR"
+      },
+      {
+        "Code": "ITA"
+      },
+      {
+        "Code": "JAM"
+      },
+      {
+        "Code": "JOR"
+      },
+      {
+        "Code": "KAZ"
+      },
+      {
+        "Code": "KEN"
+      },
+      {
+        "Code": "KGZ"
+      },
+      {
+        "Code": "KHM"
+      },
+      {
+        "Code": "KIR"
+      },
+      {
+        "Code": "KOR"
+      },
+      {
+        "Code": "LAO"
+      },
+      {
+        "Code": "LBN"
+      },
+      {
+        "Code": "LBR"
+      },
+      {
+        "Code": "LBY"
+      },
+      {
+        "Code": "LIE"
+      },
+      {
+        "Code": "LKA"
+      },
+      {
+        "Code": "LTU"
+      },
+      {
+        "Code": "LUX"
+      },
+      {
+        "Code": "LVA"
+      },
+      {
+        "Code": "MAR"
+      },
+      {
+        "Code": "MDA"
+      },
+      {
+        "Code": "MDG"
+      },
+      {
+        "Code": "MEX"
+      },
+      {
+        "Code": "MKD"
+      },
+      {
+        "Code": "MLI"
+      },
+      {
+        "Code": "MMR"
+      },
+      {
+        "Code": "MNG"
+      },
+      {
+        "Code": "MOZ"
+      },
+      {
+        "Code": "MRT"
+      },
+      {
+        "Code": "MTQ"
+      },
+      {
+        "Code": "MUS"
+      },
+      {
+        "Code": "MWI"
+      },
+      {
+        "Code": "MYT"
+      },
+      {
+        "Code": "NAM"
+      },
+      {
+        "Code": "NCL"
+      },
+      {
+        "Code": "NER"
+      },
+      {
+        "Code": "NGA"
+      },
+      {
+        "Code": "NIC"
+      },
+      {
+        "Code": "NLD"
+      },
+      {
+        "Code": "NPL"
+      },
+      {
+        "Code": "OMN"
+      },
+      {
+        "Code": "PAK"
+      },
+      {
+        "Code": "PAN"
+      },
+      {
+        "Code": "PCN"
+      },
+      {
+        "Code": "PER"
+      },
+      {
+        "Code": "PHL"
+      },
+      {
+        "Code": "PNG"
+      },
+      {
+        "Code": "POL"
+      },
+      {
+        "Code": "PRK"
+      },
+      {
+        "Code": "PRT"
+      },
+      {
+        "Code": "PRY"
+      },
+      {
+        "Code": "PSE"
+      },
+      {
+        "Code": "PYF"
+      },
+      {
+        "Code": "QAT"
+      },
+      {
+        "Code": "REU"
+      },
+      {
+        "Code": "ROM"
+      },
+      {
+        "Code": "RUS"
+      },
+      {
+        "Code": "RWA"
+      },
+      {
+        "Code": "SAU"
+      },
+      {
+        "Code": "SDN"
+      },
+      {
+        "Code": "SEN"
+      },
+      {
+        "Code": "SGP"
+      },
+      {
+        "Code": "SGS"
+      },
+      {
+        "Code": "SJM"
+      },
+      {
+        "Code": "SLB"
+      },
+      {
+        "Code": "SLE"
+      },
+      {
+        "Code": "SLV"
+      },
+      {
+        "Code": "SMR"
+      },
+      {
+        "Code": "SOM"
+      },
+      {
+        "Code": "SPM"
+      },
+      {
+        "Code": "STP"
+      },
+      {
+        "Code": "SUR"
+      },
+      {
+        "Code": "SVK"
+      },
+      {
+        "Code": "SVN"
+      },
+      {
+        "Code": "SWE"
+      },
+      {
+        "Code": "SWZ"
+      },
+      {
+        "Code": "SYR"
+      },
+      {
+        "Code": "TCD"
+      },
+      {
+        "Code": "TGO"
+      },
+      {
+        "Code": "THA"
+      },
+      {
+        "Code": "TJK"
+      },
+      {
+        "Code": "TKM"
+      },
+      {
+        "Code": "TMP"
+      },
+      {
+        "Code": "TUN"
+      },
+      {
+        "Code": "TUR"
+      },
+      {
+        "Code": "TWN"
+      },
+      {
+        "Code": "TZA"
+      },
+      {
+        "Code": "UGA"
+      },
+      {
+        "Code": "UKR"
+      },
+      {
+        "Code": "URY"
+      },
+      {
+        "Code": "UZB"
+      },
+      {
+        "Code": "VAT"
+      },
+      {
+        "Code": "VEN"
+      },
+      {
+        "Code": "VNM"
+      },
+      {
+        "Code": "WLF"
+      },
+      {
+        "Code": "YEM"
+      },
+      {
+        "Code": "YUG"
+      },
+      {
+        "Code": "ZMB"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-m1",
+    "question": "Which region is the city Kabul located in?",
+    "database": "world_1",
+    "query": "db.city.aggregate([{'$match': {'Name': 'Kabul'}}, {'$lookup': {'from': 'country', 'localField': 'CountryCode', 'foreignField': 'Code', 'as': 'ctry'}}, {'$unwind': '$ctry'}, {'$project': {'_id': 0, 'Region': '$ctry.Region'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "Region": "Southern and Central Asia"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "wl-m2",
+    "question": "Which language is the most popular in Aruba?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{'$match': {'Name': 'Aruba'}}, {'$lookup': {'from': 'countrylanguage', 'localField': 'Code', 'foreignField': 'CountryCode', 'as': 'langs'}}, {'$unwind': '$langs'}, {'$sort': {'langs.Percentage': -1}}, {'$limit': 1}, {'$project': {'_id': 0, 'Language': '$langs.Language'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "Language": "Papiamento"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "wl-m3",
+    "question": "How many official languages does Afghanistan have?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{'$match': {'Name': 'Afghanistan'}}, {'$lookup': {'from': 'countrylanguage', 'localField': 'Code', 'foreignField': 'CountryCode', 'as': 'langs'}}, {'$unwind': '$langs'}, {'$match': {'langs.IsOfficial': 'T'}}, {'$count': 'official_language_count'}])",
+    "status": "PASS",
+    "result": [
+      {
+        "official_language_count": 2
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "wl-m4",
+    "question": "What is the name of the country that speaks the largest number of languages?",
+    "database": "world_1",
+    "query": "db.countrylanguage.aggregate([{'$group': {'_id': '$CountryCode', 'lang_count': {'$sum': 1}}}, {'$sort': {'lang_count': -1}}, {'$limit': 1}, {'$lookup': {'from': 'country', 'localField': '_id', 'foreignField': 'Code', 'as': 'ctry'}}, {'$unwind': '$ctry'}, {'$project': {'_id': 0, 'Name': '$ctry.Name', 'lang_count': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "lang_count": 12,
+        "Name": "United States"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-m5",
+    "question": "What is the average life expectancy for countries in the Central Africa region?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{'$match': {'Region': 'Central Africa'}}, {'$group': {'_id': None, 'avg_life_expectancy': {'$avg': '$LifeExpectancy'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "avg_life_expectancy": 50.31111111111111
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "wl-m6",
+    "question": "Find the city with the largest population where English is spoken.",
+    "database": "world_1",
+    "query": "db.countrylanguage.aggregate([{'$match': {'Language': 'English'}}, {'$lookup': {'from': 'city', 'localField': 'CountryCode', 'foreignField': 'CountryCode', 'as': 'cities'}}, {'$unwind': '$cities'}, {'$sort': {'cities.Population': -1}}, {'$limit': 1}, {'$project': {'_id': 0, 'City': '$cities.Name', 'Population': '$cities.Population'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "City": "New York",
+        "Population": 8008278
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-h1",
+    "question": "Return the country name and number of languages spoken for each country that speaks at least 3 languages.",
+    "database": "world_1",
+    "query": "db.countrylanguage.aggregate([{'$group': {'_id': '$CountryCode', 'lang_count': {'$sum': 1}}}, {'$match': {'lang_count': {'$gte': 3}}}, {'$lookup': {'from': 'country', 'localField': '_id', 'foreignField': 'Code', 'as': 'ctry'}}, {'$unwind': '$ctry'}, {'$project': {'_id': 0, 'Name': '$ctry.Name', 'lang_count': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "lang_count": 5,
+        "Name": "Hong Kong"
+      },
+      {
+        "lang_count": 9,
+        "Name": "Angola"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Macedonia"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Lebanon"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Brunei"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Guatemala"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Panama"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Cambodia"
+      },
+      {
+        "lang_count": 12,
+        "Name": "United States"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Iraq"
+      },
+      {
+        "lang_count": 12,
+        "Name": "China"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Burkina Faso"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Argentina"
+      },
+      {
+        "lang_count": 10,
+        "Name": "Kenya"
+      },
+      {
+        "lang_count": 12,
+        "Name": "Canada"
+      },
+      {
+        "lang_count": 10,
+        "Name": "Nigeria"
+      },
+      {
+        "lang_count": 7,
+        "Name": "Ukraine"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Austria"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Turkmenistan"
+      },
+      {
+        "lang_count": 9,
+        "Name": "Indonesia"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Sierra Leone"
+      },
+      {
+        "lang_count": 7,
+        "Name": "Bangladesh"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Aruba"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Netherlands"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Brazil"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Mali"
+      },
+      {
+        "lang_count": 10,
+        "Name": "Iran"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Namibia"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Poland"
+      },
+      {
+        "lang_count": 11,
+        "Name": "South Africa"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Palau"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Gabon"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Tuvalu"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Czech Republic"
+      },
+      {
+        "lang_count": 11,
+        "Name": "Tanzania"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Virgin Islands, U.S."
+      },
+      {
+        "lang_count": 3,
+        "Name": "Liechtenstein"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Liberia"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Nauru"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Costa Rica"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Netherlands Antilles"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Switzerland"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Paraguay"
+      },
+      {
+        "lang_count": 9,
+        "Name": "Vietnam"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Lithuania"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Guinea-Bissau"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Mauritius"
+      },
+      {
+        "lang_count": 3,
+        "Name": "New Caledonia"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Thailand"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Turkey"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Pakistan"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Norway"
+      },
+      {
+        "lang_count": 12,
+        "Name": "Russian Federation"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Taiwan"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Togo"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Northern Mariana Islands"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Germany"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Vanuatu"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Jordan"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Slovenia"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Gambia"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Central African Republic"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Belarus"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Belize"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Ghana"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Venezuela"
+      },
+      {
+        "lang_count": 10,
+        "Name": "Mozambique"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Uzbekistan"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Zimbabwe"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Myanmar"
+      },
+      {
+        "lang_count": 7,
+        "Name": "Kyrgyzstan"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Albania"
+      },
+      {
+        "lang_count": 10,
+        "Name": "Congo, The Democratic Republic of the"
+      },
+      {
+        "lang_count": 3,
+        "Name": "American Samoa"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Peru"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Azerbaijan"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Cameroon"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Monaco"
+      },
+      {
+        "lang_count": 7,
+        "Name": "Ethiopia"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Slovakia"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Bolivia"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Laos"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Burundi"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Nicaragua"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Luxembourg"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Italy"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Samoa"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Senegal"
+      },
+      {
+        "lang_count": 10,
+        "Name": "Uganda"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Andorra"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Macao"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Bhutan"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Kazakstan"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Trinidad and Tobago"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Zambia"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Australia"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Colombia"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Estonia"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Latvia"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Tunisia"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Seychelles"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Eritrea"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Malaysia"
+      },
+      {
+        "lang_count": 3,
+        "Name": "United Kingdom"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Sweden"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Finland"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Djibouti"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Mexico"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Mayotte"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Spain"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Yugoslavia"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Micronesia, Federated States of"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Lesotho"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Botswana"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Bulgaria"
+      },
+      {
+        "lang_count": 7,
+        "Name": "Benin"
+      },
+      {
+        "lang_count": 7,
+        "Name": "Guinea"
+      },
+      {
+        "lang_count": 5,
+        "Name": "C\u00f4te d\u2019Ivoire"
+      },
+      {
+        "lang_count": 3,
+        "Name": "French Polynesia"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Mongolia"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Niger"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Hungary"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Chile"
+      },
+      {
+        "lang_count": 6,
+        "Name": "France"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Romania"
+      },
+      {
+        "lang_count": 7,
+        "Name": "Nepal"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Israel"
+      },
+      {
+        "lang_count": 10,
+        "Name": "Sudan"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Guyana"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Singapore"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Japan"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Guam"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Georgia"
+      },
+      {
+        "lang_count": 8,
+        "Name": "Chad"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Malawi"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Moldova"
+      },
+      {
+        "lang_count": 12,
+        "Name": "India"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Solomon Islands"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Comoros"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Mauritania"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Tajikistan"
+      },
+      {
+        "lang_count": 10,
+        "Name": "Philippines"
+      },
+      {
+        "lang_count": 7,
+        "Name": "Denmark"
+      },
+      {
+        "lang_count": 4,
+        "Name": "Honduras"
+      },
+      {
+        "lang_count": 5,
+        "Name": "R\u00e9union"
+      },
+      {
+        "lang_count": 5,
+        "Name": "Afghanistan"
+      },
+      {
+        "lang_count": 3,
+        "Name": "Sri Lanka"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Belgium"
+      },
+      {
+        "lang_count": 6,
+        "Name": "Congo"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "wl-h2",
+    "question": "Which languages are spoken by only one country among republic governments?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{'$match': {'GovernmentForm': {'$regex': 'republic', '$options': 'i'}}}, {'$lookup': {'from': 'countrylanguage', 'localField': 'Code', 'foreignField': 'CountryCode', 'as': 'langs'}}, {'$unwind': '$langs'}, {'$group': {'_id': '$langs.Language', 'country_count': {'$addToSet': '$Code'}}}, {'$project': {'_id': 1, 'num_countries': {'$size': '$country_count'}}}, {'$match': {'num_countries': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "Nsenga",
+        "num_countries": 1
+      },
+      {
+        "_id": "Abhyasi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Gagauzi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Swazi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Turkana",
+        "num_countries": 1
+      },
+      {
+        "_id": "Luo",
+        "num_countries": 1
+      },
+      {
+        "_id": "Singali",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kirgiz",
+        "num_countries": 1
+      },
+      {
+        "_id": "Gilaki",
+        "num_countries": 1
+      },
+      {
+        "_id": "Meru",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mbum",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bilin",
+        "num_countries": 1
+      },
+      {
+        "_id": "Rapa nui",
+        "num_countries": 1
+      },
+      {
+        "_id": "Chilluk",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ngbaka",
+        "num_countries": 1
+      },
+      {
+        "_id": "Aizo",
+        "num_countries": 1
+      },
+      {
+        "_id": "Khoekhoe",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ouaddai",
+        "num_countries": 1
+      },
+      {
+        "_id": "Punu-sira-nzebi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kaby\u00e9",
+        "num_countries": 1
+      },
+      {
+        "_id": "Zulu",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bemba",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ibibio",
+        "num_countries": 1
+      },
+      {
+        "_id": "Burmese",
+        "num_countries": 1
+      },
+      {
+        "_id": "Sindhi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Somba",
+        "num_countries": 1
+      },
+      {
+        "_id": "Busansi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Lao-Soung",
+        "num_countries": 1
+      },
+      {
+        "_id": "Makua",
+        "num_countries": 1
+      },
+      {
+        "_id": "Nama",
+        "num_countries": 1
+      },
+      {
+        "_id": "Pashto",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ami",
+        "num_countries": 1
+      },
+      {
+        "_id": "Sardinian",
+        "num_countries": 1
+      },
+      {
+        "_id": "Osseetti",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mongo",
+        "num_countries": 1
+      },
+      {
+        "_id": "Sidamo",
+        "num_countries": 1
+      },
+      {
+        "_id": "Otom\u00ed",
+        "num_countries": 1
+      },
+      {
+        "_id": "Dagara",
+        "num_countries": 1
+      },
+      {
+        "_id": "Chichewa",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ngala and Bangi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Edo",
+        "num_countries": 1
+      },
+      {
+        "_id": "Waray-waray",
+        "num_countries": 1
+      },
+      {
+        "_id": "Yap",
+        "num_countries": 1
+      },
+      {
+        "_id": "Arabic-French",
+        "num_countries": 1
+      },
+      {
+        "_id": "Nahua",
+        "num_countries": 1
+      },
+      {
+        "_id": "Nkole",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kirundi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Santhali",
+        "num_countries": 1
+      },
+      {
+        "_id": "Comorian-Arabic",
+        "num_countries": 1
+      },
+      {
+        "_id": "Embera",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kuranko",
+        "num_countries": 1
+      },
+      {
+        "_id": "Lango",
+        "num_countries": 1
+      },
+      {
+        "_id": "Georgiana",
+        "num_countries": 1
+      },
+      {
+        "_id": "Beja",
+        "num_countries": 1
+      },
+      {
+        "_id": "Chuabo",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mazandarani",
+        "num_countries": 1
+      },
+      {
+        "_id": "Pampango",
+        "num_countries": 1
+      },
+      {
+        "_id": "Venda",
+        "num_countries": 1
+      },
+      {
+        "_id": "Uighur",
+        "num_countries": 1
+      },
+      {
+        "_id": "Comorian-Swahili",
+        "num_countries": 1
+      },
+      {
+        "_id": "Luhya",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mon-khmer",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ronga",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ovimbundu",
+        "num_countries": 1
+      },
+      {
+        "_id": "Duala",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kissi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Rundi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Atayal",
+        "num_countries": 1
+      },
+      {
+        "_id": "Oromo",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bullom-sherbro",
+        "num_countries": 1
+      },
+      {
+        "_id": "Maltese",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mon",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mandyako",
+        "num_countries": 1
+      },
+      {
+        "_id": "Nyika",
+        "num_countries": 1
+      },
+      {
+        "_id": "Tandjile",
+        "num_countries": 1
+      },
+      {
+        "_id": "Banja",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bugi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Khmer",
+        "num_countries": 1
+      },
+      {
+        "_id": "Hadareb",
+        "num_countries": 1
+      },
+      {
+        "_id": "Makonde",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ganda",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mandarin Chinese",
+        "num_countries": 1
+      },
+      {
+        "_id": "Adja",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kannada",
+        "num_countries": 1
+      },
+      {
+        "_id": "Lezgian",
+        "num_countries": 1
+      },
+      {
+        "_id": "Herero",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kosrean",
+        "num_countries": 1
+      },
+      {
+        "_id": "Yucatec",
+        "num_countries": 1
+      },
+      {
+        "_id": "Hadjarai",
+        "num_countries": 1
+      },
+      {
+        "_id": "Min",
+        "num_countries": 1
+      },
+      {
+        "_id": "Boa",
+        "num_countries": 1
+      },
+      {
+        "_id": "Udmur",
+        "num_countries": 1
+      },
+      {
+        "_id": "Man",
+        "num_countries": 1
+      },
+      {
+        "_id": "Hiligaynon",
+        "num_countries": 1
+      },
+      {
+        "_id": "Tho",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bislama",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kamba",
+        "num_countries": 1
+      },
+      {
+        "_id": "Khasi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Lotuko",
+        "num_countries": 1
+      },
+      {
+        "_id": "Dorbet",
+        "num_countries": 1
+      },
+      {
+        "_id": "Hehet",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ukrainian and Russian",
+        "num_countries": 1
+      },
+      {
+        "_id": "Gbaya",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mant\u0161u",
+        "num_countries": 1
+      },
+      {
+        "_id": "Nyakusa",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bali",
+        "num_countries": 1
+      },
+      {
+        "_id": "Araucan",
+        "num_countries": 1
+      },
+      {
+        "_id": "Fijian",
+        "num_countries": 1
+      },
+      {
+        "_id": "Gurage",
+        "num_countries": 1
+      },
+      {
+        "_id": "Pilipino",
+        "num_countries": 1
+      },
+      {
+        "_id": "Dariganga",
+        "num_countries": 1
+      },
+      {
+        "_id": "Acholi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Tongan",
+        "num_countries": 1
+      },
+      {
+        "_id": "Marshallese",
+        "num_countries": 1
+      },
+      {
+        "_id": "Guaym\u00ed",
+        "num_countries": 1
+      },
+      {
+        "_id": "Quich\u00e9",
+        "num_countries": 1
+      },
+      {
+        "_id": "Fur",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mandjia",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kanem-bornu",
+        "num_countries": 1
+      },
+      {
+        "_id": "Temne",
+        "num_countries": 1
+      },
+      {
+        "_id": "Moba",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ijo",
+        "num_countries": 1
+      },
+      {
+        "_id": "Hindko",
+        "num_countries": 1
+      },
+      {
+        "_id": "Banda",
+        "num_countries": 1
+      },
+      {
+        "_id": "Palau",
+        "num_countries": 1
+      },
+      {
+        "_id": "Gogo",
+        "num_countries": 1
+      },
+      {
+        "_id": "Senufo and Minianka",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bassa",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ane",
+        "num_countries": 1
+      },
+      {
+        "_id": "Gorane",
+        "num_countries": 1
+      },
+      {
+        "_id": "Walaita",
+        "num_countries": 1
+      },
+      {
+        "_id": "Cuna",
+        "num_countries": 1
+      },
+      {
+        "_id": "Malajalam",
+        "num_countries": 1
+      },
+      {
+        "_id": "Gujarati",
+        "num_countries": 1
+      },
+      {
+        "_id": "Tiv",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mende",
+        "num_countries": 1
+      },
+      {
+        "_id": "Saame",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mixed Languages",
+        "num_countries": 1
+      },
+      {
+        "_id": "Seselwa",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kavango",
+        "num_countries": 1
+      },
+      {
+        "_id": "Amhara",
+        "num_countries": 1
+      },
+      {
+        "_id": "Gusii",
+        "num_countries": 1
+      },
+      {
+        "_id": "Yi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Asami",
+        "num_countries": 1
+      },
+      {
+        "_id": "Zenaga",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ambo",
+        "num_countries": 1
+      },
+      {
+        "_id": "Sumo",
+        "num_countries": 1
+      },
+      {
+        "_id": "Garo",
+        "num_countries": 1
+      },
+      {
+        "_id": "Lao",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mari",
+        "num_countries": 1
+      },
+      {
+        "_id": "Dinka",
+        "num_countries": 1
+      },
+      {
+        "_id": "Luri",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bashkir",
+        "num_countries": 1
+      },
+      {
+        "_id": "Puyi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Berberi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Maguindanao",
+        "num_countries": 1
+      },
+      {
+        "_id": "Maka",
+        "num_countries": 1
+      },
+      {
+        "_id": "Tibetan",
+        "num_countries": 1
+      },
+      {
+        "_id": "Trukese",
+        "num_countries": 1
+      },
+      {
+        "_id": "Wolea",
+        "num_countries": 1
+      },
+      {
+        "_id": "Hebrew",
+        "num_countries": 1
+      },
+      {
+        "_id": "Susu",
+        "num_countries": 1
+      },
+      {
+        "_id": "Nauru",
+        "num_countries": 1
+      },
+      {
+        "_id": "Zhuang",
+        "num_countries": 1
+      },
+      {
+        "_id": "Cebuano",
+        "num_countries": 1
+      },
+      {
+        "_id": "Karakalpak",
+        "num_countries": 1
+      },
+      {
+        "_id": "Warrau",
+        "num_countries": 1
+      },
+      {
+        "_id": "Luchazi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Tripuri",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mayo-kebbi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Brahui",
+        "num_countries": 1
+      },
+      {
+        "_id": "Watyi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Southern Slavic Languages",
+        "num_countries": 1
+      },
+      {
+        "_id": "Luguru",
+        "num_countries": 1
+      },
+      {
+        "_id": "Sunda",
+        "num_countries": 1
+      },
+      {
+        "_id": "Xhosa",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kalenjin",
+        "num_countries": 1
+      },
+      {
+        "_id": "Naudemba",
+        "num_countries": 1
+      },
+      {
+        "_id": "Gur",
+        "num_countries": 1
+      },
+      {
+        "_id": "Marendje",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ha",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mortlock",
+        "num_countries": 1
+      },
+      {
+        "_id": "Lugbara",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ibo",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mano",
+        "num_countries": 1
+      },
+      {
+        "_id": "Comorian-French",
+        "num_countries": 1
+      },
+      {
+        "_id": "Zapotec",
+        "num_countries": 1
+      },
+      {
+        "_id": "Tswa",
+        "num_countries": 1
+      },
+      {
+        "_id": "Sena",
+        "num_countries": 1
+      },
+      {
+        "_id": "Comorian",
+        "num_countries": 1
+      },
+      {
+        "_id": "Swedish",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kiga",
+        "num_countries": 1
+      },
+      {
+        "_id": "Saho",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mixtec",
+        "num_countries": 1
+      },
+      {
+        "_id": "Masai",
+        "num_countries": 1
+      },
+      {
+        "_id": "Maranao",
+        "num_countries": 1
+      },
+      {
+        "_id": "Moravian",
+        "num_countries": 1
+      },
+      {
+        "_id": "Tagalog",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mpongwe",
+        "num_countries": 1
+      },
+      {
+        "_id": "Sinaberberi",
+        "num_countries": 1
+      },
+      {
+        "_id": "[South]Mande",
+        "num_countries": 1
+      },
+      {
+        "_id": "Luba",
+        "num_countries": 1
+      },
+      {
+        "_id": "Comorian-madagassi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Goajiro",
+        "num_countries": 1
+      },
+      {
+        "_id": "Haiti Creole",
+        "num_countries": 1
+      },
+      {
+        "_id": "Arabic-French-English",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ovambo",
+        "num_countries": 1
+      },
+      {
+        "_id": "Assyrian",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bhojpuri",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bajad",
+        "num_countries": 1
+      },
+      {
+        "_id": "Gio",
+        "num_countries": 1
+      },
+      {
+        "_id": "Serer",
+        "num_countries": 1
+      },
+      {
+        "_id": "Hui",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mboshi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Cakchiquel",
+        "num_countries": 1
+      },
+      {
+        "_id": "Irish",
+        "num_countries": 1
+      },
+      {
+        "_id": "N\u00e1huatl",
+        "num_countries": 1
+      },
+      {
+        "_id": "Muong",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kayah",
+        "num_countries": 1
+      },
+      {
+        "_id": "Chin",
+        "num_countries": 1
+      },
+      {
+        "_id": "Tigre",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mbundu",
+        "num_countries": 1
+      },
+      {
+        "_id": "Hassaniya",
+        "num_countries": 1
+      },
+      {
+        "_id": "Balante",
+        "num_countries": 1
+      },
+      {
+        "_id": "Grebo",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kono-vai",
+        "num_countries": 1
+      },
+      {
+        "_id": "Chuvash",
+        "num_countries": 1
+      },
+      {
+        "_id": "Javanese",
+        "num_countries": 1
+      },
+      {
+        "_id": "Sranantonga",
+        "num_countries": 1
+      },
+      {
+        "_id": "Sango",
+        "num_countries": 1
+      },
+      {
+        "_id": "Friuli",
+        "num_countries": 1
+      },
+      {
+        "_id": "Buryat",
+        "num_countries": 1
+      },
+      {
+        "_id": "Shambala",
+        "num_countries": 1
+      },
+      {
+        "_id": "Orija",
+        "num_countries": 1
+      },
+      {
+        "_id": "Dong",
+        "num_countries": 1
+      },
+      {
+        "_id": "Garifuna",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bicol",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bari",
+        "num_countries": 1
+      },
+      {
+        "_id": "Nyaneka-nkhumbi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bakhtyari",
+        "num_countries": 1
+      },
+      {
+        "_id": "Songhai",
+        "num_countries": 1
+      },
+      {
+        "_id": "Rakhine",
+        "num_countries": 1
+      },
+      {
+        "_id": "Tukulor",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ilocano",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mandara",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ngoni",
+        "num_countries": 1
+      },
+      {
+        "_id": "Philippene Languages",
+        "num_countries": 1
+      },
+      {
+        "_id": "Northsotho",
+        "num_countries": 1
+      },
+      {
+        "_id": "Icelandic",
+        "num_countries": 1
+      },
+      {
+        "_id": "Dyula",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bariba",
+        "num_countries": 1
+      },
+      {
+        "_id": "Luimbe-nganguela",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bambara",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bura",
+        "num_countries": 1
+      },
+      {
+        "_id": "Avarian",
+        "num_countries": 1
+      },
+      {
+        "_id": "Nuer",
+        "num_countries": 1
+      },
+      {
+        "_id": "Punu",
+        "num_countries": 1
+      },
+      {
+        "_id": "Haya",
+        "num_countries": 1
+      },
+      {
+        "_id": "Nyamwesi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Southsotho",
+        "num_countries": 1
+      },
+      {
+        "_id": "Pohnpei",
+        "num_countries": 1
+      },
+      {
+        "_id": "Luvale",
+        "num_countries": 1
+      },
+      {
+        "_id": "Marma",
+        "num_countries": 1
+      },
+      {
+        "_id": "Malagasy",
+        "num_countries": 1
+      },
+      {
+        "_id": "Nubian Languages",
+        "num_countries": 1
+      },
+      {
+        "_id": "Soqutri",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mordva",
+        "num_countries": 1
+      },
+      {
+        "_id": "Limba",
+        "num_countries": 1
+      },
+      {
+        "_id": "Soga",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bamileke-bamum",
+        "num_countries": 1
+      },
+      {
+        "_id": "Chakma",
+        "num_countries": 1
+      },
+      {
+        "_id": "Mam",
+        "num_countries": 1
+      },
+      {
+        "_id": "Batakki",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kekch\u00ed",
+        "num_countries": 1
+      },
+      {
+        "_id": "Bubi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Madura",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kachin",
+        "num_countries": 1
+      },
+      {
+        "_id": "Hakka",
+        "num_countries": 1
+      },
+      {
+        "_id": "Lozi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Tujia",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kotokoli",
+        "num_countries": 1
+      },
+      {
+        "_id": "Yao",
+        "num_countries": 1
+      },
+      {
+        "_id": "Masana",
+        "num_countries": 1
+      },
+      {
+        "_id": "Kikuyu",
+        "num_countries": 1
+      },
+      {
+        "_id": "Minangkabau",
+        "num_countries": 1
+      },
+      {
+        "_id": "Dhivehi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Paiwan",
+        "num_countries": 1
+      },
+      {
+        "_id": "Gisu",
+        "num_countries": 1
+      },
+      {
+        "_id": "Silesiana",
+        "num_countries": 1
+      },
+      {
+        "_id": "Ga-adangme",
+        "num_countries": 1
+      },
+      {
+        "_id": "Telugu",
+        "num_countries": 1
+      },
+      {
+        "_id": "Saraiki",
+        "num_countries": 1
+      },
+      {
+        "_id": "Tikar",
+        "num_countries": 1
+      },
+      {
+        "_id": "Czech and Moravian",
+        "num_countries": 1
+      },
+      {
+        "_id": "Teso",
+        "num_countries": 1
+      },
+      {
+        "_id": "Nung",
+        "num_countries": 1
+      },
+      {
+        "_id": "Pangasinan",
+        "num_countries": 1
+      },
+      {
+        "_id": "Karen",
+        "num_countries": 1
+      },
+      {
+        "_id": "Latvian",
+        "num_countries": 1
+      },
+      {
+        "_id": "Fon",
+        "num_countries": 1
+      },
+      {
+        "_id": "Caprivi",
+        "num_countries": 1
+      },
+      {
+        "_id": "Songhai-zerma",
+        "num_countries": 1
+      },
+      {
+        "_id": "Chewa",
+        "num_countries": 1
+      },
+      {
+        "_id": "Chaga and Pare",
+        "num_countries": 1
+      },
+      {
+        "_id": "Chechen",
+        "num_countries": 1
+      },
+      {
+        "_id": "Shan",
+        "num_countries": 1
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-h3",
+    "question": "What is the total population and average surface area of countries in North America with a surface area bigger than 3000?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{'$match': {'Continent': 'North America', 'SurfaceArea': {'$gt': 3000}}}, {'$group': {'_id': None, 'total_population': {'$sum': '$Population'}, 'avg_surface_area': {'$avg': '$SurfaceArea'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "total_population": 480753000,
+        "avg_surface_area": 1344763.7222222222
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "wl-c1",
+    "question": "Which countries have a greater surface area than every country in Oceania?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{'$lookup': {'from': 'country', 'pipeline': [{'$match': {'Continent': 'Oceania'}}, {'$group': {'_id': None, 'max_area': {'$max': '$SurfaceArea'}}}], 'as': 'oceania_max'}}, {'$unwind': '$oceania_max'}, {'$match': {'$expr': {'$gt': ['$SurfaceArea', '$oceania_max.max_area']}}}, {'$project': {'_id': 0, 'Name': 1, 'SurfaceArea': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "Name": "Antarctica",
+        "SurfaceArea": 13120000
+      },
+      {
+        "Name": "Brazil",
+        "SurfaceArea": 8547403
+      },
+      {
+        "Name": "Canada",
+        "SurfaceArea": 9970610
+      },
+      {
+        "Name": "China",
+        "SurfaceArea": 9572900
+      },
+      {
+        "Name": "Russian Federation",
+        "SurfaceArea": 17075400
+      },
+      {
+        "Name": "United States",
+        "SurfaceArea": 9363520
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-e1",
+    "question": "What is the average age of all the dogs?",
+    "database": "dog_kennels",
+    "query": "db.Dogs.aggregate([{'$addFields': {'age_num': {'$toInt': '$age'}}}, {'$group': {'_id': None, 'avg_age': {'$avg': '$age_num'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "avg_age": 5.066666666666666
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "dk-e2",
+    "question": "What is the age of the oldest dog?",
+    "database": "dog_kennels",
+    "query": "db.Dogs.aggregate([{'$addFields': {'age_num': {'$toInt': '$age'}}}, {'$group': {'_id': None, 'max_age': {'$max': '$age_num'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "max_age": 9
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "dk-e3",
+    "question": "How many dogs went through any treatment?",
+    "database": "dog_kennels",
+    "query": "len(db.Treatments.distinct('dog_id'))",
+    "status": "FAIL",
+    "error": "REJECTED by safety check (unexpected name: len)",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-e4",
+    "question": "How much does each charge type cost? List both the charge type and amount.",
+    "database": "dog_kennels",
+    "query": "db.Charges.find({}, {'_id': 0, 'charge_type': 1, 'charge_amount': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "charge_type": "Daily Accommodation",
+        "charge_amount": 98
+      },
+      {
+        "charge_type": "Drugs",
+        "charge_amount": 322
+      },
+      {
+        "charge_type": "Health Check",
+        "charge_amount": 640
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "dk-e5",
+    "question": "What is the most expensive charge amount?",
+    "database": "dog_kennels",
+    "query": "db.Charges.aggregate([{'$group': {'_id': None, 'max_charge': {'$max': '$charge_amount'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "max_charge": 640
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "dk-e6",
+    "question": "List the email, cell phone, and home phone of all the professionals.",
+    "database": "dog_kennels",
+    "query": "db.Professionals.find({}, {'_id': 0, 'email_address': 1, 'cell_number': 1, 'home_phone': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "email_address": "deanna.schuster@example.com",
+        "home_phone": "+71(6)2898266914",
+        "cell_number": "(275)939-2435x80863"
+      },
+      {
+        "email_address": "lucile.shanahan@example.org",
+        "home_phone": "+02(1)0259033559",
+        "cell_number": "889-940-2676"
+      },
+      {
+        "email_address": "uboehm@example.org",
+        "home_phone": "325-155-0801x7005",
+        "cell_number": "(369)908-7311x065"
+      },
+      {
+        "email_address": "lourdes.lowe@example.net",
+        "home_phone": "312.216.3352",
+        "cell_number": "00230569697"
+      },
+      {
+        "email_address": "mekhi.little@example.org",
+        "home_phone": "1-609-566-2752x25197",
+        "cell_number": "011.193.9081x3186"
+      },
+      {
+        "email_address": "jacynthe.mclaughlin@example.net",
+        "home_phone": "+43(5)1132733868",
+        "cell_number": "139-321-7313"
+      },
+      {
+        "email_address": "lambert62@example.org",
+        "home_phone": "022.529.0550x1319",
+        "cell_number": "499-434-0215x1628"
+      },
+      {
+        "email_address": "goyette.roosevelt@example.net",
+        "home_phone": "891.475.2256",
+        "cell_number": "328.842.3792"
+      },
+      {
+        "email_address": "schneider.kathryne@example.org",
+        "home_phone": "320-508-6023",
+        "cell_number": "962-983-8109x3509"
+      },
+      {
+        "email_address": "jerrod.bahringer@example.org",
+        "home_phone": "(230)338-3342x585",
+        "cell_number": "461-801-2600"
+      },
+      {
+        "email_address": "west.eula@example.net",
+        "home_phone": "(920)304-4499x59146",
+        "cell_number": "609-405-2990"
+      },
+      {
+        "email_address": "marquardt.furman@example.org",
+        "home_phone": "246-951-0080x76716",
+        "cell_number": "1-181-670-9466"
+      },
+      {
+        "email_address": "delphine29@example.com",
+        "home_phone": "346.594.3739",
+        "cell_number": "880-659-7577x736"
+      },
+      {
+        "email_address": "cole.margarita@example.org",
+        "home_phone": "971.048.3763x9404",
+        "cell_number": "1-185-137-1945x409"
+      },
+      {
+        "email_address": "jeichmann@example.com",
+        "home_phone": "1-138-287-3775",
+        "cell_number": "1-258-285-4707x8020"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "dk-e7",
+    "question": "List the dog name, age, and weight of dogs that have been abandoned.",
+    "database": "dog_kennels",
+    "query": "db.Dogs.find({'abandoned_yn': '1'}, {'_id': 0, 'name': 1, 'age': 1, 'weight': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "name": "Kacey",
+        "age": "6",
+        "weight": "7.57"
+      },
+      {
+        "name": "Lyric",
+        "age": "4",
+        "weight": "4.36"
+      },
+      {
+        "name": "Evangeline",
+        "age": "1",
+        "weight": "4.01"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "dk-m1",
+    "question": "Which professionals live in the state of Hawaii or the state of Wisconsin? List their emails.",
+    "database": "dog_kennels",
+    "query": "db.Professionals.find({'state': {'$in': ['Hawaii', 'Wisconsin']}}, {'_id': 0, 'email_address': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "email_address": "uboehm@example.org"
+      },
+      {
+        "email_address": "mekhi.little@example.org"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "dk-m2",
+    "question": "What is the name of the breed with the most dogs?",
+    "database": "dog_kennels",
+    "query": "db.Dogs.aggregate([{'$group': {'_id': '$breed_code', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}, {'$lookup': {'from': 'Breeds', 'localField': '_id', 'foreignField': 'breed_code', 'as': 'b'}}, {'$unwind': '$b'}, {'$project': {'_id': 0, 'breed_name': '$b.breed_name', 'count': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "count": 7,
+        "breed_name": "Bulldog"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-m3",
+    "question": "Which owner owns the most dogs? List the owner id, first name, and last name.",
+    "database": "dog_kennels",
+    "query": "db.Dogs.aggregate([{'$group': {'_id': '$owner_id', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}, {'$lookup': {'from': 'Owners', 'localField': '_id', 'foreignField': 'owner_id', 'as': 'o'}}, {'$unwind': '$o'}, {'$project': {'_id': 0, 'owner_id': '$o.owner_id', 'first_name': '$o.first_name', 'last_name': '$o.last_name'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "owner_id": 14,
+        "first_name": "Rachelle",
+        "last_name": "Funk"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "dk-m4",
+    "question": "Which professionals have done at least two treatments? List the professional's id, role, and first name.",
+    "database": "dog_kennels",
+    "query": "db.Treatments.aggregate([{'$group': {'_id': '$professional_id', 'count': {'$sum': 1}}}, {'$match': {'count': {'$gte': 2}}}, {'$lookup': {'from': 'Professionals', 'localField': '_id', 'foreignField': 'professional_id', 'as': 'p'}}, {'$unwind': '$p'}, {'$project': {'_id': 0, 'professional_id': '$p.professional_id', 'role_code': '$p.role_code', 'first_name': '$p.first_name'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "professional_id": 14,
+        "role_code": "Employee",
+        "first_name": "Sigurd"
+      },
+      {
+        "professional_id": 9,
+        "role_code": "Veterenarian",
+        "first_name": "Monte"
+      },
+      {
+        "professional_id": 5,
+        "role_code": "Veterenarian",
+        "first_name": "Danny"
+      },
+      {
+        "professional_id": 8,
+        "role_code": "Employee",
+        "first_name": "Karley"
+      },
+      {
+        "professional_id": 7,
+        "role_code": "Veterenarian",
+        "first_name": "Velva"
+      },
+      {
+        "professional_id": 10,
+        "role_code": "Employee",
+        "first_name": "Domenica"
+      },
+      {
+        "professional_id": 4,
+        "role_code": "Veterenarian",
+        "first_name": "Vernice"
+      },
+      {
+        "professional_id": 6,
+        "role_code": "Veterenarian",
+        "first_name": "Ruben"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "dk-m5",
+    "question": "What is the description of the treatment type that costs the least money in total?",
+    "database": "dog_kennels",
+    "query": "db.Treatments.aggregate([{'$group': {'_id': '$treatment_type_code', 'total_cost': {'$sum': '$cost_of_treatment'}}}, {'$sort': {'total_cost': 1}}, {'$limit': 1}, {'$lookup': {'from': 'Treatment_Types', 'localField': '_id', 'foreignField': 'treatment_type_code', 'as': 'tt'}}, {'$unwind': '$tt'}, {'$project': {'_id': 0, 'treatment_type_description': '$tt.treatment_type_description'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "treatment_type_description": "Take for a Walk"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "dk-m6",
+    "question": "List each owner's first name, last name, and the size code of their dog.",
+    "database": "dog_kennels",
+    "query": "db.Dogs.aggregate([{'$lookup': {'from': 'Owners', 'localField': 'owner_id', 'foreignField': 'owner_id', 'as': 'o'}}, {'$unwind': '$o'}, {'$project': {'_id': 0, 'first_name': '$o.first_name', 'last_name': '$o.last_name', 'size_code': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "size_code": "LGE",
+        "first_name": "Jaclyn",
+        "last_name": "Stoltenberg"
+      },
+      {
+        "size_code": "LGE",
+        "first_name": "Gay",
+        "last_name": "Feil"
+      },
+      {
+        "size_code": "MED",
+        "first_name": "Nora",
+        "last_name": "Haley"
+      },
+      {
+        "size_code": "LGE",
+        "first_name": "Rachelle",
+        "last_name": "Funk"
+      },
+      {
+        "size_code": "MED",
+        "first_name": "Emelie",
+        "last_name": "Mertz"
+      },
+      {
+        "size_code": "MED",
+        "first_name": "Johann",
+        "last_name": "Fisher"
+      },
+      {
+        "size_code": "MED",
+        "first_name": "Jaclyn",
+        "last_name": "Stoltenberg"
+      },
+      {
+        "size_code": "SML",
+        "first_name": "Rachelle",
+        "last_name": "Funk"
+      },
+      {
+        "size_code": "MED",
+        "first_name": "Melisa",
+        "last_name": "DuBuque"
+      },
+      {
+        "size_code": "MED",
+        "first_name": "Kade",
+        "last_name": "Rippin"
+      },
+      {
+        "size_code": "LGE",
+        "first_name": "Cindy",
+        "last_name": "Schmitt"
+      },
+      {
+        "size_code": "MED",
+        "first_name": "Orlando",
+        "last_name": "Price"
+      },
+      {
+        "size_code": "SML",
+        "first_name": "Rolando",
+        "last_name": "Prohaska"
+      },
+      {
+        "size_code": "MED",
+        "first_name": "Rachelle",
+        "last_name": "Funk"
+      },
+      {
+        "size_code": "MED",
+        "first_name": "Lorenz",
+        "last_name": "Nicolas"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "dk-h1",
+    "question": "Which states have both owners and professionals living there?",
+    "database": "dog_kennels",
+    "query": "db.Owners.aggregate([{'$group': {'_id': '$state'}}, {'$lookup': {'from': 'Professionals', 'localField': '_id', 'foreignField': 'state', 'as': 'profs'}}, {'$match': {'profs': {'$ne': []}}}, {'$project': {'_id': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "Indiana"
+      },
+      {
+        "_id": "Mississippi"
+      },
+      {
+        "_id": "Wisconsin"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-h2",
+    "question": "Which owner has paid the largest amount of money in total for their dogs' treatments? Show the owner id and zip code.",
+    "database": "dog_kennels",
+    "query": "db.Treatments.aggregate([{'$lookup': {'from': 'Dogs', 'localField': 'dog_id', 'foreignField': 'dog_id', 'as': 'd'}}, {'$unwind': '$d'}, {'$group': {'_id': '$d.owner_id', 'total_cost': {'$sum': '$cost_of_treatment'}}}, {'$sort': {'total_cost': -1}}, {'$limit': 1}, {'$lookup': {'from': 'Owners', 'localField': '_id', 'foreignField': 'owner_id', 'as': 'o'}}, {'$unwind': '$o'}, {'$project': {'_id': 0, 'owner_id': '$o.owner_id', 'zip_code': '$o.zip_code'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "owner_id": 3,
+        "zip_code": "02647"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "dk-h3",
+    "question": "How many professionals did not operate any treatment on dogs?",
+    "database": "dog_kennels",
+    "query": "db.Professionals.aggregate([{'$lookup': {'from': 'Treatments', 'localField': 'professional_id', 'foreignField': 'professional_id', 'as': 't'}}, {'$match': {'t': []}}, {'$count': 'professional_count'}])",
+    "status": "PASS",
+    "result": [
+      {
+        "professional_count": 7
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "dk-c1",
+    "question": "Which dogs have not cost their owner more than 1000 in total treatment cost? List the dog names.",
+    "database": "dog_kennels",
+    "query": "db.Dogs.aggregate([{'$lookup': {'from': 'Treatments', 'localField': 'dog_id', 'foreignField': 'dog_id', 'as': 't'}}, {'$addFields': {'total_cost': {'$sum': '$t.cost_of_treatment'}}}, {'$match': {'total_cost': {'$lte': 1000}}}, {'$project': {'_id': 0, 'name': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "name": "Mavis"
+      },
+      {
+        "name": "Houston"
+      },
+      {
+        "name": "Jeffrey"
+      },
+      {
+        "name": "Merritt"
+      },
+      {
+        "name": "George"
+      },
+      {
+        "name": "Bessie"
+      },
+      {
+        "name": "Betty"
+      },
+      {
+        "name": "Jesus"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "dk-c2",
+    "question": "Which first names are used for professionals or owners but not used as dog names?",
+    "database": "dog_kennels",
+    "query": "db.Professionals.aggregate([{'$project': {'_id': 0, 'first_name': 1}}, {'$unionWith': {'coll': 'Owners', 'pipeline': [{'$project': {'_id': 0, 'first_name': 1}}]}}, {'$group': {'_id': '$first_name'}}, {'$lookup': {'from': 'Dogs', 'localField': '_id', 'foreignField': 'name', 'as': 'd'}}, {'$match': {'d': []}}, {'$project': {'_id': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "Kade"
+      },
+      {
+        "_id": "Ericka"
+      },
+      {
+        "_id": "Sigurd"
+      },
+      {
+        "_id": "Danny"
+      },
+      {
+        "_id": "Monte"
+      },
+      {
+        "_id": "Velva"
+      },
+      {
+        "_id": "Rolando"
+      },
+      {
+        "_id": "Heather"
+      },
+      {
+        "_id": "Olaf"
+      },
+      {
+        "_id": "Melisa"
+      },
+      {
+        "_id": "Adelle"
+      },
+      {
+        "_id": "Jaclyn"
+      },
+      {
+        "_id": "Domenica"
+      },
+      {
+        "_id": "Lesly"
+      },
+      {
+        "_id": "Tre"
+      },
+      {
+        "_id": "Rachelle"
+      },
+      {
+        "_id": "Emelie"
+      },
+      {
+        "_id": "Cindy"
+      },
+      {
+        "_id": "Jayson"
+      },
+      {
+        "_id": "Brady"
+      },
+      {
+        "_id": "Nora"
+      },
+      {
+        "_id": "Taryn"
+      },
+      {
+        "_id": "Karley"
+      },
+      {
+        "_id": "Johann"
+      },
+      {
+        "_id": "Lorenz"
+      },
+      {
+        "_id": "Winfield"
+      },
+      {
+        "_id": "Vernice"
+      },
+      {
+        "_id": "Gay"
+      },
+      {
+        "_id": "Orlando"
+      },
+      {
+        "_id": "Ruben"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  }
+]
