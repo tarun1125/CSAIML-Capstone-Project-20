@@ -1,24 +1,3 @@
-# Scores the RAG arm against gold, AND -- this is the part that matters for
-# a fair comparison -- re-scores the ORIGINAL baseline Qwen run restricted
-# to the SAME 21 held-out test ids RAG was evaluated on.
-#
-# Why re-slice the baseline at all: outputs/execution_scores.csv already
-# has a Qwen number (6.61%), but that was computed over all 121 cases.
-# 100 of those 121 are now the few-shot pool RAG retrieves from -- comparing
-# RAG's 21-case score against a 121-case baseline number would be comparing
-# different test sets, not measuring what retrieval added. This script
-# produces the one number that actually answers "did retrieval help":
-# baseline-on-the-test-slice vs RAG-on-the-test-slice, same 21 ids, same
-# gold, same scoring code (imports safe_eval_query / to_json_safe /
-# results_match / run_model from evaluation/execute_queries.py unchanged --
-# no second scoring implementation to maintain or trust).
-#
-# Needs a real Atlas connection -- run this locally (same as
-# execute_gold.py / execute_queries.py), not through a sandboxed tool
-# environment with no route to Atlas.
-#
-# Usage (after normalize.py has produced data/qwen_rag_normalized.json):
-#   python rag/score_rag.py
 
 import json
 import sys
@@ -26,8 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "evaluation"))
-from execute_queries import connect, run_model  # noqa: E402  reuse, don't reimplement
-
+from execute_queries import connect, run_model  
 
 def main():
     data_dir = ROOT / "data"
@@ -44,8 +22,6 @@ def main():
             f"2) python normalize.py data/qwen_rag_results.json data/qwen_rag_normalized.json"
         )
 
-    # Slice the ORIGINAL (121-case) baseline normalized predictions down to
-    # just the 21 test ids, so it's scored on the exact same slice as RAG.
     baseline_all = json.loads((data_dir / "qwen_normalized.json").read_text(encoding="utf-8"))
     baseline_slice = [c for c in baseline_all if str(c["id"]) in test_ids]
     if len(baseline_slice) != len(test_ids):
@@ -102,7 +78,7 @@ def main():
     print("[score_rag] FINAL COMPARISON (same 21 test ids, same gold, same scoring code)")
     print("=" * 80)
     print(f"  Database retrieval accuracy : {db_match}/{len(prompts)} "
-          f"({db_match/len(prompts)*100:.1f}%)  -- diagnostic, not the headline number")
+          f"({db_match/len(prompts)*100:.1f}%)")
     print(f"  Baseline (test-slice)       : {b_correct}/{b_total} ({b_pct:.1f}%)")
     print(f"  RAG                         : {r_correct}/{r_total} ({r_pct:.1f}%)")
     print(f"  Delta                       : {r_pct - b_pct:+.1f} percentage points")

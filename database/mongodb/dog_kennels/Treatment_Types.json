@@ -1,0 +1,14 @@
+[
+  {
+    "treatment_type_code": "EXAM",
+    "treatment_type_description": "Physical examination"
+  },
+  {
+    "treatment_type_code": "VAC",
+    "treatment_type_description": "Vaccination"
+  },
+  {
+    "treatment_type_code": "WALK",
+    "treatment_type_description": "Take for a Walk"
+  }
+]

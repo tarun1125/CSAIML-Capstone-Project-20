@@ -1,21 +1,3 @@
-# Splits data/reference_queries.json (121 cases) into:
-#   - data/rag_fewshot_pool.json  (100 cases) -- the retrieval corpus RAG's
-#     FAISS index is built from. Never touched at evaluation time.
-#   - data/rag_test.json          (21 cases)  -- held out, never embedded
-#     into the index, used only to measure whether retrieval helps.
-#
-# Stratified by `database` (not database x complexity -- with only 21 test
-# cases across 6 databases, that's ~3.5 cases/db on average; adding a
-# second stratification axis would create cells too small to honor
-# proportionally, so it'd be stratification in name only). This guarantees
-# every one of the 6 databases is represented in the test set in roughly
-# the same proportion it appears in the full 121, instead of leaving that
-# to chance the way a plain random split would.
-#
-# random_state is fixed so re-running this script (e.g. after adding more
-# Spider databases later) reproduces the exact same split -- change
-# RANDOM_STATE deliberately, not by re-running until you like the numbers.
-
 import json
 import logging
 from collections import Counter
@@ -53,12 +35,7 @@ def main():
     log.info("Held-out test: %d cases -- by database: %s",
               len(test_set), dict(Counter(c["database"] for c in test_set)))
 
-    # Sanity check: no id should appear in both halves. This is guaranteed
-    # by train_test_split (it partitions, doesn't sample with replacement),
-    # but a leaked few-shot example landing in the test set would silently
-    # make the RAG number look better than it is -- worth asserting, not
-    # just trusting sklearn blindly, since this specific failure mode is
-    # the one thing that would invalidate the whole comparison.
+
     fewshot_ids = {str(c["id"]) for c in fewshot_pool}
     test_ids = {str(c["id"]) for c in test_set}
     overlap = fewshot_ids & test_ids
