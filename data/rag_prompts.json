@@ -1,0 +1,401 @@
+[
+  {
+    "id": "dk-m5",
+    "question": "What is the description of the treatment type that costs the least money in total?",
+    "gold_database": "dog_kennels",
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "retrieved_ids": [
+      "dk-c1",
+      "dk-m4",
+      "dk-h3"
+    ],
+    "retrieved_neighbor_databases": [
+      "dog_kennels",
+      "dog_kennels",
+      "dog_kennels"
+    ],
+    "complexity": "medium",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: Which dogs have not cost their owner more than 1000 in total treatment cost? List the dog names.\nQuery: db.Dogs.aggregate([{\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"dog_id\", \"foreignField\": \"dog_id\", \"as\": \"t\"}}, {\"$addFields\": {\"total_cost\": {\"$sum\": \"$t.cost_of_treatment\"}}}, {\"$match\": {\"total_cost\": {\"$lte\": 1000}}}, {\"$project\": {\"_id\": 0, \"name\": 1}}])\n\nExample 2:\nQuestion: Which professionals have done at least two treatments? List the professional's id, role, and first name.\nQuery: db.Treatments.aggregate([{\"$group\": {\"_id\": \"$professional_id\", \"treatment_count\": {\"$sum\": 1}}}, {\"$match\": {\"treatment_count\": {\"$gte\": 2}}}, {\"$lookup\": {\"from\": \"Professionals\", \"localField\": \"_id\", \"foreignField\": \"professional_id\", \"as\": \"p\"}}, {\"$unwind\": \"$p\"}, {\"$project\": {\"_id\": 0, \"professional_id\": \"$_id\", \"role_code\": \"$p.role_code\", \"first_name\": \"$p.first_name\"}}])\n\nExample 3:\nQuestion: How many professionals did not operate any treatment on dogs?\nQuery: db.Professionals.aggregate([{\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"professional_id\", \"foreignField\": \"professional_id\", \"as\": \"t\"}}, {\"$match\": {\"t\": []}}, {\"$count\": \"professional_count\"}])\n\nSchema (dog_kennels, 8 collection(s) -- retrieved database, full schema):\n\n- Breeds: { breed_code (str), breed_name (str) }\n- Charges: { charge_id (int), charge_type (str), charge_amount (int) }\n- Sizes: { size_code (str), size_description (str) }\n- Treatment_Types: { treatment_type_code (str), treatment_type_description (str) }\n- Owners: { owner_id (int), first_name (str), last_name (str), street (str), city (str), state (str), zip_code (str), email_address (str), home_phone (str), cell_number (str) }\n- Dogs: { dog_id (int), owner_id (int), abandoned_yn (str), breed_code (str), size_code (str), name (str), age (str), date_of_birth (str), gender (str), weight (str), date_arrived (str), date_adopted (str), date_departed (str) }\n- Professionals: { professional_id (int), role_code (str), first_name (str), street (str), city (str), state (str), zip_code (str), last_name (str), email_address (str), home_phone (str), cell_number (str) }\n- Treatments: { treatment_id (int), dog_id (int), professional_id (int), treatment_type_code (str), date_of_treatment (str), cost_of_treatment (int) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "nw-m2",
+    "question": "What is the average grade of highschoolers?",
+    "gold_database": "network_1",
+    "predicted_database": "network_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "nw-m1",
+      "pt-m2",
+      "nw-h2"
+    ],
+    "retrieved_neighbor_databases": [
+      "network_1",
+      "pets_1",
+      "network_1"
+    ],
+    "complexity": "medium",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: How many highschoolers are there in each grade?\nQuery: db.Highschooler.aggregate([{\"$group\": {\"_id\": \"$grade\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"_id\": 1}}])\n\nExample 2:\nQuestion: What is the average age of students?\nQuery: db.Student.aggregate([{\"$group\": {\"_id\": None, \"avg_age\": {\"$avg\": \"$Age\"}}}, {\"$project\": {\"_id\": 0}}])\n\nExample 3:\nQuestion: How many friends does each highschooler have, by name?\nQuery: db.Friend.aggregate([{\"$group\": {\"_id\": \"$student_id\", \"friend_count\": {\"$sum\": 1}}}, {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"_id\", \"foreignField\": \"ID\", \"as\": \"hs\"}}, {\"$unwind\": \"$hs\"}, {\"$project\": {\"_id\": 0, \"name\": \"$hs.name\", \"friend_count\": 1}}, {\"$sort\": {\"friend_count\": -1, \"name\": 1}}])\n\nSchema (network_1, 3 collection(s) -- retrieved database, full schema):\n\n- Friend: { student_id (int), friend_id (int) }\n- Highschooler: { ID (int), name (str), grade (int) }\n- Likes: { student_id (int), liked_id (int) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "pt-m6",
+    "question": "What is the average weight of pets?",
+    "gold_database": "pets_1",
+    "predicted_database": "pets_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "pt-h2",
+      3,
+      "dk-e1"
+    ],
+    "retrieved_neighbor_databases": [
+      "pets_1",
+      "pets_1",
+      "dog_kennels"
+    ],
+    "complexity": "medium",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: For each pet type, what is the average weight?\nQuery: db.Pets.aggregate([{\"$group\": {\"_id\": \"$PetType\", \"avg_weight\": {\"$avg\": \"$weight\"}}}, {\"$sort\": {\"_id\": 1}}])\n\nExample 2:\nQuestion: Find the maximum weight of all pets.\nQuery: db.Pets.aggregate([{\"$group\": {\"_id\": None, \"max_weight\": {\"$max\": \"$weight\"}}}, {\"$project\": {\"_id\": 0, \"max_weight\": 1}}])\n\nExample 3:\nQuestion: What is the average age of all the dogs?\nQuery: db.Dogs.aggregate([{\"$addFields\": {\"age_num\": {\"$toInt\": \"$age\"}}}, {\"$group\": {\"_id\": None, \"avg_age\": {\"$avg\": \"$age_num\"}}}])\n\nSchema (pets_1, 3 collection(s) -- retrieved database, full schema):\n\n- Student: { StuID (int), LName (str), Fname (str), Age (int), Sex (str), Major (int), Advisor (int), city_code (str) }\n- Has_Pet: { StuID (int), PetID (int) }\n- Pets: { PetID (int), PetType (str), pet_age (int), weight (float) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "cs-m6",
+    "question": "List the distinct countries singers come from, in alphabetical order.",
+    "gold_database": "concert_singer",
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "retrieved_ids": [
+      "cs-m7",
+      "cs-e1",
+      4
+    ],
+    "retrieved_neighbor_databases": [
+      "concert_singer",
+      "concert_singer",
+      "concert_singer"
+    ],
+    "complexity": "medium",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: How many singers are there for each country?\nQuery: db.singer.aggregate([{\"$group\": {\"_id\": \"$Country\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1, \"_id\": 1}}])\n\nExample 2:\nQuestion: List the names of all singers.\nQuery: db.singer.find({}, {\"_id\": 0, \"Name\": 1})\n\nExample 3:\nQuestion: What are the names and ages of singers, ordered by age?\nQuery: db.singer.find({}, {\"_id\": 0, \"Name\": 1, \"Age\": 1}).sort({\"Age\": 1})\n\nSchema (concert_singer, 4 collection(s) -- retrieved database, full schema):\n\n- stadium: { Stadium_ID (int), Location (str), Name (str), Capacity (int), Highest (int), Lowest (int), Average (int) }\n- concert: { concert_ID (int), concert_Name (str), Theme (str), Stadium_ID (str), Year (str) }\n- singer: { Singer_ID (int), Name (str), Country (str), Song_Name (str), Song_release_year (str), Age (int), Is_male (str) }\n- singer_in_concert: { concert_ID (int), Singer_ID (str) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "nw-c1",
+    "question": "List the names of highschoolers who are friends with someone in grade 12.",
+    "gold_database": "network_1",
+    "predicted_database": "network_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "nw-e4",
+      "nw-h1",
+      "nw-h2"
+    ],
+    "retrieved_neighbor_databases": [
+      "network_1",
+      "network_1",
+      "network_1"
+    ],
+    "complexity": "complex",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: List the names of highschoolers in grade 12.\nQuery: db.Highschooler.find({\"grade\": 12}, {\"_id\": 0, \"name\": 1})\n\nExample 2:\nQuestion: List the names of highschoolers who appear as the 'student_id' side of at least one friendship.\nQuery: db.Friend.aggregate([{\"$group\": {\"_id\": \"$student_id\"}}, {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"_id\", \"foreignField\": \"ID\", \"as\": \"hs\"}}, {\"$unwind\": \"$hs\"}, {\"$project\": {\"_id\": 0, \"name\": \"$hs.name\"}}, {\"$sort\": {\"name\": 1}}])\n\nExample 3:\nQuestion: How many friends does each highschooler have, by name?\nQuery: db.Friend.aggregate([{\"$group\": {\"_id\": \"$student_id\", \"friend_count\": {\"$sum\": 1}}}, {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"_id\", \"foreignField\": \"ID\", \"as\": \"hs\"}}, {\"$unwind\": \"$hs\"}, {\"$project\": {\"_id\": 0, \"name\": \"$hs.name\", \"friend_count\": 1}}, {\"$sort\": {\"friend_count\": -1, \"name\": 1}}])\n\nSchema (network_1, 3 collection(s) -- retrieved database, full schema):\n\n- Friend: { student_id (int), friend_id (int) }\n- Highschooler: { ID (int), name (str), grade (int) }\n- Likes: { student_id (int), liked_id (int) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "wl-e3",
+    "question": "Which continent is Anguilla in?",
+    "gold_database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "car-e4",
+      "wl-m2",
+      "wl-e6"
+    ],
+    "retrieved_neighbor_databases": [
+      "car_1",
+      "world_1",
+      "world_1"
+    ],
+    "complexity": "easy",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: List all continents in the database.\nQuery: db.continents.find({}, {\"_id\": 0, \"Continent\": 1})\n\nExample 2:\nQuestion: Which language is the most popular in Aruba?\nQuery: db.country.aggregate([{\"$match\": {\"Name\": \"Aruba\"}}, {\"$lookup\": {\"from\": \"countrylanguage\", \"localField\": \"Code\", \"foreignField\": \"CountryCode\", \"as\": \"langs\"}}, {\"$unwind\": \"$langs\"}, {\"$sort\": {\"langs.Percentage\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"Language\": \"$langs.Language\"}}])\n\nExample 3:\nQuestion: What are the names and surface areas of the 5 largest countries by area?\nQuery: db.country.find({}, {\"_id\": 0, \"Name\": 1, \"SurfaceArea\": 1}).sort([(\"SurfaceArea\", -1)]).limit(5)\n\nSchema (world_1, 3 collection(s) -- retrieved database, full schema):\n\n- city: { ID (int), Name (str), CountryCode (str), District (str), Population (int) }\n- country: { Code (str), Name (str), Continent (str), Region (str), SurfaceArea (float), IndepYear (int, nullable), Population (int), LifeExpectancy (float, nullable), GNP (float), GNPOld (float, nullable), LocalName (str), GovernmentForm (str), HeadOfState (str, nullable), Capital (int, nullable), Code2 (str) }\n- countrylanguage: { CountryCode (str), Language (str), IsOfficial (str), Percentage (float) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "car-h1",
+    "question": "List car makers with more than 2 models. Report the full name and the model count.",
+    "gold_database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "car-e3",
+      "car-e2",
+      12
+    ],
+    "retrieved_neighbor_databases": [
+      "car_1",
+      "car_1",
+      "car_1"
+    ],
+    "complexity": "high",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: List the full names of all car makers.\nQuery: db.car_makers.find({}, {\"_id\": 0, \"FullName\": 1})\n\nExample 2:\nQuestion: List the full names of all Renault cars.\nQuery: db.car_names.find({\"Model\": \"renault\"}, {\"_id\": 0, \"Make\": 1})\n\nExample 3:\nQuestion: For each maker, find the model with the highest horsepower.\nQuery: db.cars_data.aggregate([{\"$match\": {\"Horsepower\": {\"$ne\": \"null\"}}}, {\"$lookup\": {\"from\": \"model_list.json\", \"localField\": \"Id\", \"foreignField\": \"ModelId\", \"as\": \"model\"}}, {\"$unwind\": \"$model\"}, {\"$lookup\": {\"from\": \"car_makers\", \"localField\": \"model.Maker\", \"foreignField\": \"Id\", \"as\": \"maker\"}}, {\"$unwind\": \"$maker\"}, {\"$addFields\": {\"HorsepowerNum\": {\"$toInt\": \"$Horsepower\"}}}, {\"$sort\": {\"maker.Maker\": 1, \"HorsepowerNum\": -1}}, {\"$group\": {\"_id\": \"$maker.Maker\", \"model\": {\"$first\": \"$model.Model\"}, \"horsepower\": {\"$first\": \"$HorsepowerNum\"}}}, {\"$sort\": {\"_id\": 1}}])\n\nSchema (car_1, 6 collection(s) -- retrieved database, full schema):\n\n- continents: { ContId (int), Continent (str) }\n- car_makers: { Id (int), Maker (str), FullName (str), Country (str) }\n- countries: { CountryId (int), CountryName (str), Continent (int) }\n- model_list.json: { ModelId (int), Maker (int), Model (str) }\n- cars_data: { Id (int), MPG (str), Cylinders (int), Edispl (float), Horsepower (str), Weight (int), Accelerate (float), Year (int) }\n- car_names: { MakeId (int), Model (str), Make (str) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "nw-e1",
+    "question": "How many highschoolers are there?",
+    "gold_database": "network_1",
+    "predicted_database": "network_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "nw-m1",
+      "nw-h2",
+      "pt-e1"
+    ],
+    "retrieved_neighbor_databases": [
+      "network_1",
+      "network_1",
+      "pets_1"
+    ],
+    "complexity": "easy",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: How many highschoolers are there in each grade?\nQuery: db.Highschooler.aggregate([{\"$group\": {\"_id\": \"$grade\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"_id\": 1}}])\n\nExample 2:\nQuestion: How many friends does each highschooler have, by name?\nQuery: db.Friend.aggregate([{\"$group\": {\"_id\": \"$student_id\", \"friend_count\": {\"$sum\": 1}}}, {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"_id\", \"foreignField\": \"ID\", \"as\": \"hs\"}}, {\"$unwind\": \"$hs\"}, {\"$project\": {\"_id\": 0, \"name\": \"$hs.name\", \"friend_count\": 1}}, {\"$sort\": {\"friend_count\": -1, \"name\": 1}}])\n\nExample 3:\nQuestion: How many students are there?\nQuery: db.Student.count_documents({})\n\nSchema (network_1, 3 collection(s) -- retrieved database, full schema):\n\n- Friend: { student_id (int), friend_id (int) }\n- Highschooler: { ID (int), name (str), grade (int) }\n- Likes: { student_id (int), liked_id (int) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "cs-e6",
+    "question": "List the names of stadiums with a capacity greater than 10000.",
+    "gold_database": "concert_singer",
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "retrieved_ids": [
+      "cs-m3",
+      "cs-m2",
+      "cs-e2"
+    ],
+    "retrieved_neighbor_databases": [
+      "concert_singer",
+      "concert_singer",
+      "concert_singer"
+    ],
+    "complexity": "easy",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: List the top 3 stadiums by capacity, largest first.\nQuery: db.stadium.find({}, {\"_id\": 0, \"Name\": 1, \"Capacity\": 1}).sort({\"Capacity\": -1}).limit(3)\n\nExample 2:\nQuestion: What is the total capacity of all stadiums combined?\nQuery: db.stadium.aggregate([{\"$group\": {\"_id\": None, \"total_capacity\": {\"$sum\": \"$Capacity\"}}}, {\"$project\": {\"_id\": 0}}])\n\nExample 3:\nQuestion: How many stadiums are there?\nQuery: db.stadium.count_documents({})\n\nSchema (concert_singer, 4 collection(s) -- retrieved database, full schema):\n\n- stadium: { Stadium_ID (int), Location (str), Name (str), Capacity (int), Highest (int), Lowest (int), Average (int) }\n- concert: { concert_ID (int), concert_Name (str), Theme (str), Stadium_ID (str), Year (str) }\n- singer: { Singer_ID (int), Name (str), Country (str), Song_Name (str), Song_release_year (str), Age (int), Is_male (str) }\n- singer_in_concert: { concert_ID (int), Singer_ID (str) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "car-e9",
+    "question": "List all model names produced by maker id 6.",
+    "gold_database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "car-m7",
+      "car-e3",
+      "car-m1"
+    ],
+    "retrieved_neighbor_databases": [
+      "car_1",
+      "car_1",
+      "car_1"
+    ],
+    "complexity": "easy",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: How many models does each maker have?\nQuery: db.model_list.json.aggregate([{\"$group\": {\"_id\": \"$Maker\", \"model_count\": {\"$sum\": 1}}}, {\"$sort\": {\"model_count\": -1, \"_id\": 1}}])\n\nExample 2:\nQuestion: List the full names of all car makers.\nQuery: db.car_makers.find({}, {\"_id\": 0, \"FullName\": 1})\n\nExample 3:\nQuestion: How many distinct models are listed in the model_list table?\nQuery: db.model_list.json.count_documents({})\n\nSchema (car_1, 6 collection(s) -- retrieved database, full schema):\n\n- continents: { ContId (int), Continent (str) }\n- car_makers: { Id (int), Maker (str), FullName (str), Country (str) }\n- countries: { CountryId (int), CountryName (str), Continent (int) }\n- model_list.json: { ModelId (int), Maker (int), Model (str) }\n- cars_data: { Id (int), MPG (str), Cylinders (int), Edispl (float), Horsepower (str), Weight (int), Accelerate (float), Year (int) }\n- car_names: { MakeId (int), Model (str), Make (str) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "dk-e2",
+    "question": "What is the age of the oldest dog?",
+    "gold_database": "dog_kennels",
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "retrieved_ids": [
+      "dk-e1",
+      "pt-e8",
+      "dk-m2"
+    ],
+    "retrieved_neighbor_databases": [
+      "dog_kennels",
+      "pets_1",
+      "dog_kennels"
+    ],
+    "complexity": "easy",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: What is the average age of all the dogs?\nQuery: db.Dogs.aggregate([{\"$addFields\": {\"age_num\": {\"$toInt\": \"$age\"}}}, {\"$group\": {\"_id\": None, \"avg_age\": {\"$avg\": \"$age_num\"}}}])\n\nExample 2:\nQuestion: What is the age of the cat?\nQuery: db.Pets.find({\"PetType\": \"cat\"}, {\"_id\": 0, \"pet_age\": 1})\n\nExample 3:\nQuestion: What is the name of the breed with the most dogs?\nQuery: db.Dogs.aggregate([{\"$group\": {\"_id\": \"$breed_code\", \"dog_count\": {\"$sum\": 1}}}, {\"$sort\": {\"dog_count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"Breeds\", \"localField\": \"_id\", \"foreignField\": \"breed_code\", \"as\": \"b\"}}, {\"$unwind\": \"$b\"}, {\"$project\": {\"_id\": 0, \"breed_name\": \"$b.breed_name\"}}])\n\nSchema (dog_kennels, 8 collection(s) -- retrieved database, full schema):\n\n- Breeds: { breed_code (str), breed_name (str) }\n- Charges: { charge_id (int), charge_type (str), charge_amount (int) }\n- Sizes: { size_code (str), size_description (str) }\n- Treatment_Types: { treatment_type_code (str), treatment_type_description (str) }\n- Owners: { owner_id (int), first_name (str), last_name (str), street (str), city (str), state (str), zip_code (str), email_address (str), home_phone (str), cell_number (str) }\n- Dogs: { dog_id (int), owner_id (int), abandoned_yn (str), breed_code (str), size_code (str), name (str), age (str), date_of_birth (str), gender (str), weight (str), date_arrived (str), date_adopted (str), date_departed (str) }\n- Professionals: { professional_id (int), role_code (str), first_name (str), street (str), city (str), state (str), zip_code (str), last_name (str), email_address (str), home_phone (str), cell_number (str) }\n- Treatments: { treatment_id (int), dog_id (int), professional_id (int), treatment_type_code (str), date_of_treatment (str), cost_of_treatment (int) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "pt-m4",
+    "question": "How many distinct city codes are represented among students?",
+    "gold_database": "pets_1",
+    "predicted_database": "pets_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "pt-e6",
+      "pt-e1",
+      "nw-m1"
+    ],
+    "retrieved_neighbor_databases": [
+      "pets_1",
+      "pets_1",
+      "network_1"
+    ],
+    "complexity": "medium",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: Which students live in city code 'PIT'? Give their first names.\nQuery: db.Student.find({\"city_code\": \"PIT\"}, {\"_id\": 0, \"Fname\": 1})\n\nExample 2:\nQuestion: How many students are there?\nQuery: db.Student.count_documents({})\n\nExample 3:\nQuestion: How many highschoolers are there in each grade?\nQuery: db.Highschooler.aggregate([{\"$group\": {\"_id\": \"$grade\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"_id\": 1}}])\n\nSchema (pets_1, 3 collection(s) -- retrieved database, full schema):\n\n- Student: { StuID (int), LName (str), Fname (str), Age (int), Sex (str), Major (int), Advisor (int), city_code (str) }\n- Has_Pet: { StuID (int), PetID (int) }\n- Pets: { PetID (int), PetType (str), pet_age (int), weight (float) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "car-m3",
+    "question": "What is the average weight of all cars?",
+    "gold_database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "car-m4",
+      "pt-h2",
+      "car-c2"
+    ],
+    "retrieved_neighbor_databases": [
+      "car_1",
+      "pets_1",
+      "car_1"
+    ],
+    "complexity": "medium",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: What are the 5 heaviest cars? Report Id and Weight.\nQuery: db.cars_data.find({}, {\"_id\": 0, \"Id\": 1, \"Weight\": 1}).sort({\"Weight\": -1}).limit(5)\n\nExample 2:\nQuestion: For each pet type, what is the average weight?\nQuery: db.Pets.aggregate([{\"$group\": {\"_id\": \"$PetType\", \"avg_weight\": {\"$avg\": \"$weight\"}}}, {\"$sort\": {\"_id\": 1}}])\n\nExample 3:\nQuestion: Find how many different car makers produced a vehicle heavier than 4000 lbs.\nQuery: db.cars_data.aggregate([{\"$match\": {\"Weight\": {\"$gt\": 4000}}}, {\"$lookup\": {\"from\": \"model_list.json\", \"localField\": \"Id\", \"foreignField\": \"ModelId\", \"as\": \"model\"}}, {\"$unwind\": \"$model\"}, {\"$group\": {\"_id\": \"$model.Maker\"}}, {\"$count\": \"maker_count\"}])\n\nSchema (car_1, 6 collection(s) -- retrieved database, full schema):\n\n- continents: { ContId (int), Continent (str) }\n- car_makers: { Id (int), Maker (str), FullName (str), Country (str) }\n- countries: { CountryId (int), CountryName (str), Continent (int) }\n- model_list.json: { ModelId (int), Maker (int), Model (str) }\n- cars_data: { Id (int), MPG (str), Cylinders (int), Edispl (float), Horsepower (str), Weight (int), Accelerate (float), Year (int) }\n- car_names: { MakeId (int), Model (str), Make (str) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "wl-m1",
+    "question": "Which region is the city Kabul located in?",
+    "gold_database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "wl-m3",
+      "wl-e6",
+      "wl-m6"
+    ],
+    "retrieved_neighbor_databases": [
+      "world_1",
+      "world_1",
+      "world_1"
+    ],
+    "complexity": "medium",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: How many official languages does Afghanistan have?\nQuery: db.country.aggregate([{\"$match\": {\"Name\": \"Afghanistan\"}}, {\"$lookup\": {\"from\": \"countrylanguage\", \"localField\": \"Code\", \"foreignField\": \"CountryCode\", \"as\": \"langs\"}}, {\"$unwind\": \"$langs\"}, {\"$match\": {\"langs.IsOfficial\": \"T\"}}, {\"$count\": \"official_language_count\"}])\n\nExample 2:\nQuestion: What are the names and surface areas of the 5 largest countries by area?\nQuery: db.country.find({}, {\"_id\": 0, \"Name\": 1, \"SurfaceArea\": 1}).sort([(\"SurfaceArea\", -1)]).limit(5)\n\nExample 3:\nQuestion: Find the city with the largest population where English is spoken.\nQuery: db.city.aggregate([{\"$lookup\": {\"from\": \"countrylanguage\", \"localField\": \"CountryCode\", \"foreignField\": \"CountryCode\", \"as\": \"langs\"}}, {\"$match\": {\"langs.Language\": \"English\"}}, {\"$sort\": {\"Population\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"Name\": 1, \"Population\": 1}}])\n\nSchema (world_1, 3 collection(s) -- retrieved database, full schema):\n\n- city: { ID (int), Name (str), CountryCode (str), District (str), Population (int) }\n- country: { Code (str), Name (str), Continent (str), Region (str), SurfaceArea (float), IndepYear (int, nullable), Population (int), LifeExpectancy (float, nullable), GNP (float), GNPOld (float, nullable), LocalName (str), GovernmentForm (str), HeadOfState (str, nullable), Capital (int, nullable), Code2 (str) }\n- countrylanguage: { CountryCode (str), Language (str), IsOfficial (str), Percentage (float) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "cs-m1",
+    "question": "What is the average age of singers?",
+    "gold_database": "concert_singer",
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "retrieved_ids": [
+      "cs-m5",
+      4,
+      1
+    ],
+    "retrieved_neighbor_databases": [
+      "concert_singer",
+      "concert_singer",
+      "concert_singer"
+    ],
+    "complexity": "medium",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: What is the age of the youngest singer?\nQuery: db.singer.aggregate([{\"$group\": {\"_id\": None, \"min_age\": {\"$min\": \"$Age\"}}}, {\"$project\": {\"_id\": 0}}])\n\nExample 2:\nQuestion: What are the names and ages of singers, ordered by age?\nQuery: db.singer.find({}, {\"_id\": 0, \"Name\": 1, \"Age\": 1}).sort({\"Age\": 1})\n\nExample 3:\nQuestion: How many singers are there?\nQuery: db.singer.count_documents({})\n\nSchema (concert_singer, 4 collection(s) -- retrieved database, full schema):\n\n- stadium: { Stadium_ID (int), Location (str), Name (str), Capacity (int), Highest (int), Lowest (int), Average (int) }\n- concert: { concert_ID (int), concert_Name (str), Theme (str), Stadium_ID (str), Year (str) }\n- singer: { Singer_ID (int), Name (str), Country (str), Song_Name (str), Song_release_year (str), Age (int), Is_male (str) }\n- singer_in_concert: { concert_ID (int), Singer_ID (str) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "cs-h2",
+    "question": "List the names of singers who performed in the concert called 'Auditions'.",
+    "gold_database": "concert_singer",
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "retrieved_ids": [
+      7,
+      "cs-e1",
+      "cs-e3"
+    ],
+    "retrieved_neighbor_databases": [
+      "concert_singer",
+      "concert_singer",
+      "concert_singer"
+    ],
+    "complexity": "high",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: What are the names of singers who performed in a concert in 2014?\nQuery: db.singer_in_concert.aggregate([{\"$addFields\": {\"Singer_ID_int\": {\"$toInt\": \"$Singer_ID\"}}}, {\"$lookup\": {\"from\": \"concert\", \"localField\": \"concert_ID\", \"foreignField\": \"concert_ID\", \"as\": \"concert\"}}, {\"$unwind\": \"$concert\"}, {\"$match\": {\"concert.Year\": \"2014\"}}, {\"$lookup\": {\"from\": \"singer\", \"localField\": \"Singer_ID_int\", \"foreignField\": \"Singer_ID\", \"as\": \"singer\"}}, {\"$unwind\": \"$singer\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$singer.Name\"}}, {\"$sort\": {\"Name\": 1}}])\n\nExample 2:\nQuestion: List the names of all singers.\nQuery: db.singer.find({}, {\"_id\": 0, \"Name\": 1})\n\nExample 3:\nQuestion: List the names of all concerts.\nQuery: db.concert.find({}, {\"_id\": 0, \"concert_Name\": 1})\n\nSchema (concert_singer, 4 collection(s) -- retrieved database, full schema):\n\n- stadium: { Stadium_ID (int), Location (str), Name (str), Capacity (int), Highest (int), Lowest (int), Average (int) }\n- concert: { concert_ID (int), concert_Name (str), Theme (str), Stadium_ID (str), Year (str) }\n- singer: { Singer_ID (int), Name (str), Country (str), Song_Name (str), Song_release_year (str), Age (int), Is_male (str) }\n- singer_in_concert: { concert_ID (int), Singer_ID (str) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "wl-c1",
+    "question": "Which countries have a greater surface area than every country in Oceania?",
+    "gold_database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "wl-e6",
+      "wl-h3",
+      "car-e4"
+    ],
+    "retrieved_neighbor_databases": [
+      "world_1",
+      "world_1",
+      "car_1"
+    ],
+    "complexity": "complex",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: What are the names and surface areas of the 5 largest countries by area?\nQuery: db.country.find({}, {\"_id\": 0, \"Name\": 1, \"SurfaceArea\": 1}).sort([(\"SurfaceArea\", -1)]).limit(5)\n\nExample 2:\nQuestion: What is the total population and average surface area of countries in North America with a surface area bigger than 3000?\nQuery: db.country.aggregate([{\"$match\": {\"Continent\": \"North America\", \"SurfaceArea\": {\"$gt\": 3000}}}, {\"$group\": {\"_id\": None, \"total_population\": {\"$sum\": \"$Population\"}, \"avg_surface_area\": {\"$avg\": \"$SurfaceArea\"}}}])\n\nExample 3:\nQuestion: List all continents in the database.\nQuery: db.continents.find({}, {\"_id\": 0, \"Continent\": 1})\n\nSchema (world_1, 3 collection(s) -- retrieved database, full schema):\n\n- city: { ID (int), Name (str), CountryCode (str), District (str), Population (int) }\n- country: { Code (str), Name (str), Continent (str), Region (str), SurfaceArea (float), IndepYear (int, nullable), Population (int), LifeExpectancy (float, nullable), GNP (float), GNPOld (float, nullable), LocalName (str), GovernmentForm (str), HeadOfState (str, nullable), Capital (int, nullable), Code2 (str) }\n- countrylanguage: { CountryCode (str), Language (str), IsOfficial (str), Percentage (float) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "pt-m1",
+    "question": "How many students are there in each major?",
+    "gold_database": "pets_1",
+    "predicted_database": "pets_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "pt-e1",
+      "nw-m1",
+      "pt-e5"
+    ],
+    "retrieved_neighbor_databases": [
+      "pets_1",
+      "network_1",
+      "pets_1"
+    ],
+    "complexity": "medium",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: How many students are there?\nQuery: db.Student.count_documents({})\n\nExample 2:\nQuestion: How many highschoolers are there in each grade?\nQuery: db.Highschooler.aggregate([{\"$group\": {\"_id\": \"$grade\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"_id\": 1}}])\n\nExample 3:\nQuestion: List the first names of students majoring in 600.\nQuery: db.Student.find({\"Major\": 600}, {\"_id\": 0, \"Fname\": 1})\n\nSchema (pets_1, 3 collection(s) -- retrieved database, full schema):\n\n- Student: { StuID (int), LName (str), Fname (str), Age (int), Sex (str), Major (int), Advisor (int), city_code (str) }\n- Has_Pet: { StuID (int), PetID (int) }\n- Pets: { PetID (int), PetType (str), pet_age (int), weight (float) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "dk-h2",
+    "question": "Which owner has paid the largest amount of money in total for their dogs' treatments? Show the owner id and zip code.",
+    "gold_database": "dog_kennels",
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "retrieved_ids": [
+      "dk-m3",
+      "dk-m6",
+      "dk-c1"
+    ],
+    "retrieved_neighbor_databases": [
+      "dog_kennels",
+      "dog_kennels",
+      "dog_kennels"
+    ],
+    "complexity": "high",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: Which owner owns the most dogs? List the owner id, first name, and last name.\nQuery: db.Dogs.aggregate([{\"$group\": {\"_id\": \"$owner_id\", \"dog_count\": {\"$sum\": 1}}}, {\"$sort\": {\"dog_count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"Owners\", \"localField\": \"_id\", \"foreignField\": \"owner_id\", \"as\": \"o\"}}, {\"$unwind\": \"$o\"}, {\"$project\": {\"_id\": 0, \"owner_id\": \"$_id\", \"first_name\": \"$o.first_name\", \"last_name\": \"$o.last_name\"}}])\n\nExample 2:\nQuestion: List each owner's first name, last name, and the size code of their dog.\nQuery: db.Owners.aggregate([{\"$lookup\": {\"from\": \"Dogs\", \"localField\": \"owner_id\", \"foreignField\": \"owner_id\", \"as\": \"d\"}}, {\"$unwind\": \"$d\"}, {\"$project\": {\"_id\": 0, \"first_name\": 1, \"last_name\": 1, \"size_code\": \"$d.size_code\"}}])\n\nExample 3:\nQuestion: Which dogs have not cost their owner more than 1000 in total treatment cost? List the dog names.\nQuery: db.Dogs.aggregate([{\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"dog_id\", \"foreignField\": \"dog_id\", \"as\": \"t\"}}, {\"$addFields\": {\"total_cost\": {\"$sum\": \"$t.cost_of_treatment\"}}}, {\"$match\": {\"total_cost\": {\"$lte\": 1000}}}, {\"$project\": {\"_id\": 0, \"name\": 1}}])\n\nSchema (dog_kennels, 8 collection(s) -- retrieved database, full schema):\n\n- Breeds: { breed_code (str), breed_name (str) }\n- Charges: { charge_id (int), charge_type (str), charge_amount (int) }\n- Sizes: { size_code (str), size_description (str) }\n- Treatment_Types: { treatment_type_code (str), treatment_type_description (str) }\n- Owners: { owner_id (int), first_name (str), last_name (str), street (str), city (str), state (str), zip_code (str), email_address (str), home_phone (str), cell_number (str) }\n- Dogs: { dog_id (int), owner_id (int), abandoned_yn (str), breed_code (str), size_code (str), name (str), age (str), date_of_birth (str), gender (str), weight (str), date_arrived (str), date_adopted (str), date_departed (str) }\n- Professionals: { professional_id (int), role_code (str), first_name (str), street (str), city (str), state (str), zip_code (str), last_name (str), email_address (str), home_phone (str), cell_number (str) }\n- Treatments: { treatment_id (int), dog_id (int), professional_id (int), treatment_type_code (str), date_of_treatment (str), cost_of_treatment (int) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "car-e5",
+    "question": "List all country names in the database.",
+    "gold_database": "car_1",
+    "predicted_database": "world_1",
+    "database_match": false,
+    "retrieved_ids": [
+      "car-e4",
+      "wl-h1",
+      "wl-e6"
+    ],
+    "retrieved_neighbor_databases": [
+      "car_1",
+      "world_1",
+      "world_1"
+    ],
+    "complexity": "easy",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: List all continents in the database.\nQuery: db.continents.find({}, {\"_id\": 0, \"Continent\": 1})\n\nExample 2:\nQuestion: Return the country name and number of languages spoken for each country that speaks at least 3 languages.\nQuery: db.countrylanguage.aggregate([{\"$group\": {\"_id\": \"$CountryCode\", \"lang_count\": {\"$sum\": 1}}}, {\"$match\": {\"lang_count\": {\"$gt\": 2}}}, {\"$lookup\": {\"from\": \"country\", \"localField\": \"_id\", \"foreignField\": \"Code\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$c.Name\", \"lang_count\": 1}}])\n\nExample 3:\nQuestion: What are the names and surface areas of the 5 largest countries by area?\nQuery: db.country.find({}, {\"_id\": 0, \"Name\": 1, \"SurfaceArea\": 1}).sort([(\"SurfaceArea\", -1)]).limit(5)\n\nSchema (world_1, 3 collection(s) -- retrieved database, full schema):\n\n- city: { ID (int), Name (str), CountryCode (str), District (str), Population (int) }\n- country: { Code (str), Name (str), Continent (str), Region (str), SurfaceArea (float), IndepYear (int, nullable), Population (int), LifeExpectancy (float, nullable), GNP (float), GNPOld (float, nullable), LocalName (str), GovernmentForm (str), HeadOfState (str, nullable), Capital (int, nullable), Code2 (str) }\n- countrylanguage: { CountryCode (str), Language (str), IsOfficial (str), Percentage (float) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  },
+  {
+    "id": "cs-c1",
+    "question": "List the names of singers and the stadium name where they performed, for concerts held in 2015.",
+    "gold_database": "concert_singer",
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "retrieved_ids": [
+      "cs-e7",
+      7,
+      "cs-e3"
+    ],
+    "retrieved_neighbor_databases": [
+      "concert_singer",
+      "concert_singer",
+      "concert_singer"
+    ],
+    "complexity": "complex",
+    "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question, some example question/query pairs, and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nExample question/query pairs (top-3 most similar past questions):\n\nExample 1:\nQuestion: Which concerts happened in the year 2015?\nQuery: db.concert.find({\"Year\": \"2015\"}, {\"_id\": 0, \"concert_Name\": 1})\n\nExample 2:\nQuestion: What are the names of singers who performed in a concert in 2014?\nQuery: db.singer_in_concert.aggregate([{\"$addFields\": {\"Singer_ID_int\": {\"$toInt\": \"$Singer_ID\"}}}, {\"$lookup\": {\"from\": \"concert\", \"localField\": \"concert_ID\", \"foreignField\": \"concert_ID\", \"as\": \"concert\"}}, {\"$unwind\": \"$concert\"}, {\"$match\": {\"concert.Year\": \"2014\"}}, {\"$lookup\": {\"from\": \"singer\", \"localField\": \"Singer_ID_int\", \"foreignField\": \"Singer_ID\", \"as\": \"singer\"}}, {\"$unwind\": \"$singer\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$singer.Name\"}}, {\"$sort\": {\"Name\": 1}}])\n\nExample 3:\nQuestion: List the names of all concerts.\nQuery: db.concert.find({}, {\"_id\": 0, \"concert_Name\": 1})\n\nSchema (concert_singer, 4 collection(s) -- retrieved database, full schema):\n\n- stadium: { Stadium_ID (int), Location (str), Name (str), Capacity (int), Highest (int), Lowest (int), Average (int) }\n- concert: { concert_ID (int), concert_Name (str), Theme (str), Stadium_ID (str), Year (str) }\n- singer: { Singer_ID (int), Name (str), Country (str), Song_Name (str), Song_release_year (str), Age (int), Is_male (str) }\n- singer_in_concert: { concert_ID (int), Singer_ID (str) }\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. Follow the style of the example query/answer pairs above -- same operators, same level of nesting -- when the current question is similar in shape to one of them"
+  }
+]
