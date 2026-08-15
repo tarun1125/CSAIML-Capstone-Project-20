@@ -1,0 +1,317 @@
+[
+  {
+    "id": "dk-m5",
+    "question": "What is the description of the treatment type that costs the least money in total?",
+    "database": "dog_kennels",
+    "generated_query": "db.Treatments.aggregate([{\"$group\": {\"_id\": \"$treatment_type_code\", \"cost_sum\": {\"$sum\": \"$cost_of_treatment\"}}}, {\"$sort\": {\"cost_sum\": 1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"treatment_type_description\": 1}}])",
+    "latency_s": 8.606,
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "retrieved_ids": [
+      "dk-c1",
+      "dk-m4",
+      "dk-h3"
+    ],
+    "normalized_query": "db.Treatments.aggregate([{'$group': {'_id': '$treatment_type_code', 'cost_sum': {'$sum': '$cost_of_treatment'}}}, {'$sort': {'cost_sum': 1}}, {'$limit': 1}, {'$project': {'_id': 0, 'treatment_type_description': 1}}])"
+  },
+  {
+    "id": "nw-m2",
+    "question": "What is the average grade of highschoolers?",
+    "database": "network_1",
+    "generated_query": "db.Highschooler.aggregate([{\"$group\": {\"_id\": None, \"avg_grade\": {\"$avg\": \"$grade\"}}}, {\"$project\": {\"_id\": 0}}])",
+    "latency_s": 4.013,
+    "predicted_database": "network_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "nw-m1",
+      "pt-m2",
+      "nw-h2"
+    ],
+    "normalized_query": "db.Highschooler.aggregate([{'$group': {'_id': None, 'avg_grade': {'$avg': '$grade'}}}, {'$project': {'_id': 0}}])"
+  },
+  {
+    "id": "pt-m6",
+    "question": "What is the average weight of pets?",
+    "database": "pets_1",
+    "generated_query": "db.Pets.aggregate([{\"$group\": {\"_id\": None, \"avg_weight\": {\"$avg\": \"$weight\"}}}, {\"$project\": {\"_id\": 0, \"avg_weight\": 1}}])",
+    "latency_s": 4.563,
+    "predicted_database": "pets_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "pt-h2",
+      3,
+      "dk-e1"
+    ],
+    "normalized_query": "db.Pets.aggregate([{'$group': {'_id': None, 'avg_weight': {'$avg': '$weight'}}}, {'$project': {'_id': 0, 'avg_weight': 1}}])"
+  },
+  {
+    "id": "cs-m6",
+    "question": "List the distinct countries singers come from, in alphabetical order.",
+    "database": "concert_singer",
+    "generated_query": "db.singer.distinct(\"Country\").sort()",
+    "latency_s": 1.057,
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "retrieved_ids": [
+      "cs-m7",
+      "cs-e1",
+      4
+    ],
+    "normalized_query": "db.singer.distinct('Country').sort()"
+  },
+  {
+    "id": "nw-c1",
+    "question": "List the names of highschoolers who are friends with someone in grade 12.",
+    "database": "network_1",
+    "generated_query": "db.Highschooler.find({\"ID\": {\"$in\": [x[\"student_id\"] for x in db.Friend.find({\"friend_id\": {\"$in\": [y[\"student_id\"] for y in db.Friend.find({\"friend_id\": {\"$in\": [z[\"student_id\"] for z in db.Friend.find({\"friend_id\": {\"$in\": [w[\"student_id\"] for w in db.Friend.find({\"friend_id\": {\"$in\": [v[\"student_id\"] for v in db.Friend.find({\"friend_id\": {\"$in\": [u[\"student_id\"] for u in db.Friend.find({\"friend_id\": {\"$in\": [t[\"student_id\"] for t in db.Friend.find({\"friend_id\": {\"$in\": [s[\"student_id\"] for s in db.Friend.find({\"friend_id\": {\"$in\": [r[\"student_id\"] for r in db.Friend.find({\"friend_id\": {\"$in\": [q[\"student_id\"] for q in db.Friend.find({\"friend_id\": {\"$in\": [p[\"student_id\"] for p in db.Friend.find({\"friend_id\": {\"$in\": [o[\"student_id\"] for o in db.Friend.find({\"friend_id\": {\"$in\": [n[\"student_id\"] for n in db.Friend.find({\"friend_id\": {\"$in\": [m[\"student_id\"] for m in db.Friend.find({\"friend",
+    "latency_s": 23.076,
+    "predicted_database": "network_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "nw-e4",
+      "nw-h1",
+      "nw-h2"
+    ],
+    "normalized_query": "db.Highschooler.find({\"ID\": {\"$in\": [x[\"student_id\"] for x in db.Friend.find({\"friend_id\": {\"$in\": [y[\"student_id\"] for y in db.Friend.find({\"friend_id\": {\"$in\": [z[\"student_id\"] for z in db.Friend.find({\"friend_id\": {\"$in\": [w[\"student_id\"] for w in db.Friend.find({\"friend_id\": {\"$in\": [v[\"student_id\"] for v in db.Friend.find({\"friend_id\": {\"$in\": [u[\"student_id\"] for u in db.Friend.find({\"friend_id\": {\"$in\": [t[\"student_id\"] for t in db.Friend.find({\"friend_id\": {\"$in\": [s[\"student_id\"] for s in db.Friend.find({\"friend_id\": {\"$in\": [r[\"student_id\"] for r in db.Friend.find({\"friend_id\": {\"$in\": [q[\"student_id\"] for q in db.Friend.find({\"friend_id\": {\"$in\": [p[\"student_id\"] for p in db.Friend.find({\"friend_id\": {\"$in\": [o[\"student_id\"] for o in db.Friend.find({\"friend_id\": {\"$in\": [n[\"student_id\"] for n in db.Friend.find({\"friend_id\": {\"$in\": [m[\"student_id\"] for m in db.Friend.find({\"friend"
+  },
+  {
+    "id": "wl-e3",
+    "question": "Which continent is Anguilla in?",
+    "database": "world_1",
+    "generated_query": "db.continents.find({\"Name\": \"Anguilla\"}, {\"_id\": 0, \"Continent\": 1})",
+    "latency_s": 1.202,
+    "predicted_database": "world_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "car-e4",
+      "wl-m2",
+      "wl-e6"
+    ],
+    "normalized_query": "db.continents.find({'Name': 'Anguilla'}, {'_id': 0, 'Continent': 1})"
+  },
+  {
+    "id": "car-h1",
+    "question": "List car makers with more than 2 models. Report the full name and the model count.",
+    "database": "car_1",
+    "generated_query": "db.car_makers.find({\"ModelCount\": {\"$gt\": 2}}, {\"_id\": 0, \"FullName\": 1, \"ModelCount\": 1})",
+    "latency_s": 1.717,
+    "predicted_database": "car_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "car-e3",
+      "car-e2",
+      12
+    ],
+    "normalized_query": "db.car_makers.find({'ModelCount': {'$gt': 2}}, {'_id': 0, 'FullName': 1, 'ModelCount': 1})"
+  },
+  {
+    "id": "nw-e1",
+    "question": "How many highschoolers are there?",
+    "database": "network_1",
+    "generated_query": "db.Highschooler.count_documents({})",
+    "latency_s": 0.572,
+    "predicted_database": "network_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "nw-m1",
+      "nw-h2",
+      "pt-e1"
+    ],
+    "normalized_query": "db.Highschooler.count_documents({})"
+  },
+  {
+    "id": "cs-e6",
+    "question": "List the names of stadiums with a capacity greater than 10000.",
+    "database": "concert_singer",
+    "generated_query": "db.stadium.find({\"Capacity\": {\"$gt\": 10000}}, {\"Name\": 1})",
+    "latency_s": 1.171,
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "retrieved_ids": [
+      "cs-m3",
+      "cs-m2",
+      "cs-e2"
+    ],
+    "normalized_query": "db.stadium.find({'Capacity': {'$gt': 10000}}, {'Name': 1})"
+  },
+  {
+    "id": "car-e9",
+    "question": "List all model names produced by maker id 6.",
+    "database": "car_1",
+    "generated_query": "db.model_list.json.find({\"Maker\": 6}, {\"Model\": 1})",
+    "latency_s": 0.908,
+    "predicted_database": "car_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "car-m7",
+      "car-e3",
+      "car-m1"
+    ],
+    "normalized_query": "db.model_list.json.find({'Maker': 6}, {'Model': 1})"
+  },
+  {
+    "id": "dk-e2",
+    "question": "What is the age of the oldest dog?",
+    "database": "dog_kennels",
+    "generated_query": "db.Dogs.aggregate([{\"$sort\": {\"date_of_birth\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"name\": 1, \"age\": 1}}])",
+    "latency_s": 2.256,
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "retrieved_ids": [
+      "dk-e1",
+      "pt-e8",
+      "dk-m2"
+    ],
+    "normalized_query": "db.Dogs.aggregate([{'$sort': {'date_of_birth': -1}}, {'$limit': 1}, {'$project': {'_id': 0, 'name': 1, 'age': 1}}])"
+  },
+  {
+    "id": "pt-m4",
+    "question": "How many distinct city codes are represented among students?",
+    "database": "pets_1",
+    "generated_query": "db.Student.distinct(\"city_code\")",
+    "latency_s": 0.479,
+    "predicted_database": "pets_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "pt-e6",
+      "pt-e1",
+      "nw-m1"
+    ],
+    "normalized_query": "db.Student.distinct('city_code')"
+  },
+  {
+    "id": "car-m3",
+    "question": "What is the average weight of all cars?",
+    "database": "car_1",
+    "generated_query": "db.cars_data.aggregate([{\"$group\": {\"_id\": null, \"avg_weight\": {\"$avg\": \"$Weight\"}}}])",
+    "latency_s": 1.559,
+    "predicted_database": "car_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "car-m4",
+      "pt-h2",
+      "car-c2"
+    ],
+    "normalized_query": "db.cars_data.aggregate([{'$group': {'_id': null, 'avg_weight': {'$avg': '$Weight'}}}])"
+  },
+  {
+    "id": "wl-m1",
+    "question": "Which region is the city Kabul located in?",
+    "database": "world_1",
+    "generated_query": "db.city.find({\"Name\": \"Kabul\"}, {\"Region\": 1})",
+    "latency_s": 0.797,
+    "predicted_database": "world_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "wl-m3",
+      "wl-e6",
+      "wl-m6"
+    ],
+    "normalized_query": "db.city.find({'Name': 'Kabul'}, {'Region': 1})"
+  },
+  {
+    "id": "cs-m1",
+    "question": "What is the average age of singers?",
+    "database": "concert_singer",
+    "generated_query": "db.singer.aggregate([{\"$group\": {\"_id\": None, \"avg_age\": {\"$avg\": \"$Age\"}}}, {\"$project\": {\"_id\": 0}}])",
+    "latency_s": 1.616,
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "retrieved_ids": [
+      "cs-m5",
+      4,
+      1
+    ],
+    "normalized_query": "db.singer.aggregate([{'$group': {'_id': None, 'avg_age': {'$avg': '$Age'}}}, {'$project': {'_id': 0}}])"
+  },
+  {
+    "id": "cs-h2",
+    "question": "List the names of singers who performed in the concert called 'Auditions'.",
+    "database": "concert_singer",
+    "generated_query": "db.singer_in_concert.aggregate([\n    {\"$match\": {\"concert_Name\": \"Auditions\"}},\n    {\"$lookup\": {\"from\": \"singer\", \"localField\": \"Singer_ID\", \"foreignField\": \"Singer_ID\", \"as\": \"singer\"}},\n    {\"$unwind\": \"$singer\"},\n    {\"$project\": {\"_id\": 0, \"Name\": \"$singer.Name\"}}\n])",
+    "latency_s": 3.601,
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "retrieved_ids": [
+      7,
+      "cs-e1",
+      "cs-e3"
+    ],
+    "normalized_query": "db.singer_in_concert.aggregate([{'$match': {'concert_Name': 'Auditions'}}, {'$lookup': {'from': 'singer', 'localField': 'Singer_ID', 'foreignField': 'Singer_ID', 'as': 'singer'}}, {'$unwind': '$singer'}, {'$project': {'_id': 0, 'Name': '$singer.Name'}}])"
+  },
+  {
+    "id": "wl-c1",
+    "question": "Which countries have a greater surface area than every country in Oceania?",
+    "database": "world_1",
+    "generated_query": "db.country.find({\"SurfaceArea\": {\"$gt\": db.oceania.find().sort([(\"SurfaceArea\", -1)]).next()[\"SurfaceArea\"]}})",
+    "latency_s": 1.442,
+    "predicted_database": "world_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "wl-e6",
+      "wl-h3",
+      "car-e4"
+    ],
+    "normalized_query": "db.country.find({'SurfaceArea': {'$gt': db.oceania.find().sort([('SurfaceArea', -1)]).next()['SurfaceArea']}})"
+  },
+  {
+    "id": "pt-m1",
+    "question": "How many students are there in each major?",
+    "database": "pets_1",
+    "generated_query": "db.Student.aggregate([\n    {\"$group\": {\"_id\": \"$Major\", \"count\": {\"$sum\": 1}}},\n    {\"$sort\": {\"_id\": 1}}\n])",
+    "latency_s": 1.595,
+    "predicted_database": "pets_1",
+    "database_match": true,
+    "retrieved_ids": [
+      "pt-e1",
+      "nw-m1",
+      "pt-e5"
+    ],
+    "normalized_query": "db.Student.aggregate([{'$group': {'_id': '$Major', 'count': {'$sum': 1}}}, {'$sort': {'_id': 1}}])"
+  },
+  {
+    "id": "dk-h2",
+    "question": "Which owner has paid the largest amount of money in total for their dogs' treatments? Show the owner id and zip code.",
+    "database": "dog_kennels",
+    "generated_query": "db.Treatments.aggregate([\n    {\"$group\": {\"_id\": \"$professional_id\", \"total_cost\": {\"$sum\": \"$cost_of_treatment\"}}},\n    {\"$sort\": {\"total_cost\": -1}},\n    {\"$limit\": 1},\n    {\"$lookup\": {\"from\": \"Professionals\", \"localField\": \"_id\", \"foreignField\": \"professional_id\", \"as\": \"p\"}},\n    {\"$unwind\": \"$p\"},\n    {\"$project\": {\"_id\": 0, \"owner_id\": \"$p.owner_id\", \"zip_code\": \"$p.zip_code\"}}\n])",
+    "latency_s": 6.046,
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "retrieved_ids": [
+      "dk-m3",
+      "dk-m6",
+      "dk-c1"
+    ],
+    "normalized_query": "db.Treatments.aggregate([{'$group': {'_id': '$professional_id', 'total_cost': {'$sum': '$cost_of_treatment'}}}, {'$sort': {'total_cost': -1}}, {'$limit': 1}, {'$lookup': {'from': 'Professionals', 'localField': '_id', 'foreignField': 'professional_id', 'as': 'p'}}, {'$unwind': '$p'}, {'$project': {'_id': 0, 'owner_id': '$p.owner_id', 'zip_code': '$p.zip_code'}}])"
+  },
+  {
+    "id": "car-e5",
+    "question": "List all country names in the database.",
+    "database": "car_1",
+    "generated_query": "db.country.find({}, {\"_id\": 0, \"Name\": 1})",
+    "latency_s": 0.793,
+    "predicted_database": "world_1",
+    "database_match": false,
+    "retrieved_ids": [
+      "car-e4",
+      "wl-h1",
+      "wl-e6"
+    ],
+    "normalized_query": "db.country.find({}, {'_id': 0, 'Name': 1})"
+  },
+  {
+    "id": "cs-c1",
+    "question": "List the names of singers and the stadium name where they performed, for concerts held in 2015.",
+    "database": "concert_singer",
+    "generated_query": "db.singer_in_concert.aggregate([\n    {\"$addFields\": {\"Singer_ID_int\": {\"$toInt\": \"$Singer_ID\"}}},\n    {\"$lookup\": {\"from\": \"concert\", \"localField\": \"concert_ID\", \"foreignField\": \"concert_ID\", \"as\": \"concert\"}},\n    {\"$unwind\": \"$concert\"},\n    {\"$match\": {\"concert.Year\": \"2015\"}},\n    {\"$lookup\": {\"from\": \"stadium\", \"localField\": \"Stadium_ID\", \"foreignField\": \"Stadium_ID\", \"as\": \"stadium\"}},\n    {\"$unwind\": \"$stadium\"},\n    {\"$project\": {\"_id\": 0, \"Name\": \"$singer.Name\", \"Stadium_Name\": \"$stadium.Name\"}}\n])",
+    "latency_s": 6.757,
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "retrieved_ids": [
+      "cs-e7",
+      7,
+      "cs-e3"
+    ],
+    "normalized_query": "db.singer_in_concert.aggregate([{'$addFields': {'Singer_ID_int': {'$toInt': '$Singer_ID'}}}, {'$lookup': {'from': 'concert', 'localField': 'concert_ID', 'foreignField': 'concert_ID', 'as': 'concert'}}, {'$unwind': '$concert'}, {'$match': {'concert.Year': '2015'}}, {'$lookup': {'from': 'stadium', 'localField': 'Stadium_ID', 'foreignField': 'Stadium_ID', 'as': 'stadium'}}, {'$unwind': '$stadium'}, {'$project': {'_id': 0, 'Name': '$singer.Name', 'Stadium_Name': '$stadium.Name'}}])"
+  }
+]

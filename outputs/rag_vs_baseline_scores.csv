@@ -1,0 +1,4 @@
+Arm,Correct,Total,Accuracy
+Qwen-Baseline,0,21,0.00
+Qwen-RAG,5,21,23.81
+DatabaseRetrievalDiagnostic,20,21,95.24

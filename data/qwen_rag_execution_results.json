@@ -1,0 +1,314 @@
+[
+  {
+    "id": "dk-m5",
+    "question": "What is the description of the treatment type that costs the least money in total?",
+    "database": "dog_kennels",
+    "query": "db.Treatments.aggregate([{'$group': {'_id': '$treatment_type_code', 'cost_sum': {'$sum': '$cost_of_treatment'}}}, {'$sort': {'cost_sum': 1}}, {'$limit': 1}, {'$project': {'_id': 0, 'treatment_type_description': 1}}])",
+    "status": "PASS",
+    "result": [
+      {}
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-m2",
+    "question": "What is the average grade of highschoolers?",
+    "database": "network_1",
+    "query": "db.Highschooler.aggregate([{'$group': {'_id': None, 'avg_grade': {'$avg': '$grade'}}}, {'$project': {'_id': 0}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "avg_grade": 10.5
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "pt-m6",
+    "question": "What is the average weight of pets?",
+    "database": "pets_1",
+    "query": "db.Pets.aggregate([{'$group': {'_id': None, 'avg_weight': {'$avg': '$weight'}}}, {'$project': {'_id': 0, 'avg_weight': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "avg_weight": 11.566666666666668
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-m6",
+    "question": "List the distinct countries singers come from, in alphabetical order.",
+    "database": "concert_singer",
+    "query": "db.singer.distinct('Country').sort()",
+    "status": "FAIL",
+    "error": "'NoneType' object is not iterable",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-c1",
+    "question": "List the names of highschoolers who are friends with someone in grade 12.",
+    "database": "network_1",
+    "query": "db.Highschooler.find({\"ID\": {\"$in\": [x[\"student_id\"] for x in db.Friend.find({\"friend_id\": {\"$in\": [y[\"student_id\"] for y in db.Friend.find({\"friend_id\": {\"$in\": [z[\"student_id\"] for z in db.Friend.find({\"friend_id\": {\"$in\": [w[\"student_id\"] for w in db.Friend.find({\"friend_id\": {\"$in\": [v[\"student_id\"] for v in db.Friend.find({\"friend_id\": {\"$in\": [u[\"student_id\"] for u in db.Friend.find({\"friend_id\": {\"$in\": [t[\"student_id\"] for t in db.Friend.find({\"friend_id\": {\"$in\": [s[\"student_id\"] for s in db.Friend.find({\"friend_id\": {\"$in\": [r[\"student_id\"] for r in db.Friend.find({\"friend_id\": {\"$in\": [q[\"student_id\"] for q in db.Friend.find({\"friend_id\": {\"$in\": [p[\"student_id\"] for p in db.Friend.find({\"friend_id\": {\"$in\": [o[\"student_id\"] for o in db.Friend.find({\"friend_id\": {\"$in\": [n[\"student_id\"] for n in db.Friend.find({\"friend_id\": {\"$in\": [m[\"student_id\"] for m in db.Friend.find({\"friend",
+    "status": "FAIL",
+    "error": "REJECTED by safety check (syntax error: unterminated string literal (detected at line 1) (<unknown>, line 1))",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-e3",
+    "question": "Which continent is Anguilla in?",
+    "database": "world_1",
+    "query": "db.continents.find({'Name': 'Anguilla'}, {'_id': 0, 'Continent': 1})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-h1",
+    "question": "List car makers with more than 2 models. Report the full name and the model count.",
+    "database": "car_1",
+    "query": "db.car_makers.find({'ModelCount': {'$gt': 2}}, {'_id': 0, 'FullName': 1, 'ModelCount': 1})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-e1",
+    "question": "How many highschoolers are there?",
+    "database": "network_1",
+    "query": "db.Highschooler.count_documents({})",
+    "status": "PASS",
+    "result": 16,
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-e6",
+    "question": "List the names of stadiums with a capacity greater than 10000.",
+    "database": "concert_singer",
+    "query": "db.stadium.find({'Capacity': {'$gt': 10000}}, {'Name': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "6a659cdcfdddf355848717d8",
+        "Name": "Stark's Park"
+      },
+      {
+        "_id": "6a659cdcfdddf355848717d9",
+        "Name": "Somerset Park"
+      },
+      {
+        "_id": "6a659cdcfdddf355848717db",
+        "Name": "Hampden Park"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-e9",
+    "question": "List all model names produced by maker id 6.",
+    "database": "car_1",
+    "query": "db.model_list.json.find({'Maker': 6}, {'Model': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "6a659d73fdddf35584871b4a",
+        "Model": "chrysler"
+      },
+      {
+        "_id": "6a659d73fdddf35584871b4d",
+        "Model": "dodge"
+      },
+      {
+        "_id": "6a659d73fdddf35584871b5a",
+        "Model": "plymouth"
+      },
+      {
+        "_id": "6a659d73fdddf35584871b65",
+        "Model": "jeep"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-e2",
+    "question": "What is the age of the oldest dog?",
+    "database": "dog_kennels",
+    "query": "db.Dogs.aggregate([{'$sort': {'date_of_birth': -1}}, {'$limit': 1}, {'$project': {'_id': 0, 'name': 1, 'age': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "name": "Jeffrey",
+        "age": "4"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-m4",
+    "question": "How many distinct city codes are represented among students?",
+    "database": "pets_1",
+    "query": "db.Student.distinct('city_code')",
+    "status": "PASS",
+    "result": [
+      "ATL",
+      "BAL",
+      "BOS",
+      "CHI",
+      "DAL",
+      "DET",
+      "HKG",
+      "HOU",
+      "LON",
+      "LOS",
+      "NAR",
+      "NYC",
+      "PEK",
+      "PHL",
+      "PIT",
+      "ROC",
+      "SFO",
+      "WAS",
+      "YYZ"
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-m3",
+    "question": "What is the average weight of all cars?",
+    "database": "car_1",
+    "query": "db.cars_data.aggregate([{'$group': {'_id': null, 'avg_weight': {'$avg': '$Weight'}}}])",
+    "status": "FAIL",
+    "error": "REJECTED by safety check (unexpected name: null)",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-m1",
+    "question": "Which region is the city Kabul located in?",
+    "database": "world_1",
+    "query": "db.city.find({'Name': 'Kabul'}, {'Region': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "6a7f0e34774b8187ec3daef7"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-m1",
+    "question": "What is the average age of singers?",
+    "database": "concert_singer",
+    "query": "db.singer.aggregate([{'$group': {'_id': None, 'avg_age': {'$avg': '$Age'}}}, {'$project': {'_id': 0}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "avg_age": 37.0
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-h2",
+    "question": "List the names of singers who performed in the concert called 'Auditions'.",
+    "database": "concert_singer",
+    "query": "db.singer_in_concert.aggregate([{'$match': {'concert_Name': 'Auditions'}}, {'$lookup': {'from': 'singer', 'localField': 'Singer_ID', 'foreignField': 'Singer_ID', 'as': 'singer'}}, {'$unwind': '$singer'}, {'$project': {'_id': 0, 'Name': '$singer.Name'}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-c1",
+    "question": "Which countries have a greater surface area than every country in Oceania?",
+    "database": "world_1",
+    "query": "db.country.find({'SurfaceArea': {'$gt': db.oceania.find().sort([('SurfaceArea', -1)]).next()['SurfaceArea']}})",
+    "status": "FAIL",
+    "error": "REJECTED by safety check (method not allowed: next)",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-m1",
+    "question": "How many students are there in each major?",
+    "database": "pets_1",
+    "query": "db.Student.aggregate([{'$group': {'_id': '$Major', 'count': {'$sum': 1}}}, {'$sort': {'_id': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": 50,
+        "count": 2
+      },
+      {
+        "_id": 100,
+        "count": 1
+      },
+      {
+        "_id": 520,
+        "count": 6
+      },
+      {
+        "_id": 540,
+        "count": 2
+      },
+      {
+        "_id": 550,
+        "count": 5
+      },
+      {
+        "_id": 600,
+        "count": 18
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "dk-h2",
+    "question": "Which owner has paid the largest amount of money in total for their dogs' treatments? Show the owner id and zip code.",
+    "database": "dog_kennels",
+    "query": "db.Treatments.aggregate([{'$group': {'_id': '$professional_id', 'total_cost': {'$sum': '$cost_of_treatment'}}}, {'$sort': {'total_cost': -1}}, {'$limit': 1}, {'$lookup': {'from': 'Professionals', 'localField': '_id', 'foreignField': 'professional_id', 'as': 'p'}}, {'$unwind': '$p'}, {'$project': {'_id': 0, 'owner_id': '$p.owner_id', 'zip_code': '$p.zip_code'}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "zip_code": "41215"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-e5",
+    "question": "List all country names in the database.",
+    "database": "car_1",
+    "query": "db.country.find({}, {'_id': 0, 'Name': 1})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-c1",
+    "question": "List the names of singers and the stadium name where they performed, for concerts held in 2015.",
+    "database": "concert_singer",
+    "query": "db.singer_in_concert.aggregate([{'$addFields': {'Singer_ID_int': {'$toInt': '$Singer_ID'}}}, {'$lookup': {'from': 'concert', 'localField': 'concert_ID', 'foreignField': 'concert_ID', 'as': 'concert'}}, {'$unwind': '$concert'}, {'$match': {'concert.Year': '2015'}}, {'$lookup': {'from': 'stadium', 'localField': 'Stadium_ID', 'foreignField': 'Stadium_ID', 'as': 'stadium'}}, {'$unwind': '$stadium'}, {'$project': {'_id': 0, 'Name': '$singer.Name', 'Stadium_Name': '$stadium.Name'}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  }
+]

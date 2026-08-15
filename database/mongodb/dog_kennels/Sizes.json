@@ -1,0 +1,14 @@
+[
+  {
+    "size_code": "SML",
+    "size_description": "Small"
+  },
+  {
+    "size_code": "MED",
+    "size_description": "Medium"
+  },
+  {
+    "size_code": "LGE",
+    "size_description": "Large"
+  }
+]

@@ -1,86 +1,2080 @@
 [
   {
-    "id": "easy-1",
+    "id": 1,
     "question": "How many singers are there?",
-    "query": "db.singers.count_documents({})",
+    "database": "concert_singer",
+    "query": "db.singer.count_documents({})",
     "status": "PASS",
-    "result": 0
+    "result": 6,
+    "non_empty_rate": true,
+    "execution_accuracy": true
   },
   {
-    "id": "easy-2",
+    "id": 2,
     "question": "What are the names of singers from France?",
-    "query": "db.singers.find({\"country\": \"France\"})",
+    "database": "concert_singer",
+    "query": "db.singer.find({'Country': 'France'})",
     "status": "PASS",
-    "result": []
+    "result": [
+      {
+        "_id": "6a659c87fdddf355848717be",
+        "Singer_ID": 3,
+        "Name": "Justin Brown",
+        "Country": "France",
+        "Song_Name": "Hey Oh",
+        "Song_release_year": "2013",
+        "Age": 29,
+        "Is_male": "T"
+      },
+      {
+        "_id": "6a659c87fdddf355848717bf",
+        "Singer_ID": 4,
+        "Name": "Rose White",
+        "Country": "France",
+        "Song_Name": "Sun",
+        "Song_release_year": "2003",
+        "Age": 41,
+        "Is_male": "F"
+      },
+      {
+        "_id": "6a659c87fdddf355848717c0",
+        "Singer_ID": 5,
+        "Name": "John Nizinik",
+        "Country": "France",
+        "Song_Name": "Gentleman",
+        "Song_release_year": "2014",
+        "Age": 43,
+        "Is_male": "T"
+      },
+      {
+        "_id": "6a659c87fdddf355848717c1",
+        "Singer_ID": 6,
+        "Name": "Tribal King",
+        "Country": "France",
+        "Song_Name": "Love",
+        "Song_release_year": "2016",
+        "Age": 25,
+        "Is_male": "T"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
   },
   {
-    "id": "easy-3",
+    "id": 3,
     "question": "Find the maximum weight of all pets.",
-    "query": "db.pets.aggregate([{\"$group\": {\"_id\": None, \"max_weight\": {\"$max\": \"$weight\"}}}])",
-    "status": "PASS",
-    "result": []
+    "database": "pets_1",
+    "query": "db.pets.aggregate([{'$group': {'max_weight': {'$max': '$weight'}}}])",
+    "status": "FAIL",
+    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1786729833, 4), 'signature': {'hash': b'45g\\x9b\\xefq\\x87\\xea\\x8b\\xb8V\\x1e<Gd\\xda\\xfb<\\xa0\\xa8', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1786729833, 4)}",
+    "non_empty_rate": false,
+    "execution_accuracy": false
   },
   {
-    "id": "medium-1",
+    "id": 4,
     "question": "What are the names and ages of singers, ordered by age?",
-    "query": "db.singers.find({}, {\"name\": 1, \"age\": 1}).sort(\"age\")",
+    "database": "concert_singer",
+    "query": "db.singer.find({}, {'Name': 1, 'Age': 1}).sort('Age', 1)",
     "status": "PASS",
-    "result": []
+    "result": [
+      {
+        "_id": "6a659c87fdddf355848717c1",
+        "Name": "Tribal King",
+        "Age": 25
+      },
+      {
+        "_id": "6a659c87fdddf355848717be",
+        "Name": "Justin Brown",
+        "Age": 29
+      },
+      {
+        "_id": "6a659c87fdddf355848717bd",
+        "Name": "Timbaland",
+        "Age": 32
+      },
+      {
+        "_id": "6a659c87fdddf355848717bf",
+        "Name": "Rose White",
+        "Age": 41
+      },
+      {
+        "_id": "6a659c87fdddf355848717c0",
+        "Name": "John Nizinik",
+        "Age": 43
+      },
+      {
+        "_id": "6a659c87fdddf355848717bc",
+        "Name": "Joe Sharp",
+        "Age": 52
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
   },
   {
-    "id": "medium-2",
+    "id": 5,
     "question": "How many concerts were held in each stadium?",
-    "query": "db.concerts.aggregate([ { $group: { _id: \"$stadium_id\", count: { $sum: 1 } } } ])",
-    "status": "FAIL",
-    "error": "invalid syntax (<string>, line 1)"
+    "database": "concert_singer",
+    "query": "db.concert.aggregate([{'$group': {'_id': '$Stadium_ID', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "10",
+        "count": 1
+      },
+      {
+        "_id": "2",
+        "count": 2
+      },
+      {
+        "_id": "7",
+        "count": 1
+      },
+      {
+        "_id": "9",
+        "count": 1
+      },
+      {
+        "_id": "1",
+        "count": 1
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
   },
   {
-    "id": "medium-3",
+    "id": 6,
     "question": "Find pet types that have more than one pet, with their counts.",
-    "query": "db.pets.aggregate([ {\"$group\": {\"_id\": \"$pet_type\", \"count\": {\"$sum\": 1}}}, {\"$match\": {\"count\": {\"$gt\": 1}}}, {\"$sort\": {\"count\": -1}} ])",
+    "database": "pets_1",
+    "query": "db.pets.aggregate([{'$group': {'_id': '$petType', 'count': {'$sum': 1}}}, {'$match': {'count': {'$gt': 1}}}, {'$sort': {'count': -1}}])",
     "status": "PASS",
-    "result": []
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
   },
   {
-    "id": "high-1",
+    "id": 7,
     "question": "What are the names of singers who performed in a concert in 2014?",
-    "query": "db.singers.find({\"concerts.year\": \"2014\"})",
+    "database": "concert_singer",
+    "query": "db.concert_singer.aggregate([{'$lookup': {'from': 'concert', 'localField': 'stadium', 'foreignField': 'Stadium_ID', 'as': 'concert_info'}}, {'$match': {'concert_info.Year': '2014'}}, {'$project': {'Singer_Name': '$singer.Name'}}])",
     "status": "PASS",
-    "result": []
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
   },
   {
-    "id": "high-2",
+    "id": 8,
     "question": "Find the first names of students who have a dog as a pet.",
-    "query": "db.students.find({\"has_pet.pet_type\": \"dog\"})",
+    "database": "pets_1",
+    "query": "db.pets.find({'Has_Pet.StuID': {'$exists': True}}, {'Students.Fname': 1})",
     "status": "PASS",
-    "result": []
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
   },
   {
-    "id": "high-3",
+    "id": 9,
     "question": "For each country of origin, find the average miles per gallon of cars.",
-    "query": "db.cars.aggregate([ { $group: { _id: \"$origin\", avg_mpg: { $avg: \"$mpg\" } } } ])",
-    "status": "FAIL",
-    "error": "invalid syntax (<string>, line 1)"
-  },
-  {
-    "id": "complex-1",
-    "question": "Find singers who have not participated in any concert.",
-    "query": "db.singers.find({\"singer_id\": {\"$nin\": [x[\"singer_id\"] for x in db.singer_concerts.distinct(\"singer_id\")]}})",
+    "database": "car_1",
+    "query": "db.cars_data.aggregate([{'$group': {'_id': '$Country', 'avg MPG': {'$avg': '$MPG'}}}])",
     "status": "PASS",
-    "result": []
+    "result": [
+      {
+        "_id": null,
+        "avg MPG": null
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
   },
   {
-    "id": "complex-2",
+    "id": 10,
+    "question": "Find singers who have not participated in any concert.",
+    "database": "concert_singer",
+    "query": "db.singer.find({'Singer_ID': {'$nin': [x['Singer_ID'] for x in db.singer_in_concert.distinct('Singer_ID')]}})",
+    "status": "FAIL",
+    "error": "REJECTED by safety check (unexpected name: x)",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": 11,
     "question": "Find students who have more friends than the average number of friends per student.",
-    "query": "db.students.aggregate([ { \"$group\": { \"_id\": null, \"avg_friends\": {\"$avg\": \"$friends\"} } }, { \"$project\": { \"_id\": 0, \"students_with_more_friends\": {\"$gt\": [\"$friends\", \"$avg_friends\"]} } }, { \"$match\": { \"students_with_more_friends\": true } } ])",
-    "status": "FAIL",
-    "error": "name 'null' is not defined"
+    "database": "network_1",
+    "query": "db.students.aggregate([{'$group': {'_id': '$StuID', 'num_friends': {'$sum': 1}}}, {'$project': {'avg_friends': {'$avg': '$num_friends'}}}, {'$match': {'num_friends': {'$gt': '$avg_friends'}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
   },
   {
-    "id": "complex-3",
+    "id": 12,
     "question": "For each maker, find the model with the highest horsepower.",
-    "query": "db.cars.aggregate([ { $group: { _id: \"$maker\", max_horsepower: { $max: \"$horsepower\" }, models: { $push: \"$model\" } } }, { $project: { maker: \"$_id\", max_horsepower: \"$max_horsepower\", models: { $slice: [\"$models\", -1] } } } ])",
+    "database": "car_1",
+    "query": "db.car_makers.aggregate([{'$lookup': {'from': 'cars_data', 'localField': 'id', 'foreignField': 'maker', 'as': 'car_data'}}, {'$group': {'_id': '$maker', 'max_horsepower': {'$max': '$car_data.horsepower'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "max_horsepower": []
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-e1",
+    "question": "List the names of all singers.",
+    "database": "concert_singer",
+    "query": "db.singer.find({}, {'Name': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "6a659c87fdddf355848717bc",
+        "Name": "Joe Sharp"
+      },
+      {
+        "_id": "6a659c87fdddf355848717bd",
+        "Name": "Timbaland"
+      },
+      {
+        "_id": "6a659c87fdddf355848717be",
+        "Name": "Justin Brown"
+      },
+      {
+        "_id": "6a659c87fdddf355848717bf",
+        "Name": "Rose White"
+      },
+      {
+        "_id": "6a659c87fdddf355848717c0",
+        "Name": "John Nizinik"
+      },
+      {
+        "_id": "6a659c87fdddf355848717c1",
+        "Name": "Tribal King"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-e2",
+    "question": "How many stadiums are there?",
+    "database": "concert_singer",
+    "query": "db.concert_singer.aggregate([{'$group': {'_id': None, 'count': {'$sum': 1}}}, {'$project': {'count': 1}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-e3",
+    "question": "List the names of all concerts.",
+    "database": "concert_singer",
+    "query": "db.concert.find({}, {'concert_Name': 1})",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "6a659ca2fdddf355848717c4",
+        "concert_Name": "Auditions"
+      },
+      {
+        "_id": "6a659ca2fdddf355848717c5",
+        "concert_Name": "Super bootcamp"
+      },
+      {
+        "_id": "6a659ca2fdddf355848717c6",
+        "concert_Name": "Home Visits"
+      },
+      {
+        "_id": "6a659ca2fdddf355848717c7",
+        "concert_Name": "Week 1"
+      },
+      {
+        "_id": "6a659ca2fdddf355848717c8",
+        "concert_Name": "Week 1"
+      },
+      {
+        "_id": "6a659ca2fdddf355848717c9",
+        "concert_Name": "Week 2"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-e4",
+    "question": "Find the names and ages of singers older than 40.",
+    "database": "concert_singer",
+    "query": "db.singer.find({'Age': {'$gt': 40}})",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "6a659c87fdddf355848717bc",
+        "Singer_ID": 1,
+        "Name": "Joe Sharp",
+        "Country": "Netherlands",
+        "Song_Name": "You",
+        "Song_release_year": "1992",
+        "Age": 52,
+        "Is_male": "F"
+      },
+      {
+        "_id": "6a659c87fdddf355848717bf",
+        "Singer_ID": 4,
+        "Name": "Rose White",
+        "Country": "France",
+        "Song_Name": "Sun",
+        "Song_release_year": "2003",
+        "Age": 41,
+        "Is_male": "F"
+      },
+      {
+        "_id": "6a659c87fdddf355848717c0",
+        "Singer_ID": 5,
+        "Name": "John Nizinik",
+        "Country": "France",
+        "Song_Name": "Gentleman",
+        "Song_release_year": "2014",
+        "Age": 43,
+        "Is_male": "T"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-e5",
+    "question": "What are the names of the male singers?",
+    "database": "concert_singer",
+    "query": "db.singer.find({'Is_male': 'Male'}, {'Name': 1})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-e6",
+    "question": "List the names of stadiums with a capacity greater than 10000.",
+    "database": "concert_singer",
+    "query": "db.concert_singer.find({'stadium.Capacity': {'$gt': 10000}})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-e7",
+    "question": "Which concerts happened in the year 2015?",
+    "database": "concert_singer",
+    "query": "db.concert.find({'Year': '2015'})",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "6a659ca2fdddf355848717c6",
+        "concert_ID": 3,
+        "concert_Name": "Home Visits",
+        "Theme": "Bleeding Love",
+        "Stadium_ID": "2",
+        "Year": "2015"
+      },
+      {
+        "_id": "6a659ca2fdddf355848717c8",
+        "concert_ID": 5,
+        "concert_Name": "Week 1",
+        "Theme": "Happy Tonight",
+        "Stadium_ID": "9",
+        "Year": "2015"
+      },
+      {
+        "_id": "6a659ca2fdddf355848717c9",
+        "concert_ID": 6,
+        "concert_Name": "Week 2",
+        "Theme": "Party All Night",
+        "Stadium_ID": "7",
+        "Year": "2015"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-e8",
+    "question": "Find the singer whose song is named 'Love'.",
+    "database": "concert_singer",
+    "query": "db.singer.find({'song_Name': 'Love'})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-e9",
+    "question": "List the names of singers who are not from France.",
+    "database": "concert_singer",
+    "query": "db.singer.find({'Country': {'$ne': 'France'}})",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "6a659c87fdddf355848717bc",
+        "Singer_ID": 1,
+        "Name": "Joe Sharp",
+        "Country": "Netherlands",
+        "Song_Name": "You",
+        "Song_release_year": "1992",
+        "Age": 52,
+        "Is_male": "F"
+      },
+      {
+        "_id": "6a659c87fdddf355848717bd",
+        "Singer_ID": 2,
+        "Name": "Timbaland",
+        "Country": "United States",
+        "Song_Name": "Dangerous",
+        "Song_release_year": "2008",
+        "Age": 32,
+        "Is_male": "T"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-e10",
+    "question": "What is the theme of the concert called 'Super bootcamp'?",
+    "database": "concert_singer",
+    "query": "db.concert.find_one({'concert_Name': 'Super bootcamp'}, {'Theme': 1})",
+    "status": "PASS",
+    "result": [
+      "_id",
+      "Theme"
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-m1",
+    "question": "What is the average age of singers?",
+    "database": "concert_singer",
+    "query": "db.singer.aggregate([{'$group': {'_id': None, 'averageAge': {'$avg': '$age'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "averageAge": null
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-m2",
+    "question": "What is the total capacity of all stadiums combined?",
+    "database": "concert_singer",
+    "query": "db.concert_singer.aggregate([{'$group': {'_id': None, 'total_capacity': {'$sum': '$Capacity'}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-m3",
+    "question": "List the top 3 stadiums by capacity, largest first.",
+    "database": "concert_singer",
+    "query": "db.concert_singer.aggregate([{'$group': {'_id': '$Stadium_ID', 'capacity': {'$sum': 1}}}, {'$sort': {'capacity': -1}}, {'$limit': 3}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-m4",
+    "question": "How many concerts were held in each year?",
+    "database": "concert_singer",
+    "query": "db.concert.aggregate([{'$group': {'_id': '$Year', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "2014",
+        "count": 3
+      },
+      {
+        "_id": "2015",
+        "count": 3
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-m5",
+    "question": "What is the age of the youngest singer?",
+    "database": "concert_singer",
+    "query": "db.singer.aggregate([{'$group': {'_id': '$Age', 'minAge': {'$min': '$Age'}}}, {'$sort': {'minAge': 1}}, {'$limit': 1}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": 25,
+        "minAge": 25
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-m6",
+    "question": "List the distinct countries singers come from, in alphabetical order.",
+    "database": "concert_singer",
+    "query": "db.singer.distinct('Country').sort()",
     "status": "FAIL",
-    "error": "invalid syntax (<string>, line 1)"
+    "error": "'NoneType' object is not iterable",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-m7",
+    "question": "How many singers are there for each country?",
+    "database": "concert_singer",
+    "query": "db.singer.aggregate([{'$group': {'_id': '$Country', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "Netherlands",
+        "count": 1
+      },
+      {
+        "_id": "France",
+        "count": 4
+      },
+      {
+        "_id": "United States",
+        "count": 1
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "cs-m8",
+    "question": "What is the average stadium capacity?",
+    "database": "concert_singer",
+    "query": "db.concert_singer.aggregate([{'$group': {'avg_capacity': {'$avg': '$Capacity'}}}])",
+    "status": "FAIL",
+    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1786729834, 8), 'signature': {'hash': b'\\x11\\xb8\\xf6\\x14D\\xabt\\xb6-\\x0ei\\x8e\\x9b\\xc0\\xa2ou\\xf5\\xb6\\xfa', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1786729834, 8)}",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-h1",
+    "question": "How many concerts were held at each stadium? Include the stadium name.",
+    "database": "concert_singer",
+    "query": "db.concert.aggregate([{'$lookup': {'from': 'stadium', 'localField': 'Stadium_ID', 'foreignField': 'Stadium_ID', 'as': 'stadium_info'}}, {'$group': {'_id': '$stadium_info.Name', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": [],
+        "count": 6
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-h2",
+    "question": "List the names of singers who performed in the concert called 'Auditions'.",
+    "database": "concert_singer",
+    "query": "db.concert_singer.find({'concert': 'Auditions'}, {'singer.Name': 1})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "cs-c1",
+    "question": "List the names of singers and the stadium name where they performed, for concerts held in 2015.",
+    "database": "concert_singer",
+    "query": "db.concert.find({'concert.Year': '2015'}, {'singer.Name': 1, 'stadium.Name': 1})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-e1",
+    "question": "How many students are there?",
+    "database": "pets_1",
+    "query": "db.students.count_documents({})",
+    "status": "PASS",
+    "result": 0,
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-e2",
+    "question": "List the first names of female students.",
+    "database": "pets_1",
+    "query": "db.students.find({'Sex': 'Female'}, {'Fname': 1})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-e3",
+    "question": "Find the first and last names of students younger than 18.",
+    "database": "pets_1",
+    "query": "db.students.find({'Age': {'$lt': 18}})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-e4",
+    "question": "What is the last name of the student with StuID 1010?",
+    "database": "pets_1",
+    "query": "db.Student.find_one({'StuID': 1010}, {'LName': 1})",
+    "status": "PASS",
+    "result": [
+      "_id",
+      "LName"
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-e5",
+    "question": "List the first names of students majoring in 600.",
+    "database": "pets_1",
+    "query": "db.students.find({'Major': '600'}, {'Fname': 1})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-e6",
+    "question": "Which students live in city code 'PIT'? Give their first names.",
+    "database": "pets_1",
+    "query": "db.students.find({'city_code': 'PIT'}, {'Fname': 1})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-e7",
+    "question": "List all the pet types in the database.",
+    "database": "pets_1",
+    "query": "db.pets.distinct('PetType')",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-e8",
+    "question": "What is the age of the cat?",
+    "database": "pets_1",
+    "query": "db.dogs.find_one({'breed_code': 'CAT'}, {'age': 1})",
+    "status": "FAIL",
+    "error": "'NoneType' object is not iterable",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-e9",
+    "question": "Find students whose advisor is 1148.",
+    "database": "pets_1",
+    "query": "db.students.find({'Advisor': '1148'})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-m1",
+    "question": "How many students are there in each major?",
+    "database": "pets_1",
+    "query": "db.student.aggregate([{'$group': {'_id': '$Major', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-m2",
+    "question": "What is the average age of students?",
+    "database": "pets_1",
+    "query": "db.students.aggregate([{'$group': {'_id': None, 'average_age': {'$avg': '$Age'}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-m3",
+    "question": "List the 5 oldest students, oldest first, with their ages.",
+    "database": "pets_1",
+    "query": "db.students.find().sort('Age', -1).limit(5)",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-m4",
+    "question": "How many distinct city codes are represented among students?",
+    "database": "pets_1",
+    "query": "db.student.distinct('city_code')",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-m5",
+    "question": "Which advisor has the most advisees, and how many do they have?",
+    "database": "pets_1",
+    "query": "db.students.aggregate([{'$group': {'_id': '$advisor', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-m6",
+    "question": "What is the average weight of pets?",
+    "database": "pets_1",
+    "query": "db.pets.aggregate([{'$group': {'_id': None, 'avg_weight': {'$avg': '$pet_weight'}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-h1",
+    "question": "What are the first and last names of students who own a cat?",
+    "database": "pets_1",
+    "query": "db.dogs.aggregate([{'$lookup': {'from': 'owners', 'localField': 'owner_id', 'foreignField': 'owner_id', 'as': 'owner_info'}}, {'$match': {'owner_info.breed_code': 'C'}}, {'$project': {'first_name': '$owner_info.first_name', 'last_name': '$owner_info.last_name'}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "pt-h2",
+    "question": "For each pet type, what is the average weight?",
+    "database": "pets_1",
+    "query": "db.pets.aggregate([{'$group': {'_id': '$PetType', 'avg_weight': {'$avg': '$pet_age'}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-e1",
+    "question": "How many highschoolers are there?",
+    "database": "network_1",
+    "query": "db.highschooler.count_documents({})",
+    "status": "PASS",
+    "result": 0,
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-e2",
+    "question": "List the names of highschoolers in grade 9.",
+    "database": "network_1",
+    "query": "db.highschooler.find({'grade': '9'})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-e3",
+    "question": "What is the name of the highschooler with ID 1911?",
+    "database": "network_1",
+    "query": "db.highschooler.find_one({'ID': 1911}, {'name': 1})",
+    "status": "FAIL",
+    "error": "'NoneType' object is not iterable",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-e4",
+    "question": "List the names of highschoolers in grade 12.",
+    "database": "network_1",
+    "query": "db.highschooler.find({'grade': '12'})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-e5",
+    "question": "How many friendship pairs are recorded?",
+    "database": "network_1",
+    "query": "db.Friend.count_documents({})",
+    "status": "PASS",
+    "result": 20,
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "nw-e6",
+    "question": "How many 'likes' relationships are there?",
+    "database": "network_1",
+    "query": "db.likes.count_documents({})",
+    "status": "PASS",
+    "result": 0,
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-e7",
+    "question": "List highschoolers named 'Gabriel'.",
+    "database": "network_1",
+    "query": "db.highschooler.find({'name': 'Gabriel'})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-m1",
+    "question": "How many highschoolers are there in each grade?",
+    "database": "network_1",
+    "query": "db.highschooler.aggregate([{'$group': {'_id': '$grade', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-m2",
+    "question": "What is the average grade of highschoolers?",
+    "database": "network_1",
+    "query": "db.highschooler.aggregate([{'$group': {'_id': None, 'avg_grade': {'$avg': '$grade'}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-m3",
+    "question": "Which student IDs appear most often as the 'student_id' side of a friendship, and how many friends do they list?",
+    "database": "network_1",
+    "query": "db.network_1.aggregate([{'$group': {'_id': '$student_id', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-m4",
+    "question": "List the highschooler names sorted alphabetically.",
+    "database": "network_1",
+    "query": "db.highschooler.find().sort('name')",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-h1",
+    "question": "List the names of highschoolers who appear as the 'student_id' side of at least one friendship.",
+    "database": "network_1",
+    "query": "db.network_1.aggregate([{'$lookup': {'from': 'highschooler', 'localField': 'friend_id', 'foreignField': 'ID', 'as': 'high_school_friends'}}, {'$unwind': '$high_school_friends'}, {'$group': {'_id': '$high_school_friends.name', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-h2",
+    "question": "How many friends does each highschooler have, by name?",
+    "database": "network_1",
+    "query": "db.highschooler.aggregate([{'$group': {'_id': '$name', 'num_friends': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "nw-c1",
+    "question": "List the names of highschoolers who are friends with someone in grade 12.",
+    "database": "network_1",
+    "query": "db.highschooler.aggregate([{'$lookup': {'from': 'friend', 'localField': 'id', 'foreignField': 'student_id', 'as': 'friends'}}, {'$match': {'friends.grade': 12}}, {'$project': {'_id': 0, 'name': '$name'}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-e1",
+    "question": "How many cars are in the database?",
+    "database": "car_1",
+    "query": "db.cars_data.count_documents({})",
+    "status": "PASS",
+    "result": 406,
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-e2",
+    "question": "List the full names of all Renault cars.",
+    "database": "car_1",
+    "query": "db.cars_data.find({'maker': 'Renault'}, {'maker': 0, 'model': 1})",
+    "status": "FAIL",
+    "error": "Cannot do inclusion on field model in exclusion projection, full error: {'ok': 0.0, 'errmsg': 'Cannot do inclusion on field model in exclusion projection', 'code': 31253, 'codeName': 'Location31253', '$clusterTime': {'clusterTime': Timestamp(1786729835, 10), 'signature': {'hash': b\"\\xdc\\xdc\\x1fb\\x0f^\\xb2\\x0b\\xef\\xdbS4\\t'K\\x1c\\xe4\\x89\\x0e\\xd6\", 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1786729835, 10)}",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-e3",
+    "question": "List the full names of all car makers.",
+    "database": "car_1",
+    "query": "db.car_makers.aggregate([{'$project': {'Maker': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "6a659d06fdddf355848717e3",
+        "Maker": "amc"
+      },
+      {
+        "_id": "6a659d06fdddf355848717e4",
+        "Maker": "volkswagen"
+      },
+      {
+        "_id": "6a659d06fdddf355848717e5",
+        "Maker": "bmw"
+      },
+      {
+        "_id": "6a659d06fdddf355848717e6",
+        "Maker": "gm"
+      },
+      {
+        "_id": "6a659d06fdddf355848717e7",
+        "Maker": "ford"
+      },
+      {
+        "_id": "6a659d06fdddf355848717e8",
+        "Maker": "chrysler"
+      },
+      {
+        "_id": "6a659d06fdddf355848717e9",
+        "Maker": "citroen"
+      },
+      {
+        "_id": "6a659d06fdddf355848717ea",
+        "Maker": "nissan"
+      },
+      {
+        "_id": "6a659d06fdddf355848717eb",
+        "Maker": "fiat"
+      },
+      {
+        "_id": "6a659d06fdddf355848717ec",
+        "Maker": "honda"
+      },
+      {
+        "_id": "6a659d06fdddf355848717ed",
+        "Maker": "mazda"
+      },
+      {
+        "_id": "6a659d06fdddf355848717ee",
+        "Maker": "daimler benz"
+      },
+      {
+        "_id": "6a659d06fdddf355848717ef",
+        "Maker": "opel"
+      },
+      {
+        "_id": "6a659d06fdddf355848717f0",
+        "Maker": "peugeaut"
+      },
+      {
+        "_id": "6a659d06fdddf355848717f1",
+        "Maker": "renault"
+      },
+      {
+        "_id": "6a659d06fdddf355848717f2",
+        "Maker": "saab"
+      },
+      {
+        "_id": "6a659d06fdddf355848717f3",
+        "Maker": "subaru"
+      },
+      {
+        "_id": "6a659d06fdddf355848717f4",
+        "Maker": "toyota"
+      },
+      {
+        "_id": "6a659d06fdddf355848717f5",
+        "Maker": "triumph"
+      },
+      {
+        "_id": "6a659d06fdddf355848717f6",
+        "Maker": "volvo"
+      },
+      {
+        "_id": "6a659d06fdddf355848717f7",
+        "Maker": "kia"
+      },
+      {
+        "_id": "6a659d06fdddf355848717f8",
+        "Maker": "hyundai"
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-e4",
+    "question": "List all continents in the database.",
+    "database": "car_1",
+    "query": "db.continents.distinct('Continent')",
+    "status": "PASS",
+    "result": [
+      "africa",
+      "america",
+      "asia",
+      "australia",
+      "europe"
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-e5",
+    "question": "List all country names in the database.",
+    "database": "car_1",
+    "query": "db.country.find({}, {'CountryName': 1})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-e6",
+    "question": "How many cars have exactly 3 cylinders?",
+    "database": "car_1",
+    "query": "db.cars_data.count_documents({'Cylinders': '3'})",
+    "status": "PASS",
+    "result": 0,
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-e7",
+    "question": "How many cars were produced in 1982?",
+    "database": "car_1",
+    "query": "db.cars_data.count_documents({'Year': '1982'})",
+    "status": "PASS",
+    "result": 0,
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-e8",
+    "question": "What is the make of the car with Id 100?",
+    "database": "car_1",
+    "query": "db.cars_data.find_one({'Id': 100}, {'Maker': 1})",
+    "status": "PASS",
+    "result": [
+      "_id"
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-e9",
+    "question": "List all model names produced by maker id 6.",
+    "database": "car_1",
+    "query": "db.model_list.json.aggregate([{'$match': {'Maker': '6'}}, {'$project': {'Model': 1}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-e10",
+    "question": "How many cars have exactly 8 cylinders?",
+    "database": "car_1",
+    "query": "db.cars_data.count_documents({'Cylinders': '8'})",
+    "status": "PASS",
+    "result": 0,
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-m1",
+    "question": "How many distinct models are listed in the model_list table?",
+    "database": "car_1",
+    "query": "db.model_list.count_documents({})",
+    "status": "PASS",
+    "result": 0,
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-m2",
+    "question": "How many cars were produced each year?",
+    "database": "car_1",
+    "query": "db.cars_data.aggregate([{'$group': {'_id': '$Year', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": 1974,
+        "count": 27
+      },
+      {
+        "_id": 1973,
+        "count": 40
+      },
+      {
+        "_id": 1976,
+        "count": 34
+      },
+      {
+        "_id": 1970,
+        "count": 35
+      },
+      {
+        "_id": 1972,
+        "count": 28
+      },
+      {
+        "_id": 1975,
+        "count": 30
+      },
+      {
+        "_id": 1979,
+        "count": 29
+      },
+      {
+        "_id": 1981,
+        "count": 30
+      },
+      {
+        "_id": 1982,
+        "count": 31
+      },
+      {
+        "_id": 1977,
+        "count": 28
+      },
+      {
+        "_id": 1978,
+        "count": 36
+      },
+      {
+        "_id": 1971,
+        "count": 29
+      },
+      {
+        "_id": 1980,
+        "count": 29
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-m3",
+    "question": "What is the average weight of all cars?",
+    "database": "car_1",
+    "query": "db.cars_data.aggregate([{'$group': {'_id': None, 'avg_weight': {'$avg': '$weight'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "avg_weight": null
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-m4",
+    "question": "What are the 5 heaviest cars? Report Id and Weight.",
+    "database": "car_1",
+    "query": "db.cars_data.aggregate([{'$sort': {'Weight': -1}}, {'$limit': 5}, {'$project': {'Id': 1, 'Weight': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "6a659d31fdddf355848719c6",
+        "Id": 52,
+        "Weight": 5140
+      },
+      {
+        "_id": "6a659d31fdddf35584871a01",
+        "Id": 111,
+        "Weight": 4997
+      },
+      {
+        "_id": "6a659d31fdddf355848719c4",
+        "Id": 50,
+        "Weight": 4955
+      },
+      {
+        "_id": "6a659d31fdddf355848719f4",
+        "Id": 98,
+        "Weight": 4952
+      },
+      {
+        "_id": "6a659d31fdddf355848719f9",
+        "Id": 103,
+        "Weight": 4951
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-m5",
+    "question": "How many car makers are registered under each country code?",
+    "database": "car_1",
+    "query": "db.car_makers.aggregate([{'$group': {'_id': '$Country', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "5",
+        "count": 1
+      },
+      {
+        "_id": "7",
+        "count": 1
+      },
+      {
+        "_id": "1",
+        "count": 4
+      },
+      {
+        "_id": "4",
+        "count": 5
+      },
+      {
+        "_id": "3",
+        "count": 3
+      },
+      {
+        "_id": "6",
+        "count": 2
+      },
+      {
+        "_id": "8",
+        "count": 2
+      },
+      {
+        "_id": "2",
+        "count": 4
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "car-m6",
+    "question": "What is the maximum acceleration time recorded?",
+    "database": "car_1",
+    "query": "db.cars_data.aggregate([{'$group': {'max_acceleration_time': {'$max': '$accelerate'}}}])",
+    "status": "FAIL",
+    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1786729836, 3), 'signature': {'hash': b's\\x9d2\\xeb\\x90\\xb9\\xa0+\\xae\\r$\\x94\\xa8\\xe4H,Y\\x9d\\xa0\\xe0', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1786729836, 3)}",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-m7",
+    "question": "How many models does each maker have?",
+    "database": "car_1",
+    "query": "db.model_list.json.aggregate([{'$group': {'_id': '$Maker', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": 9,
+        "count": 1
+      },
+      {
+        "_id": 14,
+        "count": 1
+      },
+      {
+        "_id": 18,
+        "count": 1
+      },
+      {
+        "_id": 16,
+        "count": 1
+      },
+      {
+        "_id": 19,
+        "count": 2
+      },
+      {
+        "_id": 20,
+        "count": 1
+      },
+      {
+        "_id": 12,
+        "count": 1
+      },
+      {
+        "_id": 17,
+        "count": 1
+      },
+      {
+        "_id": 7,
+        "count": 1
+      },
+      {
+        "_id": 22,
+        "count": 1
+      },
+      {
+        "_id": 21,
+        "count": 1
+      },
+      {
+        "_id": 3,
+        "count": 1
+      },
+      {
+        "_id": 5,
+        "count": 3
+      },
+      {
+        "_id": 13,
+        "count": 2
+      },
+      {
+        "_id": 2,
+        "count": 2
+      },
+      {
+        "_id": 23,
+        "count": 1
+      },
+      {
+        "_id": 1,
+        "count": 1
+      },
+      {
+        "_id": 8,
+        "count": 2
+      },
+      {
+        "_id": 11,
+        "count": 1
+      },
+      {
+        "_id": 15,
+        "count": 1
+      },
+      {
+        "_id": 6,
+        "count": 4
+      },
+      {
+        "_id": 4,
+        "count": 5
+      },
+      {
+        "_id": 10,
+        "count": 1
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-h1",
+    "question": "List car makers with more than 2 models. Report the full name and the model count.",
+    "database": "car_1",
+    "query": "db.car_makers.aggregate([{'$group': {'_id': '$Maker', 'count': {'$sum': 1}}}, {'$match': {'count': {'$gt': 2}}}, {'$project': {'FullName': '$FullName', 'ModelCount': '$count'}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-h2",
+    "question": "List all Volvo cars produced between 1977 and 1981 inclusive. Report the name of the car and the year.",
+    "database": "car_1",
+    "query": "db.cars_data.find({'Maker': 'Volvo', 'Year': {'$gte': 1977, '$lte': 1981}})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-h3",
+    "question": "Report all Asian automakers: their full name and country name.",
+    "database": "car_1",
+    "query": "db.car_makers.find({'Country': 'Asia'})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-c1",
+    "question": "For each Saab released after 1978, report the full name, the year, and the ratio of weight to horsepower.",
+    "database": "car_1",
+    "query": "db.car_makers.aggregate([{'$match': {'Maker': 'Saab', 'cars_data.Year': {'$gt': 1978}}}, {'$project': {'FullName': '$FullName', 'Year': '$cars_data.Year', 'Weight_to_Horsepower': {'$divide': ['$cars_data.Weight', '$cars_data.Horsepower']}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "car-c2",
+    "question": "Find how many different car makers produced a vehicle heavier than 4000 lbs.",
+    "database": "car_1",
+    "query": "db.cars_data.aggregate([{'$match': {'MPG': {'$gt': '4000'}}}, {'$group': {'_id': '$Maker', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "count": 16
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-e1",
+    "question": "What are the names of all the countries that became independent after 1950?",
+    "database": "world_1",
+    "query": "db.country.find({'IndepYear': {'$gt': '1950'}}).distinct('Name')",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-e2",
+    "question": "How many countries have a republic as their form of government?",
+    "database": "world_1",
+    "query": "db.country.count_documents({'GovernmentForm': 'Republic'})",
+    "status": "PASS",
+    "result": 122,
+    "non_empty_rate": true,
+    "execution_accuracy": true
+  },
+  {
+    "id": "wl-e3",
+    "question": "Which continent is Anguilla in?",
+    "database": "world_1",
+    "query": "db.continents.find_one({'Country': 'Anguilla'})",
+    "status": "FAIL",
+    "error": "'NoneType' object is not iterable",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-e4",
+    "question": "What are the population and life expectancy of Brazil?",
+    "database": "world_1",
+    "query": "db.country.find_one({'CountryName': 'Brazil'}, {'Population': 1, 'LifeExpectancy': 1})",
+    "status": "FAIL",
+    "error": "'NoneType' object is not iterable",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-e5",
+    "question": "How many people live in the Gelderland district?",
+    "database": "world_1",
+    "query": "db.city.count_documents({'District': 'Gelderland'})",
+    "status": "PASS",
+    "result": 4,
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-e6",
+    "question": "What are the names and surface areas of the 5 largest countries by area?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{'$sort': {'SurfaceArea': -1}}, {'$limit': 5}, {'$project': {'CountryName': 1, 'SurfaceArea': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "6a7f37e4774b8187ec3dbf9e",
+        "SurfaceArea": 17075400
+      },
+      {
+        "_id": "6a7f37e4774b8187ec3dbef4",
+        "SurfaceArea": 13120000
+      },
+      {
+        "_id": "6a7f37e4774b8187ec3dbf0e",
+        "SurfaceArea": 9970610
+      },
+      {
+        "_id": "6a7f37e4774b8187ec3dbf12",
+        "SurfaceArea": 9572900
+      },
+      {
+        "_id": "6a7f37e4774b8187ec3dbfc8",
+        "SurfaceArea": 9363520
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-e7",
+    "question": "What are the codes of countries that do not speak English?",
+    "database": "world_1",
+    "query": "db.country.find({'countrylanguage.Language': {'$ne': 'English'}}).distinct('Code')",
+    "status": "PASS",
+    "result": [
+      "ABW",
+      "AFG",
+      "AGO",
+      "AIA",
+      "ALB",
+      "AND",
+      "ANT",
+      "ARE",
+      "ARG",
+      "ARM",
+      "ASM",
+      "ATA",
+      "ATF",
+      "ATG",
+      "AUS",
+      "AUT",
+      "AZE",
+      "BDI",
+      "BEL",
+      "BEN",
+      "BFA",
+      "BGD",
+      "BGR",
+      "BHR",
+      "BHS",
+      "BIH",
+      "BLR",
+      "BLZ",
+      "BMU",
+      "BOL",
+      "BRA",
+      "BRB",
+      "BRN",
+      "BTN",
+      "BVT",
+      "BWA",
+      "CAF",
+      "CAN",
+      "CCK",
+      "CHE",
+      "CHL",
+      "CHN",
+      "CIV",
+      "CMR",
+      "COD",
+      "COG",
+      "COK",
+      "COL",
+      "COM",
+      "CPV",
+      "CRI",
+      "CUB",
+      "CXR",
+      "CYM",
+      "CYP",
+      "CZE",
+      "DEU",
+      "DJI",
+      "DMA",
+      "DNK",
+      "DOM",
+      "DZA",
+      "ECU",
+      "EGY",
+      "ERI",
+      "ESH",
+      "ESP",
+      "EST",
+      "ETH",
+      "FIN",
+      "FJI",
+      "FLK",
+      "FRA",
+      "FRO",
+      "FSM",
+      "GAB",
+      "GBR",
+      "GEO",
+      "GHA",
+      "GIB",
+      "GIN",
+      "GLP",
+      "GMB",
+      "GNB",
+      "GNQ",
+      "GRC",
+      "GRD",
+      "GRL",
+      "GTM",
+      "GUF",
+      "GUM",
+      "GUY",
+      "HKG",
+      "HMD",
+      "HND",
+      "HRV",
+      "HTI",
+      "HUN",
+      "IDN",
+      "IND",
+      "IOT",
+      "IRL",
+      "IRN",
+      "IRQ",
+      "ISL",
+      "ISR",
+      "ITA",
+      "JAM",
+      "JOR",
+      "JPN",
+      "KAZ",
+      "KEN",
+      "KGZ",
+      "KHM",
+      "KIR",
+      "KNA",
+      "KOR",
+      "KWT",
+      "LAO",
+      "LBN",
+      "LBR",
+      "LBY",
+      "LCA",
+      "LIE",
+      "LKA",
+      "LSO",
+      "LTU",
+      "LUX",
+      "LVA",
+      "MAC",
+      "MAR",
+      "MCO",
+      "MDA",
+      "MDG",
+      "MDV",
+      "MEX",
+      "MHL",
+      "MKD",
+      "MLI",
+      "MLT",
+      "MMR",
+      "MNG",
+      "MNP",
+      "MOZ",
+      "MRT",
+      "MSR",
+      "MTQ",
+      "MUS",
+      "MWI",
+      "MYS",
+      "MYT",
+      "NAM",
+      "NCL",
+      "NER",
+      "NFK",
+      "NGA",
+      "NIC",
+      "NIU",
+      "NLD",
+      "NOR",
+      "NPL",
+      "NRU",
+      "NZL",
+      "OMN",
+      "PAK",
+      "PAN",
+      "PCN",
+      "PER",
+      "PHL",
+      "PLW",
+      "PNG",
+      "POL",
+      "PRI",
+      "PRK",
+      "PRT",
+      "PRY",
+      "PSE",
+      "PYF",
+      "QAT",
+      "REU",
+      "ROM",
+      "RUS",
+      "RWA",
+      "SAU",
+      "SDN",
+      "SEN",
+      "SGP",
+      "SGS",
+      "SHN",
+      "SJM",
+      "SLB",
+      "SLE",
+      "SLV",
+      "SMR",
+      "SOM",
+      "SPM",
+      "STP",
+      "SUR",
+      "SVK",
+      "SVN",
+      "SWE",
+      "SWZ",
+      "SYC",
+      "SYR",
+      "TCA",
+      "TCD",
+      "TGO",
+      "THA",
+      "TJK",
+      "TKL",
+      "TKM",
+      "TMP",
+      "TON",
+      "TTO",
+      "TUN",
+      "TUR",
+      "TUV",
+      "TWN",
+      "TZA",
+      "UGA",
+      "UKR",
+      "UMI",
+      "URY",
+      "USA",
+      "UZB",
+      "VAT",
+      "VCT",
+      "VEN",
+      "VGB",
+      "VIR",
+      "VNM",
+      "VUT",
+      "WLF",
+      "WSM",
+      "YEM",
+      "YUG",
+      "ZAF",
+      "ZMB",
+      "ZWE"
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-m1",
+    "question": "Which region is the city Kabul located in?",
+    "database": "world_1",
+    "query": "db.city.find_one({'Name': 'Kabul'})['Region']",
+    "status": "FAIL",
+    "error": "'Region'",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-m2",
+    "question": "Which language is the most popular in Aruba?",
+    "database": "world_1",
+    "query": "db.countrylanguage.aggregate([{'$match': {'CountryCode': 'AW'}}, {'$group': {'_id': '$Language', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-m3",
+    "question": "How many official languages does Afghanistan have?",
+    "database": "world_1",
+    "query": "db.countrylanguage.count_documents({'CountryCode': 'AF'})",
+    "status": "PASS",
+    "result": 0,
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-m4",
+    "question": "What is the name of the country that speaks the largest number of languages?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{'$group': {'_id': '$Language', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "count": 239
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-m5",
+    "question": "What is the average life expectancy for countries in the Central Africa region?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{'$match': {'region': 'Central Africa'}}, {'$group': {'_id': '$Country', 'avg_life_expectancy': {'$avg': '$LifeExpectancy'}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-m6",
+    "question": "Find the city with the largest population where English is spoken.",
+    "database": "world_1",
+    "query": "db.countrylanguage.aggregate([{'$match': {'Language': 'English'}}, {'$group': {'_id': '$CountryCode', 'Population': {'$sum': '$Population'}}}, {'$sort': {'Population': -1}}, {'$limit': 1}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": "MCO",
+        "Population": 0
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-h1",
+    "question": "Return the country name and number of languages spoken for each country that speaks at least 3 languages.",
+    "database": "world_1",
+    "query": "db.country.aggregate([{'$group': {'_id': '$CountryCode', 'country_name': {'$first': '$Name'}, 'num_languages': {'$sum': 1}}}, {'$match': {'num_languages': {'$gte': 3}}}, {'$project': {'country_name': 1, 'num_languages': 1}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "country_name": "Aruba",
+        "num_languages": 239
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-h2",
+    "question": "Which languages are spoken by only one country among republic governments?",
+    "database": "world_1",
+    "query": "db.countrylanguage.aggregate([{'$match': {'IsOfficial': 'Yes'}}, {'$group': {'_id': '$CountryCode', 'count': {'$sum': 1}}}, {'$match': {'count': 1}}, {'$project': {'Language': '$_id'}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-h3",
+    "question": "What is the total population and average surface area of countries in North America with a surface area bigger than 3000?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{'$match': {'Continent': 'North America'}}, {'$group': {'_id': '$CountryName', 'TotalPopulation': {'$sum': '$Population'}, 'AverageSurfaceArea': {'$avg': '$SurfaceArea'}}}, {'$filter': {'$expr': {'$gt': ['$AverageSurfaceArea', 3000]}}}])",
+    "status": "FAIL",
+    "error": "$filter is not allowed or the syntax is incorrect, see the Atlas documentation for more information, full error: {'ok': 0, 'errmsg': '$filter is not allowed or the syntax is incorrect, see the Atlas documentation for more information', 'code': 8000, 'codeName': 'AtlasError'}",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "wl-c1",
+    "question": "Which countries have a greater surface area than every country in Oceania?",
+    "database": "world_1",
+    "query": "db.country.aggregate([{'$match': {'Continent': 'Oceania'}}, {'$group': {'_id': '$CountryName', 'surface_area': {'$sum': '$SurfaceArea'}}}, {'$project': {'country_name': '$_id', 'surface_area': '$surface_area'}}, {'$sort': {'surface_area': -1}}, {'$limit': 1}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "country_name": null,
+        "surface_area": 8564294
+      }
+    ],
+    "non_empty_rate": true,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-e1",
+    "question": "What is the average age of all the dogs?",
+    "database": "dog_kennels",
+    "query": "db.dogs.aggregate([{'$group': {'_id': None, 'average_age': {'$avg': '$age'}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-e2",
+    "question": "What is the age of the oldest dog?",
+    "database": "dog_kennels",
+    "query": "db.dogs.aggregate([{'$group': {'_id': None, 'maxAge': {'$max': '$age'}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-e3",
+    "question": "How many dogs went through any treatment?",
+    "database": "dog_kennels",
+    "query": "db.dogs.aggregate([{'$group': {'_id': '$treatment_id', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-e4",
+    "question": "How much does each charge type cost? List both the charge type and amount.",
+    "database": "dog_kennels",
+    "query": "db.charges.aggregate([{'$group': {'_id': '$charge_type', 'total_cost': {'$sum': '$charge_amount'}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-e5",
+    "question": "What is the most expensive charge amount?",
+    "database": "dog_kennels",
+    "query": "db.charges.aggregate([{'$group': {'_id': None, 'max_charge': {'$max': '$charge_amount'}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-e6",
+    "question": "List the email, cell phone, and home phone of all the professionals.",
+    "database": "dog_kennels",
+    "query": "db.professionals.find({}, {'email_address': 1, 'home_phone': 1, 'cell_number': 1})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-e7",
+    "question": "List the dog name, age, and weight of dogs that have been abandoned.",
+    "database": "dog_kennels",
+    "query": "db.dogs.find({'abandoned_yn': 'Y'})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-m1",
+    "question": "Which professionals live in the state of Hawaii or the state of Wisconsin? List their emails.",
+    "database": "dog_kennels",
+    "query": "db.professionals.find({'state': {'$in': ['Hawaii', 'Wisconsin']}, 'email_address': {'$exists': True}})",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-m2",
+    "question": "What is the name of the breed with the most dogs?",
+    "database": "dog_kennels",
+    "query": "db.dogs.aggregate([{'$group': {'_id': '$breed_code', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-m3",
+    "question": "Which owner owns the most dogs? List the owner id, first name, and last name.",
+    "database": "dog_kennels",
+    "query": "db.dogs.aggregate([{'$group': {'_id': '$owner_id', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-m4",
+    "question": "Which professionals have done at least two treatments? List the professional's id, role, and first name.",
+    "database": "dog_kennels",
+    "query": "db.professionals.aggregate([{'$group': {'_id': '$professional_id', 'count': {'$sum': 1}}}, {'$match': {'count': {'$gte': 2}}}, {'$project': {'professional_id': '$_id', 'role': '$role_code', 'first_name': '$first_name'}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-m5",
+    "question": "What is the description of the treatment type that costs the least money in total?",
+    "database": "dog_kennels",
+    "query": "db.treatments.aggregate([{'$group': {'_id': '$treatment_type_code', 'total_cost': {'$sum': '$cost_of_treatment'}}}, {'$sort': {'total_cost': 1}}, {'$limit': 1}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-m6",
+    "question": "List each owner's first name, last name, and the size code of their dog.",
+    "database": "dog_kennels",
+    "query": "db.dogs.aggregate([{'$lookup': {'from': 'owners', 'localField': 'owner_id', 'foreignField': 'owner_id', 'as': 'owner_info'}}, {'$project': {'_id': 0, 'first_name': '$owner_info.first_name', 'last_name': '$owner_info.last_name', 'size_code': '$breed_code', 'date_arrived': '$date_arrived'}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-h1",
+    "question": "Which states have both owners and professionals living there?",
+    "database": "dog_kennels",
+    "query": "db.countries.aggregate([{'$lookup': {'from': 'owners', 'localField': 'Code', 'foreignField': 'country_code', 'as': 'owner_info'}}, {'$lookup': {'from': 'professionals', 'localField': 'Code', 'foreignField': 'country_code', 'as': 'professional_info'}}, {'$match': {'$and': [{'owner_info.owner_id': {'$exists': True}}, {'professional_info.professional_id': {'$exists': True}}]}}, {'$group': {'_id': '$Name', 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-h2",
+    "question": "Which owner has paid the largest amount of money in total for their dogs' treatments? Show the owner id and zip code.",
+    "database": "dog_kennels",
+    "query": "db.treatments.aggregate([{'$group': {'_id': '$owner_id', 'total_cost': {'$sum': '$cost_of_treatment'}}}, {'$sort': {'total_cost': -1}}, {'$limit': 1}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-h3",
+    "question": "How many professionals did not operate any treatment on dogs?",
+    "database": "dog_kennels",
+    "query": "db.professionals.aggregate([{'$match': {'role_code': 'Dog Care Professional'}}, {'$lookup': {'from': 'treatments', 'localField': 'professional_id', 'foreignField': 'professional_id', 'as': 'treatments'}}, {'$unwind': '$treatments'}, {'$group': {'_id': null, 'count': {'$sum': 1}}}])",
+    "status": "FAIL",
+    "error": "REJECTED by safety check (unexpected name: null)",
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-c1",
+    "question": "Which dogs have not cost their owner more than 1000 in total treatment cost? List the dog names.",
+    "database": "dog_kennels",
+    "query": "db.dogs.aggregate([{'$group': {'_id': '$owner_id', 'total_cost': {'$sum': '$cost_of_treatment'}}}, {'$match': {'total_cost': {'$lte': 1000}}}, {'$project': {'dog_name': '$name'}}])",
+    "status": "PASS",
+    "result": [],
+    "non_empty_rate": false,
+    "execution_accuracy": false
+  },
+  {
+    "id": "dk-c2",
+    "question": "Which first names are used for professionals or owners but not used as dog names?",
+    "database": "dog_kennels",
+    "query": "db.professionals.aggregate([{'$lookup': {'from': 'dogs', 'localField': 'first_name', 'foreignField': 'owner_id', 'as': 'dog_info'}}, {'$match': {'$expr': {'$and': [{'$ne': ['$dog_info', []]}, {'$eq': ['$dog_info.name', null]}]}}}])",
+    "status": "FAIL",
+    "error": "REJECTED by safety check (unexpected name: null)",
+    "non_empty_rate": false,
+    "execution_accuracy": false
   }
 ]

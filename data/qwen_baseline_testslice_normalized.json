@@ -1,0 +1,170 @@
+[
+  {
+    "id": "cs-e6",
+    "question": "List the names of stadiums with a capacity greater than 10000.",
+    "database": "concert_singer",
+    "generated_query": "db.concert_singer.find({\"stadium.Capacity\": {\"$gt\": 10000}})",
+    "latency_s": 1.268,
+    "normalized_query": "db.concert_singer.find({'stadium.Capacity': {'$gt': 10000}})"
+  },
+  {
+    "id": "cs-m1",
+    "question": "What is the average age of singers?",
+    "database": "concert_singer",
+    "generated_query": "db.singer.aggregate([{\"$group\": {\"_id\": None, \"averageAge\": {\"$avg\": \"$age\"}}}])",
+    "latency_s": 1.467,
+    "normalized_query": "db.singer.aggregate([{'$group': {'_id': None, 'averageAge': {'$avg': '$age'}}}])"
+  },
+  {
+    "id": "cs-m6",
+    "question": "List the distinct countries singers come from, in alphabetical order.",
+    "database": "concert_singer",
+    "generated_query": "db.singer.distinct(\"Country\").sort()",
+    "latency_s": 0.828,
+    "normalized_query": "db.singer.distinct('Country').sort()"
+  },
+  {
+    "id": "cs-h2",
+    "question": "List the names of singers who performed in the concert called 'Auditions'.",
+    "database": "concert_singer",
+    "generated_query": "db.concert_singer.find({\"concert\": \"Auditions\"}, {\"singer.Name\": 1})",
+    "latency_s": 1.501,
+    "normalized_query": "db.concert_singer.find({'concert': 'Auditions'}, {'singer.Name': 1})"
+  },
+  {
+    "id": "cs-c1",
+    "question": "List the names of singers and the stadium name where they performed, for concerts held in 2015.",
+    "database": "concert_singer",
+    "generated_query": "db.concert.find({\"concert.Year\": \"2015\"}, {\"singer.Name\": 1, \"stadium.Name\": 1})",
+    "latency_s": 1.616,
+    "normalized_query": "db.concert.find({'concert.Year': '2015'}, {'singer.Name': 1, 'stadium.Name': 1})"
+  },
+  {
+    "id": "pt-m1",
+    "question": "How many students are there in each major?",
+    "database": "pets_1",
+    "generated_query": "db.student.aggregate([\n    {\"$group\": {\"_id\": \"$Major\", \"count\": {\"$sum\": 1}}}\n])",
+    "latency_s": 1.745,
+    "normalized_query": "db.student.aggregate([{'$group': {'_id': '$Major', 'count': {'$sum': 1}}}])"
+  },
+  {
+    "id": "pt-m4",
+    "question": "How many distinct city codes are represented among students?",
+    "database": "pets_1",
+    "generated_query": "db.student.distinct(\"city_code\")",
+    "latency_s": 0.768,
+    "normalized_query": "db.student.distinct('city_code')"
+  },
+  {
+    "id": "pt-m6",
+    "question": "What is the average weight of pets?",
+    "database": "pets_1",
+    "generated_query": "db.pets.aggregate([{\"$group\": {\"_id\": None, \"avg_weight\": {\"$avg\": \"$pet_weight\"}}}])",
+    "latency_s": 1.543,
+    "normalized_query": "db.pets.aggregate([{'$group': {'_id': None, 'avg_weight': {'$avg': '$pet_weight'}}}])"
+  },
+  {
+    "id": "nw-e1",
+    "question": "How many highschoolers are there?",
+    "database": "network_1",
+    "generated_query": "db.highschooler.count_documents({})",
+    "latency_s": 0.736,
+    "normalized_query": "db.highschooler.count_documents({})"
+  },
+  {
+    "id": "nw-m2",
+    "question": "What is the average grade of highschoolers?",
+    "database": "network_1",
+    "generated_query": "db.highschooler.aggregate([{\"$group\": {\"_id\": None, \"avg_grade\": {\"$avg\": \"$grade\"}}}])",
+    "latency_s": 1.792,
+    "normalized_query": "db.highschooler.aggregate([{'$group': {'_id': None, 'avg_grade': {'$avg': '$grade'}}}])"
+  },
+  {
+    "id": "nw-c1",
+    "question": "List the names of highschoolers who are friends with someone in grade 12.",
+    "database": "network_1",
+    "generated_query": "db.highschooler.aggregate([\n    {\"$lookup\": {\n        \"from\": \"friend\",\n        \"localField\": \"id\",\n        \"foreignField\": \"student_id\",\n        \"as\": \"friends\"\n    }},\n    {\"$match\": {\n        \"friends.grade\": 12\n    }},\n    {\"$project\": {\n        \"_id\": 0,\n        \"name\": \"$name\"\n    }}\n])",
+    "latency_s": 3.928,
+    "normalized_query": "db.highschooler.aggregate([{'$lookup': {'from': 'friend', 'localField': 'id', 'foreignField': 'student_id', 'as': 'friends'}}, {'$match': {'friends.grade': 12}}, {'$project': {'_id': 0, 'name': '$name'}}])"
+  },
+  {
+    "id": "car-e5",
+    "question": "List all country names in the database.",
+    "database": "car_1",
+    "generated_query": "db.country.find({}, {\"CountryName\": 1})",
+    "latency_s": 0.903,
+    "normalized_query": "db.country.find({}, {'CountryName': 1})"
+  },
+  {
+    "id": "car-e9",
+    "question": "List all model names produced by maker id 6.",
+    "database": "car_1",
+    "generated_query": "db.model_list.json.aggregate([\n    {\"$match\": {\"Maker\": \"6\"}},\n    {\"$project\": {\"Model\": 1}}\n])",
+    "latency_s": 1.579,
+    "normalized_query": "db.model_list.json.aggregate([{'$match': {'Maker': '6'}}, {'$project': {'Model': 1}}])"
+  },
+  {
+    "id": "car-m3",
+    "question": "What is the average weight of all cars?",
+    "database": "car_1",
+    "generated_query": "db.cars_data.aggregate([{\"$group\": {\"_id\": None, \"avg_weight\": {\"$avg\": \"$weight\"}}}])",
+    "latency_s": 1.581,
+    "normalized_query": "db.cars_data.aggregate([{'$group': {'_id': None, 'avg_weight': {'$avg': '$weight'}}}])"
+  },
+  {
+    "id": "car-h1",
+    "question": "List car makers with more than 2 models. Report the full name and the model count.",
+    "database": "car_1",
+    "generated_query": "db.car_makers.aggregate([\n    {\"$group\": {\"_id\": \"$Maker\", \"count\": {\"$sum\": 1}}},\n    {\"$match\": {\"count\": {\"$gt\": 2}}},\n    {\"$project\": {\"FullName\": \"$FullName\", \"ModelCount\": \"$count\"}}\n])",
+    "latency_s": 3.257,
+    "normalized_query": "db.car_makers.aggregate([{'$group': {'_id': '$Maker', 'count': {'$sum': 1}}}, {'$match': {'count': {'$gt': 2}}}, {'$project': {'FullName': '$FullName', 'ModelCount': '$count'}}])"
+  },
+  {
+    "id": "wl-e3",
+    "question": "Which continent is Anguilla in?",
+    "database": "world_1",
+    "generated_query": "db.continents.find_one({\"Country\": \"Anguilla\"})",
+    "latency_s": 1.219,
+    "normalized_query": "db.continents.find_one({'Country': 'Anguilla'})"
+  },
+  {
+    "id": "wl-m1",
+    "question": "Which region is the city Kabul located in?",
+    "database": "world_1",
+    "generated_query": "db.city.find_one({\"Name\": \"Kabul\"})[\"Region\"]",
+    "latency_s": 1.024,
+    "normalized_query": "db.city.find_one({'Name': 'Kabul'})['Region']"
+  },
+  {
+    "id": "wl-c1",
+    "question": "Which countries have a greater surface area than every country in Oceania?",
+    "database": "world_1",
+    "generated_query": "db.country.aggregate([\n    {\"$match\": {\"Continent\": \"Oceania\"}},\n    {\"$group\": {\"_id\": \"$CountryName\", \"surface_area\": {\"$sum\": \"$SurfaceArea\"}}},\n    {\"$project\": {\"country_name\": \"$_id\", \"surface_area\": \"$surface_area\"}},\n    {\"$sort\": {\"surface_area\": -1}},\n    {\"$limit\": 1}\n])",
+    "latency_s": 3.604,
+    "normalized_query": "db.country.aggregate([{'$match': {'Continent': 'Oceania'}}, {'$group': {'_id': '$CountryName', 'surface_area': {'$sum': '$SurfaceArea'}}}, {'$project': {'country_name': '$_id', 'surface_area': '$surface_area'}}, {'$sort': {'surface_area': -1}}, {'$limit': 1}])"
+  },
+  {
+    "id": "dk-e2",
+    "question": "What is the age of the oldest dog?",
+    "database": "dog_kennels",
+    "generated_query": "db.dogs.aggregate([\n    {\"$group\": {\"_id\": None, \"maxAge\": {\"$max\": \"$age\"}}}\n])",
+    "latency_s": 1.687,
+    "normalized_query": "db.dogs.aggregate([{'$group': {'_id': None, 'maxAge': {'$max': '$age'}}}])"
+  },
+  {
+    "id": "dk-m5",
+    "question": "What is the description of the treatment type that costs the least money in total?",
+    "database": "dog_kennels",
+    "generated_query": "db.treatments.aggregate([\n    {\"$group\": {\"_id\": \"$treatment_type_code\", \"total_cost\": {\"$sum\": \"$cost_of_treatment\"}}},\n    {\"$sort\": {\"total_cost\": 1}},\n    {\"$limit\": 1}\n])",
+    "latency_s": 2.61,
+    "normalized_query": "db.treatments.aggregate([{'$group': {'_id': '$treatment_type_code', 'total_cost': {'$sum': '$cost_of_treatment'}}}, {'$sort': {'total_cost': 1}}, {'$limit': 1}])"
+  },
+  {
+    "id": "dk-h2",
+    "question": "Which owner has paid the largest amount of money in total for their dogs' treatments? Show the owner id and zip code.",
+    "database": "dog_kennels",
+    "generated_query": "db.treatments.aggregate([\n    {\"$group\": {\"_id\": \"$owner_id\", \"total_cost\": {\"$sum\": \"$cost_of_treatment\"}}},\n    {\"$sort\": {\"total_cost\": -1}},\n    {\"$limit\": 1}\n])",
+    "latency_s": 2.554,
+    "normalized_query": "db.treatments.aggregate([{'$group': {'_id': '$owner_id', 'total_cost': {'$sum': '$cost_of_treatment'}}}, {'$sort': {'total_cost': -1}}, {'$limit': 1}])"
+  }
+]

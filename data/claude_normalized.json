@@ -1,0 +1,970 @@
+[
+  {
+    "id": 1,
+    "question": "How many singers are there?",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "db.singer.count_documents({})",
+    "normalized_query": "db.singer.count_documents({})"
+  },
+  {
+    "id": 2,
+    "question": "What are the names of singers from France?",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.singer.find({'Country': 'France'}, {'_id': 0, 'Name': 1}))",
+    "normalized_query": "db.singer.find({'Country': 'France'}, {'_id': 0, 'Name': 1})"
+  },
+  {
+    "id": 4,
+    "question": "What are the names and ages of singers, ordered by age?",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.singer.find({}, {'_id': 0, 'Name': 1, 'Age': 1}).sort('Age', 1))",
+    "normalized_query": "db.singer.find({}, {'_id': 0, 'Name': 1, 'Age': 1}).sort('Age', 1)"
+  },
+  {
+    "id": 5,
+    "question": "How many concerts were held in each stadium?",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.concert.aggregate([{'$group': {'_id': '$Stadium_ID', 'count': {'$sum': 1}}}]))",
+    "normalized_query": "db.concert.aggregate([{'$group': {'_id': '$Stadium_ID', 'count': {'$sum': 1}}}])"
+  },
+  {
+    "id": 7,
+    "question": "What are the names of singers who performed in a concert in 2014?",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.concert.aggregate([{'$match': {'Year': '2014'}}, {'$lookup': {'from': 'singer_in_concert', 'localField': 'concert_ID', 'foreignField': 'concert_ID', 'as': 'sic'}}, {'$unwind': '$sic'}, {'$addFields': {'singer_id_int': {'$toInt': '$sic.Singer_ID'}}}, {'$lookup': {'from': 'singer', 'localField': 'singer_id_int', 'foreignField': 'Singer_ID', 'as': 'singer'}}, {'$unwind': '$singer'}, {'$group': {'_id': '$singer.Name'}}]))",
+    "normalized_query": "db.concert.aggregate([{'$match': {'Year': '2014'}}, {'$lookup': {'from': 'singer_in_concert', 'localField': 'concert_ID', 'foreignField': 'concert_ID', 'as': 'sic'}}, {'$unwind': '$sic'}, {'$addFields': {'singer_id_int': {'$toInt': '$sic.Singer_ID'}}}, {'$lookup': {'from': 'singer', 'localField': 'singer_id_int', 'foreignField': 'Singer_ID', 'as': 'singer'}}, {'$unwind': '$singer'}, {'$group': {'_id': '$singer.Name'}}])"
+  },
+  {
+    "id": 10,
+    "question": "Find singers who have not participated in any concert.",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.singer.aggregate([{'$lookup': {'from': 'singer_in_concert', 'let': {'sid': {'$toString': '$Singer_ID'}}, 'pipeline': [{'$match': {'$expr': {'$eq': ['$Singer_ID', '$$sid']}}}], 'as': 'sic'}}, {'$match': {'sic': []}}, {'$project': {'_id': 0, 'Name': 1}}]))",
+    "normalized_query": "db.singer.aggregate([{'$lookup': {'from': 'singer_in_concert', 'let': {'sid': {'$toString': '$Singer_ID'}}, 'pipeline': [{'$match': {'$expr': {'$eq': ['$Singer_ID', '$$sid']}}}], 'as': 'sic'}}, {'$match': {'sic': []}}, {'$project': {'_id': 0, 'Name': 1}}])"
+  },
+  {
+    "id": "cs-e1",
+    "question": "List the names of all singers.",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.singer.find({}, {'_id': 0, 'Name': 1}))",
+    "normalized_query": "db.singer.find({}, {'_id': 0, 'Name': 1})"
+  },
+  {
+    "id": "cs-e2",
+    "question": "How many stadiums are there?",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "db.stadium.count_documents({})",
+    "normalized_query": "db.stadium.count_documents({})"
+  },
+  {
+    "id": "cs-e3",
+    "question": "List the names of all concerts.",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.concert.find({}, {'_id': 0, 'concert_Name': 1}))",
+    "normalized_query": "db.concert.find({}, {'_id': 0, 'concert_Name': 1})"
+  },
+  {
+    "id": "cs-e4",
+    "question": "Find the names and ages of singers older than 40.",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.singer.find({'Age': {'$gt': 40}}, {'_id': 0, 'Name': 1, 'Age': 1}))",
+    "normalized_query": "db.singer.find({'Age': {'$gt': 40}}, {'_id': 0, 'Name': 1, 'Age': 1})"
+  },
+  {
+    "id": "cs-e5",
+    "question": "What are the names of the male singers?",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.singer.find({'Is_male': 'T'}, {'_id': 0, 'Name': 1}))",
+    "normalized_query": "db.singer.find({'Is_male': 'T'}, {'_id': 0, 'Name': 1})"
+  },
+  {
+    "id": "cs-e6",
+    "question": "List the names of stadiums with a capacity greater than 10000.",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.stadium.find({'Capacity': {'$gt': 10000}}, {'_id': 0, 'Name': 1}))",
+    "normalized_query": "db.stadium.find({'Capacity': {'$gt': 10000}}, {'_id': 0, 'Name': 1})"
+  },
+  {
+    "id": "cs-e7",
+    "question": "Which concerts happened in the year 2015?",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.concert.find({'Year': '2015'}, {'_id': 0, 'concert_Name': 1}))",
+    "normalized_query": "db.concert.find({'Year': '2015'}, {'_id': 0, 'concert_Name': 1})"
+  },
+  {
+    "id": "cs-e8",
+    "question": "Find the singer whose song is named 'Love'.",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.singer.find({'Song_Name': 'Love'}, {'_id': 0, 'Name': 1}))",
+    "normalized_query": "db.singer.find({'Song_Name': 'Love'}, {'_id': 0, 'Name': 1})"
+  },
+  {
+    "id": "cs-e9",
+    "question": "List the names of singers who are not from France.",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.singer.find({'Country': {'$ne': 'France'}}, {'_id': 0, 'Name': 1}))",
+    "normalized_query": "db.singer.find({'Country': {'$ne': 'France'}}, {'_id': 0, 'Name': 1})"
+  },
+  {
+    "id": "cs-e10",
+    "question": "What is the theme of the concert called 'Super bootcamp'?",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.concert.find({'concert_Name': 'Super bootcamp'}, {'_id': 0, 'Theme': 1}))",
+    "normalized_query": "db.concert.find({'concert_Name': 'Super bootcamp'}, {'_id': 0, 'Theme': 1})"
+  },
+  {
+    "id": "cs-m1",
+    "question": "What is the average age of singers?",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.singer.aggregate([{'$group': {'_id': None, 'avg_age': {'$avg': '$Age'}}}]))",
+    "normalized_query": "db.singer.aggregate([{'$group': {'_id': None, 'avg_age': {'$avg': '$Age'}}}])"
+  },
+  {
+    "id": "cs-m2",
+    "question": "What is the total capacity of all stadiums combined?",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.stadium.aggregate([{'$group': {'_id': None, 'total_capacity': {'$sum': '$Capacity'}}}]))",
+    "normalized_query": "db.stadium.aggregate([{'$group': {'_id': None, 'total_capacity': {'$sum': '$Capacity'}}}])"
+  },
+  {
+    "id": "cs-m3",
+    "question": "List the top 3 stadiums by capacity, largest first.",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.stadium.find({}, {'_id': 0, 'Name': 1, 'Capacity': 1}).sort('Capacity', -1).limit(3))",
+    "normalized_query": "db.stadium.find({}, {'_id': 0, 'Name': 1, 'Capacity': 1}).sort('Capacity', -1).limit(3)"
+  },
+  {
+    "id": "cs-m4",
+    "question": "How many concerts were held in each year?",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.concert.aggregate([{'$group': {'_id': '$Year', 'count': {'$sum': 1}}}]))",
+    "normalized_query": "db.concert.aggregate([{'$group': {'_id': '$Year', 'count': {'$sum': 1}}}])"
+  },
+  {
+    "id": "cs-m5",
+    "question": "What is the age of the youngest singer?",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.singer.find({}, {'_id': 0, 'Age': 1}).sort('Age', 1).limit(1))",
+    "normalized_query": "db.singer.find({}, {'_id': 0, 'Age': 1}).sort('Age', 1).limit(1)"
+  },
+  {
+    "id": "cs-m6",
+    "question": "List the distinct countries singers come from, in alphabetical order.",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "sorted(db.singer.distinct('Country'))",
+    "normalized_query": "sorted(db.singer.distinct('Country'))"
+  },
+  {
+    "id": "cs-m7",
+    "question": "How many singers are there for each country?",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.singer.aggregate([{'$group': {'_id': '$Country', 'count': {'$sum': 1}}}]))",
+    "normalized_query": "db.singer.aggregate([{'$group': {'_id': '$Country', 'count': {'$sum': 1}}}])"
+  },
+  {
+    "id": "cs-m8",
+    "question": "What is the average stadium capacity?",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.stadium.aggregate([{'$group': {'_id': None, 'avg_capacity': {'$avg': '$Capacity'}}}]))",
+    "normalized_query": "db.stadium.aggregate([{'$group': {'_id': None, 'avg_capacity': {'$avg': '$Capacity'}}}])"
+  },
+  {
+    "id": "cs-h1",
+    "question": "How many concerts were held at each stadium? Include the stadium name.",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.concert.aggregate([{'$addFields': {'stadium_id_int': {'$toInt': '$Stadium_ID'}}}, {'$lookup': {'from': 'stadium', 'localField': 'stadium_id_int', 'foreignField': 'Stadium_ID', 'as': 'stad'}}, {'$unwind': '$stad'}, {'$group': {'_id': '$stad.Name', 'count': {'$sum': 1}}}]))",
+    "normalized_query": "db.concert.aggregate([{'$addFields': {'stadium_id_int': {'$toInt': '$Stadium_ID'}}}, {'$lookup': {'from': 'stadium', 'localField': 'stadium_id_int', 'foreignField': 'Stadium_ID', 'as': 'stad'}}, {'$unwind': '$stad'}, {'$group': {'_id': '$stad.Name', 'count': {'$sum': 1}}}])"
+  },
+  {
+    "id": "cs-h2",
+    "question": "List the names of singers who performed in the concert called 'Auditions'.",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.concert.aggregate([{'$match': {'concert_Name': 'Auditions'}}, {'$lookup': {'from': 'singer_in_concert', 'localField': 'concert_ID', 'foreignField': 'concert_ID', 'as': 'sic'}}, {'$unwind': '$sic'}, {'$addFields': {'singer_id_int': {'$toInt': '$sic.Singer_ID'}}}, {'$lookup': {'from': 'singer', 'localField': 'singer_id_int', 'foreignField': 'Singer_ID', 'as': 'singer'}}, {'$unwind': '$singer'}, {'$project': {'_id': 0, 'Name': '$singer.Name'}}]))",
+    "normalized_query": "db.concert.aggregate([{'$match': {'concert_Name': 'Auditions'}}, {'$lookup': {'from': 'singer_in_concert', 'localField': 'concert_ID', 'foreignField': 'concert_ID', 'as': 'sic'}}, {'$unwind': '$sic'}, {'$addFields': {'singer_id_int': {'$toInt': '$sic.Singer_ID'}}}, {'$lookup': {'from': 'singer', 'localField': 'singer_id_int', 'foreignField': 'Singer_ID', 'as': 'singer'}}, {'$unwind': '$singer'}, {'$project': {'_id': 0, 'Name': '$singer.Name'}}])"
+  },
+  {
+    "id": "cs-c1",
+    "question": "List the names of singers and the stadium name where they performed, for concerts held in 2015.",
+    "database": "concert_singer",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.concert.aggregate([{'$match': {'Year': '2015'}}, {'$addFields': {'stadium_id_int': {'$toInt': '$Stadium_ID'}}}, {'$lookup': {'from': 'stadium', 'localField': 'stadium_id_int', 'foreignField': 'Stadium_ID', 'as': 'stad'}}, {'$unwind': '$stad'}, {'$lookup': {'from': 'singer_in_concert', 'localField': 'concert_ID', 'foreignField': 'concert_ID', 'as': 'sic'}}, {'$unwind': '$sic'}, {'$addFields': {'singer_id_int': {'$toInt': '$sic.Singer_ID'}}}, {'$lookup': {'from': 'singer', 'localField': 'singer_id_int', 'foreignField': 'Singer_ID', 'as': 'singer'}}, {'$unwind': '$singer'}, {'$project': {'_id': 0, 'singer_name': '$singer.Name', 'stadium_name': '$stad.Name'}}]))",
+    "normalized_query": "db.concert.aggregate([{'$match': {'Year': '2015'}}, {'$addFields': {'stadium_id_int': {'$toInt': '$Stadium_ID'}}}, {'$lookup': {'from': 'stadium', 'localField': 'stadium_id_int', 'foreignField': 'Stadium_ID', 'as': 'stad'}}, {'$unwind': '$stad'}, {'$lookup': {'from': 'singer_in_concert', 'localField': 'concert_ID', 'foreignField': 'concert_ID', 'as': 'sic'}}, {'$unwind': '$sic'}, {'$addFields': {'singer_id_int': {'$toInt': '$sic.Singer_ID'}}}, {'$lookup': {'from': 'singer', 'localField': 'singer_id_int', 'foreignField': 'Singer_ID', 'as': 'singer'}}, {'$unwind': '$singer'}, {'$project': {'_id': 0, 'singer_name': '$singer.Name', 'stadium_name': '$stad.Name'}}])"
+  },
+  {
+    "id": 3,
+    "question": "Find the maximum weight of all pets.",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Pets.aggregate([{'$group': {'_id': None, 'max_weight': {'$max': '$weight'}}}]))",
+    "normalized_query": "db.Pets.aggregate([{'$group': {'_id': None, 'max_weight': {'$max': '$weight'}}}])"
+  },
+  {
+    "id": 6,
+    "question": "Find pet types that have more than one pet, with their counts.",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Pets.aggregate([{'$group': {'_id': '$PetType', 'count': {'$sum': 1}}}, {'$match': {'count': {'$gt': 1}}}]))",
+    "normalized_query": "db.Pets.aggregate([{'$group': {'_id': '$PetType', 'count': {'$sum': 1}}}, {'$match': {'count': {'$gt': 1}}}])"
+  },
+  {
+    "id": 8,
+    "question": "Find the first names of students who have a dog as a pet.",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Has_Pet.aggregate([{'$lookup': {'from': 'Pets', 'localField': 'PetID', 'foreignField': 'PetID', 'as': 'pet'}}, {'$unwind': '$pet'}, {'$match': {'pet.PetType': 'dog'}}, {'$lookup': {'from': 'Student', 'localField': 'StuID', 'foreignField': 'StuID', 'as': 'stu'}}, {'$unwind': '$stu'}, {'$project': {'_id': 0, 'Fname': '$stu.Fname'}}]))",
+    "normalized_query": "db.Has_Pet.aggregate([{'$lookup': {'from': 'Pets', 'localField': 'PetID', 'foreignField': 'PetID', 'as': 'pet'}}, {'$unwind': '$pet'}, {'$match': {'pet.PetType': 'dog'}}, {'$lookup': {'from': 'Student', 'localField': 'StuID', 'foreignField': 'StuID', 'as': 'stu'}}, {'$unwind': '$stu'}, {'$project': {'_id': 0, 'Fname': '$stu.Fname'}}])"
+  },
+  {
+    "id": "pt-e1",
+    "question": "How many students are there?",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "db.Student.count_documents({})",
+    "normalized_query": "db.Student.count_documents({})"
+  },
+  {
+    "id": "pt-e2",
+    "question": "List the first names of female students.",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Student.find({'Sex': 'F'}, {'_id': 0, 'Fname': 1}))",
+    "normalized_query": "db.Student.find({'Sex': 'F'}, {'_id': 0, 'Fname': 1})"
+  },
+  {
+    "id": "pt-e3",
+    "question": "Find the first and last names of students younger than 18.",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Student.find({'Age': {'$lt': 18}}, {'_id': 0, 'Fname': 1, 'LName': 1}))",
+    "normalized_query": "db.Student.find({'Age': {'$lt': 18}}, {'_id': 0, 'Fname': 1, 'LName': 1})"
+  },
+  {
+    "id": "pt-e4",
+    "question": "What is the last name of the student with StuID 1010?",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Student.find({'StuID': 1010}, {'_id': 0, 'LName': 1}))",
+    "normalized_query": "db.Student.find({'StuID': 1010}, {'_id': 0, 'LName': 1})"
+  },
+  {
+    "id": "pt-e5",
+    "question": "List the first names of students majoring in 600.",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Student.find({'Major': 600}, {'_id': 0, 'Fname': 1}))",
+    "normalized_query": "db.Student.find({'Major': 600}, {'_id': 0, 'Fname': 1})"
+  },
+  {
+    "id": "pt-e6",
+    "question": "Which students live in city code 'PIT'? Give their first names.",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Student.find({'city_code': 'PIT'}, {'_id': 0, 'Fname': 1}))",
+    "normalized_query": "db.Student.find({'city_code': 'PIT'}, {'_id': 0, 'Fname': 1})"
+  },
+  {
+    "id": "pt-e7",
+    "question": "List all the pet types in the database.",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "db.Pets.distinct('PetType')",
+    "normalized_query": "db.Pets.distinct('PetType')"
+  },
+  {
+    "id": "pt-e8",
+    "question": "What is the age of the cat?",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Pets.find({'PetType': 'cat'}, {'_id': 0, 'pet_age': 1}))",
+    "normalized_query": "db.Pets.find({'PetType': 'cat'}, {'_id': 0, 'pet_age': 1})"
+  },
+  {
+    "id": "pt-e9",
+    "question": "Find students whose advisor is 1148.",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Student.find({'Advisor': 1148}, {'_id': 0, 'Fname': 1, 'LName': 1}))",
+    "normalized_query": "db.Student.find({'Advisor': 1148}, {'_id': 0, 'Fname': 1, 'LName': 1})"
+  },
+  {
+    "id": "pt-m1",
+    "question": "How many students are there in each major?",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Student.aggregate([{'$group': {'_id': '$Major', 'count': {'$sum': 1}}}]))",
+    "normalized_query": "db.Student.aggregate([{'$group': {'_id': '$Major', 'count': {'$sum': 1}}}])"
+  },
+  {
+    "id": "pt-m2",
+    "question": "What is the average age of students?",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Student.aggregate([{'$group': {'_id': None, 'avg_age': {'$avg': '$Age'}}}]))",
+    "normalized_query": "db.Student.aggregate([{'$group': {'_id': None, 'avg_age': {'$avg': '$Age'}}}])"
+  },
+  {
+    "id": "pt-m3",
+    "question": "List the 5 oldest students, oldest first, with their ages.",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Student.find({}, {'_id': 0, 'Fname': 1, 'LName': 1, 'Age': 1}).sort('Age', -1).limit(5))",
+    "normalized_query": "db.Student.find({}, {'_id': 0, 'Fname': 1, 'LName': 1, 'Age': 1}).sort('Age', -1).limit(5)"
+  },
+  {
+    "id": "pt-m4",
+    "question": "How many distinct city codes are represented among students?",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "len(db.Student.distinct('city_code'))",
+    "normalized_query": "len(db.Student.distinct('city_code'))"
+  },
+  {
+    "id": "pt-m5",
+    "question": "Which advisor has the most advisees, and how many do they have?",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Student.aggregate([{'$group': {'_id': '$Advisor', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}]))",
+    "normalized_query": "db.Student.aggregate([{'$group': {'_id': '$Advisor', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}])"
+  },
+  {
+    "id": "pt-m6",
+    "question": "What is the average weight of pets?",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Pets.aggregate([{'$group': {'_id': None, 'avg_weight': {'$avg': '$weight'}}}]))",
+    "normalized_query": "db.Pets.aggregate([{'$group': {'_id': None, 'avg_weight': {'$avg': '$weight'}}}])"
+  },
+  {
+    "id": "pt-h1",
+    "question": "What are the first and last names of students who own a cat?",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Has_Pet.aggregate([{'$lookup': {'from': 'Pets', 'localField': 'PetID', 'foreignField': 'PetID', 'as': 'pet'}}, {'$unwind': '$pet'}, {'$match': {'pet.PetType': 'cat'}}, {'$lookup': {'from': 'Student', 'localField': 'StuID', 'foreignField': 'StuID', 'as': 'stu'}}, {'$unwind': '$stu'}, {'$project': {'_id': 0, 'Fname': '$stu.Fname', 'LName': '$stu.LName'}}]))",
+    "normalized_query": "db.Has_Pet.aggregate([{'$lookup': {'from': 'Pets', 'localField': 'PetID', 'foreignField': 'PetID', 'as': 'pet'}}, {'$unwind': '$pet'}, {'$match': {'pet.PetType': 'cat'}}, {'$lookup': {'from': 'Student', 'localField': 'StuID', 'foreignField': 'StuID', 'as': 'stu'}}, {'$unwind': '$stu'}, {'$project': {'_id': 0, 'Fname': '$stu.Fname', 'LName': '$stu.LName'}}])"
+  },
+  {
+    "id": "pt-h2",
+    "question": "For each pet type, what is the average weight?",
+    "database": "pets_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Pets.aggregate([{'$group': {'_id': '$PetType', 'avg_weight': {'$avg': '$weight'}}}]))",
+    "normalized_query": "db.Pets.aggregate([{'$group': {'_id': '$PetType', 'avg_weight': {'$avg': '$weight'}}}])"
+  },
+  {
+    "id": 11,
+    "question": "Find students who have more friends than the average number of friends per student.",
+    "database": "network_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Friend.aggregate([{'$group': {'_id': '$student_id', 'friend_count': {'$sum': 1}}}, {'$group': {'_id': None, 'avg_friends': {'$avg': '$friend_count'}, 'docs': {'$push': {'student_id': '$_id', 'friend_count': '$friend_count'}}}}, {'$unwind': '$docs'}, {'$match': {'$expr': {'$gt': ['$docs.friend_count', '$avg_friends']}}}, {'$replaceRoot': {'newRoot': '$docs'}}]))",
+    "normalized_query": "db.Friend.aggregate([{'$group': {'_id': '$student_id', 'friend_count': {'$sum': 1}}}, {'$group': {'_id': None, 'avg_friends': {'$avg': '$friend_count'}, 'docs': {'$push': {'student_id': '$_id', 'friend_count': '$friend_count'}}}}, {'$unwind': '$docs'}, {'$match': {'$expr': {'$gt': ['$docs.friend_count', '$avg_friends']}}}, {'$replaceRoot': {'newRoot': '$docs'}}])"
+  },
+  {
+    "id": "nw-e1",
+    "question": "How many highschoolers are there?",
+    "database": "network_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "db.Highschooler.count_documents({})",
+    "normalized_query": "db.Highschooler.count_documents({})"
+  },
+  {
+    "id": "nw-e2",
+    "question": "List the names of highschoolers in grade 9.",
+    "database": "network_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Highschooler.find({'grade': 9}, {'_id': 0, 'name': 1}))",
+    "normalized_query": "db.Highschooler.find({'grade': 9}, {'_id': 0, 'name': 1})"
+  },
+  {
+    "id": "nw-e3",
+    "question": "What is the name of the highschooler with ID 1911?",
+    "database": "network_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Highschooler.find({'ID': 1911}, {'_id': 0, 'name': 1}))",
+    "normalized_query": "db.Highschooler.find({'ID': 1911}, {'_id': 0, 'name': 1})"
+  },
+  {
+    "id": "nw-e4",
+    "question": "List the names of highschoolers in grade 12.",
+    "database": "network_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Highschooler.find({'grade': 12}, {'_id': 0, 'name': 1}))",
+    "normalized_query": "db.Highschooler.find({'grade': 12}, {'_id': 0, 'name': 1})"
+  },
+  {
+    "id": "nw-e5",
+    "question": "How many friendship pairs are recorded?",
+    "database": "network_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "db.Friend.count_documents({})",
+    "normalized_query": "db.Friend.count_documents({})"
+  },
+  {
+    "id": "nw-e6",
+    "question": "How many 'likes' relationships are there?",
+    "database": "network_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "db.Likes.count_documents({})",
+    "normalized_query": "db.Likes.count_documents({})"
+  },
+  {
+    "id": "nw-e7",
+    "question": "List highschoolers named 'Gabriel'.",
+    "database": "network_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Highschooler.find({'name': 'Gabriel'}, {'_id': 0, 'ID': 1, 'name': 1, 'grade': 1}))",
+    "normalized_query": "db.Highschooler.find({'name': 'Gabriel'}, {'_id': 0, 'ID': 1, 'name': 1, 'grade': 1})"
+  },
+  {
+    "id": "nw-m1",
+    "question": "How many highschoolers are there in each grade?",
+    "database": "network_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Highschooler.aggregate([{'$group': {'_id': '$grade', 'count': {'$sum': 1}}}]))",
+    "normalized_query": "db.Highschooler.aggregate([{'$group': {'_id': '$grade', 'count': {'$sum': 1}}}])"
+  },
+  {
+    "id": "nw-m2",
+    "question": "What is the average grade of highschoolers?",
+    "database": "network_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Highschooler.aggregate([{'$group': {'_id': None, 'avg_grade': {'$avg': '$grade'}}}]))",
+    "normalized_query": "db.Highschooler.aggregate([{'$group': {'_id': None, 'avg_grade': {'$avg': '$grade'}}}])"
+  },
+  {
+    "id": "nw-m3",
+    "question": "Which student IDs appear most often as the 'student_id' side of a friendship, and how many friends do they list?",
+    "database": "network_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Friend.aggregate([{'$group': {'_id': '$student_id', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}]))",
+    "normalized_query": "db.Friend.aggregate([{'$group': {'_id': '$student_id', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}])"
+  },
+  {
+    "id": "nw-m4",
+    "question": "List the highschooler names sorted alphabetically.",
+    "database": "network_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Highschooler.find({}, {'_id': 0, 'name': 1}).sort('name', 1))",
+    "normalized_query": "db.Highschooler.find({}, {'_id': 0, 'name': 1}).sort('name', 1)"
+  },
+  {
+    "id": "nw-h1",
+    "question": "List the names of highschoolers who appear as the 'student_id' side of at least one friendship.",
+    "database": "network_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Friend.aggregate([{'$group': {'_id': '$student_id'}}, {'$lookup': {'from': 'Highschooler', 'localField': '_id', 'foreignField': 'ID', 'as': 'hs'}}, {'$unwind': '$hs'}, {'$project': {'_id': 0, 'name': '$hs.name'}}]))",
+    "normalized_query": "db.Friend.aggregate([{'$group': {'_id': '$student_id'}}, {'$lookup': {'from': 'Highschooler', 'localField': '_id', 'foreignField': 'ID', 'as': 'hs'}}, {'$unwind': '$hs'}, {'$project': {'_id': 0, 'name': '$hs.name'}}])"
+  },
+  {
+    "id": "nw-h2",
+    "question": "How many friends does each highschooler have, by name?",
+    "database": "network_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Friend.aggregate([{'$group': {'_id': '$student_id', 'friend_count': {'$sum': 1}}}, {'$lookup': {'from': 'Highschooler', 'localField': '_id', 'foreignField': 'ID', 'as': 'hs'}}, {'$unwind': '$hs'}, {'$project': {'_id': 0, 'name': '$hs.name', 'friend_count': 1}}]))",
+    "normalized_query": "db.Friend.aggregate([{'$group': {'_id': '$student_id', 'friend_count': {'$sum': 1}}}, {'$lookup': {'from': 'Highschooler', 'localField': '_id', 'foreignField': 'ID', 'as': 'hs'}}, {'$unwind': '$hs'}, {'$project': {'_id': 0, 'name': '$hs.name', 'friend_count': 1}}])"
+  },
+  {
+    "id": "nw-c1",
+    "question": "List the names of highschoolers who are friends with someone in grade 12.",
+    "database": "network_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Friend.aggregate([{'$lookup': {'from': 'Highschooler', 'localField': 'friend_id', 'foreignField': 'ID', 'as': 'fr'}}, {'$unwind': '$fr'}, {'$match': {'fr.grade': 12}}, {'$lookup': {'from': 'Highschooler', 'localField': 'student_id', 'foreignField': 'ID', 'as': 'stu'}}, {'$unwind': '$stu'}, {'$group': {'_id': '$stu.name'}}]))",
+    "normalized_query": "db.Friend.aggregate([{'$lookup': {'from': 'Highschooler', 'localField': 'friend_id', 'foreignField': 'ID', 'as': 'fr'}}, {'$unwind': '$fr'}, {'$match': {'fr.grade': 12}}, {'$lookup': {'from': 'Highschooler', 'localField': 'student_id', 'foreignField': 'ID', 'as': 'stu'}}, {'$unwind': '$stu'}, {'$group': {'_id': '$stu.name'}}])"
+  },
+  {
+    "id": 9,
+    "question": "For each country of origin, find the average miles per gallon of cars.",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.cars_data.aggregate([{'$lookup': {'from': 'model_list.json', 'localField': 'Id', 'foreignField': 'ModelId', 'as': 'ml'}}, {'$unwind': '$ml'}, {'$lookup': {'from': 'car_makers', 'localField': 'ml.Maker', 'foreignField': 'Id', 'as': 'mk'}}, {'$unwind': '$mk'}, {'$addFields': {'country_id': {'$toInt': '$mk.Country'}}}, {'$lookup': {'from': 'countries', 'localField': 'country_id', 'foreignField': 'CountryId', 'as': 'ctry'}}, {'$unwind': '$ctry'}, {'$addFields': {'mpg_num': {'$toDouble': '$MPG'}}}, {'$group': {'_id': '$ctry.CountryName', 'avg_mpg': {'$avg': '$mpg_num'}}}]))",
+    "normalized_query": "db.cars_data.aggregate([{'$lookup': {'from': 'model_list.json', 'localField': 'Id', 'foreignField': 'ModelId', 'as': 'ml'}}, {'$unwind': '$ml'}, {'$lookup': {'from': 'car_makers', 'localField': 'ml.Maker', 'foreignField': 'Id', 'as': 'mk'}}, {'$unwind': '$mk'}, {'$addFields': {'country_id': {'$toInt': '$mk.Country'}}}, {'$lookup': {'from': 'countries', 'localField': 'country_id', 'foreignField': 'CountryId', 'as': 'ctry'}}, {'$unwind': '$ctry'}, {'$addFields': {'mpg_num': {'$toDouble': '$MPG'}}}, {'$group': {'_id': '$ctry.CountryName', 'avg_mpg': {'$avg': '$mpg_num'}}}])"
+  },
+  {
+    "id": 12,
+    "question": "For each maker, find the model with the highest horsepower.",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.cars_data.aggregate([{'$addFields': {'hp_num': {'$toDouble': '$Horsepower'}}}, {'$lookup': {'from': 'model_list.json', 'localField': 'Id', 'foreignField': 'ModelId', 'as': 'ml'}}, {'$unwind': '$ml'}, {'$lookup': {'from': 'car_makers', 'localField': 'ml.Maker', 'foreignField': 'Id', 'as': 'mk'}}, {'$unwind': '$mk'}, {'$sort': {'hp_num': -1}}, {'$group': {'_id': '$mk.FullName', 'model': {'$first': '$ml.Model'}, 'horsepower': {'$first': '$hp_num'}}}]))",
+    "normalized_query": "db.cars_data.aggregate([{'$addFields': {'hp_num': {'$toDouble': '$Horsepower'}}}, {'$lookup': {'from': 'model_list.json', 'localField': 'Id', 'foreignField': 'ModelId', 'as': 'ml'}}, {'$unwind': '$ml'}, {'$lookup': {'from': 'car_makers', 'localField': 'ml.Maker', 'foreignField': 'Id', 'as': 'mk'}}, {'$unwind': '$mk'}, {'$sort': {'hp_num': -1}}, {'$group': {'_id': '$mk.FullName', 'model': {'$first': '$ml.Model'}, 'horsepower': {'$first': '$hp_num'}}}])"
+  },
+  {
+    "id": "car-e1",
+    "question": "How many cars are in the database?",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "db.cars_data.count_documents({})",
+    "normalized_query": "db.cars_data.count_documents({})"
+  },
+  {
+    "id": "car-e2",
+    "question": "List the full names of all Renault cars.",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.car_names.find({'Make': {'$regex': 'renault', '$options': 'i'}}, {'_id': 0, 'Make': 1}))",
+    "normalized_query": "db.car_names.find({'Make': {'$regex': 'renault', '$options': 'i'}}, {'_id': 0, 'Make': 1})"
+  },
+  {
+    "id": "car-e3",
+    "question": "List the full names of all car makers.",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.car_makers.find({}, {'_id': 0, 'FullName': 1}))",
+    "normalized_query": "db.car_makers.find({}, {'_id': 0, 'FullName': 1})"
+  },
+  {
+    "id": "car-e4",
+    "question": "List all continents in the database.",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.continents.find({}, {'_id': 0, 'Continent': 1}))",
+    "normalized_query": "db.continents.find({}, {'_id': 0, 'Continent': 1})"
+  },
+  {
+    "id": "car-e5",
+    "question": "List all country names in the database.",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.countries.find({}, {'_id': 0, 'CountryName': 1}))",
+    "normalized_query": "db.countries.find({}, {'_id': 0, 'CountryName': 1})"
+  },
+  {
+    "id": "car-e6",
+    "question": "How many cars have exactly 3 cylinders?",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "db.cars_data.count_documents({'Cylinders': 3})",
+    "normalized_query": "db.cars_data.count_documents({'Cylinders': 3})"
+  },
+  {
+    "id": "car-e7",
+    "question": "How many cars were produced in 1982?",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "db.cars_data.count_documents({'Year': 1982})",
+    "normalized_query": "db.cars_data.count_documents({'Year': 1982})"
+  },
+  {
+    "id": "car-e8",
+    "question": "What is the make of the car with Id 100?",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.car_names.find({'MakeId': 100}, {'_id': 0, 'Make': 1}))",
+    "normalized_query": "db.car_names.find({'MakeId': 100}, {'_id': 0, 'Make': 1})"
+  },
+  {
+    "id": "car-e9",
+    "question": "List all model names produced by maker id 6.",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db['model_list.json'].find({'Maker': 6}, {'_id': 0, 'Model': 1}))",
+    "normalized_query": "db['model_list.json'].find({'Maker': 6}, {'_id': 0, 'Model': 1})"
+  },
+  {
+    "id": "car-e10",
+    "question": "How many cars have exactly 8 cylinders?",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "db.cars_data.count_documents({'Cylinders': 8})",
+    "normalized_query": "db.cars_data.count_documents({'Cylinders': 8})"
+  },
+  {
+    "id": "car-m1",
+    "question": "How many distinct models are listed in the model_list table?",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "len(db['model_list.json'].distinct('Model'))",
+    "normalized_query": "len(db['model_list.json'].distinct('Model'))"
+  },
+  {
+    "id": "car-m2",
+    "question": "How many cars were produced each year?",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.cars_data.aggregate([{'$group': {'_id': '$Year', 'count': {'$sum': 1}}}]))",
+    "normalized_query": "db.cars_data.aggregate([{'$group': {'_id': '$Year', 'count': {'$sum': 1}}}])"
+  },
+  {
+    "id": "car-m3",
+    "question": "What is the average weight of all cars?",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.cars_data.aggregate([{'$group': {'_id': None, 'avg_weight': {'$avg': '$Weight'}}}]))",
+    "normalized_query": "db.cars_data.aggregate([{'$group': {'_id': None, 'avg_weight': {'$avg': '$Weight'}}}])"
+  },
+  {
+    "id": "car-m4",
+    "question": "What are the 5 heaviest cars? Report Id and Weight.",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.cars_data.find({}, {'_id': 0, 'Id': 1, 'Weight': 1}).sort('Weight', -1).limit(5))",
+    "normalized_query": "db.cars_data.find({}, {'_id': 0, 'Id': 1, 'Weight': 1}).sort('Weight', -1).limit(5)"
+  },
+  {
+    "id": "car-m5",
+    "question": "How many car makers are registered under each country code?",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.car_makers.aggregate([{'$group': {'_id': '$Country', 'count': {'$sum': 1}}}]))",
+    "normalized_query": "db.car_makers.aggregate([{'$group': {'_id': '$Country', 'count': {'$sum': 1}}}])"
+  },
+  {
+    "id": "car-m6",
+    "question": "What is the maximum acceleration time recorded?",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.cars_data.aggregate([{'$group': {'_id': None, 'max_accel': {'$max': '$Accelerate'}}}]))",
+    "normalized_query": "db.cars_data.aggregate([{'$group': {'_id': None, 'max_accel': {'$max': '$Accelerate'}}}])"
+  },
+  {
+    "id": "car-m7",
+    "question": "How many models does each maker have?",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db['model_list.json'].aggregate([{'$group': {'_id': '$Maker', 'count': {'$sum': 1}}}]))",
+    "normalized_query": "db['model_list.json'].aggregate([{'$group': {'_id': '$Maker', 'count': {'$sum': 1}}}])"
+  },
+  {
+    "id": "car-h1",
+    "question": "List car makers with more than 2 models. Report the full name and the model count.",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db['model_list.json'].aggregate([{'$group': {'_id': '$Maker', 'count': {'$sum': 1}}}, {'$match': {'count': {'$gt': 2}}}, {'$lookup': {'from': 'car_makers', 'localField': '_id', 'foreignField': 'Id', 'as': 'mk'}}, {'$unwind': '$mk'}, {'$project': {'_id': 0, 'FullName': '$mk.FullName', 'model_count': '$count'}}]))",
+    "normalized_query": "db['model_list.json'].aggregate([{'$group': {'_id': '$Maker', 'count': {'$sum': 1}}}, {'$match': {'count': {'$gt': 2}}}, {'$lookup': {'from': 'car_makers', 'localField': '_id', 'foreignField': 'Id', 'as': 'mk'}}, {'$unwind': '$mk'}, {'$project': {'_id': 0, 'FullName': '$mk.FullName', 'model_count': '$count'}}])"
+  },
+  {
+    "id": "car-h2",
+    "question": "List all Volvo cars produced between 1977 and 1981 inclusive. Report the name of the car and the year.",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.car_names.aggregate([{'$match': {'Make': {'$regex': 'volvo', '$options': 'i'}}}, {'$lookup': {'from': 'cars_data', 'localField': 'MakeId', 'foreignField': 'Id', 'as': 'cd'}}, {'$unwind': '$cd'}, {'$match': {'cd.Year': {'$gte': 1977, '$lte': 1981}}}, {'$project': {'_id': 0, 'Make': 1, 'Year': '$cd.Year'}}]))",
+    "normalized_query": "db.car_names.aggregate([{'$match': {'Make': {'$regex': 'volvo', '$options': 'i'}}}, {'$lookup': {'from': 'cars_data', 'localField': 'MakeId', 'foreignField': 'Id', 'as': 'cd'}}, {'$unwind': '$cd'}, {'$match': {'cd.Year': {'$gte': 1977, '$lte': 1981}}}, {'$project': {'_id': 0, 'Make': 1, 'Year': '$cd.Year'}}])"
+  },
+  {
+    "id": "car-h3",
+    "question": "Report all Asian automakers: their full name and country name.",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.car_makers.aggregate([{'$addFields': {'country_id': {'$toInt': '$Country'}}}, {'$lookup': {'from': 'countries', 'localField': 'country_id', 'foreignField': 'CountryId', 'as': 'ctry'}}, {'$unwind': '$ctry'}, {'$addFields': {'continent_id': '$ctry.Continent'}}, {'$lookup': {'from': 'continents', 'localField': 'continent_id', 'foreignField': 'ContId', 'as': 'cont'}}, {'$unwind': '$cont'}, {'$match': {'cont.Continent': 'asia'}}, {'$project': {'_id': 0, 'FullName': 1, 'CountryName': '$ctry.CountryName'}}]))",
+    "normalized_query": "db.car_makers.aggregate([{'$addFields': {'country_id': {'$toInt': '$Country'}}}, {'$lookup': {'from': 'countries', 'localField': 'country_id', 'foreignField': 'CountryId', 'as': 'ctry'}}, {'$unwind': '$ctry'}, {'$addFields': {'continent_id': '$ctry.Continent'}}, {'$lookup': {'from': 'continents', 'localField': 'continent_id', 'foreignField': 'ContId', 'as': 'cont'}}, {'$unwind': '$cont'}, {'$match': {'cont.Continent': 'asia'}}, {'$project': {'_id': 0, 'FullName': 1, 'CountryName': '$ctry.CountryName'}}])"
+  },
+  {
+    "id": "car-c1",
+    "question": "For each Saab released after 1978, report the full name, the year, and the ratio of weight to horsepower.",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.car_names.aggregate([{'$match': {'Make': {'$regex': 'saab', '$options': 'i'}}}, {'$lookup': {'from': 'cars_data', 'localField': 'MakeId', 'foreignField': 'Id', 'as': 'cd'}}, {'$unwind': '$cd'}, {'$match': {'cd.Year': {'$gt': 1978}}}, {'$addFields': {'hp_num': {'$toDouble': '$cd.Horsepower'}}}, {'$project': {'_id': 0, 'Make': 1, 'Year': '$cd.Year', 'weight_hp_ratio': {'$divide': ['$cd.Weight', '$hp_num']}}}]))",
+    "normalized_query": "db.car_names.aggregate([{'$match': {'Make': {'$regex': 'saab', '$options': 'i'}}}, {'$lookup': {'from': 'cars_data', 'localField': 'MakeId', 'foreignField': 'Id', 'as': 'cd'}}, {'$unwind': '$cd'}, {'$match': {'cd.Year': {'$gt': 1978}}}, {'$addFields': {'hp_num': {'$toDouble': '$cd.Horsepower'}}}, {'$project': {'_id': 0, 'Make': 1, 'Year': '$cd.Year', 'weight_hp_ratio': {'$divide': ['$cd.Weight', '$hp_num']}}}])"
+  },
+  {
+    "id": "car-c2",
+    "question": "Find how many different car makers produced a vehicle heavier than 4000 lbs.",
+    "database": "car_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.cars_data.aggregate([{'$match': {'Weight': {'$gt': 4000}}}, {'$lookup': {'from': 'model_list.json', 'localField': 'Id', 'foreignField': 'ModelId', 'as': 'ml'}}, {'$unwind': '$ml'}, {'$group': {'_id': '$ml.Maker'}}, {'$count': 'maker_count'}]))",
+    "normalized_query": "db.cars_data.aggregate([{'$match': {'Weight': {'$gt': 4000}}}, {'$lookup': {'from': 'model_list.json', 'localField': 'Id', 'foreignField': 'ModelId', 'as': 'ml'}}, {'$unwind': '$ml'}, {'$group': {'_id': '$ml.Maker'}}, {'$count': 'maker_count'}])"
+  },
+  {
+    "id": "wl-e1",
+    "question": "What are the names of all the countries that became independent after 1950?",
+    "database": "world_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.country.find({'IndepYear': {'$gt': 1950}}, {'_id': 0, 'Name': 1}))",
+    "normalized_query": "db.country.find({'IndepYear': {'$gt': 1950}}, {'_id': 0, 'Name': 1})"
+  },
+  {
+    "id": "wl-e2",
+    "question": "How many countries have a republic as their form of government?",
+    "database": "world_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "db.country.count_documents({'GovernmentForm': {'$regex': 'republic', '$options': 'i'}})",
+    "normalized_query": "db.country.count_documents({'GovernmentForm': {'$regex': 'republic', '$options': 'i'}})"
+  },
+  {
+    "id": "wl-e3",
+    "question": "Which continent is Anguilla in?",
+    "database": "world_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.country.find({'Name': 'Anguilla'}, {'_id': 0, 'Continent': 1}))",
+    "normalized_query": "db.country.find({'Name': 'Anguilla'}, {'_id': 0, 'Continent': 1})"
+  },
+  {
+    "id": "wl-e4",
+    "question": "What are the population and life expectancy of Brazil?",
+    "database": "world_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.country.find({'Name': 'Brazil'}, {'_id': 0, 'Population': 1, 'LifeExpectancy': 1}))",
+    "normalized_query": "db.country.find({'Name': 'Brazil'}, {'_id': 0, 'Population': 1, 'LifeExpectancy': 1})"
+  },
+  {
+    "id": "wl-e5",
+    "question": "How many people live in the Gelderland district?",
+    "database": "world_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.city.aggregate([{'$match': {'District': 'Gelderland'}}, {'$group': {'_id': None, 'total_population': {'$sum': '$Population'}}}]))",
+    "normalized_query": "db.city.aggregate([{'$match': {'District': 'Gelderland'}}, {'$group': {'_id': None, 'total_population': {'$sum': '$Population'}}}])"
+  },
+  {
+    "id": "wl-e6",
+    "question": "What are the names and surface areas of the 5 largest countries by area?",
+    "database": "world_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.country.find({}, {'_id': 0, 'Name': 1, 'SurfaceArea': 1}).sort('SurfaceArea', -1).limit(5))",
+    "normalized_query": "db.country.find({}, {'_id': 0, 'Name': 1, 'SurfaceArea': 1}).sort('SurfaceArea', -1).limit(5)"
+  },
+  {
+    "id": "wl-e7",
+    "question": "What are the codes of countries that do not speak English?",
+    "database": "world_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.country.aggregate([{'$lookup': {'from': 'countrylanguage', 'let': {'code': '$Code'}, 'pipeline': [{'$match': {'$expr': {'$and': [{'$eq': ['$CountryCode', '$$code']}, {'$eq': ['$Language', 'English']}]}}}], 'as': 'eng'}}, {'$match': {'eng': []}}, {'$project': {'_id': 0, 'Code': 1}}]))",
+    "normalized_query": "db.country.aggregate([{'$lookup': {'from': 'countrylanguage', 'let': {'code': '$Code'}, 'pipeline': [{'$match': {'$expr': {'$and': [{'$eq': ['$CountryCode', '$$code']}, {'$eq': ['$Language', 'English']}]}}}], 'as': 'eng'}}, {'$match': {'eng': []}}, {'$project': {'_id': 0, 'Code': 1}}])"
+  },
+  {
+    "id": "wl-m1",
+    "question": "Which region is the city Kabul located in?",
+    "database": "world_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.city.aggregate([{'$match': {'Name': 'Kabul'}}, {'$lookup': {'from': 'country', 'localField': 'CountryCode', 'foreignField': 'Code', 'as': 'ctry'}}, {'$unwind': '$ctry'}, {'$project': {'_id': 0, 'Region': '$ctry.Region'}}]))",
+    "normalized_query": "db.city.aggregate([{'$match': {'Name': 'Kabul'}}, {'$lookup': {'from': 'country', 'localField': 'CountryCode', 'foreignField': 'Code', 'as': 'ctry'}}, {'$unwind': '$ctry'}, {'$project': {'_id': 0, 'Region': '$ctry.Region'}}])"
+  },
+  {
+    "id": "wl-m2",
+    "question": "Which language is the most popular in Aruba?",
+    "database": "world_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.country.aggregate([{'$match': {'Name': 'Aruba'}}, {'$lookup': {'from': 'countrylanguage', 'localField': 'Code', 'foreignField': 'CountryCode', 'as': 'langs'}}, {'$unwind': '$langs'}, {'$sort': {'langs.Percentage': -1}}, {'$limit': 1}, {'$project': {'_id': 0, 'Language': '$langs.Language'}}]))",
+    "normalized_query": "db.country.aggregate([{'$match': {'Name': 'Aruba'}}, {'$lookup': {'from': 'countrylanguage', 'localField': 'Code', 'foreignField': 'CountryCode', 'as': 'langs'}}, {'$unwind': '$langs'}, {'$sort': {'langs.Percentage': -1}}, {'$limit': 1}, {'$project': {'_id': 0, 'Language': '$langs.Language'}}])"
+  },
+  {
+    "id": "wl-m3",
+    "question": "How many official languages does Afghanistan have?",
+    "database": "world_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.country.aggregate([{'$match': {'Name': 'Afghanistan'}}, {'$lookup': {'from': 'countrylanguage', 'localField': 'Code', 'foreignField': 'CountryCode', 'as': 'langs'}}, {'$unwind': '$langs'}, {'$match': {'langs.IsOfficial': 'T'}}, {'$count': 'official_language_count'}]))",
+    "normalized_query": "db.country.aggregate([{'$match': {'Name': 'Afghanistan'}}, {'$lookup': {'from': 'countrylanguage', 'localField': 'Code', 'foreignField': 'CountryCode', 'as': 'langs'}}, {'$unwind': '$langs'}, {'$match': {'langs.IsOfficial': 'T'}}, {'$count': 'official_language_count'}])"
+  },
+  {
+    "id": "wl-m4",
+    "question": "What is the name of the country that speaks the largest number of languages?",
+    "database": "world_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.countrylanguage.aggregate([{'$group': {'_id': '$CountryCode', 'lang_count': {'$sum': 1}}}, {'$sort': {'lang_count': -1}}, {'$limit': 1}, {'$lookup': {'from': 'country', 'localField': '_id', 'foreignField': 'Code', 'as': 'ctry'}}, {'$unwind': '$ctry'}, {'$project': {'_id': 0, 'Name': '$ctry.Name', 'lang_count': 1}}]))",
+    "normalized_query": "db.countrylanguage.aggregate([{'$group': {'_id': '$CountryCode', 'lang_count': {'$sum': 1}}}, {'$sort': {'lang_count': -1}}, {'$limit': 1}, {'$lookup': {'from': 'country', 'localField': '_id', 'foreignField': 'Code', 'as': 'ctry'}}, {'$unwind': '$ctry'}, {'$project': {'_id': 0, 'Name': '$ctry.Name', 'lang_count': 1}}])"
+  },
+  {
+    "id": "wl-m5",
+    "question": "What is the average life expectancy for countries in the Central Africa region?",
+    "database": "world_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.country.aggregate([{'$match': {'Region': 'Central Africa'}}, {'$group': {'_id': None, 'avg_life_expectancy': {'$avg': '$LifeExpectancy'}}}]))",
+    "normalized_query": "db.country.aggregate([{'$match': {'Region': 'Central Africa'}}, {'$group': {'_id': None, 'avg_life_expectancy': {'$avg': '$LifeExpectancy'}}}])"
+  },
+  {
+    "id": "wl-m6",
+    "question": "Find the city with the largest population where English is spoken.",
+    "database": "world_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.countrylanguage.aggregate([{'$match': {'Language': 'English'}}, {'$lookup': {'from': 'city', 'localField': 'CountryCode', 'foreignField': 'CountryCode', 'as': 'cities'}}, {'$unwind': '$cities'}, {'$sort': {'cities.Population': -1}}, {'$limit': 1}, {'$project': {'_id': 0, 'City': '$cities.Name', 'Population': '$cities.Population'}}]))",
+    "normalized_query": "db.countrylanguage.aggregate([{'$match': {'Language': 'English'}}, {'$lookup': {'from': 'city', 'localField': 'CountryCode', 'foreignField': 'CountryCode', 'as': 'cities'}}, {'$unwind': '$cities'}, {'$sort': {'cities.Population': -1}}, {'$limit': 1}, {'$project': {'_id': 0, 'City': '$cities.Name', 'Population': '$cities.Population'}}])"
+  },
+  {
+    "id": "wl-h1",
+    "question": "Return the country name and number of languages spoken for each country that speaks at least 3 languages.",
+    "database": "world_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.countrylanguage.aggregate([{'$group': {'_id': '$CountryCode', 'lang_count': {'$sum': 1}}}, {'$match': {'lang_count': {'$gte': 3}}}, {'$lookup': {'from': 'country', 'localField': '_id', 'foreignField': 'Code', 'as': 'ctry'}}, {'$unwind': '$ctry'}, {'$project': {'_id': 0, 'Name': '$ctry.Name', 'lang_count': 1}}]))",
+    "normalized_query": "db.countrylanguage.aggregate([{'$group': {'_id': '$CountryCode', 'lang_count': {'$sum': 1}}}, {'$match': {'lang_count': {'$gte': 3}}}, {'$lookup': {'from': 'country', 'localField': '_id', 'foreignField': 'Code', 'as': 'ctry'}}, {'$unwind': '$ctry'}, {'$project': {'_id': 0, 'Name': '$ctry.Name', 'lang_count': 1}}])"
+  },
+  {
+    "id": "wl-h2",
+    "question": "Which languages are spoken by only one country among republic governments?",
+    "database": "world_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.country.aggregate([{'$match': {'GovernmentForm': {'$regex': 'republic', '$options': 'i'}}}, {'$lookup': {'from': 'countrylanguage', 'localField': 'Code', 'foreignField': 'CountryCode', 'as': 'langs'}}, {'$unwind': '$langs'}, {'$group': {'_id': '$langs.Language', 'country_count': {'$addToSet': '$Code'}}}, {'$project': {'_id': 1, 'num_countries': {'$size': '$country_count'}}}, {'$match': {'num_countries': 1}}]))",
+    "normalized_query": "db.country.aggregate([{'$match': {'GovernmentForm': {'$regex': 'republic', '$options': 'i'}}}, {'$lookup': {'from': 'countrylanguage', 'localField': 'Code', 'foreignField': 'CountryCode', 'as': 'langs'}}, {'$unwind': '$langs'}, {'$group': {'_id': '$langs.Language', 'country_count': {'$addToSet': '$Code'}}}, {'$project': {'_id': 1, 'num_countries': {'$size': '$country_count'}}}, {'$match': {'num_countries': 1}}])"
+  },
+  {
+    "id": "wl-h3",
+    "question": "What is the total population and average surface area of countries in North America with a surface area bigger than 3000?",
+    "database": "world_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.country.aggregate([{'$match': {'Continent': 'North America', 'SurfaceArea': {'$gt': 3000}}}, {'$group': {'_id': None, 'total_population': {'$sum': '$Population'}, 'avg_surface_area': {'$avg': '$SurfaceArea'}}}]))",
+    "normalized_query": "db.country.aggregate([{'$match': {'Continent': 'North America', 'SurfaceArea': {'$gt': 3000}}}, {'$group': {'_id': None, 'total_population': {'$sum': '$Population'}, 'avg_surface_area': {'$avg': '$SurfaceArea'}}}])"
+  },
+  {
+    "id": "wl-c1",
+    "question": "Which countries have a greater surface area than every country in Oceania?",
+    "database": "world_1",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.country.aggregate([{'$lookup': {'from': 'country', 'pipeline': [{'$match': {'Continent': 'Oceania'}}, {'$group': {'_id': None, 'max_area': {'$max': '$SurfaceArea'}}}], 'as': 'oceania_max'}}, {'$unwind': '$oceania_max'}, {'$match': {'$expr': {'$gt': ['$SurfaceArea', '$oceania_max.max_area']}}}, {'$project': {'_id': 0, 'Name': 1, 'SurfaceArea': 1}}]))",
+    "normalized_query": "db.country.aggregate([{'$lookup': {'from': 'country', 'pipeline': [{'$match': {'Continent': 'Oceania'}}, {'$group': {'_id': None, 'max_area': {'$max': '$SurfaceArea'}}}], 'as': 'oceania_max'}}, {'$unwind': '$oceania_max'}, {'$match': {'$expr': {'$gt': ['$SurfaceArea', '$oceania_max.max_area']}}}, {'$project': {'_id': 0, 'Name': 1, 'SurfaceArea': 1}}])"
+  },
+  {
+    "id": "dk-e1",
+    "question": "What is the average age of all the dogs?",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Dogs.aggregate([{'$addFields': {'age_num': {'$toInt': '$age'}}}, {'$group': {'_id': None, 'avg_age': {'$avg': '$age_num'}}}]))",
+    "normalized_query": "db.Dogs.aggregate([{'$addFields': {'age_num': {'$toInt': '$age'}}}, {'$group': {'_id': None, 'avg_age': {'$avg': '$age_num'}}}])"
+  },
+  {
+    "id": "dk-e2",
+    "question": "What is the age of the oldest dog?",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Dogs.aggregate([{'$addFields': {'age_num': {'$toInt': '$age'}}}, {'$group': {'_id': None, 'max_age': {'$max': '$age_num'}}}]))",
+    "normalized_query": "db.Dogs.aggregate([{'$addFields': {'age_num': {'$toInt': '$age'}}}, {'$group': {'_id': None, 'max_age': {'$max': '$age_num'}}}])"
+  },
+  {
+    "id": "dk-e3",
+    "question": "How many dogs went through any treatment?",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "len(db.Treatments.distinct('dog_id'))",
+    "normalized_query": "len(db.Treatments.distinct('dog_id'))"
+  },
+  {
+    "id": "dk-e4",
+    "question": "How much does each charge type cost? List both the charge type and amount.",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Charges.find({}, {'_id': 0, 'charge_type': 1, 'charge_amount': 1}))",
+    "normalized_query": "db.Charges.find({}, {'_id': 0, 'charge_type': 1, 'charge_amount': 1})"
+  },
+  {
+    "id": "dk-e5",
+    "question": "What is the most expensive charge amount?",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Charges.aggregate([{'$group': {'_id': None, 'max_charge': {'$max': '$charge_amount'}}}]))",
+    "normalized_query": "db.Charges.aggregate([{'$group': {'_id': None, 'max_charge': {'$max': '$charge_amount'}}}])"
+  },
+  {
+    "id": "dk-e6",
+    "question": "List the email, cell phone, and home phone of all the professionals.",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Professionals.find({}, {'_id': 0, 'email_address': 1, 'cell_number': 1, 'home_phone': 1}))",
+    "normalized_query": "db.Professionals.find({}, {'_id': 0, 'email_address': 1, 'cell_number': 1, 'home_phone': 1})"
+  },
+  {
+    "id": "dk-e7",
+    "question": "List the dog name, age, and weight of dogs that have been abandoned.",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Dogs.find({'abandoned_yn': '1'}, {'_id': 0, 'name': 1, 'age': 1, 'weight': 1}))",
+    "normalized_query": "db.Dogs.find({'abandoned_yn': '1'}, {'_id': 0, 'name': 1, 'age': 1, 'weight': 1})"
+  },
+  {
+    "id": "dk-m1",
+    "question": "Which professionals live in the state of Hawaii or the state of Wisconsin? List their emails.",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Professionals.find({'state': {'$in': ['Hawaii', 'Wisconsin']}}, {'_id': 0, 'email_address': 1}))",
+    "normalized_query": "db.Professionals.find({'state': {'$in': ['Hawaii', 'Wisconsin']}}, {'_id': 0, 'email_address': 1})"
+  },
+  {
+    "id": "dk-m2",
+    "question": "What is the name of the breed with the most dogs?",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Dogs.aggregate([{'$group': {'_id': '$breed_code', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}, {'$lookup': {'from': 'Breeds', 'localField': '_id', 'foreignField': 'breed_code', 'as': 'b'}}, {'$unwind': '$b'}, {'$project': {'_id': 0, 'breed_name': '$b.breed_name', 'count': 1}}]))",
+    "normalized_query": "db.Dogs.aggregate([{'$group': {'_id': '$breed_code', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}, {'$lookup': {'from': 'Breeds', 'localField': '_id', 'foreignField': 'breed_code', 'as': 'b'}}, {'$unwind': '$b'}, {'$project': {'_id': 0, 'breed_name': '$b.breed_name', 'count': 1}}])"
+  },
+  {
+    "id": "dk-m3",
+    "question": "Which owner owns the most dogs? List the owner id, first name, and last name.",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Dogs.aggregate([{'$group': {'_id': '$owner_id', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}, {'$lookup': {'from': 'Owners', 'localField': '_id', 'foreignField': 'owner_id', 'as': 'o'}}, {'$unwind': '$o'}, {'$project': {'_id': 0, 'owner_id': '$o.owner_id', 'first_name': '$o.first_name', 'last_name': '$o.last_name'}}]))",
+    "normalized_query": "db.Dogs.aggregate([{'$group': {'_id': '$owner_id', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}, {'$lookup': {'from': 'Owners', 'localField': '_id', 'foreignField': 'owner_id', 'as': 'o'}}, {'$unwind': '$o'}, {'$project': {'_id': 0, 'owner_id': '$o.owner_id', 'first_name': '$o.first_name', 'last_name': '$o.last_name'}}])"
+  },
+  {
+    "id": "dk-m4",
+    "question": "Which professionals have done at least two treatments? List the professional's id, role, and first name.",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Treatments.aggregate([{'$group': {'_id': '$professional_id', 'count': {'$sum': 1}}}, {'$match': {'count': {'$gte': 2}}}, {'$lookup': {'from': 'Professionals', 'localField': '_id', 'foreignField': 'professional_id', 'as': 'p'}}, {'$unwind': '$p'}, {'$project': {'_id': 0, 'professional_id': '$p.professional_id', 'role_code': '$p.role_code', 'first_name': '$p.first_name'}}]))",
+    "normalized_query": "db.Treatments.aggregate([{'$group': {'_id': '$professional_id', 'count': {'$sum': 1}}}, {'$match': {'count': {'$gte': 2}}}, {'$lookup': {'from': 'Professionals', 'localField': '_id', 'foreignField': 'professional_id', 'as': 'p'}}, {'$unwind': '$p'}, {'$project': {'_id': 0, 'professional_id': '$p.professional_id', 'role_code': '$p.role_code', 'first_name': '$p.first_name'}}])"
+  },
+  {
+    "id": "dk-m5",
+    "question": "What is the description of the treatment type that costs the least money in total?",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Treatments.aggregate([{'$group': {'_id': '$treatment_type_code', 'total_cost': {'$sum': '$cost_of_treatment'}}}, {'$sort': {'total_cost': 1}}, {'$limit': 1}, {'$lookup': {'from': 'Treatment_Types', 'localField': '_id', 'foreignField': 'treatment_type_code', 'as': 'tt'}}, {'$unwind': '$tt'}, {'$project': {'_id': 0, 'treatment_type_description': '$tt.treatment_type_description'}}]))",
+    "normalized_query": "db.Treatments.aggregate([{'$group': {'_id': '$treatment_type_code', 'total_cost': {'$sum': '$cost_of_treatment'}}}, {'$sort': {'total_cost': 1}}, {'$limit': 1}, {'$lookup': {'from': 'Treatment_Types', 'localField': '_id', 'foreignField': 'treatment_type_code', 'as': 'tt'}}, {'$unwind': '$tt'}, {'$project': {'_id': 0, 'treatment_type_description': '$tt.treatment_type_description'}}])"
+  },
+  {
+    "id": "dk-m6",
+    "question": "List each owner's first name, last name, and the size code of their dog.",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Dogs.aggregate([{'$lookup': {'from': 'Owners', 'localField': 'owner_id', 'foreignField': 'owner_id', 'as': 'o'}}, {'$unwind': '$o'}, {'$project': {'_id': 0, 'first_name': '$o.first_name', 'last_name': '$o.last_name', 'size_code': 1}}]))",
+    "normalized_query": "db.Dogs.aggregate([{'$lookup': {'from': 'Owners', 'localField': 'owner_id', 'foreignField': 'owner_id', 'as': 'o'}}, {'$unwind': '$o'}, {'$project': {'_id': 0, 'first_name': '$o.first_name', 'last_name': '$o.last_name', 'size_code': 1}}])"
+  },
+  {
+    "id": "dk-h1",
+    "question": "Which states have both owners and professionals living there?",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Owners.aggregate([{'$group': {'_id': '$state'}}, {'$lookup': {'from': 'Professionals', 'localField': '_id', 'foreignField': 'state', 'as': 'profs'}}, {'$match': {'profs': {'$ne': []}}}, {'$project': {'_id': 1}}]))",
+    "normalized_query": "db.Owners.aggregate([{'$group': {'_id': '$state'}}, {'$lookup': {'from': 'Professionals', 'localField': '_id', 'foreignField': 'state', 'as': 'profs'}}, {'$match': {'profs': {'$ne': []}}}, {'$project': {'_id': 1}}])"
+  },
+  {
+    "id": "dk-h2",
+    "question": "Which owner has paid the largest amount of money in total for their dogs' treatments? Show the owner id and zip code.",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Treatments.aggregate([{'$lookup': {'from': 'Dogs', 'localField': 'dog_id', 'foreignField': 'dog_id', 'as': 'd'}}, {'$unwind': '$d'}, {'$group': {'_id': '$d.owner_id', 'total_cost': {'$sum': '$cost_of_treatment'}}}, {'$sort': {'total_cost': -1}}, {'$limit': 1}, {'$lookup': {'from': 'Owners', 'localField': '_id', 'foreignField': 'owner_id', 'as': 'o'}}, {'$unwind': '$o'}, {'$project': {'_id': 0, 'owner_id': '$o.owner_id', 'zip_code': '$o.zip_code'}}]))",
+    "normalized_query": "db.Treatments.aggregate([{'$lookup': {'from': 'Dogs', 'localField': 'dog_id', 'foreignField': 'dog_id', 'as': 'd'}}, {'$unwind': '$d'}, {'$group': {'_id': '$d.owner_id', 'total_cost': {'$sum': '$cost_of_treatment'}}}, {'$sort': {'total_cost': -1}}, {'$limit': 1}, {'$lookup': {'from': 'Owners', 'localField': '_id', 'foreignField': 'owner_id', 'as': 'o'}}, {'$unwind': '$o'}, {'$project': {'_id': 0, 'owner_id': '$o.owner_id', 'zip_code': '$o.zip_code'}}])"
+  },
+  {
+    "id": "dk-h3",
+    "question": "How many professionals did not operate any treatment on dogs?",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Professionals.aggregate([{'$lookup': {'from': 'Treatments', 'localField': 'professional_id', 'foreignField': 'professional_id', 'as': 't'}}, {'$match': {'t': []}}, {'$count': 'professional_count'}]))",
+    "normalized_query": "db.Professionals.aggregate([{'$lookup': {'from': 'Treatments', 'localField': 'professional_id', 'foreignField': 'professional_id', 'as': 't'}}, {'$match': {'t': []}}, {'$count': 'professional_count'}])"
+  },
+  {
+    "id": "dk-c1",
+    "question": "Which dogs have not cost their owner more than 1000 in total treatment cost? List the dog names.",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Dogs.aggregate([{'$lookup': {'from': 'Treatments', 'localField': 'dog_id', 'foreignField': 'dog_id', 'as': 't'}}, {'$addFields': {'total_cost': {'$sum': '$t.cost_of_treatment'}}}, {'$match': {'total_cost': {'$lte': 1000}}}, {'$project': {'_id': 0, 'name': 1}}]))",
+    "normalized_query": "db.Dogs.aggregate([{'$lookup': {'from': 'Treatments', 'localField': 'dog_id', 'foreignField': 'dog_id', 'as': 't'}}, {'$addFields': {'total_cost': {'$sum': '$t.cost_of_treatment'}}}, {'$match': {'total_cost': {'$lte': 1000}}}, {'$project': {'_id': 0, 'name': 1}}])"
+  },
+  {
+    "id": "dk-c2",
+    "question": "Which first names are used for professionals or owners but not used as dog names?",
+    "database": "dog_kennels",
+    "model": "claude-sonnet-5",
+    "generated_query": "list(db.Professionals.aggregate([{'$project': {'_id': 0, 'first_name': 1}}, {'$unionWith': {'coll': 'Owners', 'pipeline': [{'$project': {'_id': 0, 'first_name': 1}}]}}, {'$group': {'_id': '$first_name'}}, {'$lookup': {'from': 'Dogs', 'localField': '_id', 'foreignField': 'name', 'as': 'd'}}, {'$match': {'d': []}}, {'$project': {'_id': 1}}]))",
+    "normalized_query": "db.Professionals.aggregate([{'$project': {'_id': 0, 'first_name': 1}}, {'$unionWith': {'coll': 'Owners', 'pipeline': [{'$project': {'_id': 0, 'first_name': 1}}]}}, {'$group': {'_id': '$first_name'}}, {'$lookup': {'from': 'Dogs', 'localField': '_id', 'foreignField': 'name', 'as': 'd'}}, {'$match': {'d': []}}, {'$project': {'_id': 1}}])"
+  }
+]
