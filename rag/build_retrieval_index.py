@@ -1,6 +1,7 @@
-# Embeds the 100-example few-shot pool (data/rag_fewshot_pool.json, produced
-# by build_split.py) with all-MiniLM-L6-v2 and builds a flat FAISS index
-# over the embeddings.
+# Embeds the 100-example few-shot pool (rag/data/rag_fewshot_pool.json,
+# produced by build_split.py) with all-MiniLM-L6-v2 and builds a flat FAISS
+# index over the embeddings. Index + row-aligned metadata are saved into
+# rag/data/ alongside the rest of the RAG-specific artifacts.
 #
 # IndexFlatIP (brute-force inner product over L2-normalized vectors, i.e.
 # cosine similarity) is the right-fit choice at this scale -- 100 vectors is
@@ -30,10 +31,11 @@ log = logging.getLogger("rag.build_retrieval_index")
 
 def main():
     root = Path(__file__).resolve().parents[1]
-    data_dir = root / "data"
     rag_dir = root / "rag"
+    rag_data_dir = rag_dir / "data"
+    rag_data_dir.mkdir(parents=True, exist_ok=True)
 
-    pool_file = data_dir / "rag_fewshot_pool.json"
+    pool_file = rag_data_dir / "rag_fewshot_pool.json"
     pool = json.loads(pool_file.read_text(encoding="utf-8"))
     log.info("Loaded %d few-shot pool cases from %s", len(pool), pool_file)
 
@@ -45,7 +47,7 @@ def main():
     index.add(vecs)
     log.info("Built FAISS IndexFlatIP, ntotal=%d, dim=%d", index.ntotal, vecs.shape[1])
 
-    index_path = rag_dir / "fewshot.index"
+    index_path = rag_data_dir / "fewshot.index"
     faiss.write_index(index, str(index_path))
 
     # Metadata is aligned by row position to the FAISS index (row i in the
@@ -62,7 +64,7 @@ def main():
         }
         for c in pool
     ]
-    metadata_path = rag_dir / "fewshot_metadata.json"
+    metadata_path = rag_data_dir / "fewshot_metadata.json"
     metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
     log.info("Saved FAISS index -> %s", index_path)
