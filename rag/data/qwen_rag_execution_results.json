@@ -3,10 +3,13 @@
     "id": "dk-m5",
     "question": "What is the description of the treatment type that costs the least money in total?",
     "database": "dog_kennels",
-    "query": "db.Treatments.aggregate([{'$group': {'_id': '$treatment_type_code', 'cost_sum': {'$sum': '$cost_of_treatment'}}}, {'$sort': {'cost_sum': 1}}, {'$limit': 1}, {'$project': {'_id': 0, 'treatment_type_description': 1}}])",
+    "query": "db.Treatment_Types.aggregate([{'$group': {'_id': '$treatment_type_code', 'total_cost': {'$sum': '$cost_of_treatment'}}}, {'$sort': {'total_cost': 1}}, {'$limit': 1}])",
     "status": "PASS",
     "result": [
-      {}
+      {
+        "_id": "EXAM",
+        "total_cost": 0
+      }
     ],
     "non_empty_rate": true,
     "execution_accuracy": false
@@ -53,9 +56,9 @@
     "id": "nw-c1",
     "question": "List the names of highschoolers who are friends with someone in grade 12.",
     "database": "network_1",
-    "query": "db.Highschooler.find({\"ID\": {\"$in\": [x[\"student_id\"] for x in db.Friend.find({\"friend_id\": {\"$in\": [y[\"student_id\"] for y in db.Friend.find({\"friend_id\": {\"$in\": [z[\"student_id\"] for z in db.Friend.find({\"friend_id\": {\"$in\": [w[\"student_id\"] for w in db.Friend.find({\"friend_id\": {\"$in\": [v[\"student_id\"] for v in db.Friend.find({\"friend_id\": {\"$in\": [u[\"student_id\"] for u in db.Friend.find({\"friend_id\": {\"$in\": [t[\"student_id\"] for t in db.Friend.find({\"friend_id\": {\"$in\": [s[\"student_id\"] for s in db.Friend.find({\"friend_id\": {\"$in\": [r[\"student_id\"] for r in db.Friend.find({\"friend_id\": {\"$in\": [q[\"student_id\"] for q in db.Friend.find({\"friend_id\": {\"$in\": [p[\"student_id\"] for p in db.Friend.find({\"friend_id\": {\"$in\": [o[\"student_id\"] for o in db.Friend.find({\"friend_id\": {\"$in\": [n[\"student_id\"] for n in db.Friend.find({\"friend_id\": {\"$in\": [m[\"student_id\"] for m in db.Friend.find({\"friend",
+    "query": "db.Friend.aggregate([{'$match': {'friend_id': {'$in': db.Highschooler.find({'grade': 12}, {'_id': 0, 'name': 1})}}}, {'$lookup': {'from': 'Highschooler', 'localField': 'friend_id', 'foreignField': 'ID', 'as': 'hs'}}, {'$unwind': '$hs'}, {'$project': {'_id': 0, 'name': '$hs.name'}}])",
     "status": "FAIL",
-    "error": "REJECTED by safety check (syntax error: unterminated string literal (detected at line 1) (<unknown>, line 1))",
+    "error": "Invalid document: cannot encode object: <pymongo.synchronous.cursor.Cursor object at 0x0000024D36531010>, of type: <class 'pymongo.synchronous.cursor.Cursor'>",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -73,7 +76,7 @@
     "id": "car-h1",
     "question": "List car makers with more than 2 models. Report the full name and the model count.",
     "database": "car_1",
-    "query": "db.car_makers.find({'ModelCount': {'$gt': 2}}, {'_id': 0, 'FullName': 1, 'ModelCount': 1})",
+    "query": "db.car_makers.aggregate([{'$group': {'_id': '$Maker', 'model_count': {'$sum': 1}}}, {'$match': {'model_count': {'$gt': 2}}}, {'$project': {'_id': 0, 'Maker': 1, 'model_count': 1}}])",
     "status": "PASS",
     "result": [],
     "non_empty_rate": false,
@@ -93,62 +96,54 @@
     "id": "cs-e6",
     "question": "List the names of stadiums with a capacity greater than 10000.",
     "database": "concert_singer",
-    "query": "db.stadium.find({'Capacity': {'$gt': 10000}}, {'Name': 1})",
+    "query": "db.stadium.find({'Capacity': {'$gt': 10000}}, {'_id': 0, 'Name': 1})",
     "status": "PASS",
     "result": [
       {
-        "_id": "6a659cdcfdddf355848717d8",
         "Name": "Stark's Park"
       },
       {
-        "_id": "6a659cdcfdddf355848717d9",
         "Name": "Somerset Park"
       },
       {
-        "_id": "6a659cdcfdddf355848717db",
         "Name": "Hampden Park"
       }
     ],
     "non_empty_rate": true,
-    "execution_accuracy": false
+    "execution_accuracy": true
   },
   {
     "id": "car-e9",
     "question": "List all model names produced by maker id 6.",
     "database": "car_1",
-    "query": "db.model_list.json.find({'Maker': 6}, {'Model': 1})",
+    "query": "db.model_list.json.find({'Maker': 6}, {'_id': 0, 'Model': 1})",
     "status": "PASS",
     "result": [
       {
-        "_id": "6a659d73fdddf35584871b4a",
         "Model": "chrysler"
       },
       {
-        "_id": "6a659d73fdddf35584871b4d",
         "Model": "dodge"
       },
       {
-        "_id": "6a659d73fdddf35584871b5a",
         "Model": "plymouth"
       },
       {
-        "_id": "6a659d73fdddf35584871b65",
         "Model": "jeep"
       }
     ],
     "non_empty_rate": true,
-    "execution_accuracy": false
+    "execution_accuracy": true
   },
   {
     "id": "dk-e2",
     "question": "What is the age of the oldest dog?",
     "database": "dog_kennels",
-    "query": "db.Dogs.aggregate([{'$sort': {'date_of_birth': -1}}, {'$limit': 1}, {'$project': {'_id': 0, 'name': 1, 'age': 1}}])",
+    "query": "db.Dogs.aggregate([{'$group': {'_id': None, 'max_age': {'$max': '$age'}}}, {'$project': {'_id': 0}}])",
     "status": "PASS",
     "result": [
       {
-        "name": "Jeffrey",
-        "age": "4"
+        "max_age": "9"
       }
     ],
     "non_empty_rate": true,
@@ -305,10 +300,23 @@
     "id": "cs-c1",
     "question": "List the names of singers and the stadium name where they performed, for concerts held in 2015.",
     "database": "concert_singer",
-    "query": "db.singer_in_concert.aggregate([{'$addFields': {'Singer_ID_int': {'$toInt': '$Singer_ID'}}}, {'$lookup': {'from': 'concert', 'localField': 'concert_ID', 'foreignField': 'concert_ID', 'as': 'concert'}}, {'$unwind': '$concert'}, {'$match': {'concert.Year': '2015'}}, {'$lookup': {'from': 'stadium', 'localField': 'Stadium_ID', 'foreignField': 'Stadium_ID', 'as': 'stadium'}}, {'$unwind': '$stadium'}, {'$project': {'_id': 0, 'Name': '$singer.Name', 'Stadium_Name': '$stadium.Name'}}])",
+    "query": "db.singer_in_concert.aggregate([{'$addFields': {'Singer_ID_int': {'$toInt': '$Singer_ID'}}}, {'$lookup': {'from': 'concert', 'localField': 'concert_ID', 'foreignField': 'concert_ID', 'as': 'concert'}}, {'$unwind': '$concert'}, {'$match': {'concert.Year': '2015'}}, {'$lookup': {'from': 'singer', 'localField': 'Singer_ID_int', 'foreignField': 'Singer_ID', 'as': 'singer'}}, {'$unwind': '$singer'}, {'$project': {'_id': 0, 'Name': '$singer.Name', 'Stadium_Name': '$concert.Stadium_Name'}}])",
     "status": "PASS",
-    "result": [],
-    "non_empty_rate": false,
+    "result": [
+      {
+        "Name": "John Nizinik"
+      },
+      {
+        "Name": "Tribal King"
+      },
+      {
+        "Name": "Justin Brown"
+      },
+      {
+        "Name": "Timbaland"
+      }
+    ],
+    "non_empty_rate": true,
     "execution_accuracy": false
   }
 ]

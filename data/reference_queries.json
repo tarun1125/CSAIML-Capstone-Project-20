@@ -1491,17 +1491,6 @@
   "source": "expansion-2026-08-16-spider"
  },
  {
-  "id": "spider-concert_singer-12",
-  "question": "How many singers do we have?",
-  "database": "concert_singer",
-  "complexity": "easy",
-  "gold_collections": [
-   "concert_singer.singer"
-  ],
-  "normalized_query": "db.singer.count_documents({})",
-  "source": "expansion-2026-08-16-spider"
- },
- {
   "id": "spider-concert_singer-13",
   "question": "What is the average, minimum, and maximum age of all singers from France?",
   "database": "concert_singer",
@@ -2928,28 +2917,6 @@
   "source": "expansion-2026-08-16-spider"
  },
  {
-  "id": "spider-world_1-30",
-  "question": "Give the names of the nations that were founded after 1950.",
-  "database": "world_1",
-  "complexity": "easy",
-  "gold_collections": [
-   "world_1.country"
-  ],
-  "normalized_query": "db.country.find({\"IndepYear\": {\"$gt\": 1950}}, {\"_id\": 0, \"Name\": 1})",
-  "source": "expansion-2026-08-16-spider"
- },
- {
-  "id": "spider-world_1-31",
-  "question": "How many countries have governments that are republics?",
-  "database": "world_1",
-  "complexity": "easy",
-  "gold_collections": [
-   "world_1.country"
-  ],
-  "normalized_query": "db.country.count_documents({\"GovernmentForm\": \"Republic\"})",
-  "source": "expansion-2026-08-16-spider"
- },
- {
   "id": "spider-world_1-32",
   "question": "What is the total surface area of the countries in the Caribbean region?",
   "database": "world_1",
@@ -2958,17 +2925,6 @@
    "world_1.country"
   ],
   "normalized_query": "db.country.aggregate([{\"$match\": {\"Region\": \"Caribbean\"}}, {\"$group\": {\"_id\": None, \"total_surface_area\": {\"$sum\": \"$SurfaceArea\"}}}, {\"$project\": {\"_id\": 0, \"total_surface_area\": 1}}])",
-  "source": "expansion-2026-08-16-spider"
- },
- {
-  "id": "spider-world_1-33",
-  "question": "What is the continent name which Anguilla belongs to?",
-  "database": "world_1",
-  "complexity": "easy",
-  "gold_collections": [
-   "world_1.country"
-  ],
-  "normalized_query": "db.country.find({\"Name\": \"Anguilla\"}, {\"_id\": 0, \"Continent\": 1})",
   "source": "expansion-2026-08-16-spider"
  },
  {
@@ -3251,18 +3207,6 @@
   "source": "expansion-2026-08-16-spider"
  },
  {
-  "id": "spider-dog_kennels-3",
-  "question": "Which breed do the most dogs have? Give me the breed name.",
-  "database": "dog_kennels",
-  "complexity": "hard",
-  "gold_collections": [
-   "dog_kennels.Dogs",
-   "dog_kennels.Breeds"
-  ],
-  "normalized_query": "db.Dogs.aggregate([{\"$group\": {\"_id\": \"$breed_code\", \"dog_count\": {\"$sum\": 1}}}, {\"$sort\": {\"dog_count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"Breeds\", \"localField\": \"_id\", \"foreignField\": \"breed_code\", \"as\": \"b\"}}, {\"$unwind\": \"$b\"}, {\"$project\": {\"_id\": 0, \"breed_name\": \"$b.breed_name\"}}])",
-  "source": "expansion-2026-08-16-spider"
- },
- {
   "id": "spider-dog_kennels-4",
   "question": "Which owner has paid for the most treatments on his or her dogs? List the owner id and last name.",
   "database": "dog_kennels",
@@ -3273,18 +3217,6 @@
    "dog_kennels.Owners"
   ],
   "normalized_query": "db.Treatments.aggregate([{\"$lookup\": {\"from\": \"Dogs\", \"localField\": \"dog_id\", \"foreignField\": \"dog_id\", \"as\": \"d\"}}, {\"$unwind\": \"$d\"}, {\"$group\": {\"_id\": \"$d.owner_id\", \"treatment_count\": {\"$sum\": 1}}}, {\"$sort\": {\"treatment_count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"Owners\", \"localField\": \"_id\", \"foreignField\": \"owner_id\", \"as\": \"o\"}}, {\"$unwind\": \"$o\"}, {\"$project\": {\"_id\": 0, \"owner_id\": \"$_id\", \"last_name\": \"$o.last_name\"}}])",
-  "source": "expansion-2026-08-16-spider"
- },
- {
-  "id": "spider-dog_kennels-5",
-  "question": "Give me the description of the treatment type whose total cost is the lowest.",
-  "database": "dog_kennels",
-  "complexity": "hard",
-  "gold_collections": [
-   "dog_kennels.Treatments",
-   "dog_kennels.Treatment_Types"
-  ],
-  "normalized_query": "db.Treatments.aggregate([{\"$group\": {\"_id\": \"$treatment_type_code\", \"total_cost\": {\"$sum\": \"$cost_of_treatment\"}}}, {\"$sort\": {\"total_cost\": 1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"Treatment_Types\", \"localField\": \"_id\", \"foreignField\": \"treatment_type_code\", \"as\": \"t\"}}, {\"$unwind\": \"$t\"}, {\"$project\": {\"_id\": 0, \"treatment_type_description\": \"$t.treatment_type_description\"}}])",
   "source": "expansion-2026-08-16-spider"
  },
  {
@@ -3529,28 +3461,6 @@
    "dog_kennels.Dogs"
   ],
   "normalized_query": "db.Dogs.aggregate([{\"$match\": {\"abandoned_yn\": \"1\"}}, {\"$sort\": {\"dog_id\": 1}}, {\"$project\": {\"_id\": 0, \"name\": 1, \"age\": 1, \"weight\": 1}}])",
-  "source": "expansion-2026-08-16-spider"
- },
- {
-  "id": "spider-dog_kennels-32",
-  "question": "Compute the average age of all the dogs.",
-  "database": "dog_kennels",
-  "complexity": "easy",
-  "gold_collections": [
-   "dog_kennels.Dogs"
-  ],
-  "normalized_query": "db.Dogs.aggregate([{\"$addFields\": {\"age_num\": {\"$toInt\": \"$age\"}}}, {\"$group\": {\"_id\": None, \"avg_age\": {\"$avg\": \"$age_num\"}}}])",
-  "source": "expansion-2026-08-16-spider"
- },
- {
-  "id": "spider-dog_kennels-33",
-  "question": "Tell me the age of the oldest dog.",
-  "database": "dog_kennels",
-  "complexity": "easy",
-  "gold_collections": [
-   "dog_kennels.Dogs"
-  ],
-  "normalized_query": "db.Dogs.aggregate([{\"$addFields\": {\"age_num\": {\"$toInt\": \"$age\"}}}, {\"$group\": {\"_id\": None, \"max_age\": {\"$max\": \"$age_num\"}}}])",
   "source": "expansion-2026-08-16-spider"
  },
  {

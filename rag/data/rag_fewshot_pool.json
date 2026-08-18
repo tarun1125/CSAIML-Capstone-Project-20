@@ -1,69 +1,36 @@
 [
   {
-    "id": "cs-e8",
-    "question": "Find the singer whose song is named 'Love'.",
+    "id": "spider-world_1-24",
+    "question": "What is the total number of unique official languages spoken in the countries that are founded before 1930?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.country",
+      "world_1.countrylanguage"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$match\": {\"IndepYear\": {\"$lt\": 1930}}}, {\"$lookup\": {\"from\": \"countrylanguage\", \"localField\": \"Code\", \"foreignField\": \"CountryCode\", \"as\": \"langs\"}}, {\"$unwind\": \"$langs\"}, {\"$match\": {\"langs.IsOfficial\": \"T\"}}, {\"$group\": {\"_id\": \"$langs.Language\"}}, {\"$count\": \"unique_official_language_count\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "cs-m1",
+    "question": "What is the average age of singers?",
     "database": "concert_singer",
-    "complexity": "easy",
+    "complexity": "medium",
     "gold_collections": [
       "concert_singer.singer"
     ],
-    "normalized_query": "db.singer.find({\"Song_Name\": \"Love\"}, {\"_id\": 0, \"Name\": 1})",
+    "normalized_query": "db.singer.aggregate([{\"$group\": {\"_id\": None, \"avg_age\": {\"$avg\": \"$Age\"}}}, {\"$project\": {\"_id\": 0}}])",
     "source": "expansion-2026-08"
   },
   {
-    "id": "nw-e6",
-    "question": "How many 'likes' relationships are there?",
-    "database": "network_1",
+    "id": "dk-e7",
+    "database": "dog_kennels",
     "complexity": "easy",
+    "question": "List the dog name, age, and weight of dogs that have been abandoned.",
     "gold_collections": [
-      "network_1.Likes"
+      "dog_kennels.Dogs"
     ],
-    "normalized_query": "db.Likes.count_documents({})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "pt-e2",
-    "question": "List the first names of female students.",
-    "database": "pets_1",
-    "complexity": "easy",
-    "gold_collections": [
-      "pets_1.Student"
-    ],
-    "normalized_query": "db.Student.find({\"Sex\": \"F\"}, {\"_id\": 0, \"Fname\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "pt-m5",
-    "question": "Which advisor has the most advisees, and how many do they have?",
-    "database": "pets_1",
-    "complexity": "medium",
-    "gold_collections": [
-      "pets_1.Student"
-    ],
-    "normalized_query": "db.Student.aggregate([{\"$group\": {\"_id\": \"$Advisor\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1, \"_id\": 1}}, {\"$limit\": 1}])",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": 11,
-    "question": "Find students who have more friends than the average number of friends per student.",
-    "database": "network_1",
-    "complexity": "complex",
-    "gold_collections": [
-      "network_1.Friend",
-      "network_1.Highschooler"
-    ],
-    "normalized_query": "db.Friend.aggregate([{\"$group\": {\"_id\": \"$student_id\", \"friend_count\": {\"$sum\": 1}}}, {\"$group\": {\"_id\": None, \"avg_friends\": {\"$avg\": \"$friend_count\"}, \"students\": {\"$push\": {\"student_id\": \"$_id\", \"friend_count\": \"$friend_count\"}}}}, {\"$unwind\": \"$students\"}, {\"$match\": {\"$expr\": {\"$gt\": [\"$students.friend_count\", \"$avg_friends\"]}}}, {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"students.student_id\", \"foreignField\": \"ID\", \"as\": \"student\"}}, {\"$unwind\": \"$student\"}, {\"$project\": {\"_id\": 0, \"name\": \"$student.name\"}}, {\"$sort\": {\"name\": 1}}])",
-    "source": "original-12"
-  },
-  {
-    "id": "wl-e4",
-    "database": "world_1",
-    "complexity": "easy",
-    "question": "What are the population and life expectancy of Brazil?",
-    "gold_collections": [
-      "world_1.country"
-    ],
-    "normalized_query": "db.country.find({\"Name\": \"Brazil\"}, {\"_id\": 0, \"Population\": 1, \"LifeExpectancy\": 1})",
+    "normalized_query": "db.Dogs.find({\"abandoned_yn\": \"1\"}, {\"_id\": 0, \"name\": 1, \"age\": 1, \"weight\": 1})",
     "source": "expansion-2026-08-07-spider-extra"
   },
   {
@@ -79,506 +46,14 @@
     "source": "expansion-2026-08-07-spider-extra"
   },
   {
-    "id": "cs-e5",
-    "question": "What are the names of the male singers?",
-    "database": "concert_singer",
-    "complexity": "easy",
-    "gold_collections": [
-      "concert_singer.singer"
-    ],
-    "normalized_query": "db.singer.find({\"Is_male\": \"T\"}, {\"_id\": 0, \"Name\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "car-e4",
-    "question": "List all continents in the database.",
-    "database": "car_1",
-    "complexity": "easy",
-    "gold_collections": [
-      "car_1.continents"
-    ],
-    "normalized_query": "db.continents.find({}, {\"_id\": 0, \"Continent\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "wl-h2",
-    "database": "world_1",
-    "complexity": "high",
-    "question": "Which languages are spoken by only one country among republic governments?",
-    "gold_collections": [
-      "world_1.country",
-      "world_1.countrylanguage"
-    ],
-    "normalized_query": "db.country.aggregate([{\"$match\": {\"GovernmentForm\": \"Republic\"}}, {\"$lookup\": {\"from\": \"countrylanguage\", \"localField\": \"Code\", \"foreignField\": \"CountryCode\", \"as\": \"langs\"}}, {\"$unwind\": \"$langs\"}, {\"$group\": {\"_id\": \"$langs.Language\", \"country_count\": {\"$sum\": 1}}}, {\"$match\": {\"country_count\": 1}}, {\"$project\": {\"_id\": 0, \"Language\": \"$_id\"}}])",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "cs-e9",
-    "question": "List the names of singers who are not from France.",
-    "database": "concert_singer",
-    "complexity": "easy",
-    "gold_collections": [
-      "concert_singer.singer"
-    ],
-    "normalized_query": "db.singer.find({\"Country\": {\"$ne\": \"France\"}}, {\"_id\": 0, \"Name\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "cs-m8",
-    "question": "What is the average stadium capacity?",
-    "database": "concert_singer",
-    "complexity": "medium",
-    "gold_collections": [
-      "concert_singer.stadium"
-    ],
-    "normalized_query": "db.stadium.aggregate([{\"$group\": {\"_id\": None, \"avg_capacity\": {\"$avg\": \"$Capacity\"}}}, {\"$project\": {\"_id\": 0}}])",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "wl-m6",
-    "database": "world_1",
-    "complexity": "medium",
-    "question": "Find the city with the largest population where English is spoken.",
-    "gold_collections": [
-      "world_1.city",
-      "world_1.countrylanguage"
-    ],
-    "normalized_query": "db.city.aggregate([{\"$lookup\": {\"from\": \"countrylanguage\", \"localField\": \"CountryCode\", \"foreignField\": \"CountryCode\", \"as\": \"langs\"}}, {\"$match\": {\"langs.Language\": \"English\"}}, {\"$sort\": {\"Population\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"Name\": 1, \"Population\": 1}}])",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "wl-h3",
-    "database": "world_1",
-    "complexity": "high",
-    "question": "What is the total population and average surface area of countries in North America with a surface area bigger than 3000?",
-    "gold_collections": [
-      "world_1.country"
-    ],
-    "normalized_query": "db.country.aggregate([{\"$match\": {\"Continent\": \"North America\", \"SurfaceArea\": {\"$gt\": 3000}}}, {\"$group\": {\"_id\": None, \"total_population\": {\"$sum\": \"$Population\"}, \"avg_surface_area\": {\"$avg\": \"$SurfaceArea\"}}}])",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "car-c1",
-    "question": "For each Saab released after 1978, report the full name, the year, and the ratio of weight to horsepower.",
-    "database": "car_1",
-    "complexity": "complex",
-    "gold_collections": [
-      "car_1.car_names",
-      "car_1.cars_data"
-    ],
-    "normalized_query": "db.car_names.aggregate([{\"$match\": {\"Model\": \"saab\"}}, {\"$lookup\": {\"from\": \"cars_data\", \"localField\": \"MakeId\", \"foreignField\": \"Id\", \"as\": \"data\"}}, {\"$unwind\": \"$data\"}, {\"$match\": {\"data.Year\": {\"$gt\": 1978}, \"data.Horsepower\": {\"$ne\": \"null\"}}}, {\"$addFields\": {\"hp_int\": {\"$toInt\": \"$data.Horsepower\"}}}, {\"$project\": {\"_id\": 0, \"Make\": 1, \"Year\": \"$data.Year\", \"ratio\": {\"$divide\": [\"$data.Weight\", \"$hp_int\"]}}}, {\"$sort\": {\"Year\": 1}}])",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "pt-e1",
-    "question": "How many students are there?",
+    "id": "pt-e4",
+    "question": "What is the last name of the student with StuID 1010?",
     "database": "pets_1",
     "complexity": "easy",
     "gold_collections": [
       "pets_1.Student"
     ],
-    "normalized_query": "db.Student.count_documents({})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "car-h2",
-    "question": "List all Volvo cars produced between 1977 and 1981 inclusive. Report the name of the car and the year.",
-    "database": "car_1",
-    "complexity": "high",
-    "gold_collections": [
-      "car_1.car_names",
-      "car_1.cars_data"
-    ],
-    "normalized_query": "db.car_names.aggregate([{\"$match\": {\"Model\": \"volvo\"}}, {\"$lookup\": {\"from\": \"cars_data\", \"localField\": \"MakeId\", \"foreignField\": \"Id\", \"as\": \"data\"}}, {\"$unwind\": \"$data\"}, {\"$match\": {\"data.Year\": {\"$gte\": 1977, \"$lte\": 1981}}}, {\"$project\": {\"_id\": 0, \"Make\": 1, \"Year\": \"$data.Year\"}}, {\"$sort\": {\"Year\": 1}}])",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "car-c2",
-    "question": "Find how many different car makers produced a vehicle heavier than 4000 lbs.",
-    "database": "car_1",
-    "complexity": "complex",
-    "gold_collections": [
-      "car_1.cars_data",
-      "car_1.model_list.json"
-    ],
-    "normalized_query": "db.cars_data.aggregate([{\"$match\": {\"Weight\": {\"$gt\": 4000}}}, {\"$lookup\": {\"from\": \"model_list.json\", \"localField\": \"Id\", \"foreignField\": \"ModelId\", \"as\": \"model\"}}, {\"$unwind\": \"$model\"}, {\"$group\": {\"_id\": \"$model.Maker\"}}, {\"$count\": \"maker_count\"}])",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "cs-m3",
-    "question": "List the top 3 stadiums by capacity, largest first.",
-    "database": "concert_singer",
-    "complexity": "medium",
-    "gold_collections": [
-      "concert_singer.stadium"
-    ],
-    "normalized_query": "db.stadium.find({}, {\"_id\": 0, \"Name\": 1, \"Capacity\": 1}).sort({\"Capacity\": -1}).limit(3)",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "wl-e2",
-    "database": "world_1",
-    "complexity": "easy",
-    "question": "How many countries have a republic as their form of government?",
-    "gold_collections": [
-      "world_1.country"
-    ],
-    "normalized_query": "db.country.count_documents({\"GovernmentForm\": \"Republic\"})",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "pt-m2",
-    "question": "What is the average age of students?",
-    "database": "pets_1",
-    "complexity": "medium",
-    "gold_collections": [
-      "pets_1.Student"
-    ],
-    "normalized_query": "db.Student.aggregate([{\"$group\": {\"_id\": None, \"avg_age\": {\"$avg\": \"$Age\"}}}, {\"$project\": {\"_id\": 0}}])",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "dk-h3",
-    "database": "dog_kennels",
-    "complexity": "high",
-    "question": "How many professionals did not operate any treatment on dogs?",
-    "gold_collections": [
-      "dog_kennels.Professionals",
-      "dog_kennels.Treatments"
-    ],
-    "normalized_query": "db.Professionals.aggregate([{\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"professional_id\", \"foreignField\": \"professional_id\", \"as\": \"t\"}}, {\"$match\": {\"t\": []}}, {\"$count\": \"professional_count\"}])",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "car-m5",
-    "question": "How many car makers are registered under each country code?",
-    "database": "car_1",
-    "complexity": "medium",
-    "gold_collections": [
-      "car_1.car_makers"
-    ],
-    "normalized_query": "db.car_makers.aggregate([{\"$group\": {\"_id\": \"$Country\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1, \"_id\": 1}}])",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "car-m2",
-    "question": "How many cars were produced each year?",
-    "database": "car_1",
-    "complexity": "medium",
-    "gold_collections": [
-      "car_1.cars_data"
-    ],
-    "normalized_query": "db.cars_data.aggregate([{\"$group\": {\"_id\": \"$Year\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"_id\": 1}}])",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "car-m1",
-    "question": "How many distinct models are listed in the model_list table?",
-    "database": "car_1",
-    "complexity": "medium",
-    "gold_collections": [
-      "car_1.model_list.json"
-    ],
-    "normalized_query": "db.model_list.json.count_documents({})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "dk-m1",
-    "database": "dog_kennels",
-    "complexity": "medium",
-    "question": "Which professionals live in the state of Hawaii or the state of Wisconsin? List their emails.",
-    "gold_collections": [
-      "dog_kennels.Professionals"
-    ],
-    "normalized_query": "db.Professionals.find({\"state\": {\"$in\": [\"Hawaii\", \"Wisconsin\"]}}, {\"_id\": 0, \"email_address\": 1})",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": 10,
-    "question": "Find singers who have not participated in any concert.",
-    "database": "concert_singer",
-    "complexity": "high",
-    "gold_collections": [
-      "concert_singer.singer",
-      "concert_singer.singer_in_concert"
-    ],
-    "normalized_query": "db.singer.aggregate([{\"$lookup\": {\"from\": \"singer_in_concert\", \"localField\": \"Singer_ID\", \"foreignField\": \"Singer_ID\", \"as\": \"concerts\"}}, {\"$match\": {\"concerts\": {\"$eq\": []}}}, {\"$project\": {\"_id\": 0, \"Name\": 1}}, {\"$sort\": {\"Name\": 1}}])",
-    "source": "original-12"
-  },
-  {
-    "id": "pt-e3",
-    "question": "Find the first and last names of students younger than 18.",
-    "database": "pets_1",
-    "complexity": "easy",
-    "gold_collections": [
-      "pets_1.Student"
-    ],
-    "normalized_query": "db.Student.find({\"Age\": {\"$lt\": 18}}, {\"_id\": 0, \"Fname\": 1, \"LName\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "car-m6",
-    "question": "What is the maximum acceleration time recorded?",
-    "database": "car_1",
-    "complexity": "medium",
-    "gold_collections": [
-      "car_1.cars_data"
-    ],
-    "normalized_query": "db.cars_data.aggregate([{\"$group\": {\"_id\": None, \"max_accel\": {\"$max\": \"$Accelerate\"}}}, {\"$project\": {\"_id\": 0}}])",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "dk-m6",
-    "database": "dog_kennels",
-    "complexity": "medium",
-    "question": "List each owner's first name, last name, and the size code of their dog.",
-    "gold_collections": [
-      "dog_kennels.Owners",
-      "dog_kennels.Dogs"
-    ],
-    "normalized_query": "db.Owners.aggregate([{\"$lookup\": {\"from\": \"Dogs\", \"localField\": \"owner_id\", \"foreignField\": \"owner_id\", \"as\": \"d\"}}, {\"$unwind\": \"$d\"}, {\"$project\": {\"_id\": 0, \"first_name\": 1, \"last_name\": 1, \"size_code\": \"$d.size_code\"}}])",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": 8,
-    "question": "Find the first names of students who have a dog as a pet.",
-    "database": "pets_1",
-    "complexity": "complex",
-    "gold_collections": [
-      "pets_1.Has_Pet",
-      "pets_1.Pets",
-      "pets_1.Student"
-    ],
-    "normalized_query": "db.Has_Pet.aggregate([{\"$lookup\": {\"from\": \"Pets\", \"localField\": \"PetID\", \"foreignField\": \"PetID\", \"as\": \"pet\"}}, {\"$unwind\": \"$pet\"}, {\"$match\": {\"pet.PetType\": \"dog\"}}, {\"$lookup\": {\"from\": \"Student\", \"localField\": \"StuID\", \"foreignField\": \"StuID\", \"as\": \"student\"}}, {\"$unwind\": \"$student\"}, {\"$project\": {\"_id\": 0, \"Fname\": \"$student.Fname\"}}, {\"$sort\": {\"Fname\": 1}}])",
-    "source": "original-12"
-  },
-  {
-    "id": 6,
-    "question": "Find pet types that have more than one pet, with their counts.",
-    "database": "pets_1",
-    "complexity": "medium",
-    "gold_collections": [
-      "pets_1.Pets"
-    ],
-    "normalized_query": "db.Pets.aggregate([{\"$group\": {\"_id\": \"$PetType\", \"count\": {\"$sum\": 1}}}, {\"$match\": {\"count\": {\"$gt\": 1}}}, {\"$sort\": {\"count\": -1, \"_id\": 1}}])",
-    "source": "original-12"
-  },
-  {
-    "id": "cs-e1",
-    "question": "List the names of all singers.",
-    "database": "concert_singer",
-    "complexity": "easy",
-    "gold_collections": [
-      "concert_singer.singer"
-    ],
-    "normalized_query": "db.singer.find({}, {\"_id\": 0, \"Name\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "nw-h2",
-    "question": "How many friends does each highschooler have, by name?",
-    "database": "network_1",
-    "complexity": "high",
-    "gold_collections": [
-      "network_1.Friend",
-      "network_1.Highschooler"
-    ],
-    "normalized_query": "db.Friend.aggregate([{\"$group\": {\"_id\": \"$student_id\", \"friend_count\": {\"$sum\": 1}}}, {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"_id\", \"foreignField\": \"ID\", \"as\": \"hs\"}}, {\"$unwind\": \"$hs\"}, {\"$project\": {\"_id\": 0, \"name\": \"$hs.name\", \"friend_count\": 1}}, {\"$sort\": {\"friend_count\": -1, \"name\": 1}}])",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "pt-h2",
-    "question": "For each pet type, what is the average weight?",
-    "database": "pets_1",
-    "complexity": "high",
-    "gold_collections": [
-      "pets_1.Pets"
-    ],
-    "normalized_query": "db.Pets.aggregate([{\"$group\": {\"_id\": \"$PetType\", \"avg_weight\": {\"$avg\": \"$weight\"}}}, {\"$sort\": {\"_id\": 1}}])",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "cs-e7",
-    "question": "Which concerts happened in the year 2015?",
-    "database": "concert_singer",
-    "complexity": "easy",
-    "gold_collections": [
-      "concert_singer.concert"
-    ],
-    "normalized_query": "db.concert.find({\"Year\": \"2015\"}, {\"_id\": 0, \"concert_Name\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "dk-m2",
-    "database": "dog_kennels",
-    "complexity": "medium",
-    "question": "What is the name of the breed with the most dogs?",
-    "gold_collections": [
-      "dog_kennels.Breeds",
-      "dog_kennels.Dogs"
-    ],
-    "normalized_query": "db.Dogs.aggregate([{\"$group\": {\"_id\": \"$breed_code\", \"dog_count\": {\"$sum\": 1}}}, {\"$sort\": {\"dog_count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"Breeds\", \"localField\": \"_id\", \"foreignField\": \"breed_code\", \"as\": \"b\"}}, {\"$unwind\": \"$b\"}, {\"$project\": {\"_id\": 0, \"breed_name\": \"$b.breed_name\"}}])",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "wl-m3",
-    "database": "world_1",
-    "complexity": "medium",
-    "question": "How many official languages does Afghanistan have?",
-    "gold_collections": [
-      "world_1.country",
-      "world_1.countrylanguage"
-    ],
-    "normalized_query": "db.country.aggregate([{\"$match\": {\"Name\": \"Afghanistan\"}}, {\"$lookup\": {\"from\": \"countrylanguage\", \"localField\": \"Code\", \"foreignField\": \"CountryCode\", \"as\": \"langs\"}}, {\"$unwind\": \"$langs\"}, {\"$match\": {\"langs.IsOfficial\": \"T\"}}, {\"$count\": \"official_language_count\"}])",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "pt-e7",
-    "question": "List all the pet types in the database.",
-    "database": "pets_1",
-    "complexity": "easy",
-    "gold_collections": [
-      "pets_1.Pets"
-    ],
-    "normalized_query": "db.Pets.find({}, {\"_id\": 0, \"PetType\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "wl-e6",
-    "database": "world_1",
-    "complexity": "easy",
-    "question": "What are the names and surface areas of the 5 largest countries by area?",
-    "gold_collections": [
-      "world_1.country"
-    ],
-    "normalized_query": "db.country.find({}, {\"_id\": 0, \"Name\": 1, \"SurfaceArea\": 1}).sort([(\"SurfaceArea\", -1)]).limit(5)",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": 12,
-    "question": "For each maker, find the model with the highest horsepower.",
-    "database": "car_1",
-    "complexity": "complex",
-    "gold_collections": [
-      "car_1.cars_data",
-      "car_1.model_list.json",
-      "car_1.car_makers"
-    ],
-    "normalized_query": "db.cars_data.aggregate([{\"$match\": {\"Horsepower\": {\"$ne\": \"null\"}}}, {\"$lookup\": {\"from\": \"model_list.json\", \"localField\": \"Id\", \"foreignField\": \"ModelId\", \"as\": \"model\"}}, {\"$unwind\": \"$model\"}, {\"$lookup\": {\"from\": \"car_makers\", \"localField\": \"model.Maker\", \"foreignField\": \"Id\", \"as\": \"maker\"}}, {\"$unwind\": \"$maker\"}, {\"$addFields\": {\"HorsepowerNum\": {\"$toInt\": \"$Horsepower\"}}}, {\"$sort\": {\"maker.Maker\": 1, \"HorsepowerNum\": -1}}, {\"$group\": {\"_id\": \"$maker.Maker\", \"model\": {\"$first\": \"$model.Model\"}, \"horsepower\": {\"$first\": \"$HorsepowerNum\"}}}, {\"$sort\": {\"_id\": 1}}])",
-    "source": "original-12"
-  },
-  {
-    "id": "nw-m3",
-    "question": "Which student IDs appear most often as the 'student_id' side of a friendship, and how many friends do they list?",
-    "database": "network_1",
-    "complexity": "medium",
-    "gold_collections": [
-      "network_1.Friend"
-    ],
-    "normalized_query": "db.Friend.aggregate([{\"$group\": {\"_id\": \"$student_id\", \"friend_count\": {\"$sum\": 1}}}, {\"$sort\": {\"friend_count\": -1, \"_id\": 1}}, {\"$limit\": 3}])",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "dk-c2",
-    "database": "dog_kennels",
-    "complexity": "complex",
-    "question": "Which first names are used for professionals or owners but not used as dog names?",
-    "gold_collections": [
-      "dog_kennels.Professionals",
-      "dog_kennels.Owners",
-      "dog_kennels.Dogs"
-    ],
-    "normalized_query": "db.Professionals.aggregate([{\"$project\": {\"_id\": 0, \"first_name\": 1}}, {\"$unionWith\": {\"coll\": \"Owners\", \"pipeline\": [{\"$project\": {\"_id\": 0, \"first_name\": 1}}]}}, {\"$group\": {\"_id\": \"$first_name\"}}, {\"$lookup\": {\"from\": \"Dogs\", \"localField\": \"_id\", \"foreignField\": \"name\", \"as\": \"d\"}}, {\"$match\": {\"d\": []}}, {\"$project\": {\"_id\": 0, \"first_name\": \"$_id\"}}])",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "wl-e5",
-    "database": "world_1",
-    "complexity": "easy",
-    "question": "How many people live in the Gelderland district?",
-    "gold_collections": [
-      "world_1.city"
-    ],
-    "normalized_query": "db.city.aggregate([{\"$match\": {\"District\": \"Gelderland\"}}, {\"$group\": {\"_id\": None, \"total_population\": {\"$sum\": \"$Population\"}}}])",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "cs-e10",
-    "question": "What is the theme of the concert called 'Super bootcamp'?",
-    "database": "concert_singer",
-    "complexity": "easy",
-    "gold_collections": [
-      "concert_singer.concert"
-    ],
-    "normalized_query": "db.concert.find({\"concert_Name\": \"Super bootcamp\"}, {\"_id\": 0, \"Theme\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "nw-m4",
-    "question": "List the highschooler names sorted alphabetically.",
-    "database": "network_1",
-    "complexity": "medium",
-    "gold_collections": [
-      "network_1.Highschooler"
-    ],
-    "normalized_query": "db.Highschooler.find({}, {\"_id\": 0, \"name\": 1}).sort({\"name\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "pt-e5",
-    "question": "List the first names of students majoring in 600.",
-    "database": "pets_1",
-    "complexity": "easy",
-    "gold_collections": [
-      "pets_1.Student"
-    ],
-    "normalized_query": "db.Student.find({\"Major\": 600}, {\"_id\": 0, \"Fname\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "wl-h1",
-    "database": "world_1",
-    "complexity": "high",
-    "question": "Return the country name and number of languages spoken for each country that speaks at least 3 languages.",
-    "gold_collections": [
-      "world_1.country",
-      "world_1.countrylanguage"
-    ],
-    "normalized_query": "db.countrylanguage.aggregate([{\"$group\": {\"_id\": \"$CountryCode\", \"lang_count\": {\"$sum\": 1}}}, {\"$match\": {\"lang_count\": {\"$gt\": 2}}}, {\"$lookup\": {\"from\": \"country\", \"localField\": \"_id\", \"foreignField\": \"Code\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$c.Name\", \"lang_count\": 1}}])",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "cs-m5",
-    "question": "What is the age of the youngest singer?",
-    "database": "concert_singer",
-    "complexity": "medium",
-    "gold_collections": [
-      "concert_singer.singer"
-    ],
-    "normalized_query": "db.singer.aggregate([{\"$group\": {\"_id\": None, \"min_age\": {\"$min\": \"$Age\"}}}, {\"$project\": {\"_id\": 0}}])",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "cs-m4",
-    "question": "How many concerts were held in each year?",
-    "database": "concert_singer",
-    "complexity": "medium",
-    "gold_collections": [
-      "concert_singer.concert"
-    ],
-    "normalized_query": "db.concert.aggregate([{\"$group\": {\"_id\": \"$Year\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"_id\": 1}}])",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "cs-h1",
-    "question": "How many concerts were held at each stadium? Include the stadium name.",
-    "database": "concert_singer",
-    "complexity": "high",
-    "gold_collections": [
-      "concert_singer.concert",
-      "concert_singer.stadium"
-    ],
-    "normalized_query": "db.concert.aggregate([{\"$addFields\": {\"Stadium_ID_int\": {\"$toInt\": \"$Stadium_ID\"}}}, {\"$lookup\": {\"from\": \"stadium\", \"localField\": \"Stadium_ID_int\", \"foreignField\": \"Stadium_ID\", \"as\": \"stad\"}}, {\"$unwind\": \"$stad\"}, {\"$group\": {\"_id\": \"$stad.Name\", \"concert_count\": {\"$sum\": 1}}}, {\"$sort\": {\"concert_count\": -1, \"_id\": 1}}])",
+    "normalized_query": "db.Student.find({\"StuID\": 1010}, {\"_id\": 0, \"LName\": 1})",
     "source": "expansion-2026-08"
   },
   {
@@ -593,308 +68,74 @@
     "source": "expansion-2026-08"
   },
   {
-    "id": "car-e1",
-    "question": "How many cars are in the database?",
-    "database": "car_1",
-    "complexity": "easy",
-    "gold_collections": [
-      "car_1.cars_data"
-    ],
-    "normalized_query": "db.cars_data.count_documents({})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": 2,
-    "question": "What are the names of singers from France?",
+    "id": "cs-e6",
+    "question": "List the names of stadiums with a capacity greater than 10000.",
     "database": "concert_singer",
     "complexity": "easy",
     "gold_collections": [
-      "concert_singer.singer"
+      "concert_singer.stadium"
     ],
-    "normalized_query": "db.singer.find({\"Country\": \"France\"}, {\"_id\": 0, \"Name\": 1})",
-    "source": "original-12"
-  },
-  {
-    "id": "car-e6",
-    "question": "How many cars have exactly 3 cylinders?",
-    "database": "car_1",
-    "complexity": "easy",
-    "gold_collections": [
-      "car_1.cars_data"
-    ],
-    "normalized_query": "db.cars_data.count_documents({\"Cylinders\": 3})",
+    "normalized_query": "db.stadium.find({\"Capacity\": {\"$gt\": 10000}}, {\"_id\": 0, \"Name\": 1})",
     "source": "expansion-2026-08"
   },
   {
-    "id": "pt-e6",
-    "question": "Which students live in city code 'PIT'? Give their first names.",
-    "database": "pets_1",
-    "complexity": "easy",
-    "gold_collections": [
-      "pets_1.Student"
-    ],
-    "normalized_query": "db.Student.find({\"city_code\": \"PIT\"}, {\"_id\": 0, \"Fname\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "wl-e7",
-    "database": "world_1",
-    "complexity": "easy",
-    "question": "What are the codes of countries that do not speak English?",
-    "gold_collections": [
-      "world_1.countrylanguage"
-    ],
-    "normalized_query": "db.countrylanguage.aggregate([{\"$group\": {\"_id\": \"$CountryCode\", \"languages\": {\"$push\": \"$Language\"}}}, {\"$match\": {\"languages\": {\"$ne\": \"English\"}}}, {\"$project\": {\"_id\": 0, \"CountryCode\": \"$_id\"}}])",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "nw-h1",
-    "question": "List the names of highschoolers who appear as the 'student_id' side of at least one friendship.",
+    "id": "spider-network_1-13",
+    "question": "Show ids of all students who do not have any friends.",
     "database": "network_1",
-    "complexity": "high",
+    "complexity": "medium",
     "gold_collections": [
-      "network_1.Friend",
-      "network_1.Highschooler"
+      "network_1.Highschooler",
+      "network_1.Friend"
     ],
-    "normalized_query": "db.Friend.aggregate([{\"$group\": {\"_id\": \"$student_id\"}}, {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"_id\", \"foreignField\": \"ID\", \"as\": \"hs\"}}, {\"$unwind\": \"$hs\"}, {\"$project\": {\"_id\": 0, \"name\": \"$hs.name\"}}, {\"$sort\": {\"name\": 1}}])",
-    "source": "expansion-2026-08"
+    "normalized_query": "db.Highschooler.aggregate([{\"$lookup\": {\"from\": \"Friend\", \"localField\": \"ID\", \"foreignField\": \"student_id\", \"as\": \"friends\"}}, {\"$match\": {\"friends\": {\"$eq\": []}}}, {\"$project\": {\"_id\": 0, \"id\": \"$ID\"}}, {\"$sort\": {\"id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
   },
   {
-    "id": "nw-e3",
-    "question": "What is the name of the highschooler with ID 1911?",
-    "database": "network_1",
-    "complexity": "easy",
-    "gold_collections": [
-      "network_1.Highschooler"
-    ],
-    "normalized_query": "db.Highschooler.find({\"ID\": 1911}, {\"_id\": 0, \"name\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "car-e8",
-    "question": "What is the make of the car with Id 100?",
-    "database": "car_1",
-    "complexity": "easy",
-    "gold_collections": [
-      "car_1.car_names"
-    ],
-    "normalized_query": "db.car_names.find({\"MakeId\": 100}, {\"_id\": 0, \"Make\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "dk-e3",
+    "id": "spider-dog_kennels-36",
+    "question": "How many owners temporarily do not have any dogs?",
     "database": "dog_kennels",
-    "complexity": "easy",
-    "question": "How many dogs went through any treatment?",
+    "complexity": "medium",
     "gold_collections": [
-      "dog_kennels.Treatments"
-    ],
-    "normalized_query": "db.Treatments.distinct(\"dog_id\")",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "dk-e7",
-    "database": "dog_kennels",
-    "complexity": "easy",
-    "question": "List the dog name, age, and weight of dogs that have been abandoned.",
-    "gold_collections": [
+      "dog_kennels.Owners",
       "dog_kennels.Dogs"
     ],
-    "normalized_query": "db.Dogs.find({\"abandoned_yn\": \"1\"}, {\"_id\": 0, \"name\": 1, \"age\": 1, \"weight\": 1})",
-    "source": "expansion-2026-08-07-spider-extra"
+    "normalized_query": "db.Owners.aggregate([{\"$lookup\": {\"from\": \"Dogs\", \"localField\": \"owner_id\", \"foreignField\": \"owner_id\", \"as\": \"d\"}}, {\"$match\": {\"d\": {\"$eq\": []}}}, {\"$count\": \"count\"}])",
+    "source": "expansion-2026-08-16-spider"
   },
   {
-    "id": "wl-m4",
-    "database": "world_1",
-    "complexity": "medium",
-    "question": "What is the name of the country that speaks the largest number of languages?",
-    "gold_collections": [
-      "world_1.country",
-      "world_1.countrylanguage"
-    ],
-    "normalized_query": "db.countrylanguage.aggregate([{\"$group\": {\"_id\": \"$CountryCode\", \"lang_count\": {\"$sum\": 1}}}, {\"$sort\": {\"lang_count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"country\", \"localField\": \"_id\", \"foreignField\": \"Code\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$c.Name\"}}])",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "dk-e5",
-    "database": "dog_kennels",
-    "complexity": "easy",
-    "question": "What is the most expensive charge amount?",
-    "gold_collections": [
-      "dog_kennels.Charges"
-    ],
-    "normalized_query": "db.Charges.aggregate([{\"$group\": {\"_id\": None, \"max_charge\": {\"$max\": \"$charge_amount\"}}}])",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "pt-h1",
-    "question": "What are the first and last names of students who own a cat?",
-    "database": "pets_1",
-    "complexity": "high",
-    "gold_collections": [
-      "pets_1.Has_Pet",
-      "pets_1.Pets",
-      "pets_1.Student"
-    ],
-    "normalized_query": "db.Has_Pet.aggregate([{\"$lookup\": {\"from\": \"Pets\", \"localField\": \"PetID\", \"foreignField\": \"PetID\", \"as\": \"pet\"}}, {\"$unwind\": \"$pet\"}, {\"$match\": {\"pet.PetType\": \"cat\"}}, {\"$lookup\": {\"from\": \"Student\", \"localField\": \"StuID\", \"foreignField\": \"StuID\", \"as\": \"student\"}}, {\"$unwind\": \"$student\"}, {\"$project\": {\"_id\": 0, \"Fname\": \"$student.Fname\", \"LName\": \"$student.LName\"}}])",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": 1,
-    "question": "How many singers are there?",
-    "database": "concert_singer",
-    "complexity": "easy",
-    "gold_collections": [
-      "concert_singer.singer"
-    ],
-    "normalized_query": "db.singer.count_documents({})",
-    "source": "original-12"
-  },
-  {
-    "id": "nw-e2",
-    "question": "List the names of highschoolers in grade 9.",
-    "database": "network_1",
-    "complexity": "easy",
-    "gold_collections": [
-      "network_1.Highschooler"
-    ],
-    "normalized_query": "db.Highschooler.find({\"grade\": 9}, {\"_id\": 0, \"name\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "cs-e3",
-    "question": "List the names of all concerts.",
-    "database": "concert_singer",
-    "complexity": "easy",
-    "gold_collections": [
-      "concert_singer.concert"
-    ],
-    "normalized_query": "db.concert.find({}, {\"_id\": 0, \"concert_Name\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "car-m4",
-    "question": "What are the 5 heaviest cars? Report Id and Weight.",
+    "id": "spider-car_1-43",
+    "question": "How many cars has over 6 cylinders?",
     "database": "car_1",
-    "complexity": "medium",
+    "complexity": "easy",
     "gold_collections": [
       "car_1.cars_data"
     ],
-    "normalized_query": "db.cars_data.find({}, {\"_id\": 0, \"Id\": 1, \"Weight\": 1}).sort({\"Weight\": -1}).limit(5)",
-    "source": "expansion-2026-08"
+    "normalized_query": "db.cars_data.count_documents({\"Cylinders\": {\"$gt\": 6}})",
+    "source": "expansion-2026-08-16-spider"
   },
   {
-    "id": 7,
-    "question": "What are the names of singers who performed in a concert in 2014?",
-    "database": "concert_singer",
-    "complexity": "complex",
-    "gold_collections": [
-      "concert_singer.singer_in_concert",
-      "concert_singer.concert",
-      "concert_singer.singer"
-    ],
-    "normalized_query": "db.singer_in_concert.aggregate([{\"$addFields\": {\"Singer_ID_int\": {\"$toInt\": \"$Singer_ID\"}}}, {\"$lookup\": {\"from\": \"concert\", \"localField\": \"concert_ID\", \"foreignField\": \"concert_ID\", \"as\": \"concert\"}}, {\"$unwind\": \"$concert\"}, {\"$match\": {\"concert.Year\": \"2014\"}}, {\"$lookup\": {\"from\": \"singer\", \"localField\": \"Singer_ID_int\", \"foreignField\": \"Singer_ID\", \"as\": \"singer\"}}, {\"$unwind\": \"$singer\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$singer.Name\"}}, {\"$sort\": {\"Name\": 1}}])",
-    "source": "original-12"
-  },
-  {
-    "id": 5,
-    "question": "How many concerts were held in each stadium?",
-    "database": "concert_singer",
-    "complexity": "medium",
-    "gold_collections": [
-      "concert_singer.concert"
-    ],
-    "normalized_query": "db.concert.aggregate([{\"$group\": {\"_id\": \"$Stadium_ID\", \"concert_count\": {\"$sum\": 1}}}, {\"$sort\": {\"_id\": 1}}])",
-    "source": "original-12"
-  },
-  {
-    "id": "dk-m4",
-    "database": "dog_kennels",
-    "complexity": "medium",
-    "question": "Which professionals have done at least two treatments? List the professional's id, role, and first name.",
-    "gold_collections": [
-      "dog_kennels.Professionals",
-      "dog_kennels.Treatments"
-    ],
-    "normalized_query": "db.Treatments.aggregate([{\"$group\": {\"_id\": \"$professional_id\", \"treatment_count\": {\"$sum\": 1}}}, {\"$match\": {\"treatment_count\": {\"$gte\": 2}}}, {\"$lookup\": {\"from\": \"Professionals\", \"localField\": \"_id\", \"foreignField\": \"professional_id\", \"as\": \"p\"}}, {\"$unwind\": \"$p\"}, {\"$project\": {\"_id\": 0, \"professional_id\": \"$_id\", \"role_code\": \"$p.role_code\", \"first_name\": \"$p.first_name\"}}])",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "pt-e9",
-    "question": "Find students whose advisor is 1148.",
+    "id": "spider-pets_1-21",
+    "question": "Find the average age of students who do not have any pet .",
     "database": "pets_1",
-    "complexity": "easy",
-    "gold_collections": [
-      "pets_1.Student"
-    ],
-    "normalized_query": "db.Student.find({\"Advisor\": 1148}, {\"_id\": 0, \"Fname\": 1, \"LName\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "wl-e1",
-    "database": "world_1",
-    "complexity": "easy",
-    "question": "What are the names of all the countries that became independent after 1950?",
-    "gold_collections": [
-      "world_1.country"
-    ],
-    "normalized_query": "db.country.find({\"IndepYear\": {\"$gt\": 1950}}, {\"_id\": 0, \"Name\": 1})",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "car-m7",
-    "question": "How many models does each maker have?",
-    "database": "car_1",
     "complexity": "medium",
     "gold_collections": [
+      "pets_1.Student",
+      "pets_1.Has_Pet"
+    ],
+    "normalized_query": "db.Student.aggregate([{\"$lookup\": {\"from\": \"Has_Pet\", \"localField\": \"StuID\", \"foreignField\": \"StuID\", \"as\": \"pets\"}}, {\"$match\": {\"pets\": {\"$eq\": []}}}, {\"$group\": {\"_id\": None, \"avg_age\": {\"$avg\": \"$Age\"}}}, {\"$project\": {\"_id\": 0, \"avg_age\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-8",
+    "question": "Which makers designed more than 3 car models? List full name and the id.",
+    "database": "car_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "car_1.car_makers",
       "car_1.model_list.json"
     ],
-    "normalized_query": "db.model_list.json.aggregate([{\"$group\": {\"_id\": \"$Maker\", \"model_count\": {\"$sum\": 1}}}, {\"$sort\": {\"model_count\": -1, \"_id\": 1}}])",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "dk-e1",
-    "database": "dog_kennels",
-    "complexity": "easy",
-    "question": "What is the average age of all the dogs?",
-    "gold_collections": [
-      "dog_kennels.Dogs"
-    ],
-    "normalized_query": "db.Dogs.aggregate([{\"$addFields\": {\"age_num\": {\"$toInt\": \"$age\"}}}, {\"$group\": {\"_id\": None, \"avg_age\": {\"$avg\": \"$age_num\"}}}])",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "nw-e7",
-    "question": "List highschoolers named 'Gabriel'.",
-    "database": "network_1",
-    "complexity": "easy",
-    "gold_collections": [
-      "network_1.Highschooler"
-    ],
-    "normalized_query": "db.Highschooler.find({\"name\": \"Gabriel\"}, {\"_id\": 0, \"ID\": 1, \"grade\": 1})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "dk-e4",
-    "database": "dog_kennels",
-    "complexity": "easy",
-    "question": "How much does each charge type cost? List both the charge type and amount.",
-    "gold_collections": [
-      "dog_kennels.Charges"
-    ],
-    "normalized_query": "db.Charges.find({}, {\"_id\": 0, \"charge_type\": 1, \"charge_amount\": 1})",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "pt-e4",
-    "question": "What is the last name of the student with StuID 1010?",
-    "database": "pets_1",
-    "complexity": "easy",
-    "gold_collections": [
-      "pets_1.Student"
-    ],
-    "normalized_query": "db.Student.find({\"StuID\": 1010}, {\"_id\": 0, \"LName\": 1})",
-    "source": "expansion-2026-08"
+    "normalized_query": "db.car_makers.aggregate([{\"$lookup\": {\"from\": \"model_list.json\", \"localField\": \"Id\", \"foreignField\": \"Maker\", \"as\": \"models\"}}, {\"$match\": {\"$expr\": {\"$gt\": [{\"$size\": \"$models\"}, 3]}}}, {\"$project\": {\"_id\": 0, \"FullName\": 1, \"Id\": 1}}, {\"$sort\": {\"Id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
   },
   {
     "id": "cs-e4",
@@ -908,82 +149,405 @@
     "source": "expansion-2026-08"
   },
   {
-    "id": "car-e3",
-    "question": "List the full names of all car makers.",
+    "id": "spider-world_1-47",
+    "question": "What are the codes of the countries that do not speak English and whose government forms are not Republic?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.country",
+      "world_1.countrylanguage"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$match\": {\"GovernmentForm\": {\"$ne\": \"Republic\"}}}, {\"$lookup\": {\"from\": \"countrylanguage\", \"let\": {\"code\": \"$Code\"}, \"pipeline\": [{\"$match\": {\"$expr\": {\"$and\": [{\"$eq\": [\"$CountryCode\", \"$$code\"]}, {\"$eq\": [\"$Language\", \"English\"]}]}}}], \"as\": \"eng\"}}, {\"$match\": {\"eng\": {\"$eq\": []}}}, {\"$project\": {\"_id\": 0, \"Code\": 1}}, {\"$sort\": {\"Code\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "dk-m5",
+    "database": "dog_kennels",
+    "complexity": "medium",
+    "question": "What is the description of the treatment type that costs the least money in total?",
+    "gold_collections": [
+      "dog_kennels.Treatment_Types",
+      "dog_kennels.Treatments"
+    ],
+    "normalized_query": "db.Treatments.aggregate([{\"$group\": {\"_id\": \"$treatment_type_code\", \"total_cost\": {\"$sum\": \"$cost_of_treatment\"}}}, {\"$sort\": {\"total_cost\": 1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"Treatment_Types\", \"localField\": \"_id\", \"foreignField\": \"treatment_type_code\", \"as\": \"t\"}}, {\"$unwind\": \"$t\"}, {\"$project\": {\"_id\": 0, \"treatment_type_description\": \"$t.treatment_type_description\"}}])",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "spider-concert_singer-3",
+    "question": "Show name, country, age for all singers ordered by age from the oldest to the youngest.",
+    "database": "concert_singer",
+    "complexity": "medium",
+    "gold_collections": [
+      "concert_singer.singer"
+    ],
+    "normalized_query": "db.singer.find({}, {\"_id\": 0, \"Name\": 1, \"Country\": 1, \"Age\": 1}).sort({\"Age\": -1})",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "dk-h2",
+    "database": "dog_kennels",
+    "complexity": "high",
+    "question": "Which owner has paid the largest amount of money in total for their dogs' treatments? Show the owner id and zip code.",
+    "gold_collections": [
+      "dog_kennels.Owners",
+      "dog_kennels.Dogs",
+      "dog_kennels.Treatments"
+    ],
+    "normalized_query": "db.Dogs.aggregate([{\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"dog_id\", \"foreignField\": \"dog_id\", \"as\": \"t\"}}, {\"$unwind\": \"$t\"}, {\"$group\": {\"_id\": \"$owner_id\", \"total_cost\": {\"$sum\": \"$t.cost_of_treatment\"}}}, {\"$sort\": {\"total_cost\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"Owners\", \"localField\": \"_id\", \"foreignField\": \"owner_id\", \"as\": \"o\"}}, {\"$unwind\": \"$o\"}, {\"$project\": {\"_id\": 0, \"owner_id\": \"$_id\", \"zip_code\": \"$o.zip_code\"}}])",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "car-e9",
+    "question": "List all model names produced by maker id 6.",
     "database": "car_1",
     "complexity": "easy",
     "gold_collections": [
-      "car_1.car_makers"
+      "car_1.model_list.json"
     ],
-    "normalized_query": "db.car_makers.find({}, {\"_id\": 0, \"FullName\": 1})",
+    "normalized_query": "db.model_list.json.find({\"Maker\": 6}, {\"_id\": 0, \"Model\": 1})",
     "source": "expansion-2026-08"
   },
   {
-    "id": 3,
-    "question": "Find the maximum weight of all pets.",
+    "id": "spider-world_1-48",
+    "question": "Which unique cities are in Asian countries where Chinese is the official language ?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.country",
+      "world_1.countrylanguage",
+      "world_1.city"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$match\": {\"Continent\": \"Asia\"}}, {\"$lookup\": {\"from\": \"countrylanguage\", \"let\": {\"code\": \"$Code\"}, \"pipeline\": [{\"$match\": {\"$expr\": {\"$and\": [{\"$eq\": [\"$CountryCode\", \"$$code\"]}, {\"$eq\": [\"$Language\", \"Chinese\"]}, {\"$eq\": [\"$IsOfficial\", \"T\"]}]}}}], \"as\": \"chinese_official\"}}, {\"$match\": {\"chinese_official\": {\"$ne\": []}}}, {\"$lookup\": {\"from\": \"city\", \"localField\": \"Code\", \"foreignField\": \"CountryCode\", \"as\": \"cities\"}}, {\"$unwind\": \"$cities\"}, {\"$group\": {\"_id\": \"$cities.Name\"}}, {\"$project\": {\"_id\": 0, \"Name\": \"$_id\"}}, {\"$sort\": {\"Name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-network_1-9",
+    "question": "Show the student IDs and numbers of friends corresponding to each.",
+    "database": "network_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "network_1.Friend"
+    ],
+    "normalized_query": "db.Friend.aggregate([{\"$group\": {\"_id\": \"$student_id\", \"friend_count\": {\"$sum\": 1}}}, {\"$project\": {\"_id\": 0, \"student_id\": \"$_id\", \"friend_count\": 1}}, {\"$sort\": {\"student_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "car-e5",
+    "question": "List all country names in the database.",
+    "database": "car_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "car_1.countries"
+    ],
+    "normalized_query": "db.countries.find({}, {\"_id\": 0, \"CountryName\": 1})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "nw-e2",
+    "question": "List the names of highschoolers in grade 9.",
+    "database": "network_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Highschooler.find({\"grade\": 9}, {\"_id\": 0, \"name\": 1})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-pets_1-4",
+    "question": "Find the weight of the youngest dog.",
     "database": "pets_1",
     "complexity": "medium",
     "gold_collections": [
       "pets_1.Pets"
     ],
-    "normalized_query": "db.Pets.aggregate([{\"$group\": {\"_id\": None, \"max_weight\": {\"$max\": \"$weight\"}}}, {\"$project\": {\"_id\": 0, \"max_weight\": 1}}])",
-    "source": "original-12"
+    "normalized_query": "db.Pets.find({\"PetType\": \"dog\"}, {\"_id\": 0, \"weight\": 1}).sort(\"pet_age\", 1).limit(1)",
+    "source": "expansion-2026-08-16-spider"
   },
   {
-    "id": "car-h3",
-    "question": "Report all Asian automakers: their full name and country name.",
-    "database": "car_1",
-    "complexity": "high",
+    "id": "dk-e6",
+    "database": "dog_kennels",
+    "complexity": "easy",
+    "question": "List the email, cell phone, and home phone of all the professionals.",
     "gold_collections": [
-      "car_1.car_makers",
-      "car_1.countries"
+      "dog_kennels.Professionals"
     ],
-    "normalized_query": "db.car_makers.aggregate([{\"$addFields\": {\"country_int\": {\"$toInt\": \"$Country\"}}}, {\"$lookup\": {\"from\": \"countries\", \"localField\": \"country_int\", \"foreignField\": \"CountryId\", \"as\": \"country\"}}, {\"$unwind\": \"$country\"}, {\"$match\": {\"country.Continent\": 3}}, {\"$project\": {\"_id\": 0, \"FullName\": 1, \"CountryName\": \"$country.CountryName\"}}, {\"$sort\": {\"FullName\": 1}}])",
+    "normalized_query": "db.Professionals.find({}, {\"_id\": 0, \"email_address\": 1, \"cell_number\": 1, \"home_phone\": 1})",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "cs-e5",
+    "question": "What are the names of the male singers?",
+    "database": "concert_singer",
+    "complexity": "easy",
+    "gold_collections": [
+      "concert_singer.singer"
+    ],
+    "normalized_query": "db.singer.find({\"Is_male\": \"T\"}, {\"_id\": 0, \"Name\": 1})",
     "source": "expansion-2026-08"
   },
   {
-    "id": "cs-m2",
-    "question": "What is the total capacity of all stadiums combined?",
+    "id": "spider-concert_singer-22",
+    "question": "Find the name and location of the stadiums which some concerts happened in the years of both 2014 and 2015.",
+    "database": "concert_singer",
+    "complexity": "medium",
+    "gold_collections": [
+      "concert_singer.concert",
+      "concert_singer.stadium"
+    ],
+    "normalized_query": "db.concert.aggregate([{\"$addFields\": {\"Stadium_ID_int\": {\"$toInt\": \"$Stadium_ID\"}}}, {\"$facet\": {\"a\": [{\"$match\": {\"Year\": \"2014\"}}, {\"$group\": {\"_id\": \"$Stadium_ID_int\"}}], \"b\": [{\"$match\": {\"Year\": \"2015\"}}, {\"$group\": {\"_id\": \"$Stadium_ID_int\"}}]}}, {\"$project\": {\"stadium_ids\": {\"$setIntersection\": [\"$a._id\", \"$b._id\"]}}}, {\"$unwind\": \"$stadium_ids\"}, {\"$lookup\": {\"from\": \"stadium\", \"localField\": \"stadium_ids\", \"foreignField\": \"Stadium_ID\", \"as\": \"stad\"}}, {\"$unwind\": \"$stad\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$stad.Name\", \"Location\": \"$stad.Location\"}}, {\"$sort\": {\"Name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "pt-e8",
+    "question": "What is the age of the cat?",
+    "database": "pets_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "pets_1.Pets"
+    ],
+    "normalized_query": "db.Pets.find({\"PetType\": \"cat\"}, {\"_id\": 0, \"pet_age\": 1})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "pt-e1",
+    "question": "How many students are there?",
+    "database": "pets_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "pets_1.Student"
+    ],
+    "normalized_query": "db.Student.count_documents({})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "nw-e7",
+    "question": "List highschoolers named 'Gabriel'.",
+    "database": "network_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Highschooler.find({\"name\": \"Gabriel\"}, {\"_id\": 0, \"ID\": 1, \"grade\": 1})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "car-e4",
+    "question": "List all continents in the database.",
+    "database": "car_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "car_1.continents"
+    ],
+    "normalized_query": "db.continents.find({}, {\"_id\": 0, \"Continent\": 1})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-world_1-41",
+    "question": "What is the average GNP and total population in all nations whose government is US territory?",
+    "database": "world_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$match\": {\"GovernmentForm\": \"US Territory\"}}, {\"$group\": {\"_id\": None, \"avg_gnp\": {\"$avg\": \"$GNP\"}, \"total_population\": {\"$sum\": \"$Population\"}}}, {\"$project\": {\"_id\": 0, \"avg_gnp\": 1, \"total_population\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "wl-m1",
+    "database": "world_1",
+    "complexity": "medium",
+    "question": "Which region is the city Kabul located in?",
+    "gold_collections": [
+      "world_1.city",
+      "world_1.country"
+    ],
+    "normalized_query": "db.city.aggregate([{\"$match\": {\"Name\": \"Kabul\"}}, {\"$lookup\": {\"from\": \"country\", \"localField\": \"CountryCode\", \"foreignField\": \"Code\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$project\": {\"_id\": 0, \"Region\": \"$c.Region\"}}])",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "cs-m3",
+    "question": "List the top 3 stadiums by capacity, largest first.",
     "database": "concert_singer",
     "complexity": "medium",
     "gold_collections": [
       "concert_singer.stadium"
     ],
-    "normalized_query": "db.stadium.aggregate([{\"$group\": {\"_id\": None, \"total_capacity\": {\"$sum\": \"$Capacity\"}}}, {\"$project\": {\"_id\": 0}}])",
+    "normalized_query": "db.stadium.find({}, {\"_id\": 0, \"Name\": 1, \"Capacity\": 1}).sort({\"Capacity\": -1}).limit(3)",
     "source": "expansion-2026-08"
   },
   {
-    "id": "car-e2",
-    "question": "List the full names of all Renault cars.",
-    "database": "car_1",
-    "complexity": "easy",
+    "id": "spider-concert_singer-6",
+    "question": "List all song names by singers above the average age.",
+    "database": "concert_singer",
+    "complexity": "medium",
     "gold_collections": [
+      "concert_singer.singer"
+    ],
+    "normalized_query": "db.singer.aggregate([{\"$group\": {\"_id\": None, \"avg_age\": {\"$avg\": \"$Age\"}, \"rows\": {\"$push\": \"$$ROOT\"}}}, {\"$unwind\": \"$rows\"}, {\"$match\": {\"$expr\": {\"$gt\": [\"$rows.Age\", \"$avg_age\"]}}}, {\"$project\": {\"_id\": 0, \"Song_Name\": \"$rows.Song_Name\"}}, {\"$sort\": {\"Song_Name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-world_1-15",
+    "question": "What is the number of distinct continents where Chinese is spoken?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.countrylanguage",
+      "world_1.country"
+    ],
+    "normalized_query": "db.countrylanguage.aggregate([{\"$match\": {\"Language\": \"Chinese\"}}, {\"$lookup\": {\"from\": \"country\", \"localField\": \"CountryCode\", \"foreignField\": \"Code\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$group\": {\"_id\": \"$c.Continent\"}}, {\"$count\": \"distinct_continent_count\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-concert_singer-19",
+    "question": "Show the name and theme for all concerts and the number of singers in each concert.",
+    "database": "concert_singer",
+    "complexity": "medium",
+    "gold_collections": [
+      "concert_singer.singer_in_concert",
+      "concert_singer.concert"
+    ],
+    "normalized_query": "db.singer_in_concert.aggregate([{\"$group\": {\"_id\": \"$concert_ID\", \"singer_count\": {\"$sum\": 1}}}, {\"$lookup\": {\"from\": \"concert\", \"localField\": \"_id\", \"foreignField\": \"concert_ID\", \"as\": \"concert\"}}, {\"$unwind\": \"$concert\"}, {\"$project\": {\"_id\": 0, \"concert_Name\": \"$concert.concert_Name\", \"Theme\": \"$concert.Theme\", \"singer_count\": 1}}, {\"$sort\": {\"concert_Name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-26",
+    "question": "What is the maximum horsepower and the make of the car models with 3 cylinders?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.cars_data",
       "car_1.car_names"
     ],
-    "normalized_query": "db.car_names.find({\"Model\": \"renault\"}, {\"_id\": 0, \"Make\": 1})",
+    "normalized_query": "db.cars_data.aggregate([{\"$match\": {\"Cylinders\": 3, \"Horsepower\": {\"$ne\": \"null\"}}}, {\"$addFields\": {\"HorsepowerNum\": {\"$toInt\": \"$Horsepower\"}}}, {\"$sort\": {\"HorsepowerNum\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"car_names\", \"localField\": \"Id\", \"foreignField\": \"MakeId\", \"as\": \"car_name\"}}, {\"$unwind\": \"$car_name\"}, {\"$project\": {\"_id\": 0, \"horsepower\": \"$HorsepowerNum\", \"Make\": \"$car_name.Make\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "pt-m6",
+    "question": "What is the average weight of pets?",
+    "database": "pets_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "pets_1.Pets"
+    ],
+    "normalized_query": "db.Pets.aggregate([{\"$group\": {\"_id\": None, \"avg_weight\": {\"$avg\": \"$weight\"}}}, {\"$project\": {\"_id\": 0}}])",
     "source": "expansion-2026-08"
   },
   {
-    "id": "car-e10",
-    "question": "How many cars have exactly 8 cylinders?",
-    "database": "car_1",
+    "id": "wl-e6",
+    "database": "world_1",
     "complexity": "easy",
+    "question": "What are the names and surface areas of the 5 largest countries by area?",
     "gold_collections": [
-      "car_1.cars_data"
+      "world_1.country"
     ],
-    "normalized_query": "db.cars_data.count_documents({\"Cylinders\": 8})",
-    "source": "expansion-2026-08"
+    "normalized_query": "db.country.find({}, {\"_id\": 0, \"Name\": 1, \"SurfaceArea\": 1}).sort([(\"SurfaceArea\", -1)]).limit(5)",
+    "source": "expansion-2026-08-07-spider-extra"
   },
   {
-    "id": "car-e7",
-    "question": "How many cars were produced in 1982?",
+    "id": "spider-car_1-33",
+    "question": "How many continents are there?",
     "database": "car_1",
     "complexity": "easy",
     "gold_collections": [
-      "car_1.cars_data"
+      "car_1.continents"
     ],
-    "normalized_query": "db.cars_data.count_documents({\"Year\": 1982})",
-    "source": "expansion-2026-08"
+    "normalized_query": "db.continents.count_documents({})",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-dog_kennels-2",
+    "question": "What are the id, role, and first name of the professionals who have performed two or more treatments?",
+    "database": "dog_kennels",
+    "complexity": "hard",
+    "gold_collections": [
+      "dog_kennels.Treatments",
+      "dog_kennels.Professionals"
+    ],
+    "normalized_query": "db.Treatments.aggregate([{\"$group\": {\"_id\": \"$professional_id\", \"treatment_count\": {\"$sum\": 1}}}, {\"$match\": {\"treatment_count\": {\"$gte\": 2}}}, {\"$lookup\": {\"from\": \"Professionals\", \"localField\": \"_id\", \"foreignField\": \"professional_id\", \"as\": \"p\"}}, {\"$unwind\": \"$p\"}, {\"$project\": {\"_id\": 0, \"professional_id\": \"$_id\", \"role_code\": \"$p.role_code\", \"first_name\": \"$p.first_name\"}}, {\"$sort\": {\"professional_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-world_1-39",
+    "question": "What is the total surface area of the continents Asia and Europe?",
+    "database": "world_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$match\": {\"Continent\": {\"$in\": [\"Asia\", \"Europe\"]}}}, {\"$group\": {\"_id\": None, \"total_surface_area\": {\"$sum\": \"$SurfaceArea\"}}}, {\"$project\": {\"_id\": 0, \"total_surface_area\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-dog_kennels-4",
+    "question": "Which owner has paid for the most treatments on his or her dogs? List the owner id and last name.",
+    "database": "dog_kennels",
+    "complexity": "hard",
+    "gold_collections": [
+      "dog_kennels.Treatments",
+      "dog_kennels.Dogs",
+      "dog_kennels.Owners"
+    ],
+    "normalized_query": "db.Treatments.aggregate([{\"$lookup\": {\"from\": \"Dogs\", \"localField\": \"dog_id\", \"foreignField\": \"dog_id\", \"as\": \"d\"}}, {\"$unwind\": \"$d\"}, {\"$group\": {\"_id\": \"$d.owner_id\", \"treatment_count\": {\"$sum\": 1}}}, {\"$sort\": {\"treatment_count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"Owners\", \"localField\": \"_id\", \"foreignField\": \"owner_id\", \"as\": \"o\"}}, {\"$unwind\": \"$o\"}, {\"$project\": {\"_id\": 0, \"owner_id\": \"$_id\", \"last_name\": \"$o.last_name\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": 4,
+    "question": "What are the names and ages of singers, ordered by age?",
+    "database": "concert_singer",
+    "complexity": "easy",
+    "gold_collections": [
+      "concert_singer.singer"
+    ],
+    "normalized_query": "db.singer.find({}, {\"_id\": 0, \"Name\": 1, \"Age\": 1}).sort({\"Age\": 1})",
+    "source": "original-12"
+  },
+  {
+    "id": "spider-pets_1-1",
+    "question": "Find the first name of students who have both cat and dog pets .",
+    "database": "pets_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "pets_1.Has_Pet",
+      "pets_1.Pets",
+      "pets_1.Student"
+    ],
+    "normalized_query": "db.Has_Pet.aggregate([{\"$facet\": {\"cat\": [{\"$lookup\": {\"from\": \"Pets\", \"localField\": \"PetID\", \"foreignField\": \"PetID\", \"as\": \"pet\"}}, {\"$unwind\": \"$pet\"}, {\"$match\": {\"pet.PetType\": \"cat\"}}, {\"$lookup\": {\"from\": \"Student\", \"localField\": \"StuID\", \"foreignField\": \"StuID\", \"as\": \"student\"}}, {\"$unwind\": \"$student\"}, {\"$group\": {\"_id\": \"$student.Fname\"}}], \"dog\": [{\"$lookup\": {\"from\": \"Pets\", \"localField\": \"PetID\", \"foreignField\": \"PetID\", \"as\": \"pet\"}}, {\"$unwind\": \"$pet\"}, {\"$match\": {\"pet.PetType\": \"dog\"}}, {\"$lookup\": {\"from\": \"Student\", \"localField\": \"StuID\", \"foreignField\": \"StuID\", \"as\": \"student\"}}, {\"$unwind\": \"$student\"}, {\"$group\": {\"_id\": \"$student.Fname\"}}]}}, {\"$project\": {\"_id\": 0, \"Fname\": {\"$setIntersection\": [\"$cat._id\", \"$dog._id\"]}}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-world_1-52",
+    "question": "Find the average life expectancy and total population for each continent where the average life expectancy is shorter than 72?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$group\": {\"_id\": \"$Continent\", \"total_population\": {\"$sum\": \"$Population\"}, \"avg_life_expectancy\": {\"$avg\": \"$LifeExpectancy\"}}}, {\"$match\": {\"avg_life_expectancy\": {\"$lt\": 72}}}, {\"$project\": {\"_id\": 0, \"Continent\": \"$_id\", \"total_population\": 1, \"avg_life_expectancy\": 1}}, {\"$sort\": {\"Continent\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-concert_singer-9",
+    "question": "Which year has most number of concerts?",
+    "database": "concert_singer",
+    "complexity": "medium",
+    "gold_collections": [
+      "concert_singer.concert"
+    ],
+    "normalized_query": "db.concert.aggregate([{\"$group\": {\"_id\": \"$Year\", \"concert_count\": {\"$sum\": 1}}}, {\"$sort\": {\"concert_count\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"Year\": \"$_id\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "wl-c1",
+    "database": "world_1",
+    "complexity": "complex",
+    "question": "Which countries have a greater surface area than every country in Oceania?",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$lookup\": {\"from\": \"country\", \"pipeline\": [{\"$match\": {\"Continent\": \"Oceania\"}}, {\"$group\": {\"_id\": None, \"max_area\": {\"$max\": \"$SurfaceArea\"}}}], \"as\": \"threshold\"}}, {\"$unwind\": \"$threshold\"}, {\"$match\": {\"$expr\": {\"$gt\": [\"$SurfaceArea\", \"$threshold.max_area\"]}}}, {\"$project\": {\"_id\": 0, \"Name\": 1}}])",
+    "source": "expansion-2026-08-07-spider-extra"
   },
   {
     "id": 9,
@@ -1000,48 +564,389 @@
     "source": "original-12"
   },
   {
-    "id": "pt-e8",
-    "question": "What is the age of the cat?",
+    "id": "spider-world_1-21",
+    "question": "What is average life expectancy in the countries where English is not the official language?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.country",
+      "world_1.countrylanguage"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$lookup\": {\"from\": \"countrylanguage\", \"let\": {\"code\": \"$Code\"}, \"pipeline\": [{\"$match\": {\"$expr\": {\"$and\": [{\"$eq\": [\"$CountryCode\", \"$$code\"]}, {\"$eq\": [\"$Language\", \"English\"]}, {\"$eq\": [\"$IsOfficial\", \"T\"]}]}}}], \"as\": \"eng_official\"}}, {\"$match\": {\"eng_official\": {\"$eq\": []}}}, {\"$group\": {\"_id\": None, \"avg_life_expectancy\": {\"$avg\": \"$LifeExpectancy\"}}}, {\"$project\": {\"_id\": 0, \"avg_life_expectancy\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-pets_1-2",
+    "question": "Find the first name and age of students who have a dog but do not have a cat as a pet.",
     "database": "pets_1",
-    "complexity": "easy",
+    "complexity": "hard",
     "gold_collections": [
-      "pets_1.Pets"
+      "pets_1.Has_Pet",
+      "pets_1.Pets",
+      "pets_1.Student"
     ],
-    "normalized_query": "db.Pets.find({\"PetType\": \"cat\"}, {\"_id\": 0, \"pet_age\": 1})",
-    "source": "expansion-2026-08"
+    "normalized_query": "db.Has_Pet.aggregate([{\"$lookup\": {\"from\": \"Pets\", \"localField\": \"PetID\", \"foreignField\": \"PetID\", \"as\": \"pet\"}}, {\"$unwind\": \"$pet\"}, {\"$match\": {\"pet.PetType\": \"dog\"}}, {\"$lookup\": {\"from\": \"Student\", \"localField\": \"StuID\", \"foreignField\": \"StuID\", \"as\": \"student\"}}, {\"$unwind\": \"$student\"}, {\"$lookup\": {\"from\": \"Has_Pet\", \"let\": {\"sid\": \"$StuID\"}, \"pipeline\": [{\"$match\": {\"$expr\": {\"$eq\": [\"$StuID\", \"$$sid\"]}}}, {\"$lookup\": {\"from\": \"Pets\", \"localField\": \"PetID\", \"foreignField\": \"PetID\", \"as\": \"p\"}}, {\"$unwind\": \"$p\"}, {\"$match\": {\"p.PetType\": \"cat\"}}], \"as\": \"cat_pets\"}}, {\"$match\": {\"cat_pets\": {\"$eq\": []}}}, {\"$project\": {\"_id\": 0, \"Fname\": \"$student.Fname\", \"Age\": \"$student.Age\"}}, {\"$sort\": {\"Fname\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
   },
   {
-    "id": "dk-e6",
-    "database": "dog_kennels",
-    "complexity": "easy",
-    "question": "List the email, cell phone, and home phone of all the professionals.",
-    "gold_collections": [
-      "dog_kennels.Professionals"
-    ],
-    "normalized_query": "db.Professionals.find({}, {\"_id\": 0, \"email_address\": 1, \"cell_number\": 1, \"home_phone\": 1})",
-    "source": "expansion-2026-08-07-spider-extra"
-  },
-  {
-    "id": "nw-e5",
-    "question": "How many friendship pairs are recorded?",
-    "database": "network_1",
-    "complexity": "easy",
-    "gold_collections": [
-      "network_1.Friend"
-    ],
-    "normalized_query": "db.Friend.count_documents({})",
-    "source": "expansion-2026-08"
-  },
-  {
-    "id": "cs-m7",
-    "question": "How many singers are there for each country?",
+    "id": "spider-concert_singer-4",
+    "question": "Show the name and the release year of the song by the youngest singer.",
     "database": "concert_singer",
     "complexity": "medium",
     "gold_collections": [
       "concert_singer.singer"
     ],
-    "normalized_query": "db.singer.aggregate([{\"$group\": {\"_id\": \"$Country\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1, \"_id\": 1}}])",
+    "normalized_query": "db.singer.find({}, {\"_id\": 0, \"Song_Name\": 1, \"Song_release_year\": 1}).sort({\"Age\": 1}).limit(1)",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "wl-h1",
+    "database": "world_1",
+    "complexity": "high",
+    "question": "Return the country name and number of languages spoken for each country that speaks at least 3 languages.",
+    "gold_collections": [
+      "world_1.country",
+      "world_1.countrylanguage"
+    ],
+    "normalized_query": "db.countrylanguage.aggregate([{\"$group\": {\"_id\": \"$CountryCode\", \"lang_count\": {\"$sum\": 1}}}, {\"$match\": {\"lang_count\": {\"$gt\": 2}}}, {\"$lookup\": {\"from\": \"country\", \"localField\": \"_id\", \"foreignField\": \"Code\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$c.Name\", \"lang_count\": 1}}])",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "spider-car_1-40",
+    "question": "How many cars have more than 4 cylinders?",
+    "database": "car_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.cars_data.count_documents({\"Cylinders\": {\"$gt\": 4}})",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-network_1-2",
+    "question": "Show the names of high schoolers who have at least 3 friends.",
+    "database": "network_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "network_1.Friend",
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Friend.aggregate([{\"$group\": {\"_id\": \"$student_id\", \"friend_count\": {\"$sum\": 1}}}, {\"$match\": {\"friend_count\": {\"$gte\": 3}}}, {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"_id\", \"foreignField\": \"ID\", \"as\": \"hs\"}}, {\"$unwind\": \"$hs\"}, {\"$project\": {\"_id\": 0, \"name\": \"$hs.name\"}}, {\"$sort\": {\"name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-9",
+    "question": "Which distinctive models are produced by maker with the full name General Motors or weighing more than 3500?",
+    "database": "car_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "car_1.car_names",
+      "car_1.model_list.json",
+      "car_1.car_makers",
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.car_names.aggregate([{\"$lookup\": {\"from\": \"model_list.json\", \"localField\": \"Model\", \"foreignField\": \"Model\", \"as\": \"model\"}}, {\"$unwind\": \"$model\"}, {\"$lookup\": {\"from\": \"car_makers\", \"localField\": \"model.Maker\", \"foreignField\": \"Id\", \"as\": \"maker\"}}, {\"$unwind\": \"$maker\"}, {\"$lookup\": {\"from\": \"cars_data\", \"localField\": \"MakeId\", \"foreignField\": \"Id\", \"as\": \"car_data\"}}, {\"$unwind\": \"$car_data\"}, {\"$match\": {\"$or\": [{\"maker.FullName\": \"General Motors\"}, {\"car_data.Weight\": {\"$gt\": 3500}}]}}, {\"$group\": {\"_id\": \"$model.Model\"}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-dog_kennels-11",
+    "question": "Find the states where both owners and professionals live.",
+    "database": "dog_kennels",
+    "complexity": "medium",
+    "gold_collections": [
+      "dog_kennels.Owners",
+      "dog_kennels.Professionals"
+    ],
+    "normalized_query": "db.Owners.aggregate([{\"$group\": {\"_id\": None, \"owner_states\": {\"$addToSet\": \"$state\"}}}, {\"$lookup\": {\"from\": \"Professionals\", \"pipeline\": [{\"$group\": {\"_id\": None, \"prof_states\": {\"$addToSet\": \"$state\"}}}], \"as\": \"p\"}}, {\"$unwind\": \"$p\"}, {\"$project\": {\"_id\": 0, \"states\": {\"$setIntersection\": [\"$owner_states\", \"$p.prof_states\"]}}}, {\"$unwind\": \"$states\"}, {\"$project\": {\"_id\": 0, \"state\": \"$states\"}}, {\"$sort\": {\"state\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-world_1-55",
+    "question": "What are the names of the nations with the 3 lowest populations?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$sort\": {\"Population\": 1}}, {\"$limit\": 3}, {\"$project\": {\"_id\": 0, \"Name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-concert_singer-14",
+    "question": "What are all distinct countries where singers above age 20 are from?",
+    "database": "concert_singer",
+    "complexity": "easy",
+    "gold_collections": [
+      "concert_singer.singer"
+    ],
+    "normalized_query": "db.singer.aggregate([{\"$match\": {\"Age\": {\"$gt\": 20}}}, {\"$group\": {\"_id\": \"$Country\"}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-dog_kennels-20",
+    "question": "List pairs of the owner's first name and the dogs's name.",
+    "database": "dog_kennels",
+    "complexity": "medium",
+    "gold_collections": [
+      "dog_kennels.Owners",
+      "dog_kennels.Dogs"
+    ],
+    "normalized_query": "db.Owners.aggregate([{\"$lookup\": {\"from\": \"Dogs\", \"localField\": \"owner_id\", \"foreignField\": \"owner_id\", \"as\": \"d\"}}, {\"$unwind\": \"$d\"}, {\"$sort\": {\"owner_id\": 1, \"d.dog_id\": 1}}, {\"$project\": {\"_id\": 0, \"first_name\": 1, \"name\": \"$d.name\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-dog_kennels-29",
+    "question": "Which professionals live in a city containing the substring 'West'? List his or her role, street, city and state.",
+    "database": "dog_kennels",
+    "complexity": "easy",
+    "gold_collections": [
+      "dog_kennels.Professionals"
+    ],
+    "normalized_query": "db.Professionals.aggregate([{\"$match\": {\"city\": {\"$regex\": \"West\"}}}, {\"$sort\": {\"professional_id\": 1}}, {\"$project\": {\"_id\": 0, \"role_code\": 1, \"street\": 1, \"city\": 1, \"state\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "nw-m4",
+    "question": "List the highschooler names sorted alphabetically.",
+    "database": "network_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Highschooler.find({}, {\"_id\": 0, \"name\": 1}).sort({\"name\": 1})",
     "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-car_1-34",
+    "question": "How many countries are listed?",
+    "database": "car_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "car_1.countries"
+    ],
+    "normalized_query": "db.countries.count_documents({})",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-dog_kennels-10",
+    "question": "List the last name of the owner owning the youngest dog.",
+    "database": "dog_kennels",
+    "complexity": "hard",
+    "gold_collections": [
+      "dog_kennels.Dogs",
+      "dog_kennels.Owners"
+    ],
+    "normalized_query": "db.Dogs.aggregate([{\"$addFields\": {\"age_num\": {\"$toInt\": \"$age\"}}}, {\"$group\": {\"_id\": None, \"min_age\": {\"$min\": \"$age_num\"}, \"rows\": {\"$push\": \"$$ROOT\"}}}, {\"$unwind\": \"$rows\"}, {\"$match\": {\"$expr\": {\"$eq\": [\"$rows.age_num\", \"$min_age\"]}}}, {\"$lookup\": {\"from\": \"Owners\", \"localField\": \"rows.owner_id\", \"foreignField\": \"owner_id\", \"as\": \"o\"}}, {\"$unwind\": \"$o\"}, {\"$project\": {\"_id\": 0, \"last_name\": \"$o.last_name\"}}, {\"$sort\": {\"last_name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "pt-m1",
+    "question": "How many students are there in each major?",
+    "database": "pets_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "pets_1.Student"
+    ],
+    "normalized_query": "db.Student.aggregate([{\"$group\": {\"_id\": \"$Major\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1, \"_id\": 1}}])",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "car-m1",
+    "question": "How many distinct models are listed in the model_list table?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.model_list.json"
+    ],
+    "normalized_query": "db.model_list.json.count_documents({})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-world_1-25",
+    "question": "What are the countries that have greater surface area than any country in Europe?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$facet\": {\"threshold\": [{\"$match\": {\"Continent\": \"Europe\"}}, {\"$group\": {\"_id\": None, \"val\": {\"$min\": \"$SurfaceArea\"}}}], \"all\": [{\"$project\": {\"_id\": 0, \"Name\": 1, \"SurfaceArea\": 1}}]}}, {\"$unwind\": \"$threshold\"}, {\"$unwind\": \"$all\"}, {\"$match\": {\"$expr\": {\"$gt\": [\"$all.SurfaceArea\", \"$threshold.val\"]}}}, {\"$project\": {\"_id\": 0, \"Name\": \"$all.Name\"}}, {\"$sort\": {\"Name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "wl-h3",
+    "database": "world_1",
+    "complexity": "high",
+    "question": "What is the total population and average surface area of countries in North America with a surface area bigger than 3000?",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$match\": {\"Continent\": \"North America\", \"SurfaceArea\": {\"$gt\": 3000}}}, {\"$group\": {\"_id\": None, \"total_population\": {\"$sum\": \"$Population\"}, \"avg_surface_area\": {\"$avg\": \"$SurfaceArea\"}}}])",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "pt-m2",
+    "question": "What is the average age of students?",
+    "database": "pets_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "pets_1.Student"
+    ],
+    "normalized_query": "db.Student.aggregate([{\"$group\": {\"_id\": None, \"avg_age\": {\"$avg\": \"$Age\"}}}, {\"$project\": {\"_id\": 0}}])",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": 1,
+    "question": "How many singers are there?",
+    "database": "concert_singer",
+    "complexity": "easy",
+    "gold_collections": [
+      "concert_singer.singer"
+    ],
+    "normalized_query": "db.singer.count_documents({})",
+    "source": "original-12"
+  },
+  {
+    "id": "cs-c1",
+    "question": "List the names of singers and the stadium name where they performed, for concerts held in 2015.",
+    "database": "concert_singer",
+    "complexity": "complex",
+    "gold_collections": [
+      "concert_singer.singer_in_concert",
+      "concert_singer.concert",
+      "concert_singer.stadium",
+      "concert_singer.singer"
+    ],
+    "normalized_query": "db.singer_in_concert.aggregate([{\"$addFields\": {\"sid_int\": {\"$toInt\": \"$Singer_ID\"}}}, {\"$lookup\": {\"from\": \"concert\", \"localField\": \"concert_ID\", \"foreignField\": \"concert_ID\", \"as\": \"concert\"}}, {\"$unwind\": \"$concert\"}, {\"$match\": {\"concert.Year\": \"2015\"}}, {\"$addFields\": {\"stad_id_int\": {\"$toInt\": \"$concert.Stadium_ID\"}}}, {\"$lookup\": {\"from\": \"stadium\", \"localField\": \"stad_id_int\", \"foreignField\": \"Stadium_ID\", \"as\": \"stad\"}}, {\"$unwind\": \"$stad\"}, {\"$lookup\": {\"from\": \"singer\", \"localField\": \"sid_int\", \"foreignField\": \"Singer_ID\", \"as\": \"singer\"}}, {\"$unwind\": \"$singer\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$singer.Name\", \"Stadium\": \"$stad.Name\"}}, {\"$sort\": {\"Name\": 1}}])",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": 7,
+    "question": "What are the names of singers who performed in a concert in 2014?",
+    "database": "concert_singer",
+    "complexity": "complex",
+    "gold_collections": [
+      "concert_singer.singer_in_concert",
+      "concert_singer.concert",
+      "concert_singer.singer"
+    ],
+    "normalized_query": "db.singer_in_concert.aggregate([{\"$addFields\": {\"Singer_ID_int\": {\"$toInt\": \"$Singer_ID\"}}}, {\"$lookup\": {\"from\": \"concert\", \"localField\": \"concert_ID\", \"foreignField\": \"concert_ID\", \"as\": \"concert\"}}, {\"$unwind\": \"$concert\"}, {\"$match\": {\"concert.Year\": \"2014\"}}, {\"$lookup\": {\"from\": \"singer\", \"localField\": \"Singer_ID_int\", \"foreignField\": \"Singer_ID\", \"as\": \"singer\"}}, {\"$unwind\": \"$singer\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$singer.Name\"}}, {\"$sort\": {\"Name\": 1}}])",
+    "source": "original-12"
+  },
+  {
+    "id": "spider-world_1-59",
+    "question": "What are the codes of countries where Spanish is spoken by the largest percentage of people?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.countrylanguage"
+    ],
+    "normalized_query": "db.countrylanguage.aggregate([{\"$match\": {\"Language\": \"Spanish\"}}, {\"$group\": {\"_id\": \"$CountryCode\", \"max_percentage\": {\"$max\": \"$Percentage\"}}}, {\"$project\": {\"_id\": 0, \"CountryCode\": \"$_id\", \"max_percentage\": 1}}, {\"$sort\": {\"CountryCode\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-world_1-44",
+    "question": "How many countries speak both English and Dutch?",
+    "database": "world_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "world_1.countrylanguage"
+    ],
+    "normalized_query": "db.countrylanguage.aggregate([{\"$group\": {\"_id\": \"$CountryCode\", \"languages\": {\"$addToSet\": \"$Language\"}}}, {\"$match\": {\"languages\": {\"$all\": [\"English\", \"Dutch\"]}}}, {\"$count\": \"country_count\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-concert_singer-24",
+    "question": "How many concerts are there in year 2014 or 2015?",
+    "database": "concert_singer",
+    "complexity": "easy",
+    "gold_collections": [
+      "concert_singer.concert"
+    ],
+    "normalized_query": "db.concert.count_documents({\"Year\": {\"$in\": [\"2014\", \"2015\"]}})",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-24",
+    "question": "How many car models are produced in the usa?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.model_list.json",
+      "car_1.car_makers",
+      "car_1.countries"
+    ],
+    "normalized_query": "db.model_list.json.aggregate([{\"$lookup\": {\"from\": \"car_makers\", \"localField\": \"Maker\", \"foreignField\": \"Id\", \"as\": \"maker\"}}, {\"$unwind\": \"$maker\"}, {\"$addFields\": {\"maker_country_int\": {\"$toInt\": \"$maker.Country\"}}}, {\"$lookup\": {\"from\": \"countries\", \"localField\": \"maker_country_int\", \"foreignField\": \"CountryId\", \"as\": \"country\"}}, {\"$unwind\": \"$country\"}, {\"$match\": {\"country.CountryName\": \"usa\"}}, {\"$count\": \"count\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": 8,
+    "question": "Find the first names of students who have a dog as a pet.",
+    "database": "pets_1",
+    "complexity": "complex",
+    "gold_collections": [
+      "pets_1.Has_Pet",
+      "pets_1.Pets",
+      "pets_1.Student"
+    ],
+    "normalized_query": "db.Has_Pet.aggregate([{\"$lookup\": {\"from\": \"Pets\", \"localField\": \"PetID\", \"foreignField\": \"PetID\", \"as\": \"pet\"}}, {\"$unwind\": \"$pet\"}, {\"$match\": {\"pet.PetType\": \"dog\"}}, {\"$lookup\": {\"from\": \"Student\", \"localField\": \"StuID\", \"foreignField\": \"StuID\", \"as\": \"student\"}}, {\"$unwind\": \"$student\"}, {\"$project\": {\"_id\": 0, \"Fname\": \"$student.Fname\"}}, {\"$sort\": {\"Fname\": 1}}])",
+    "source": "original-12"
+  },
+  {
+    "id": "spider-network_1-3",
+    "question": "What is the name of the high schooler who has the greatest number of likes?",
+    "database": "network_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "network_1.Likes",
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Likes.aggregate([{\"$group\": {\"_id\": \"$student_id\", \"like_count\": {\"$sum\": 1}}}, {\"$sort\": {\"like_count\": -1, \"_id\": 1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"_id\", \"foreignField\": \"ID\", \"as\": \"hs\"}}, {\"$unwind\": \"$hs\"}, {\"$project\": {\"_id\": 0, \"name\": \"$hs.name\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "cs-e3",
+    "question": "List the names of all concerts.",
+    "database": "concert_singer",
+    "complexity": "easy",
+    "gold_collections": [
+      "concert_singer.concert"
+    ],
+    "normalized_query": "db.concert.find({}, {\"_id\": 0, \"concert_Name\": 1})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-pets_1-13",
+    "question": "Find the id and weight of all pets whose age is older than 1.",
+    "database": "pets_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "pets_1.Pets"
+    ],
+    "normalized_query": "db.Pets.find({\"pet_age\": {\"$gt\": 1}}, {\"_id\": 0, \"PetID\": 1, \"weight\": 1}).sort(\"PetID\", 1)",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-concert_singer-10",
+    "question": "Show the stadium names without any concert.",
+    "database": "concert_singer",
+    "complexity": "medium",
+    "gold_collections": [
+      "concert_singer.stadium",
+      "concert_singer.concert"
+    ],
+    "normalized_query": "db.stadium.aggregate([{\"$addFields\": {\"Stadium_ID_str\": {\"$toString\": \"$Stadium_ID\"}}}, {\"$lookup\": {\"from\": \"concert\", \"localField\": \"Stadium_ID_str\", \"foreignField\": \"Stadium_ID\", \"as\": \"concerts\"}}, {\"$match\": {\"concerts\": {\"$eq\": []}}}, {\"$project\": {\"_id\": 0, \"Name\": 1}}, {\"$sort\": {\"Name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-pets_1-11",
+    "question": "Find the number of pets whose weight is heavier than 10.",
+    "database": "pets_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "pets_1.Pets"
+    ],
+    "normalized_query": "db.Pets.count_documents({\"weight\": {\"$gt\": 10}})",
+    "source": "expansion-2026-08-16-spider"
   },
   {
     "id": "wl-m2",
@@ -1056,15 +961,247 @@
     "source": "expansion-2026-08-07-spider-extra"
   },
   {
-    "id": "pt-m3",
-    "question": "List the 5 oldest students, oldest first, with their ages.",
-    "database": "pets_1",
+    "id": "spider-concert_singer-18",
+    "question": "Show names for all stadiums except for stadiums having a concert in year 2014.",
+    "database": "concert_singer",
     "complexity": "medium",
     "gold_collections": [
-      "pets_1.Student"
+      "concert_singer.stadium",
+      "concert_singer.concert"
     ],
-    "normalized_query": "db.Student.find({}, {\"_id\": 0, \"Fname\": 1, \"Age\": 1}).sort({\"Age\": -1}).limit(5)",
+    "normalized_query": "db.stadium.aggregate([{\"$facet\": {\"a\": [{\"$group\": {\"_id\": \"$Name\"}}], \"b\": [{\"$addFields\": {\"Stadium_ID_str\": {\"$toString\": \"$Stadium_ID\"}}}, {\"$lookup\": {\"from\": \"concert\", \"localField\": \"Stadium_ID_str\", \"foreignField\": \"Stadium_ID\", \"as\": \"concerts\"}}, {\"$unwind\": \"$concerts\"}, {\"$match\": {\"concerts.Year\": \"2014\"}}, {\"$group\": {\"_id\": \"$Name\"}}]}}, {\"$project\": {\"_id\": 0, \"name\": {\"$setDifference\": [\"$a._id\", \"$b._id\"]}}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-dog_kennels-8",
+    "question": "What are the first name and last name of the professionals who have done treatment with cost below average?",
+    "database": "dog_kennels",
+    "complexity": "hard",
+    "gold_collections": [
+      "dog_kennels.Treatments",
+      "dog_kennels.Professionals"
+    ],
+    "normalized_query": "db.Treatments.aggregate([{\"$group\": {\"_id\": None, \"avg_cost\": {\"$avg\": \"$cost_of_treatment\"}, \"rows\": {\"$push\": {\"professional_id\": \"$professional_id\", \"cost\": \"$cost_of_treatment\"}}}}, {\"$unwind\": \"$rows\"}, {\"$match\": {\"$expr\": {\"$lt\": [\"$rows.cost\", \"$avg_cost\"]}}}, {\"$group\": {\"_id\": \"$rows.professional_id\"}}, {\"$lookup\": {\"from\": \"Professionals\", \"localField\": \"_id\", \"foreignField\": \"professional_id\", \"as\": \"p\"}}, {\"$unwind\": \"$p\"}, {\"$project\": {\"_id\": 0, \"first_name\": \"$p.first_name\", \"last_name\": \"$p.last_name\"}}, {\"$sort\": {\"first_name\": 1, \"last_name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "cs-e7",
+    "question": "Which concerts happened in the year 2015?",
+    "database": "concert_singer",
+    "complexity": "easy",
+    "gold_collections": [
+      "concert_singer.concert"
+    ],
+    "normalized_query": "db.concert.find({\"Year\": \"2015\"}, {\"_id\": 0, \"concert_Name\": 1})",
     "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-world_1-18",
+    "question": "Which countries have either English or Dutch as an official language?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.countrylanguage",
+      "world_1.country"
+    ],
+    "normalized_query": "db.countrylanguage.aggregate([{\"$match\": {\"IsOfficial\": \"T\", \"Language\": {\"$in\": [\"English\", \"Dutch\"]}}}, {\"$lookup\": {\"from\": \"country\", \"localField\": \"CountryCode\", \"foreignField\": \"Code\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$project\": {\"_id\": 0, \"CountryCode\": 1, \"Language\": 1, \"IsOfficial\": 1, \"Percentage\": 1, \"Code\": \"$c.Code\", \"Name\": \"$c.Name\", \"Continent\": \"$c.Continent\", \"Region\": \"$c.Region\", \"SurfaceArea\": \"$c.SurfaceArea\", \"IndepYear\": \"$c.IndepYear\", \"Population\": \"$c.Population\", \"LifeExpectancy\": \"$c.LifeExpectancy\", \"GNP\": \"$c.GNP\", \"GNPOld\": \"$c.GNPOld\", \"LocalName\": \"$c.LocalName\", \"GovernmentForm\": \"$c.GovernmentForm\", \"HeadOfState\": \"$c.HeadOfState\", \"Capital\": \"$c.Capital\", \"Code2\": \"$c.Code2\"}}, {\"$sort\": {\"Name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-dog_kennels-7",
+    "question": "Which professionals have done at least two types of treatments? List the professional id and cell phone.",
+    "database": "dog_kennels",
+    "complexity": "hard",
+    "gold_collections": [
+      "dog_kennels.Treatments",
+      "dog_kennels.Professionals"
+    ],
+    "normalized_query": "db.Treatments.aggregate([{\"$group\": {\"_id\": \"$professional_id\", \"types\": {\"$addToSet\": \"$treatment_type_code\"}}}, {\"$match\": {\"$expr\": {\"$gte\": [{\"$size\": \"$types\"}, 2]}}}, {\"$lookup\": {\"from\": \"Professionals\", \"localField\": \"_id\", \"foreignField\": \"professional_id\", \"as\": \"p\"}}, {\"$unwind\": \"$p\"}, {\"$project\": {\"_id\": 0, \"professional_id\": \"$_id\", \"cell_number\": \"$p.cell_number\"}}, {\"$sort\": {\"professional_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-world_1-37",
+    "question": "What is the total population and maximum GNP in Asia?",
+    "database": "world_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$match\": {\"Continent\": \"Asia\"}}, {\"$group\": {\"_id\": None, \"total_population\": {\"$sum\": \"$Population\"}, \"max_gnp\": {\"$max\": \"$GNP\"}}}, {\"$project\": {\"_id\": 0, \"total_population\": 1, \"max_gnp\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "cs-e1",
+    "question": "List the names of all singers.",
+    "database": "concert_singer",
+    "complexity": "easy",
+    "gold_collections": [
+      "concert_singer.singer"
+    ],
+    "normalized_query": "db.singer.find({}, {\"_id\": 0, \"Name\": 1})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-world_1-26",
+    "question": "What are the African countries that have a  population less than any country in Asia?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$facet\": {\"threshold\": [{\"$match\": {\"Continent\": \"Asia\"}}, {\"$group\": {\"_id\": None, \"val\": {\"$max\": \"$Population\"}}}], \"all\": [{\"$match\": {\"Continent\": \"Africa\"}}, {\"$project\": {\"_id\": 0, \"Name\": 1, \"Population\": 1}}]}}, {\"$unwind\": \"$threshold\"}, {\"$unwind\": \"$all\"}, {\"$match\": {\"$expr\": {\"$lt\": [\"$all.Population\", \"$threshold.val\"]}}}, {\"$project\": {\"_id\": 0, \"Name\": \"$all.Name\"}}, {\"$sort\": {\"Name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-16",
+    "question": "How many countries does each continent have? List the continent id, continent name and the number of countries.",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.continents",
+      "car_1.countries"
+    ],
+    "normalized_query": "db.continents.aggregate([{\"$lookup\": {\"from\": \"countries\", \"localField\": \"ContId\", \"foreignField\": \"Continent\", \"as\": \"countries\"}}, {\"$unwind\": \"$countries\"}, {\"$group\": {\"_id\": \"$ContId\", \"Continent\": {\"$first\": \"$Continent\"}, \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-world_1-51",
+    "question": "Find the government form name and total population for each government form whose average life expectancy is longer than 72.",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$group\": {\"_id\": \"$GovernmentForm\", \"total_population\": {\"$sum\": \"$Population\"}, \"avg_life_expectancy\": {\"$avg\": \"$LifeExpectancy\"}}}, {\"$match\": {\"avg_life_expectancy\": {\"$gt\": 72}}}, {\"$project\": {\"_id\": 0, \"GovernmentForm\": \"$_id\", \"total_population\": 1}}, {\"$sort\": {\"GovernmentForm\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-world_1-7",
+    "question": "Find the number of cities in each district whose population is greater than the average population of cities?",
+    "database": "world_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "world_1.city"
+    ],
+    "normalized_query": "db.city.aggregate([{\"$group\": {\"_id\": None, \"avgPop\": {\"$avg\": \"$Population\"}, \"rows\": {\"$push\": \"$$ROOT\"}}}, {\"$unwind\": \"$rows\"}, {\"$match\": {\"$expr\": {\"$gt\": [\"$rows.Population\", \"$avgPop\"]}}}, {\"$group\": {\"_id\": \"$rows.District\", \"count\": {\"$sum\": 1}}}, {\"$project\": {\"_id\": 0, \"District\": \"$_id\", \"count\": 1}}, {\"$sort\": {\"District\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "car-c1",
+    "question": "For each Saab released after 1978, report the full name, the year, and the ratio of weight to horsepower.",
+    "database": "car_1",
+    "complexity": "complex",
+    "gold_collections": [
+      "car_1.car_names",
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.car_names.aggregate([{\"$match\": {\"Model\": \"saab\"}}, {\"$lookup\": {\"from\": \"cars_data\", \"localField\": \"MakeId\", \"foreignField\": \"Id\", \"as\": \"data\"}}, {\"$unwind\": \"$data\"}, {\"$match\": {\"data.Year\": {\"$gt\": 1978}, \"data.Horsepower\": {\"$ne\": \"null\"}}}, {\"$addFields\": {\"hp_int\": {\"$toInt\": \"$data.Horsepower\"}}}, {\"$project\": {\"_id\": 0, \"Make\": 1, \"Year\": \"$data.Year\", \"ratio\": {\"$divide\": [\"$data.Weight\", \"$hp_int\"]}}}, {\"$sort\": {\"Year\": 1}}])",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "car-e8",
+    "question": "What is the make of the car with Id 100?",
+    "database": "car_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "car_1.car_names"
+    ],
+    "normalized_query": "db.car_names.find({\"MakeId\": 100}, {\"_id\": 0, \"Make\": 1})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-car_1-23",
+    "question": "How many car makers are there in france?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.car_makers",
+      "car_1.countries"
+    ],
+    "normalized_query": "db.car_makers.aggregate([{\"$addFields\": {\"CountryInt\": {\"$toInt\": \"$Country\"}}}, {\"$lookup\": {\"from\": \"countries\", \"localField\": \"CountryInt\", \"foreignField\": \"CountryId\", \"as\": \"country\"}}, {\"$unwind\": \"$country\"}, {\"$match\": {\"country.CountryName\": \"france\"}}, {\"$count\": \"count\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-21",
+    "question": "What is the number of car models that are produced by each maker and what is the id and full name of each maker?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.model_list.json",
+      "car_1.car_makers"
+    ],
+    "normalized_query": "db.model_list.json.aggregate([{\"$lookup\": {\"from\": \"car_makers\", \"localField\": \"Maker\", \"foreignField\": \"Id\", \"as\": \"maker\"}}, {\"$unwind\": \"$maker\"}, {\"$group\": {\"_id\": \"$maker.Id\", \"count\": {\"$sum\": 1}, \"FullName\": {\"$first\": \"$maker.FullName\"}}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-concert_singer-20",
+    "question": "List singer names and number of concerts for each singer.",
+    "database": "concert_singer",
+    "complexity": "medium",
+    "gold_collections": [
+      "concert_singer.singer_in_concert",
+      "concert_singer.singer"
+    ],
+    "normalized_query": "db.singer_in_concert.aggregate([{\"$addFields\": {\"Singer_ID_int\": {\"$toInt\": \"$Singer_ID\"}}}, {\"$group\": {\"_id\": \"$Singer_ID_int\", \"concert_count\": {\"$sum\": 1}}}, {\"$lookup\": {\"from\": \"singer\", \"localField\": \"_id\", \"foreignField\": \"Singer_ID\", \"as\": \"singer\"}}, {\"$unwind\": \"$singer\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$singer.Name\", \"concert_count\": 1}}, {\"$sort\": {\"Name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-dog_kennels-13",
+    "question": "Which professionals live in the state of Indiana or have done treatment on more than 2 treatments? List his or her id, last name and cell phone.",
+    "database": "dog_kennels",
+    "complexity": "medium",
+    "gold_collections": [
+      "dog_kennels.Professionals",
+      "dog_kennels.Treatments"
+    ],
+    "normalized_query": "db.Professionals.aggregate([{\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"professional_id\", \"foreignField\": \"professional_id\", \"as\": \"t\"}}, {\"$addFields\": {\"treatment_count\": {\"$size\": \"$t\"}}}, {\"$match\": {\"$or\": [{\"state\": \"Indiana\"}, {\"treatment_count\": {\"$gt\": 2}}]}}, {\"$project\": {\"_id\": 0, \"professional_id\": 1, \"last_name\": 1, \"cell_number\": 1}}, {\"$sort\": {\"professional_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-concert_singer-11",
+    "question": "Show countries where a singer above age 40 and a singer below 30 are from.",
+    "database": "concert_singer",
+    "complexity": "medium",
+    "gold_collections": [
+      "concert_singer.singer"
+    ],
+    "normalized_query": "db.singer.aggregate([{\"$facet\": {\"a\": [{\"$match\": {\"Age\": {\"$gt\": 40}}}, {\"$group\": {\"_id\": \"$Country\"}}], \"b\": [{\"$match\": {\"Age\": {\"$lt\": 30}}}, {\"$group\": {\"_id\": \"$Country\"}}]}}, {\"$project\": {\"_id\": 0, \"country\": {\"$setIntersection\": [\"$a._id\", \"$b._id\"]}}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-world_1-14",
+    "question": "What are the names of nations where both English and French are official languages?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.countrylanguage",
+      "world_1.country"
+    ],
+    "normalized_query": "db.countrylanguage.aggregate([{\"$match\": {\"IsOfficial\": \"T\"}}, {\"$group\": {\"_id\": \"$CountryCode\", \"languages\": {\"$addToSet\": \"$Language\"}}}, {\"$match\": {\"languages\": {\"$all\": [\"English\", \"French\"]}}}, {\"$lookup\": {\"from\": \"country\", \"localField\": \"_id\", \"foreignField\": \"Code\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$c.Name\"}}, {\"$sort\": {\"Name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "pt-e7",
+    "question": "List all the pet types in the database.",
+    "database": "pets_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "pets_1.Pets"
+    ],
+    "normalized_query": "db.Pets.find({}, {\"_id\": 0, \"PetType\": 1})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-network_1-11",
+    "question": "Show the names of all of the high schooler Kyle's friends.",
+    "database": "network_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "network_1.Highschooler",
+      "network_1.Friend"
+    ],
+    "normalized_query": "db.Highschooler.aggregate([{\"$match\": {\"name\": \"Kyle\"}}, {\"$lookup\": {\"from\": \"Friend\", \"localField\": \"ID\", \"foreignField\": \"student_id\", \"as\": \"friends\"}}, {\"$unwind\": \"$friends\"}, {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"friends.friend_id\", \"foreignField\": \"ID\", \"as\": \"friend_hs\"}}, {\"$unwind\": \"$friend_hs\"}, {\"$project\": {\"_id\": 0, \"name\": \"$friend_hs.name\"}}, {\"$sort\": {\"name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
   },
   {
     "id": "dk-m3",
@@ -1079,15 +1216,484 @@
     "source": "expansion-2026-08-07-spider-extra"
   },
   {
-    "id": 4,
-    "question": "What are the names and ages of singers, ordered by age?",
+    "id": "spider-network_1-17",
+    "question": "Show the names and grades of each high schooler.",
+    "database": "network_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Highschooler.find({}, {\"_id\": 0, \"name\": 1, \"grade\": 1}).sort({\"name\": 1})",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "pt-e5",
+    "question": "List the first names of students majoring in 600.",
+    "database": "pets_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "pets_1.Student"
+    ],
+    "normalized_query": "db.Student.find({\"Major\": 600}, {\"_id\": 0, \"Fname\": 1})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-car_1-35",
+    "question": "What is the average miles per gallon(mpg) of the cars with 4 cylinders?",
+    "database": "car_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.cars_data.aggregate([{\"$match\": {\"Cylinders\": 4, \"MPG\": {\"$ne\": \"null\"}}}, {\"$group\": {\"_id\": None, \"avg_mpg\": {\"$avg\": {\"$toDouble\": \"$MPG\"}}}}, {\"$project\": {\"_id\": 0}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-world_1-43",
+    "question": "How many type of governments are in Africa?",
+    "database": "world_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$match\": {\"Continent\": \"Africa\"}}, {\"$group\": {\"_id\": \"$GovernmentForm\"}}, {\"$count\": \"government_form_count\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "dk-e2",
+    "database": "dog_kennels",
+    "complexity": "easy",
+    "question": "What is the age of the oldest dog?",
+    "gold_collections": [
+      "dog_kennels.Dogs"
+    ],
+    "normalized_query": "db.Dogs.aggregate([{\"$addFields\": {\"age_num\": {\"$toInt\": \"$age\"}}}, {\"$group\": {\"_id\": None, \"max_age\": {\"$max\": \"$age_num\"}}}])",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "spider-world_1-56",
+    "question": "Which language is spoken by the largest number of countries?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.countrylanguage"
+    ],
+    "normalized_query": "db.countrylanguage.aggregate([{\"$group\": {\"_id\": \"$Language\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"Language\": \"$_id\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-7",
+    "question": "Which countries in europe have at least 3 car manufacturers?",
+    "database": "car_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "car_1.car_makers",
+      "car_1.countries",
+      "car_1.continents"
+    ],
+    "normalized_query": "db.car_makers.aggregate([{\"$addFields\": {\"CountryInt\": {\"$toInt\": \"$Country\"}}}, {\"$lookup\": {\"from\": \"countries\", \"localField\": \"CountryInt\", \"foreignField\": \"CountryId\", \"as\": \"country\"}}, {\"$unwind\": \"$country\"}, {\"$lookup\": {\"from\": \"continents\", \"localField\": \"country.Continent\", \"foreignField\": \"ContId\", \"as\": \"continent\"}}, {\"$unwind\": \"$continent\"}, {\"$match\": {\"continent.Continent\": \"europe\"}}, {\"$group\": {\"_id\": \"$country.CountryName\", \"count\": {\"$sum\": 1}}}, {\"$match\": {\"count\": {\"$gte\": 3}}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-1",
+    "question": "Find the model of the car whose weight is below the average weight.",
+    "database": "car_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "car_1.cars_data",
+      "car_1.car_names"
+    ],
+    "normalized_query": "db.cars_data.aggregate([{\"$group\": {\"_id\": None, \"avg_weight\": {\"$avg\": \"$Weight\"}, \"rows\": {\"$push\": \"$$ROOT\"}}}, {\"$unwind\": \"$rows\"}, {\"$match\": {\"$expr\": {\"$lt\": [\"$rows.Weight\", \"$avg_weight\"]}}}, {\"$lookup\": {\"from\": \"car_names\", \"localField\": \"rows.Id\", \"foreignField\": \"MakeId\", \"as\": \"car_name\"}}, {\"$unwind\": \"$car_name\"}, {\"$project\": {\"_id\": 0, \"model\": \"$car_name.Model\"}}, {\"$sort\": {\"model\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "car-e7",
+    "question": "How many cars were produced in 1982?",
+    "database": "car_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.cars_data.count_documents({\"Year\": 1982})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "car-e10",
+    "question": "How many cars have exactly 8 cylinders?",
+    "database": "car_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.cars_data.count_documents({\"Cylinders\": 8})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-network_1-7",
+    "question": "Which grade has the most high schoolers?",
+    "database": "network_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Highschooler.aggregate([{\"$group\": {\"_id\": \"$grade\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1, \"_id\": 1}}, {\"$limit\": 1}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "car-m4",
+    "question": "What are the 5 heaviest cars? Report Id and Weight.",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.cars_data.find({}, {\"_id\": 0, \"Id\": 1, \"Weight\": 1}).sort({\"Weight\": -1}).limit(5)",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "cs-h1",
+    "question": "How many concerts were held at each stadium? Include the stadium name.",
+    "database": "concert_singer",
+    "complexity": "high",
+    "gold_collections": [
+      "concert_singer.concert",
+      "concert_singer.stadium"
+    ],
+    "normalized_query": "db.concert.aggregate([{\"$addFields\": {\"Stadium_ID_int\": {\"$toInt\": \"$Stadium_ID\"}}}, {\"$lookup\": {\"from\": \"stadium\", \"localField\": \"Stadium_ID_int\", \"foreignField\": \"Stadium_ID\", \"as\": \"stad\"}}, {\"$unwind\": \"$stad\"}, {\"$group\": {\"_id\": \"$stad.Name\", \"concert_count\": {\"$sum\": 1}}}, {\"$sort\": {\"concert_count\": -1, \"_id\": 1}}])",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "pt-e9",
+    "question": "Find students whose advisor is 1148.",
+    "database": "pets_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "pets_1.Student"
+    ],
+    "normalized_query": "db.Student.find({\"Advisor\": 1148}, {\"_id\": 0, \"Fname\": 1, \"LName\": 1})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-dog_kennels-30",
+    "question": "Which owners live in the state whose name contains the substring 'North'? List his first name, last name and email.",
+    "database": "dog_kennels",
+    "complexity": "easy",
+    "gold_collections": [
+      "dog_kennels.Owners"
+    ],
+    "normalized_query": "db.Owners.aggregate([{\"$match\": {\"state\": {\"$regex\": \"North\"}}}, {\"$sort\": {\"owner_id\": 1}}, {\"$project\": {\"_id\": 0, \"first_name\": 1, \"last_name\": 1, \"email_address\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "wl-e3",
+    "database": "world_1",
+    "complexity": "easy",
+    "question": "Which continent is Anguilla in?",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.find({\"Name\": \"Anguilla\"}, {\"_id\": 0, \"Continent\": 1})",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "spider-world_1-27",
+    "question": "Which African countries have a smaller population than that of any country in Asia?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$facet\": {\"threshold\": [{\"$match\": {\"Continent\": \"Asia\"}}, {\"$group\": {\"_id\": None, \"val\": {\"$min\": \"$Population\"}}}], \"all\": [{\"$match\": {\"Continent\": \"Africa\"}}, {\"$project\": {\"_id\": 0, \"Name\": 1, \"Population\": 1}}]}}, {\"$unwind\": \"$threshold\"}, {\"$unwind\": \"$all\"}, {\"$match\": {\"$expr\": {\"$lt\": [\"$all.Population\", \"$threshold.val\"]}}}, {\"$project\": {\"_id\": 0, \"Name\": \"$all.Name\"}}, {\"$sort\": {\"Name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-concert_singer-23",
+    "question": "Find the number of concerts happened in the stadium with the highest capacity .",
+    "database": "concert_singer",
+    "complexity": "medium",
+    "gold_collections": [
+      "concert_singer.stadium",
+      "concert_singer.concert"
+    ],
+    "normalized_query": "db.stadium.aggregate([{\"$sort\": {\"Capacity\": -1}}, {\"$limit\": 1}, {\"$addFields\": {\"Stadium_ID_str\": {\"$toString\": \"$Stadium_ID\"}}}, {\"$lookup\": {\"from\": \"concert\", \"localField\": \"Stadium_ID_str\", \"foreignField\": \"Stadium_ID\", \"as\": \"concerts\"}}, {\"$project\": {\"_id\": 0, \"count\": {\"$size\": \"$concerts\"}}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-dog_kennels-9",
+    "question": "List the names of the dogs of the rarest breed and the treatment dates of them.",
+    "database": "dog_kennels",
+    "complexity": "hard",
+    "gold_collections": [
+      "dog_kennels.Dogs",
+      "dog_kennels.Treatments"
+    ],
+    "normalized_query": "db.Dogs.aggregate([{\"$lookup\": {\"from\": \"Dogs\", \"pipeline\": [{\"$group\": {\"_id\": \"$breed_code\", \"cnt\": {\"$sum\": 1}}}, {\"$sort\": {\"cnt\": 1}}, {\"$limit\": 1}], \"as\": \"rarest\"}}, {\"$unwind\": \"$rarest\"}, {\"$match\": {\"$expr\": {\"$eq\": [\"$breed_code\", \"$rarest._id\"]}}}, {\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"dog_id\", \"foreignField\": \"dog_id\", \"as\": \"t\"}}, {\"$unwind\": \"$t\"}, {\"$project\": {\"_id\": 0, \"name\": 1, \"date_of_treatment\": \"$t.date_of_treatment\"}}, {\"$sort\": {\"name\": 1, \"date_of_treatment\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-32",
+    "question": "What is the horsepower of the car with the largest accelerate?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.cars_data.find({}, {\"_id\": 0, \"Horsepower\": 1}).sort({\"Accelerate\": -1}).limit(1)",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "wl-e2",
+    "database": "world_1",
+    "complexity": "easy",
+    "question": "How many countries have a republic as their form of government?",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.count_documents({\"GovernmentForm\": \"Republic\"})",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "spider-dog_kennels-31",
+    "question": "List the dog name, age and weight of the dogs who have been abandoned? 1 stands for yes, and 0 stands for no.",
+    "database": "dog_kennels",
+    "complexity": "easy",
+    "gold_collections": [
+      "dog_kennels.Dogs"
+    ],
+    "normalized_query": "db.Dogs.aggregate([{\"$match\": {\"abandoned_yn\": \"1\"}}, {\"$sort\": {\"dog_id\": 1}}, {\"$project\": {\"_id\": 0, \"name\": 1, \"age\": 1, \"weight\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "nw-e5",
+    "question": "How many friendship pairs are recorded?",
+    "database": "network_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "network_1.Friend"
+    ],
+    "normalized_query": "db.Friend.count_documents({})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-car_1-46",
+    "question": "How many cars have a larger accelerate than the car with the largest horsepower?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.cars_data.aggregate([{\"$facet\": {\"threshold\": [{\"$match\": {\"Horsepower\": {\"$ne\": \"null\"}}}, {\"$addFields\": {\"HorsepowerNum\": {\"$toInt\": \"$Horsepower\"}}}, {\"$sort\": {\"HorsepowerNum\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"Accelerate\": 1}}], \"all_cars\": [{\"$project\": {\"_id\": 0, \"Accelerate\": 1}}]}}, {\"$project\": {\"threshold_val\": {\"$arrayElemAt\": [\"$threshold.Accelerate\", 0]}, \"all_cars\": 1}}, {\"$unwind\": \"$all_cars\"}, {\"$match\": {\"$expr\": {\"$gt\": [\"$all_cars.Accelerate\", \"$threshold_val\"]}}}, {\"$count\": \"count\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "pt-m3",
+    "question": "List the 5 oldest students, oldest first, with their ages.",
+    "database": "pets_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "pets_1.Student"
+    ],
+    "normalized_query": "db.Student.find({}, {\"_id\": 0, \"Fname\": 1, \"Age\": 1}).sort({\"Age\": -1}).limit(5)",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "dk-c2",
+    "database": "dog_kennels",
+    "complexity": "complex",
+    "question": "Which first names are used for professionals or owners but not used as dog names?",
+    "gold_collections": [
+      "dog_kennels.Professionals",
+      "dog_kennels.Owners",
+      "dog_kennels.Dogs"
+    ],
+    "normalized_query": "db.Professionals.aggregate([{\"$project\": {\"_id\": 0, \"first_name\": 1}}, {\"$unionWith\": {\"coll\": \"Owners\", \"pipeline\": [{\"$project\": {\"_id\": 0, \"first_name\": 1}}]}}, {\"$group\": {\"_id\": \"$first_name\"}}, {\"$lookup\": {\"from\": \"Dogs\", \"localField\": \"_id\", \"foreignField\": \"name\", \"as\": \"d\"}}, {\"$match\": {\"d\": []}}, {\"$project\": {\"_id\": 0, \"first_name\": \"$_id\"}}])",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "spider-world_1-13",
+    "question": "What are the names of nations speak both English and French?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.countrylanguage",
+      "world_1.country"
+    ],
+    "normalized_query": "db.countrylanguage.aggregate([{\"$group\": {\"_id\": \"$CountryCode\", \"languages\": {\"$addToSet\": \"$Language\"}}}, {\"$match\": {\"languages\": {\"$all\": [\"English\", \"French\"]}}}, {\"$lookup\": {\"from\": \"country\", \"localField\": \"_id\", \"foreignField\": \"Code\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$c.Name\"}}, {\"$sort\": {\"Name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-30",
+    "question": "Which model has the most version(make) of cars?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.car_names"
+    ],
+    "normalized_query": "db.car_names.aggregate([{\"$group\": {\"_id\": \"$Model\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1, \"_id\": 1}}, {\"$limit\": 1}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-concert_singer-1",
+    "question": "Show the stadium name and capacity with most number of concerts in year 2014 or after.",
+    "database": "concert_singer",
+    "complexity": "hard",
+    "gold_collections": [
+      "concert_singer.concert",
+      "concert_singer.stadium"
+    ],
+    "normalized_query": "db.concert.aggregate([{\"$addFields\": {\"Year_int\": {\"$toInt\": \"$Year\"}, \"Stadium_ID_int\": {\"$toInt\": \"$Stadium_ID\"}}}, {\"$match\": {\"Year_int\": {\"$gte\": 2014}}}, {\"$group\": {\"_id\": \"$Stadium_ID_int\", \"concert_count\": {\"$sum\": 1}}}, {\"$sort\": {\"concert_count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"stadium\", \"localField\": \"_id\", \"foreignField\": \"Stadium_ID\", \"as\": \"stad\"}}, {\"$unwind\": \"$stad\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$stad.Name\", \"Capacity\": \"$stad.Capacity\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "wl-h2",
+    "database": "world_1",
+    "complexity": "high",
+    "question": "Which languages are spoken by only one country among republic governments?",
+    "gold_collections": [
+      "world_1.country",
+      "world_1.countrylanguage"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$match\": {\"GovernmentForm\": \"Republic\"}}, {\"$lookup\": {\"from\": \"countrylanguage\", \"localField\": \"Code\", \"foreignField\": \"CountryCode\", \"as\": \"langs\"}}, {\"$unwind\": \"$langs\"}, {\"$group\": {\"_id\": \"$langs.Language\", \"country_count\": {\"$sum\": 1}}}, {\"$match\": {\"country_count\": 1}}, {\"$project\": {\"_id\": 0, \"Language\": \"$_id\"}}])",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "nw-c1",
+    "question": "List the names of highschoolers who are friends with someone in grade 12.",
+    "database": "network_1",
+    "complexity": "complex",
+    "gold_collections": [
+      "network_1.Friend",
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Friend.aggregate([{\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"friend_id\", \"foreignField\": \"ID\", \"as\": \"friend\"}}, {\"$unwind\": \"$friend\"}, {\"$match\": {\"friend.grade\": 12}}, {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"student_id\", \"foreignField\": \"ID\", \"as\": \"student\"}}, {\"$unwind\": \"$student\"}, {\"$group\": {\"_id\": \"$student.name\"}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "nw-e1",
+    "question": "How many highschoolers are there?",
+    "database": "network_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Highschooler.count_documents({})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "pt-h1",
+    "question": "What are the first and last names of students who own a cat?",
+    "database": "pets_1",
+    "complexity": "high",
+    "gold_collections": [
+      "pets_1.Has_Pet",
+      "pets_1.Pets",
+      "pets_1.Student"
+    ],
+    "normalized_query": "db.Has_Pet.aggregate([{\"$lookup\": {\"from\": \"Pets\", \"localField\": \"PetID\", \"foreignField\": \"PetID\", \"as\": \"pet\"}}, {\"$unwind\": \"$pet\"}, {\"$match\": {\"pet.PetType\": \"cat\"}}, {\"$lookup\": {\"from\": \"Student\", \"localField\": \"StuID\", \"foreignField\": \"StuID\", \"as\": \"student\"}}, {\"$unwind\": \"$student\"}, {\"$project\": {\"_id\": 0, \"Fname\": \"$student.Fname\", \"LName\": \"$student.LName\"}}])",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-dog_kennels-16",
+    "question": "Which professional did not operate any treatment on dogs? List the professional's id, role and email.",
+    "database": "dog_kennels",
+    "complexity": "medium",
+    "gold_collections": [
+      "dog_kennels.Professionals",
+      "dog_kennels.Treatments"
+    ],
+    "normalized_query": "db.Professionals.aggregate([{\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"professional_id\", \"foreignField\": \"professional_id\", \"as\": \"t\"}}, {\"$match\": {\"t\": {\"$eq\": []}}}, {\"$project\": {\"_id\": 0, \"professional_id\": 1, \"role_code\": 1, \"email_address\": 1}}, {\"$sort\": {\"professional_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": 10,
+    "question": "Find singers who have not participated in any concert.",
+    "database": "concert_singer",
+    "complexity": "high",
+    "gold_collections": [
+      "concert_singer.singer",
+      "concert_singer.singer_in_concert"
+    ],
+    "normalized_query": "db.singer.aggregate([{\"$lookup\": {\"from\": \"singer_in_concert\", \"localField\": \"Singer_ID\", \"foreignField\": \"Singer_ID\", \"as\": \"concerts\"}}, {\"$match\": {\"concerts\": {\"$eq\": []}}}, {\"$project\": {\"_id\": 0, \"Name\": 1}}, {\"$sort\": {\"Name\": 1}}])",
+    "source": "original-12"
+  },
+  {
+    "id": "spider-world_1-60",
+    "question": "how many countries are in Asia?",
+    "database": "world_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.count_documents({\"Continent\": \"Asia\"})",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-pets_1-18",
+    "question": "Find the id of the pet owned by student whose last name is \u2018Smith\u2019.",
+    "database": "pets_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "pets_1.Has_Pet",
+      "pets_1.Student"
+    ],
+    "normalized_query": "db.Has_Pet.aggregate([{\"$lookup\": {\"from\": \"Student\", \"localField\": \"StuID\", \"foreignField\": \"StuID\", \"as\": \"student\"}}, {\"$unwind\": \"$student\"}, {\"$match\": {\"student.LName\": \"Smith\"}}, {\"$project\": {\"_id\": 0, \"PetID\": 1}}, {\"$sort\": {\"PetID\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "pt-e6",
+    "question": "Which students live in city code 'PIT'? Give their first names.",
+    "database": "pets_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "pets_1.Student"
+    ],
+    "normalized_query": "db.Student.find({\"city_code\": \"PIT\"}, {\"_id\": 0, \"Fname\": 1})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": 2,
+    "question": "What are the names of singers from France?",
     "database": "concert_singer",
     "complexity": "easy",
     "gold_collections": [
       "concert_singer.singer"
     ],
-    "normalized_query": "db.singer.find({}, {\"_id\": 0, \"Name\": 1, \"Age\": 1}).sort({\"Age\": 1})",
+    "normalized_query": "db.singer.find({\"Country\": \"France\"}, {\"_id\": 0, \"Name\": 1})",
     "source": "original-12"
+  },
+  {
+    "id": "spider-dog_kennels-37",
+    "question": "Find the number of professionals who have not treated any dogs.",
+    "database": "dog_kennels",
+    "complexity": "medium",
+    "gold_collections": [
+      "dog_kennels.Professionals",
+      "dog_kennels.Treatments"
+    ],
+    "normalized_query": "db.Professionals.aggregate([{\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"professional_id\", \"foreignField\": \"professional_id\", \"as\": \"t\"}}, {\"$match\": {\"t\": {\"$eq\": []}}}, {\"$count\": \"count\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-concert_singer-25",
+    "question": "what is the name and nation of the singer who have a song having 'Hey' in its name?",
+    "database": "concert_singer",
+    "complexity": "easy",
+    "gold_collections": [
+      "concert_singer.singer"
+    ],
+    "normalized_query": "db.singer.find({\"Song_Name\": {\"$regex\": \"Hey\", \"$options\": \"i\"}}, {\"_id\": 0, \"Name\": 1, \"Country\": 1}).sort({\"Name\": 1})",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-network_1-8",
+    "question": "Show me all grades that have at least 4 students.",
+    "database": "network_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Highschooler.aggregate([{\"$group\": {\"_id\": \"$grade\", \"count\": {\"$sum\": 1}}}, {\"$match\": {\"count\": {\"$gte\": 4}}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
   },
   {
     "id": "wl-m5",
@@ -1101,6 +1707,461 @@
     "source": "expansion-2026-08-07-spider-extra"
   },
   {
+    "id": "spider-network_1-1",
+    "question": "What is the name of the high schooler who has the greatest number of friends?",
+    "database": "network_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "network_1.Friend",
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Friend.aggregate([{\"$group\": {\"_id\": \"$student_id\", \"friend_count\": {\"$sum\": 1}}}, {\"$sort\": {\"friend_count\": -1, \"_id\": 1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"_id\", \"foreignField\": \"ID\", \"as\": \"hs\"}}, {\"$unwind\": \"$hs\"}, {\"$project\": {\"_id\": 0, \"name\": \"$hs.name\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "nw-e3",
+    "question": "What is the name of the highschooler with ID 1911?",
+    "database": "network_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Highschooler.find({\"ID\": 1911}, {\"_id\": 0, \"name\": 1})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-world_1-10",
+    "question": "What is the name of country that has the shortest life expectancy in Asia?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$match\": {\"Continent\": \"Asia\"}}, {\"$sort\": {\"LifeExpectancy\": 1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"Name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-concert_singer-13",
+    "question": "What is the average, minimum, and maximum age of all singers from France?",
+    "database": "concert_singer",
+    "complexity": "easy",
+    "gold_collections": [
+      "concert_singer.singer"
+    ],
+    "normalized_query": "db.singer.aggregate([{\"$match\": {\"Country\": \"France\"}}, {\"$group\": {\"_id\": None, \"avg_age\": {\"$avg\": \"$Age\"}, \"min_age\": {\"$min\": \"$Age\"}, \"max_age\": {\"$max\": \"$Age\"}}}, {\"$project\": {\"_id\": 0}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-19",
+    "question": "Which distinct car models are the produced after 1980?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.model_list.json",
+      "car_1.car_names",
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.model_list.json.aggregate([{\"$lookup\": {\"from\": \"car_names\", \"localField\": \"Model\", \"foreignField\": \"Model\", \"as\": \"car_name\"}}, {\"$unwind\": \"$car_name\"}, {\"$lookup\": {\"from\": \"cars_data\", \"localField\": \"car_name.MakeId\", \"foreignField\": \"Id\", \"as\": \"car_data\"}}, {\"$unwind\": \"$car_data\"}, {\"$match\": {\"car_data.Year\": {\"$gt\": 1980}}}, {\"$group\": {\"_id\": \"$Model\"}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-48",
+    "question": "What are the name of the countries where there is not a single car maker?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.countries",
+      "car_1.car_makers"
+    ],
+    "normalized_query": "db.countries.aggregate([{\"$lookup\": {\"from\": \"car_makers\", \"let\": {\"cid\": \"$CountryId\"}, \"pipeline\": [{\"$addFields\": {\"CountryInt\": {\"$toInt\": \"$Country\"}}}, {\"$match\": {\"$expr\": {\"$eq\": [\"$CountryInt\", \"$$cid\"]}}}], \"as\": \"makers\"}}, {\"$match\": {\"makers\": {\"$eq\": []}}}, {\"$project\": {\"_id\": 0, \"CountryName\": 1}}, {\"$sort\": {\"CountryName\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-45",
+    "question": "For model volvo, how many cylinders does the car with the least accelerate have?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.car_names",
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.car_names.aggregate([{\"$match\": {\"Model\": \"volvo\"}}, {\"$lookup\": {\"from\": \"cars_data\", \"localField\": \"MakeId\", \"foreignField\": \"Id\", \"as\": \"car_data\"}}, {\"$unwind\": \"$car_data\"}, {\"$sort\": {\"car_data.Accelerate\": 1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"Cylinders\": \"$car_data.Cylinders\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-world_1-20",
+    "question": "Find the name, population and expected life length of asian country with the largest area?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$match\": {\"Continent\": \"Asia\"}}, {\"$sort\": {\"SurfaceArea\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"Name\": 1, \"Population\": 1, \"LifeExpectancy\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-concert_singer-7",
+    "question": "What is the name and capacity for the stadium with highest average attendance?",
+    "database": "concert_singer",
+    "complexity": "medium",
+    "gold_collections": [
+      "concert_singer.stadium"
+    ],
+    "normalized_query": "db.stadium.find({}, {\"_id\": 0, \"Name\": 1, \"Capacity\": 1}).sort({\"Average\": -1}).limit(1)",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-38",
+    "question": "What is the number of the cars with horsepower more than 150?",
+    "database": "car_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.cars_data.aggregate([{\"$match\": {\"Horsepower\": {\"$ne\": \"null\"}}}, {\"$addFields\": {\"HorsepowerNum\": {\"$toInt\": \"$Horsepower\"}}}, {\"$match\": {\"HorsepowerNum\": {\"$gt\": 150}}}, {\"$count\": \"count\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-network_1-5",
+    "question": "Show the names of students who have a grade higher than 5 and have at least 2 friends.",
+    "database": "network_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "network_1.Friend",
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Friend.aggregate([{\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"student_id\", \"foreignField\": \"ID\", \"as\": \"hs\"}}, {\"$unwind\": \"$hs\"}, {\"$match\": {\"hs.grade\": {\"$gt\": 5}}}, {\"$group\": {\"_id\": \"$student_id\", \"friend_count\": {\"$sum\": 1}, \"name\": {\"$first\": \"$hs.name\"}}}, {\"$match\": {\"friend_count\": {\"$gte\": 2}}}, {\"$project\": {\"_id\": 0, \"name\": 1}}, {\"$sort\": {\"name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-network_1-24",
+    "question": "Count the number of likes for each student id.",
+    "database": "network_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "network_1.Likes"
+    ],
+    "normalized_query": "db.Likes.aggregate([{\"$group\": {\"_id\": \"$student_id\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-3",
+    "question": "Find the make and production time of the cars that were produced in the earliest year?",
+    "database": "car_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "car_1.cars_data",
+      "car_1.car_names"
+    ],
+    "normalized_query": "db.cars_data.aggregate([{\"$group\": {\"_id\": None, \"min_year\": {\"$min\": \"$Year\"}, \"rows\": {\"$push\": \"$$ROOT\"}}}, {\"$unwind\": \"$rows\"}, {\"$match\": {\"$expr\": {\"$eq\": [\"$rows.Year\", \"$min_year\"]}}}, {\"$lookup\": {\"from\": \"car_names\", \"localField\": \"rows.Id\", \"foreignField\": \"MakeId\", \"as\": \"car_name\"}}, {\"$unwind\": \"$car_name\"}, {\"$project\": {\"_id\": 0, \"Make\": \"$car_name.Make\", \"Year\": \"$rows.Year\"}}, {\"$sort\": {\"Make\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-pets_1-19",
+    "question": "Find the number of pets for each student who has any pet and student id.",
+    "database": "pets_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "pets_1.Has_Pet"
+    ],
+    "normalized_query": "db.Has_Pet.aggregate([{\"$group\": {\"_id\": \"$StuID\", \"count\": {\"$sum\": 1}}}, {\"$project\": {\"_id\": 0, \"StuID\": \"$_id\", \"count\": 1}}, {\"$sort\": {\"StuID\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-31",
+    "question": "How many car models were produced by the maker with full name American Motor Company?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.car_makers",
+      "car_1.model_list.json"
+    ],
+    "normalized_query": "db.car_makers.aggregate([{\"$match\": {\"FullName\": \"American Motor Company\"}}, {\"$lookup\": {\"from\": \"model_list.json\", \"localField\": \"Id\", \"foreignField\": \"Maker\", \"as\": \"models\"}}, {\"$unwind\": \"$models\"}, {\"$count\": \"count\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-15",
+    "question": "What are the id and names of the countries which have more than 3 car makers or produce the 'fiat' model?",
+    "database": "car_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "car_1.countries",
+      "car_1.car_makers",
+      "car_1.model_list.json"
+    ],
+    "normalized_query": "db.countries.aggregate([{\"$facet\": {\"branch1\": [{\"$lookup\": {\"from\": \"car_makers\", \"let\": {\"cid\": \"$CountryId\"}, \"pipeline\": [{\"$addFields\": {\"CountryInt\": {\"$toInt\": \"$Country\"}}}, {\"$match\": {\"$expr\": {\"$eq\": [\"$CountryInt\", \"$$cid\"]}}}], \"as\": \"makers\"}}, {\"$match\": {\"$expr\": {\"$gt\": [{\"$size\": \"$makers\"}, 3]}}}, {\"$project\": {\"countryId\": \"$CountryId\", \"CountryName\": \"$CountryName\"}}], \"branch2\": [{\"$lookup\": {\"from\": \"car_makers\", \"let\": {\"cid\": \"$CountryId\"}, \"pipeline\": [{\"$addFields\": {\"CountryInt\": {\"$toInt\": \"$Country\"}}}, {\"$match\": {\"$expr\": {\"$eq\": [\"$CountryInt\", \"$$cid\"]}}}], \"as\": \"makers\"}}, {\"$unwind\": \"$makers\"}, {\"$lookup\": {\"from\": \"model_list.json\", \"localField\": \"makers.Id\", \"foreignField\": \"Maker\", \"as\": \"models\"}}, {\"$unwind\": \"$models\"}, {\"$match\": {\"models.Model\": \"fiat\"}}, {\"$project\": {\"countryId\": \"$CountryId\", \"CountryName\": \"$CountryName\"}}]}}, {\"$project\": {\"result\": {\"$setUnion\": [{\"$map\": {\"input\": \"$branch1\", \"as\": \"b\", \"in\": {\"countryId\": \"$$b.countryId\", \"CountryName\": \"$$b.CountryName\"}}}, {\"$map\": {\"input\": \"$branch2\", \"as\": \"b\", \"in\": {\"countryId\": \"$$b.countryId\", \"CountryName\": \"$$b.CountryName\"}}}]}}}, {\"$unwind\": \"$result\"}, {\"$replaceRoot\": {\"newRoot\": \"$result\"}}, {\"$sort\": {\"countryId\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-13",
+    "question": "Which models are lighter than 3500 but not built by the 'Ford Motor Company'?",
+    "database": "car_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "car_1.model_list.json",
+      "car_1.car_names",
+      "car_1.cars_data",
+      "car_1.car_makers"
+    ],
+    "normalized_query": "db.model_list.json.aggregate([{\"$lookup\": {\"from\": \"car_names\", \"localField\": \"Model\", \"foreignField\": \"Model\", \"as\": \"car_name\"}}, {\"$unwind\": \"$car_name\"}, {\"$lookup\": {\"from\": \"cars_data\", \"localField\": \"car_name.MakeId\", \"foreignField\": \"Id\", \"as\": \"car_data\"}}, {\"$unwind\": \"$car_data\"}, {\"$lookup\": {\"from\": \"car_makers\", \"localField\": \"Maker\", \"foreignField\": \"Id\", \"as\": \"maker\"}}, {\"$unwind\": \"$maker\"}, {\"$match\": {\"car_data.Weight\": {\"$lt\": 3500}, \"maker.FullName\": {\"$ne\": \"Ford Motor Company\"}}}, {\"$group\": {\"_id\": \"$Model\"}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-network_1-25",
+    "question": "Show the names of high schoolers who have likes, and numbers of likes for each.",
+    "database": "network_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "network_1.Likes",
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Likes.aggregate([{\"$group\": {\"_id\": \"$student_id\", \"like_count\": {\"$sum\": 1}}}, {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"_id\", \"foreignField\": \"ID\", \"as\": \"hs\"}}, {\"$unwind\": \"$hs\"}, {\"$project\": {\"_id\": 0, \"name\": \"$hs.name\", \"like_count\": 1}}, {\"$sort\": {\"name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-world_1-57",
+    "question": "What is the language spoken by the largest percentage of people in each country?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.countrylanguage"
+    ],
+    "normalized_query": "db.countrylanguage.aggregate([{\"$sort\": {\"CountryCode\": 1, \"Percentage\": -1}}, {\"$group\": {\"_id\": \"$CountryCode\", \"Language\": {\"$first\": \"$Language\"}, \"max_percentage\": {\"$first\": \"$Percentage\"}}}, {\"$project\": {\"_id\": 0, \"CountryCode\": \"$_id\", \"Language\": 1, \"max_percentage\": 1}}, {\"$sort\": {\"CountryCode\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "pt-h2",
+    "question": "For each pet type, what is the average weight?",
+    "database": "pets_1",
+    "complexity": "high",
+    "gold_collections": [
+      "pets_1.Pets"
+    ],
+    "normalized_query": "db.Pets.aggregate([{\"$group\": {\"_id\": \"$PetType\", \"avg_weight\": {\"$avg\": \"$weight\"}}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-world_1-50",
+    "question": "What are the population, name and leader of the country with the largest area?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$sort\": {\"SurfaceArea\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"Name\": 1, \"Population\": 1, \"HeadOfState\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "dk-m2",
+    "database": "dog_kennels",
+    "complexity": "medium",
+    "question": "What is the name of the breed with the most dogs?",
+    "gold_collections": [
+      "dog_kennels.Breeds",
+      "dog_kennels.Dogs"
+    ],
+    "normalized_query": "db.Dogs.aggregate([{\"$group\": {\"_id\": \"$breed_code\", \"dog_count\": {\"$sum\": 1}}}, {\"$sort\": {\"dog_count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"Breeds\", \"localField\": \"_id\", \"foreignField\": \"breed_code\", \"as\": \"b\"}}, {\"$unwind\": \"$b\"}, {\"$project\": {\"_id\": 0, \"breed_name\": \"$b.breed_name\"}}])",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "spider-network_1-27",
+    "question": "Find the average grade of all students who have some friends.",
+    "database": "network_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "network_1.Highschooler",
+      "network_1.Friend"
+    ],
+    "normalized_query": "db.Highschooler.aggregate([{\"$lookup\": {\"from\": \"Friend\", \"localField\": \"ID\", \"foreignField\": \"student_id\", \"as\": \"friends\"}}, {\"$match\": {\"friends\": {\"$ne\": []}}}, {\"$group\": {\"_id\": None, \"avg_grade\": {\"$avg\": \"$grade\"}}}, {\"$project\": {\"_id\": 0}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-dog_kennels-28",
+    "question": "How many professionals have performed any treatment to dogs?",
+    "database": "dog_kennels",
+    "complexity": "easy",
+    "gold_collections": [
+      "dog_kennels.Treatments"
+    ],
+    "normalized_query": "db.Treatments.aggregate([{\"$group\": {\"_id\": \"$professional_id\"}}, {\"$count\": \"count\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "nw-m2",
+    "question": "What is the average grade of highschoolers?",
+    "database": "network_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Highschooler.aggregate([{\"$group\": {\"_id\": None, \"avg_grade\": {\"$avg\": \"$grade\"}}}, {\"$project\": {\"_id\": 0}}])",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-concert_singer-8",
+    "question": "Show the stadium name and the number of concerts in each stadium.",
+    "database": "concert_singer",
+    "complexity": "medium",
+    "gold_collections": [
+      "concert_singer.concert",
+      "concert_singer.stadium"
+    ],
+    "normalized_query": "db.concert.aggregate([{\"$addFields\": {\"Stadium_ID_int\": {\"$toInt\": \"$Stadium_ID\"}}}, {\"$lookup\": {\"from\": \"stadium\", \"localField\": \"Stadium_ID_int\", \"foreignField\": \"Stadium_ID\", \"as\": \"stad\"}}, {\"$unwind\": \"$stad\"}, {\"$group\": {\"_id\": \"$stad.Name\", \"concert_count\": {\"$sum\": 1}}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-17",
+    "question": "How many models does each car maker produce? List maker full name, id and the number.",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.car_makers",
+      "car_1.model_list.json"
+    ],
+    "normalized_query": "db.car_makers.aggregate([{\"$lookup\": {\"from\": \"model_list.json\", \"localField\": \"Id\", \"foreignField\": \"Maker\", \"as\": \"models\"}}, {\"$match\": {\"models\": {\"$ne\": []}}}, {\"$project\": {\"_id\": 0, \"FullName\": 1, \"Id\": 1, \"count\": {\"$size\": \"$models\"}}}, {\"$sort\": {\"Id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "dk-m4",
+    "database": "dog_kennels",
+    "complexity": "medium",
+    "question": "Which professionals have done at least two treatments? List the professional's id, role, and first name.",
+    "gold_collections": [
+      "dog_kennels.Professionals",
+      "dog_kennels.Treatments"
+    ],
+    "normalized_query": "db.Treatments.aggregate([{\"$group\": {\"_id\": \"$professional_id\", \"treatment_count\": {\"$sum\": 1}}}, {\"$match\": {\"treatment_count\": {\"$gte\": 2}}}, {\"$lookup\": {\"from\": \"Professionals\", \"localField\": \"_id\", \"foreignField\": \"professional_id\", \"as\": \"p\"}}, {\"$unwind\": \"$p\"}, {\"$project\": {\"_id\": 0, \"professional_id\": \"$_id\", \"role_code\": \"$p.role_code\", \"first_name\": \"$p.first_name\"}}])",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "spider-world_1-38",
+    "question": "What is the average life expectancy in African countries that are republics?",
+    "database": "world_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$match\": {\"Continent\": \"Africa\", \"GovernmentForm\": \"Republic\"}}, {\"$group\": {\"_id\": None, \"avg_life_expectancy\": {\"$avg\": \"$LifeExpectancy\"}}}, {\"$project\": {\"_id\": 0, \"avg_life_expectancy\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-pets_1-9",
+    "question": "Find the major and age of students who do not have a cat pet.",
+    "database": "pets_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "pets_1.Student",
+      "pets_1.Has_Pet",
+      "pets_1.Pets"
+    ],
+    "normalized_query": "db.Student.aggregate([{\"$lookup\": {\"from\": \"Has_Pet\", \"let\": {\"sid\": \"$StuID\"}, \"pipeline\": [{\"$match\": {\"$expr\": {\"$eq\": [\"$StuID\", \"$$sid\"]}}}, {\"$lookup\": {\"from\": \"Pets\", \"localField\": \"PetID\", \"foreignField\": \"PetID\", \"as\": \"p\"}}, {\"$unwind\": \"$p\"}, {\"$match\": {\"p.PetType\": \"cat\"}}], \"as\": \"cat_pets\"}}, {\"$match\": {\"cat_pets\": {\"$eq\": []}}}, {\"$project\": {\"_id\": 0, \"Major\": 1, \"Age\": 1}}, {\"$sort\": {\"Major\": 1, \"Age\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-dog_kennels-38",
+    "question": "List the first name of all the professionals along with the description of the treatment they have done.",
+    "database": "dog_kennels",
+    "complexity": "medium",
+    "gold_collections": [
+      "dog_kennels.Professionals",
+      "dog_kennels.Treatments",
+      "dog_kennels.Treatment_Types"
+    ],
+    "normalized_query": "db.Professionals.aggregate([{\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"professional_id\", \"foreignField\": \"professional_id\", \"as\": \"t\"}}, {\"$unwind\": \"$t\"}, {\"$lookup\": {\"from\": \"Treatment_Types\", \"localField\": \"t.treatment_type_code\", \"foreignField\": \"treatment_type_code\", \"as\": \"tt\"}}, {\"$unwind\": \"$tt\"}, {\"$group\": {\"_id\": {\"first_name\": \"$first_name\", \"treatment_type_description\": \"$tt.treatment_type_description\"}}}, {\"$project\": {\"_id\": 0, \"first_name\": \"$_id.first_name\", \"treatment_type_description\": \"$_id.treatment_type_description\"}}, {\"$sort\": {\"first_name\": 1, \"treatment_type_description\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-pets_1-17",
+    "question": "Find the first name and age of students who have a pet.",
+    "database": "pets_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "pets_1.Has_Pet",
+      "pets_1.Student"
+    ],
+    "normalized_query": "db.Has_Pet.aggregate([{\"$lookup\": {\"from\": \"Student\", \"localField\": \"StuID\", \"foreignField\": \"StuID\", \"as\": \"student\"}}, {\"$unwind\": \"$student\"}, {\"$group\": {\"_id\": {\"Fname\": \"$student.Fname\", \"Age\": \"$student.Age\"}}}, {\"$project\": {\"_id\": 0, \"Fname\": \"$_id.Fname\", \"Age\": \"$_id.Age\"}}, {\"$sort\": {\"Fname\": 1, \"Age\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": 5,
+    "question": "How many concerts were held in each stadium?",
+    "database": "concert_singer",
+    "complexity": "medium",
+    "gold_collections": [
+      "concert_singer.concert"
+    ],
+    "normalized_query": "db.concert.aggregate([{\"$group\": {\"_id\": \"$Stadium_ID\", \"concert_count\": {\"$sum\": 1}}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "original-12"
+  },
+  {
+    "id": "spider-car_1-42",
+    "question": "In which years cars were produced weighing no less than 3000 and no more than 4000 ?",
+    "database": "car_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.cars_data.distinct(\"Year\", {\"Weight\": {\"$gte\": 3000, \"$lte\": 4000}})",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "car-e6",
+    "question": "How many cars have exactly 3 cylinders?",
+    "database": "car_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.cars_data.count_documents({\"Cylinders\": 3})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-car_1-12",
+    "question": "Among the cars that do not have the minimum horsepower , what are the make ids and names of all those with less than 4 cylinders ?",
+    "database": "car_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "car_1.cars_data",
+      "car_1.car_names"
+    ],
+    "normalized_query": "db.cars_data.aggregate([{\"$match\": {\"Horsepower\": {\"$ne\": \"null\"}}}, {\"$addFields\": {\"HorsepowerNum\": {\"$toInt\": \"$Horsepower\"}}}, {\"$group\": {\"_id\": None, \"min_hp\": {\"$min\": \"$HorsepowerNum\"}, \"rows\": {\"$push\": \"$$ROOT\"}}}, {\"$unwind\": \"$rows\"}, {\"$match\": {\"$expr\": {\"$and\": [{\"$gt\": [\"$rows.HorsepowerNum\", \"$min_hp\"]}, {\"$lt\": [\"$rows.Cylinders\", 4]}]}}}, {\"$lookup\": {\"from\": \"car_names\", \"localField\": \"rows.Id\", \"foreignField\": \"MakeId\", \"as\": \"car_name\"}}, {\"$unwind\": \"$car_name\"}, {\"$project\": {\"_id\": 0, \"MakeId\": \"$car_name.MakeId\", \"Make\": \"$car_name.Make\"}}, {\"$sort\": {\"MakeId\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-world_1-58",
+    "question": "What is the total number of countries where Spanish is spoken by the largest percentage of people?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.countrylanguage"
+    ],
+    "normalized_query": "db.countrylanguage.aggregate([{\"$sort\": {\"CountryCode\": 1, \"Percentage\": -1}}, {\"$group\": {\"_id\": \"$CountryCode\", \"Language\": {\"$first\": \"$Language\"}}}, {\"$match\": {\"Language\": \"Spanish\"}}, {\"$count\": \"total\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "cs-m6",
+    "question": "List the distinct countries singers come from, in alphabetical order.",
+    "database": "concert_singer",
+    "complexity": "medium",
+    "gold_collections": [
+      "concert_singer.singer"
+    ],
+    "normalized_query": "db.singer.aggregate([{\"$group\": {\"_id\": \"$Country\"}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "nw-h1",
+    "question": "List the names of highschoolers who appear as the 'student_id' side of at least one friendship.",
+    "database": "network_1",
+    "complexity": "high",
+    "gold_collections": [
+      "network_1.Friend",
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Friend.aggregate([{\"$group\": {\"_id\": \"$student_id\"}}, {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"_id\", \"foreignField\": \"ID\", \"as\": \"hs\"}}, {\"$unwind\": \"$hs\"}, {\"$project\": {\"_id\": 0, \"name\": \"$hs.name\"}}, {\"$sort\": {\"name\": 1}}])",
+    "source": "expansion-2026-08"
+  },
+  {
     "id": "nw-m1",
     "question": "How many highschoolers are there in each grade?",
     "database": "network_1",
@@ -1112,26 +2173,652 @@
     "source": "expansion-2026-08"
   },
   {
-    "id": "cs-e2",
-    "question": "How many stadiums are there?",
-    "database": "concert_singer",
-    "complexity": "easy",
+    "id": "spider-dog_kennels-17",
+    "question": "List the date of each treatment, together with the first name of the professional who operated it.",
+    "database": "dog_kennels",
+    "complexity": "medium",
     "gold_collections": [
-      "concert_singer.stadium"
+      "dog_kennels.Treatments",
+      "dog_kennels.Professionals"
     ],
-    "normalized_query": "db.stadium.count_documents({})",
+    "normalized_query": "db.Treatments.aggregate([{\"$lookup\": {\"from\": \"Professionals\", \"localField\": \"professional_id\", \"foreignField\": \"professional_id\", \"as\": \"p\"}}, {\"$unwind\": \"$p\"}, {\"$sort\": {\"date_of_treatment\": 1, \"treatment_id\": 1}}, {\"$project\": {\"_id\": 0, \"date_of_treatment\": 1, \"first_name\": \"$p.first_name\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-pets_1-7",
+    "question": "Find the number of dog pets that are raised by female students (with sex F).",
+    "database": "pets_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "pets_1.Has_Pet",
+      "pets_1.Student",
+      "pets_1.Pets"
+    ],
+    "normalized_query": "db.Has_Pet.aggregate([{\"$lookup\": {\"from\": \"Student\", \"localField\": \"StuID\", \"foreignField\": \"StuID\", \"as\": \"student\"}}, {\"$unwind\": \"$student\"}, {\"$match\": {\"student.Sex\": \"F\"}}, {\"$lookup\": {\"from\": \"Pets\", \"localField\": \"PetID\", \"foreignField\": \"PetID\", \"as\": \"pet\"}}, {\"$unwind\": \"$pet\"}, {\"$match\": {\"pet.PetType\": \"dog\"}}, {\"$count\": \"count\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-world_1-16",
+    "question": "What are the regions that use English or Dutch?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.countrylanguage",
+      "world_1.country"
+    ],
+    "normalized_query": "db.countrylanguage.aggregate([{\"$match\": {\"Language\": {\"$in\": [\"English\", \"Dutch\"]}}}, {\"$lookup\": {\"from\": \"country\", \"localField\": \"CountryCode\", \"foreignField\": \"Code\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$group\": {\"_id\": \"$c.Region\"}}, {\"$project\": {\"_id\": 0, \"Region\": \"$_id\"}}, {\"$sort\": {\"Region\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "cs-h2",
+    "question": "List the names of singers who performed in the concert called 'Auditions'.",
+    "database": "concert_singer",
+    "complexity": "high",
+    "gold_collections": [
+      "concert_singer.concert",
+      "concert_singer.singer_in_concert",
+      "concert_singer.singer"
+    ],
+    "normalized_query": "db.concert.aggregate([{\"$match\": {\"concert_Name\": \"Auditions\"}}, {\"$lookup\": {\"from\": \"singer_in_concert\", \"localField\": \"concert_ID\", \"foreignField\": \"concert_ID\", \"as\": \"sic\"}}, {\"$unwind\": \"$sic\"}, {\"$addFields\": {\"sid_int\": {\"$toInt\": \"$sic.Singer_ID\"}}}, {\"$lookup\": {\"from\": \"singer\", \"localField\": \"sid_int\", \"foreignField\": \"Singer_ID\", \"as\": \"singer\"}}, {\"$unwind\": \"$singer\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$singer.Name\"}}, {\"$sort\": {\"Name\": 1}}])",
     "source": "expansion-2026-08"
   },
   {
-    "id": "dk-h1",
+    "id": "pt-e2",
+    "question": "List the first names of female students.",
+    "database": "pets_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "pets_1.Student"
+    ],
+    "normalized_query": "db.Student.find({\"Sex\": \"F\"}, {\"_id\": 0, \"Fname\": 1})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-world_1-45",
+    "question": "What are the country codes of countries where people use languages other than English?",
+    "database": "world_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "world_1.countrylanguage"
+    ],
+    "normalized_query": "db.countrylanguage.distinct(\"CountryCode\", {\"Language\": {\"$ne\": \"English\"}})",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-concert_singer-2",
+    "question": "What is the name and capacity of the stadium with the most concerts after 2013 ?",
+    "database": "concert_singer",
+    "complexity": "hard",
+    "gold_collections": [
+      "concert_singer.concert",
+      "concert_singer.stadium"
+    ],
+    "normalized_query": "db.concert.aggregate([{\"$addFields\": {\"Year_int\": {\"$toInt\": \"$Year\"}, \"Stadium_ID_int\": {\"$toInt\": \"$Stadium_ID\"}}}, {\"$match\": {\"Year_int\": {\"$gt\": 2013}}}, {\"$group\": {\"_id\": \"$Stadium_ID_int\", \"concert_count\": {\"$sum\": 1}}}, {\"$sort\": {\"concert_count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"stadium\", \"localField\": \"_id\", \"foreignField\": \"Stadium_ID\", \"as\": \"stad\"}}, {\"$unwind\": \"$stad\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$stad.Name\", \"Capacity\": \"$stad.Capacity\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-5",
+    "question": "Which of the countries has the most car makers? List the country name.",
+    "database": "car_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "car_1.car_makers",
+      "car_1.countries"
+    ],
+    "normalized_query": "db.car_makers.aggregate([{\"$addFields\": {\"CountryInt\": {\"$toInt\": \"$Country\"}}}, {\"$group\": {\"_id\": \"$CountryInt\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1, \"_id\": 1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"countries\", \"localField\": \"_id\", \"foreignField\": \"CountryId\", \"as\": \"country\"}}, {\"$unwind\": \"$country\"}, {\"$project\": {\"_id\": 0, \"CountryName\": \"$country.CountryName\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "car-e2",
+    "question": "List the full names of all Renault cars.",
+    "database": "car_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "car_1.car_names"
+    ],
+    "normalized_query": "db.car_names.find({\"Model\": \"renault\"}, {\"_id\": 0, \"Make\": 1})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "dk-m6",
     "database": "dog_kennels",
-    "complexity": "high",
-    "question": "Which states have both owners and professionals living there?",
+    "complexity": "medium",
+    "question": "List each owner's first name, last name, and the size code of their dog.",
     "gold_collections": [
       "dog_kennels.Owners",
+      "dog_kennels.Dogs"
+    ],
+    "normalized_query": "db.Owners.aggregate([{\"$lookup\": {\"from\": \"Dogs\", \"localField\": \"owner_id\", \"foreignField\": \"owner_id\", \"as\": \"d\"}}, {\"$unwind\": \"$d\"}, {\"$project\": {\"_id\": 0, \"first_name\": 1, \"last_name\": 1, \"size_code\": \"$d.size_code\"}}])",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "dk-m1",
+    "database": "dog_kennels",
+    "complexity": "medium",
+    "question": "Which professionals live in the state of Hawaii or the state of Wisconsin? List their emails.",
+    "gold_collections": [
       "dog_kennels.Professionals"
     ],
-    "normalized_query": "db.Owners.aggregate([{\"$group\": {\"_id\": \"$state\"}}, {\"$lookup\": {\"from\": \"Professionals\", \"localField\": \"_id\", \"foreignField\": \"state\", \"as\": \"p\"}}, {\"$match\": {\"p\": {\"$ne\": []}}}, {\"$project\": {\"_id\": 0, \"state\": \"$_id\"}}])",
+    "normalized_query": "db.Professionals.find({\"state\": {\"$in\": [\"Hawaii\", \"Wisconsin\"]}}, {\"_id\": 0, \"email_address\": 1})",
     "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "car-m7",
+    "question": "How many models does each maker have?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.model_list.json"
+    ],
+    "normalized_query": "db.model_list.json.aggregate([{\"$group\": {\"_id\": \"$Maker\", \"model_count\": {\"$sum\": 1}}}, {\"$sort\": {\"model_count\": -1, \"_id\": 1}}])",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-dog_kennels-25",
+    "question": "List the emails of the professionals who live in the state of Hawaii or the state of Wisconsin.",
+    "database": "dog_kennels",
+    "complexity": "easy",
+    "gold_collections": [
+      "dog_kennels.Professionals"
+    ],
+    "normalized_query": "db.Professionals.aggregate([{\"$match\": {\"$or\": [{\"state\": \"Hawaii\"}, {\"state\": \"Wisconsin\"}]}}, {\"$sort\": {\"professional_id\": 1}}, {\"$project\": {\"_id\": 0, \"email_address\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-47",
+    "question": "For the cars with 4 cylinders, which model has the largest horsepower?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.cars_data",
+      "car_1.car_names"
+    ],
+    "normalized_query": "db.cars_data.aggregate([{\"$match\": {\"Cylinders\": 4, \"Horsepower\": {\"$ne\": \"null\"}}}, {\"$addFields\": {\"HorsepowerNum\": {\"$toInt\": \"$Horsepower\"}}}, {\"$sort\": {\"HorsepowerNum\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"car_names\", \"localField\": \"Id\", \"foreignField\": \"MakeId\", \"as\": \"car_name\"}}, {\"$unwind\": \"$car_name\"}, {\"$project\": {\"_id\": 0, \"Model\": \"$car_name.Model\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-world_1-63",
+    "question": "What are the cities whose population is between 160000 and 900000?",
+    "database": "world_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "world_1.city"
+    ],
+    "normalized_query": "db.city.find({\"Population\": {\"$gte\": 160000, \"$lte\": 900000}}, {\"_id\": 0, \"Name\": 1})",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "pt-m4",
+    "question": "How many distinct city codes are represented among students?",
+    "database": "pets_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "pets_1.Student"
+    ],
+    "normalized_query": "db.Student.aggregate([{\"$group\": {\"_id\": \"$city_code\"}}, {\"$count\": \"distinct_cities\"}])",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-car_1-36",
+    "question": "What is the smallest weight of the car produced with 8 cylinders on 1974 ?",
+    "database": "car_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.cars_data.aggregate([{\"$match\": {\"Cylinders\": 8, \"Year\": 1974}}, {\"$group\": {\"_id\": None, \"min_weight\": {\"$min\": \"$Weight\"}}}, {\"$project\": {\"_id\": 0}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-18",
+    "question": "Which model of the car has the minimum horsepower?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.cars_data",
+      "car_1.car_names"
+    ],
+    "normalized_query": "db.cars_data.aggregate([{\"$match\": {\"Horsepower\": {\"$ne\": \"null\"}}}, {\"$addFields\": {\"HorsepowerNum\": {\"$toInt\": \"$Horsepower\"}}}, {\"$sort\": {\"HorsepowerNum\": 1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"car_names\", \"localField\": \"Id\", \"foreignField\": \"MakeId\", \"as\": \"car_name\"}}, {\"$unwind\": \"$car_name\"}, {\"$project\": {\"_id\": 0, \"Model\": \"$car_name.Model\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "wl-e5",
+    "database": "world_1",
+    "complexity": "easy",
+    "question": "How many people live in the Gelderland district?",
+    "gold_collections": [
+      "world_1.city"
+    ],
+    "normalized_query": "db.city.aggregate([{\"$match\": {\"District\": \"Gelderland\"}}, {\"$group\": {\"_id\": None, \"total_population\": {\"$sum\": \"$Population\"}}}])",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "car-m2",
+    "question": "How many cars were produced each year?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.cars_data.aggregate([{\"$group\": {\"_id\": \"$Year\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "car-e3",
+    "question": "List the full names of all car makers.",
+    "database": "car_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "car_1.car_makers"
+    ],
+    "normalized_query": "db.car_makers.find({}, {\"_id\": 0, \"FullName\": 1})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-network_1-19",
+    "question": "What grade is Kyle in?",
+    "database": "network_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Highschooler.find({\"name\": \"Kyle\"}, {\"_id\": 0, \"grade\": 1})",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-world_1-17",
+    "question": "What are the countries where either English or Dutch is the official language ?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.countrylanguage",
+      "world_1.country"
+    ],
+    "normalized_query": "db.countrylanguage.aggregate([{\"$match\": {\"IsOfficial\": \"T\", \"Language\": {\"$in\": [\"English\", \"Dutch\"]}}}, {\"$lookup\": {\"from\": \"country\", \"localField\": \"CountryCode\", \"foreignField\": \"Code\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$group\": {\"_id\": \"$c.Name\"}}, {\"$project\": {\"_id\": 0, \"Name\": \"$_id\"}}, {\"$sort\": {\"Name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "cs-m4",
+    "question": "How many concerts were held in each year?",
+    "database": "concert_singer",
+    "complexity": "medium",
+    "gold_collections": [
+      "concert_singer.concert"
+    ],
+    "normalized_query": "db.concert.aggregate([{\"$group\": {\"_id\": \"$Year\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "wl-m6",
+    "database": "world_1",
+    "complexity": "medium",
+    "question": "Find the city with the largest population where English is spoken.",
+    "gold_collections": [
+      "world_1.city",
+      "world_1.countrylanguage"
+    ],
+    "normalized_query": "db.city.aggregate([{\"$lookup\": {\"from\": \"countrylanguage\", \"localField\": \"CountryCode\", \"foreignField\": \"CountryCode\", \"as\": \"langs\"}}, {\"$match\": {\"langs.Language\": \"English\"}}, {\"$sort\": {\"Population\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"Name\": 1, \"Population\": 1}}])",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "spider-pets_1-12",
+    "question": "Find the number of distinct type of pets.",
+    "database": "pets_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "pets_1.Pets"
+    ],
+    "normalized_query": "db.Pets.aggregate([{\"$group\": {\"_id\": \"$PetType\"}}, {\"$count\": \"count\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "dk-h3",
+    "database": "dog_kennels",
+    "complexity": "high",
+    "question": "How many professionals did not operate any treatment on dogs?",
+    "gold_collections": [
+      "dog_kennels.Professionals",
+      "dog_kennels.Treatments"
+    ],
+    "normalized_query": "db.Professionals.aggregate([{\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"professional_id\", \"foreignField\": \"professional_id\", \"as\": \"t\"}}, {\"$match\": {\"t\": []}}, {\"$count\": \"professional_count\"}])",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "spider-car_1-22",
+    "question": "What is the accelerate of the car make amc hornet sportabout (sw)?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.car_names",
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.car_names.aggregate([{\"$match\": {\"Make\": \"amc hornet sportabout (sw)\"}}, {\"$lookup\": {\"from\": \"cars_data\", \"localField\": \"MakeId\", \"foreignField\": \"Id\", \"as\": \"car_data\"}}, {\"$unwind\": \"$car_data\"}, {\"$project\": {\"_id\": 0, \"Accelerate\": \"$car_data.Accelerate\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-dog_kennels-21",
+    "question": "Which dogs are owned by someone who lives in Virginia? List the owner's first name and the dog's name.",
+    "database": "dog_kennels",
+    "complexity": "medium",
+    "gold_collections": [
+      "dog_kennels.Owners",
+      "dog_kennels.Dogs"
+    ],
+    "normalized_query": "db.Owners.aggregate([{\"$match\": {\"state\": \"Virginia\"}}, {\"$lookup\": {\"from\": \"Dogs\", \"localField\": \"owner_id\", \"foreignField\": \"owner_id\", \"as\": \"d\"}}, {\"$unwind\": \"$d\"}, {\"$sort\": {\"owner_id\": 1, \"d.dog_id\": 1}}, {\"$project\": {\"_id\": 0, \"first_name\": 1, \"name\": \"$d.name\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "car-h1",
+    "question": "List car makers with more than 2 models. Report the full name and the model count.",
+    "database": "car_1",
+    "complexity": "high",
+    "gold_collections": [
+      "car_1.model_list.json",
+      "car_1.car_makers"
+    ],
+    "normalized_query": "db.model_list.json.aggregate([{\"$group\": {\"_id\": \"$Maker\", \"model_count\": {\"$sum\": 1}}}, {\"$match\": {\"model_count\": {\"$gt\": 2}}}, {\"$lookup\": {\"from\": \"car_makers\", \"localField\": \"_id\", \"foreignField\": \"Id\", \"as\": \"maker\"}}, {\"$unwind\": \"$maker\"}, {\"$project\": {\"_id\": 0, \"FullName\": \"$maker.FullName\", \"model_count\": 1}}, {\"$sort\": {\"model_count\": -1}}])",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "wl-m4",
+    "database": "world_1",
+    "complexity": "medium",
+    "question": "What is the name of the country that speaks the largest number of languages?",
+    "gold_collections": [
+      "world_1.country",
+      "world_1.countrylanguage"
+    ],
+    "normalized_query": "db.countrylanguage.aggregate([{\"$group\": {\"_id\": \"$CountryCode\", \"lang_count\": {\"$sum\": 1}}}, {\"$sort\": {\"lang_count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"country\", \"localField\": \"_id\", \"foreignField\": \"Code\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$c.Name\"}}])",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "spider-world_1-42",
+    "question": "How many unique languages are spoken in the world?",
+    "database": "world_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "world_1.countrylanguage"
+    ],
+    "normalized_query": "db.countrylanguage.aggregate([{\"$group\": {\"_id\": \"$Language\"}}, {\"$count\": \"unique_language_count\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-27",
+    "question": "Which model saves the most gasoline? That is to say, have the maximum miles per gallon.",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.cars_data",
+      "car_1.car_names"
+    ],
+    "normalized_query": "db.cars_data.aggregate([{\"$match\": {\"MPG\": {\"$ne\": \"null\"}}}, {\"$addFields\": {\"MPGNum\": {\"$toDouble\": \"$MPG\"}}}, {\"$sort\": {\"MPGNum\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"car_names\", \"localField\": \"Id\", \"foreignField\": \"MakeId\", \"as\": \"car_name\"}}, {\"$unwind\": \"$car_name\"}, {\"$project\": {\"_id\": 0, \"Model\": \"$car_name.Model\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-10",
+    "question": "How many countries has more than 2 car makers ?",
+    "database": "car_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "car_1.countries",
+      "car_1.car_makers"
+    ],
+    "normalized_query": "db.countries.aggregate([{\"$lookup\": {\"from\": \"car_makers\", \"let\": {\"cid\": \"$CountryId\"}, \"pipeline\": [{\"$addFields\": {\"CountryInt\": {\"$toInt\": \"$Country\"}}}, {\"$match\": {\"$expr\": {\"$eq\": [\"$CountryInt\", \"$$cid\"]}}}], \"as\": \"makers\"}}, {\"$match\": {\"$expr\": {\"$gt\": [{\"$size\": \"$makers\"}, 2]}}}, {\"$count\": \"count\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-pets_1-5",
+    "question": "Find the maximum weight for each type of pet. List the maximum weight and pet type.",
+    "database": "pets_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "pets_1.Pets"
+    ],
+    "normalized_query": "db.Pets.aggregate([{\"$group\": {\"_id\": \"$PetType\", \"max_weight\": {\"$max\": \"$weight\"}}}, {\"$project\": {\"_id\": 0, \"PetType\": \"$_id\", \"max_weight\": 1}}, {\"$sort\": {\"PetType\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-25",
+    "question": "What is the average weight of cars each year?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.cars_data.aggregate([{\"$group\": {\"_id\": \"$Year\", \"avg_weight\": {\"$avg\": \"$Weight\"}}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-dog_kennels-18",
+    "question": "List the cost of each treatment and the corresponding treatment type description.",
+    "database": "dog_kennels",
+    "complexity": "medium",
+    "gold_collections": [
+      "dog_kennels.Treatments",
+      "dog_kennels.Treatment_Types"
+    ],
+    "normalized_query": "db.Treatments.aggregate([{\"$lookup\": {\"from\": \"Treatment_Types\", \"localField\": \"treatment_type_code\", \"foreignField\": \"treatment_type_code\", \"as\": \"tt\"}}, {\"$unwind\": \"$tt\"}, {\"$sort\": {\"treatment_id\": 1}}, {\"$project\": {\"_id\": 0, \"cost_of_treatment\": 1, \"treatment_type_description\": \"$tt.treatment_type_description\"}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "car-m6",
+    "question": "What is the maximum acceleration time recorded?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.cars_data.aggregate([{\"$group\": {\"_id\": None, \"max_accel\": {\"$max\": \"$Accelerate\"}}}, {\"$project\": {\"_id\": 0}}])",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "nw-e6",
+    "question": "How many 'likes' relationships are there?",
+    "database": "network_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "network_1.Likes"
+    ],
+    "normalized_query": "db.Likes.count_documents({})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-car_1-11",
+    "question": "Among the cars with more than lowest horsepower, which ones do not have more than 3 cylinders? List the car makeid and make name.",
+    "database": "car_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "car_1.cars_data",
+      "car_1.car_names"
+    ],
+    "normalized_query": "db.cars_data.aggregate([{\"$match\": {\"Horsepower\": {\"$ne\": \"null\"}}}, {\"$addFields\": {\"HorsepowerNum\": {\"$toInt\": \"$Horsepower\"}}}, {\"$group\": {\"_id\": None, \"min_hp\": {\"$min\": \"$HorsepowerNum\"}, \"rows\": {\"$push\": \"$$ROOT\"}}}, {\"$unwind\": \"$rows\"}, {\"$match\": {\"$expr\": {\"$and\": [{\"$gt\": [\"$rows.HorsepowerNum\", \"$min_hp\"]}, {\"$lte\": [\"$rows.Cylinders\", 3]}]}}}, {\"$lookup\": {\"from\": \"car_names\", \"localField\": \"rows.Id\", \"foreignField\": \"MakeId\", \"as\": \"car_name\"}}, {\"$unwind\": \"$car_name\"}, {\"$project\": {\"_id\": 0, \"MakeId\": \"$car_name.MakeId\", \"Make\": \"$car_name.Make\"}}, {\"$sort\": {\"MakeId\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "dk-e4",
+    "database": "dog_kennels",
+    "complexity": "easy",
+    "question": "How much does each charge type cost? List both the charge type and amount.",
+    "gold_collections": [
+      "dog_kennels.Charges"
+    ],
+    "normalized_query": "db.Charges.find({}, {\"_id\": 0, \"charge_type\": 1, \"charge_amount\": 1})",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "wl-e4",
+    "database": "world_1",
+    "complexity": "easy",
+    "question": "What are the population and life expectancy of Brazil?",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.find({\"Name\": \"Brazil\"}, {\"_id\": 0, \"Population\": 1, \"LifeExpectancy\": 1})",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "spider-dog_kennels-22",
+    "question": "What are the arriving date and the departing date of the dogs who have gone through a treatment?",
+    "database": "dog_kennels",
+    "complexity": "medium",
+    "gold_collections": [
+      "dog_kennels.Dogs",
+      "dog_kennels.Treatments"
+    ],
+    "normalized_query": "db.Dogs.aggregate([{\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"dog_id\", \"foreignField\": \"dog_id\", \"as\": \"t\"}}, {\"$match\": {\"t\": {\"$ne\": []}}}, {\"$group\": {\"_id\": {\"date_arrived\": \"$date_arrived\", \"date_departed\": \"$date_departed\"}}}, {\"$project\": {\"_id\": 0, \"date_arrived\": \"$_id.date_arrived\", \"date_departed\": \"$_id.date_departed\"}}, {\"$sort\": {\"date_arrived\": 1, \"date_departed\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "pt-e3",
+    "question": "Find the first and last names of students younger than 18.",
+    "database": "pets_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "pets_1.Student"
+    ],
+    "normalized_query": "db.Student.find({\"Age\": {\"$lt\": 18}}, {\"_id\": 0, \"Fname\": 1, \"LName\": 1})",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-world_1-28",
+    "question": "Which Asian countries have a population that is larger than any country in Africa?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.country"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$facet\": {\"threshold\": [{\"$match\": {\"Continent\": \"Africa\"}}, {\"$group\": {\"_id\": None, \"val\": {\"$max\": \"$Population\"}}}], \"all\": [{\"$match\": {\"Continent\": \"Asia\"}}, {\"$project\": {\"_id\": 0, \"Name\": 1, \"Population\": 1}}]}}, {\"$unwind\": \"$threshold\"}, {\"$unwind\": \"$all\"}, {\"$match\": {\"$expr\": {\"$gt\": [\"$all.Population\", \"$threshold.val\"]}}}, {\"$project\": {\"_id\": 0, \"Name\": \"$all.Name\"}}, {\"$sort\": {\"Name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-pets_1-16",
+    "question": "Find the average weight for each pet type.",
+    "database": "pets_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "pets_1.Pets"
+    ],
+    "normalized_query": "db.Pets.aggregate([{\"$group\": {\"_id\": \"$PetType\", \"avg_weight\": {\"$avg\": \"$weight\"}}}, {\"$project\": {\"_id\": 0, \"PetType\": \"$_id\", \"avg_weight\": 1}}, {\"$sort\": {\"PetType\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-2",
+    "question": "Find the name of the makers that produced some cars in the year of 1970?",
+    "database": "car_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "car_1.car_makers",
+      "car_1.model_list.json",
+      "car_1.car_names",
+      "car_1.cars_data"
+    ],
+    "normalized_query": "db.car_makers.aggregate([{\"$lookup\": {\"from\": \"model_list.json\", \"localField\": \"Id\", \"foreignField\": \"Maker\", \"as\": \"model\"}}, {\"$unwind\": \"$model\"}, {\"$lookup\": {\"from\": \"car_names\", \"localField\": \"model.Model\", \"foreignField\": \"Model\", \"as\": \"car_name\"}}, {\"$unwind\": \"$car_name\"}, {\"$lookup\": {\"from\": \"cars_data\", \"localField\": \"car_name.MakeId\", \"foreignField\": \"Id\", \"as\": \"car_data\"}}, {\"$unwind\": \"$car_data\"}, {\"$match\": {\"car_data.Year\": 1970}}, {\"$group\": {\"_id\": \"$Maker\"}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-world_1-11",
+    "question": "What is the total number of languages used in Aruba?",
+    "database": "world_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "world_1.country",
+      "world_1.countrylanguage"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$match\": {\"Name\": \"Aruba\"}}, {\"$lookup\": {\"from\": \"countrylanguage\", \"localField\": \"Code\", \"foreignField\": \"CountryCode\", \"as\": \"langs\"}}, {\"$unwind\": \"$langs\"}, {\"$count\": \"language_count\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-network_1-10",
+    "question": "Show the names of high school students and their corresponding number of friends.",
+    "database": "network_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "network_1.Friend",
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Friend.aggregate([{\"$group\": {\"_id\": \"$student_id\", \"friend_count\": {\"$sum\": 1}}}, {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"_id\", \"foreignField\": \"ID\", \"as\": \"hs\"}}, {\"$unwind\": \"$hs\"}, {\"$project\": {\"_id\": 0, \"name\": \"$hs.name\", \"friend_count\": 1}}, {\"$sort\": {\"name\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "wl-m3",
+    "database": "world_1",
+    "complexity": "medium",
+    "question": "How many official languages does Afghanistan have?",
+    "gold_collections": [
+      "world_1.country",
+      "world_1.countrylanguage"
+    ],
+    "normalized_query": "db.country.aggregate([{\"$match\": {\"Name\": \"Afghanistan\"}}, {\"$lookup\": {\"from\": \"countrylanguage\", \"localField\": \"Code\", \"foreignField\": \"CountryCode\", \"as\": \"langs\"}}, {\"$unwind\": \"$langs\"}, {\"$match\": {\"langs.IsOfficial\": \"T\"}}, {\"$count\": \"official_language_count\"}])",
+    "source": "expansion-2026-08-07-spider-extra"
+  },
+  {
+    "id": "nw-h2",
+    "question": "How many friends does each highschooler have, by name?",
+    "database": "network_1",
+    "complexity": "high",
+    "gold_collections": [
+      "network_1.Friend",
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Friend.aggregate([{\"$group\": {\"_id\": \"$student_id\", \"friend_count\": {\"$sum\": 1}}}, {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"_id\", \"foreignField\": \"ID\", \"as\": \"hs\"}}, {\"$unwind\": \"$hs\"}, {\"$project\": {\"_id\": 0, \"name\": \"$hs.name\", \"friend_count\": 1}}, {\"$sort\": {\"friend_count\": -1, \"name\": 1}}])",
+    "source": "expansion-2026-08"
+  },
+  {
+    "id": "spider-network_1-21",
+    "question": "Show the ID of the high schooler named Kyle.",
+    "database": "network_1",
+    "complexity": "easy",
+    "gold_collections": [
+      "network_1.Highschooler"
+    ],
+    "normalized_query": "db.Highschooler.find({\"name\": \"Kyle\"}, {\"_id\": 0, \"ID\": 1})",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-dog_kennels-23",
+    "question": "How many dogs have an age below the average?",
+    "database": "dog_kennels",
+    "complexity": "medium",
+    "gold_collections": [
+      "dog_kennels.Dogs"
+    ],
+    "normalized_query": "db.Dogs.aggregate([{\"$addFields\": {\"age_num\": {\"$toInt\": \"$age\"}}}, {\"$group\": {\"_id\": None, \"avg_age\": {\"$avg\": \"$age_num\"}, \"rows\": {\"$push\": \"$$ROOT\"}}}, {\"$unwind\": \"$rows\"}, {\"$match\": {\"$expr\": {\"$lt\": [\"$rows.age_num\", \"$avg_age\"]}}}, {\"$count\": \"count\"}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-network_1-28",
+    "question": "Find the minimum grade of students who have no friends.",
+    "database": "network_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "network_1.Highschooler",
+      "network_1.Friend"
+    ],
+    "normalized_query": "db.Highschooler.aggregate([{\"$lookup\": {\"from\": \"Friend\", \"localField\": \"ID\", \"foreignField\": \"student_id\", \"as\": \"friends\"}}, {\"$match\": {\"friends\": {\"$eq\": []}}}, {\"$group\": {\"_id\": None, \"min_grade\": {\"$min\": \"$grade\"}}}, {\"$project\": {\"_id\": 0}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "spider-car_1-4",
+    "question": "How many car makers are there in each continents? List the continent name and the count.",
+    "database": "car_1",
+    "complexity": "hard",
+    "gold_collections": [
+      "car_1.car_makers",
+      "car_1.countries",
+      "car_1.continents"
+    ],
+    "normalized_query": "db.car_makers.aggregate([{\"$addFields\": {\"CountryInt\": {\"$toInt\": \"$Country\"}}}, {\"$lookup\": {\"from\": \"countries\", \"localField\": \"CountryInt\", \"foreignField\": \"CountryId\", \"as\": \"country\"}}, {\"$unwind\": \"$country\"}, {\"$lookup\": {\"from\": \"continents\", \"localField\": \"country.Continent\", \"foreignField\": \"ContId\", \"as\": \"continent\"}}, {\"$unwind\": \"$continent\"}, {\"$group\": {\"_id\": \"$continent.Continent\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"_id\": 1}}])",
+    "source": "expansion-2026-08-16-spider"
+  },
+  {
+    "id": "car-m5",
+    "question": "How many car makers are registered under each country code?",
+    "database": "car_1",
+    "complexity": "medium",
+    "gold_collections": [
+      "car_1.car_makers"
+    ],
+    "normalized_query": "db.car_makers.aggregate([{\"$group\": {\"_id\": \"$Country\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1, \"_id\": 1}}])",
+    "source": "expansion-2026-08"
   }
 ]

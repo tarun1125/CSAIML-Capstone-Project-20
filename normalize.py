@@ -7,8 +7,8 @@ import sys
 # paths on the command line to reuse it for the GPT arm instead of
 # duplicating the whole file:
 #   python normalize.py data/gpt_results.json data/gpt_normalized.json
-INPUT = sys.argv[1] if len(sys.argv) > 1 else "data/qwen2.5-coder_results.json"
-OUTPUT = sys.argv[2] if len(sys.argv) > 2 else "data/qwen_normalized.json"
+INPUT = sys.argv[1] if len(sys.argv) > 1 else "data/claude_baseline_results.json"
+OUTPUT = sys.argv[2] if len(sys.argv) > 2 else "data/claude_normalized.json"
 
 
 def normalize(query: str) -> str:
