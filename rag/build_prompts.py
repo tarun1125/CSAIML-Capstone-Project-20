@@ -31,9 +31,26 @@
 # Runs entirely locally (CPU, no Atlas connection, no GPU) -- only the
 # actual Qwen generation call happens on Colab, reading this script's
 # output (rag/data/rag_prompts.json) directly.
+#
+# TOP_K is overridable from the command line for a controlled K-sweep
+# (K=3 vs K=5 vs K=10, same 61-case test split, same gold, same scoring
+# code) -- this was previously a hardcoded constant that changed by hand
+# across three separate dataset sizes (3 -> 5 -> 10), which confounded
+# "more examples" with "bigger pool, bigger test set." Comparing K on a
+# fixed split needed this to be a parameter, not a constant:
+#   python rag/build_prompts.py         # TOP_K=10 (default, unchanged
+#                                        # behavior -- still writes
+#                                        # rag_prompts.json)
+#   python rag/build_prompts.py 3       # writes rag_prompts_k3.json
+#   python rag/build_prompts.py 5       # writes rag_prompts_k5.json
+# K=10's output filename is deliberately left as the original
+# rag_prompts.json (not rag_prompts_k10.json) so nothing already reading
+# that default filename (score_rag.py's diagnostic, the RAG notebook)
+# breaks without an explicit opt-in.
 
 import json
 import logging
+import sys
 from collections import Counter
 from pathlib import Path
 
@@ -45,7 +62,7 @@ from schema_cards import build_cards
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("rag.build_prompts")
 
-TOP_K = 10
+TOP_K = int(sys.argv[1]) if len(sys.argv) > 1 else 10
 
 PROMPT_HEADER = (
     "You are a MongoDB query expert.\n"
@@ -90,10 +107,25 @@ def render_numeric_string_note(db_name: str) -> str:
     fields = STRING_TYPED_NUMERIC_FIELDS.get(db_name)
     if not fields:
         return ""
+    # Bare $toInt/$toDouble is shorthand for $convert with no onError/onNull
+    # -- it throws instead of returning a fallback value. Confirmed as a live
+    # crash, not a hypothetical: spider-car_1-39 and spider-car_1-44 both DID
+    # cast (following this note as originally worded) and both still failed
+    # with "Failed to parse number 'null' in $convert with no onError value"
+    # -- some rows in these fields hold the literal string "null" as data,
+    # which isn't a parseable number either way. The fix is telling the model
+    # to use $convert directly with onError/onNull set, not just to cast.
     return (
         "\nNote: some logically-numeric fields in this schema are stored as "
-        f"strings ({', '.join(fields)}) -- use $toInt / $toDouble when "
-        "comparing, filtering, or joining on these.\n"
+        f"strings ({', '.join(fields)}), and a few rows even hold the literal "
+        "string \"null\" instead of a real value. Casting with bare $toInt / "
+        "$toDouble will crash on those rows (\"Failed to parse number "
+        "'null' in $convert with no onError value\"). Use $convert directly "
+        "with onError and onNull set instead, e.g. "
+        "{\"$convert\": {\"input\": \"$Field\", \"to\": \"double\", "
+        "\"onError\": null, \"onNull\": null}} -- this returns null for "
+        "unparseable rows (which $avg/$max/$sum then correctly ignore) "
+        "instead of throwing and failing the whole query.\n"
     )
 
 
@@ -115,6 +147,18 @@ def render_schema_block(db_name: str, cards_by_db: dict) -> str:
     for c in cards:
         fields = ", ".join(f"{k} ({v})" for k, v in c["fields"].items())
         lines.append(f"- {c['collection']}: {{ {fields} }}")
+        # Foreign keys, from schema_cards.py's FOREIGN_KEYS (harvested from the
+        # golden reference queries' actual $lookup stages, not guessed) -- makes
+        # join paths explicit instead of leaving the model to either filter an
+        # FK field with a literal display value (e.g. car_makers.Country ==
+        # 'Asia', when Country is an id two hops from continents) or skip a
+        # multi-hop join because nothing showed the chain existed.
+        for fk in c.get("foreign_keys", []):
+            note = f"  [{fk['note']}]" if fk["note"] else ""
+            lines.append(
+                f"    FK: {c['collection']}.{fk['field']} -> "
+                f"{fk['ref_collection']}.{fk['ref_field']}{note}"
+            )
     return "\n".join(lines)
 
 
@@ -135,7 +179,7 @@ def main():
     rag_data_dir.mkdir(parents=True, exist_ok=True)
 
     test_cases = json.loads((rag_data_dir / "rag_test.json").read_text(encoding="utf-8"))
-    log.info("Loaded %d held-out test cases", len(test_cases))
+    log.info("Loaded %d held-out test cases -- TOP_K=%d for this run", len(test_cases), TOP_K)
 
     index = faiss.read_index(str(rag_data_dir / "fewshot.index"))
     metadata = json.loads((rag_data_dir / "fewshot_metadata.json").read_text(encoding="utf-8"))
@@ -190,12 +234,13 @@ def main():
                   case_id, gold_database, predicted_database, database_match,
                   [n["id"] for n in neighbors])
 
-    out_path = rag_data_dir / "rag_prompts.json"
+    out_name = "rag_prompts.json" if TOP_K == 10 else f"rag_prompts_k{TOP_K}.json"
+    out_path = rag_data_dir / out_name
     out_path.write_text(json.dumps(prompts, indent=2), encoding="utf-8")
 
     accuracy = db_match_count / len(test_cases)
-    log.info("SUMMARY  database retrieval accuracy: %d/%d = %.1f%%",
-              db_match_count, len(test_cases), accuracy * 100)
+    log.info("SUMMARY  TOP_K=%d  database retrieval accuracy: %d/%d = %.1f%%",
+              TOP_K, db_match_count, len(test_cases), accuracy * 100)
     log.info("This is a diagnostic on retrieval quality, NOT the final metric -- "
               "it just tells you how often step 2 picked the right database "
               "before Qwen even runs. Saved -> %s", out_path)
