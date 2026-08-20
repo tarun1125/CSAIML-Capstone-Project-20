@@ -107,25 +107,10 @@ def render_numeric_string_note(db_name: str) -> str:
     fields = STRING_TYPED_NUMERIC_FIELDS.get(db_name)
     if not fields:
         return ""
-    # Bare $toInt/$toDouble is shorthand for $convert with no onError/onNull
-    # -- it throws instead of returning a fallback value. Confirmed as a live
-    # crash, not a hypothetical: spider-car_1-39 and spider-car_1-44 both DID
-    # cast (following this note as originally worded) and both still failed
-    # with "Failed to parse number 'null' in $convert with no onError value"
-    # -- some rows in these fields hold the literal string "null" as data,
-    # which isn't a parseable number either way. The fix is telling the model
-    # to use $convert directly with onError/onNull set, not just to cast.
     return (
         "\nNote: some logically-numeric fields in this schema are stored as "
-        f"strings ({', '.join(fields)}), and a few rows even hold the literal "
-        "string \"null\" instead of a real value. Casting with bare $toInt / "
-        "$toDouble will crash on those rows (\"Failed to parse number "
-        "'null' in $convert with no onError value\"). Use $convert directly "
-        "with onError and onNull set instead, e.g. "
-        "{\"$convert\": {\"input\": \"$Field\", \"to\": \"double\", "
-        "\"onError\": null, \"onNull\": null}} -- this returns null for "
-        "unparseable rows (which $avg/$max/$sum then correctly ignore) "
-        "instead of throwing and failing the whole query.\n"
+        f"strings ({', '.join(fields)}) -- use $toInt / $toDouble when "
+        "comparing, filtering, or joining on these.\n"
     )
 
 
@@ -147,18 +132,6 @@ def render_schema_block(db_name: str, cards_by_db: dict) -> str:
     for c in cards:
         fields = ", ".join(f"{k} ({v})" for k, v in c["fields"].items())
         lines.append(f"- {c['collection']}: {{ {fields} }}")
-        # Foreign keys, from schema_cards.py's FOREIGN_KEYS (harvested from the
-        # golden reference queries' actual $lookup stages, not guessed) -- makes
-        # join paths explicit instead of leaving the model to either filter an
-        # FK field with a literal display value (e.g. car_makers.Country ==
-        # 'Asia', when Country is an id two hops from continents) or skip a
-        # multi-hop join because nothing showed the chain existed.
-        for fk in c.get("foreign_keys", []):
-            note = f"  [{fk['note']}]" if fk["note"] else ""
-            lines.append(
-                f"    FK: {c['collection']}.{fk['field']} -> "
-                f"{fk['ref_collection']}.{fk['ref_field']}{note}"
-            )
     return "\n".join(lines)
 
 
