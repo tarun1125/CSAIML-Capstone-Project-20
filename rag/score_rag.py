@@ -20,7 +20,18 @@
 # environment with no route to Atlas.
 #
 # Usage (after normalize.py has produced rag/data/qwen_rag_normalized.json):
-#   python rag/score_rag.py
+#   python rag/score_rag.py          # K=10 (default), matches build_prompts.py's
+#                                     # own unsuffixed-by-default convention --
+#                                     # reads rag_prompts.json / qwen_rag_normalized.json,
+#                                     # writes rag_vs_baseline_scores.csv
+#   python rag/score_rag.py 3        # K=3 sweep -- reads rag_prompts_k3.json /
+#                                     # qwen_rag_normalized_k3.json, writes
+#                                     # rag_vs_baseline_scores_k3.csv
+#   python rag/score_rag.py 5        # same, for K=5
+# The K suffix only touches RAG-specific filenames (prompts/normalized/
+# execution-results/summary) -- the baseline test-slice re-score doesn't
+# depend on K at all (same 61 ids regardless of how many few-shot examples
+# RAG used), so it's recomputed fresh each run rather than K-suffixed.
 
 import json
 import sys
@@ -30,22 +41,31 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "evaluation"))
 from execute_queries import connect, run_model  # noqa: E402  reuse, don't reimplement
 
+TOP_K_ARG = sys.argv[1] if len(sys.argv) > 1 else None
+SUFFIX = "" if TOP_K_ARG in (None, "10") else f"_k{TOP_K_ARG}"
+
 
 def main():
     data_dir = ROOT / "data"          # shared with baseline -- unchanged, stays at top level
     rag_data_dir = ROOT / "rag" / "data"  # RAG-specific artifacts
     rag_data_dir.mkdir(parents=True, exist_ok=True)
+    print(f"[score_rag] K arg={TOP_K_ARG!r} -> file suffix={SUFFIX!r} "
+          f"(empty suffix = the original K=10 filenames)")
 
     test_cases = json.loads((rag_data_dir / "rag_test.json").read_text(encoding="utf-8"))
     test_ids = {str(c["id"]) for c in test_cases}
     print(f"[score_rag] scoring against {len(test_ids)} held-out test ids: {sorted(test_ids)}")
 
-    rag_normalized_file = rag_data_dir / "qwen_rag_normalized.json"
+    rag_normalized_file = rag_data_dir / f"qwen_rag_normalized{SUFFIX}.json"
+    rag_prompts_file = rag_data_dir / f"rag_prompts{SUFFIX}.json"
     if not rag_normalized_file.exists():
         raise RuntimeError(
             f"{rag_normalized_file} not found. Run, in order: "
-            f"1) the Colab RAG inference notebook (produces rag/data/qwen_rag_results.json) "
-            f"2) python normalize.py rag/data/qwen_rag_results.json rag/data/qwen_rag_normalized.json"
+            f"1) python rag/build_prompts.py{' ' + TOP_K_ARG if TOP_K_ARG else ''} "
+            f"(produces {rag_prompts_file.name}) "
+            f"2) the Colab RAG inference notebook, pointed at {rag_prompts_file.name} "
+            f"(produces rag/data/qwen_rag_results{SUFFIX}.json) "
+            f"3) python normalize.py rag/data/qwen_rag_results{SUFFIX}.json {rag_normalized_file}"
         )
 
     # Slice the ORIGINAL full-golden-set baseline normalized predictions
@@ -84,7 +104,7 @@ def main():
     print("=" * 80)
     rag_results = run_model(
         client, "Qwen-RAG",
-        rag_normalized_file, rag_data_dir / "qwen_rag_execution_results.json",
+        rag_normalized_file, rag_data_dir / f"qwen_rag_execution_results{SUFFIX}.json",
         gold_results,
     )
 
@@ -102,7 +122,7 @@ def main():
     # database, wrong query; or by luck, wrong database, still-correct
     # query on a simple case) and conflating them would hide which stage
     # of the pipeline needs work if the RAG number disappoints.
-    prompts = json.loads((rag_data_dir / "rag_prompts.json").read_text(encoding="utf-8"))
+    prompts = json.loads(rag_prompts_file.read_text(encoding="utf-8"))
     db_match = sum(p["database_match"] for p in prompts)
 
     # Worst-case (p=0.5) standard error on a proportion, computed for whatever
@@ -113,7 +133,8 @@ def main():
     se_pct = (0.5 * 0.5 / n_test) ** 0.5 * 100 if n_test else 0.0
 
     print("\n" + "=" * 80)
-    print(f"[score_rag] FINAL COMPARISON (same {n_test} test ids, same gold, same scoring code)")
+    print(f"[score_rag] FINAL COMPARISON  K={TOP_K_ARG or 10}  "
+          f"(same {n_test} test ids, same gold, same scoring code)")
     print("=" * 80)
     print(f"  Database retrieval accuracy : {db_match}/{len(prompts)} "
           f"({db_match/len(prompts)*100:.1f}%)  -- diagnostic, not the headline number")
@@ -123,7 +144,7 @@ def main():
     print(f"\n  NOTE: n={n_test} -- worst-case standard error at p~=0.5 is ~{se_pct:.0f} points, "
           f"so treat this as a directional signal, not a precise measurement.")
 
-    summary_path = ROOT / "rag" / "outputs" / "rag_vs_baseline_scores.csv"
+    summary_path = ROOT / "rag" / "outputs" / f"rag_vs_baseline_scores{SUFFIX}.csv"
     summary_path.parent.mkdir(exist_ok=True)
     with summary_path.open("w", encoding="utf-8") as f:
         f.write("Arm,Correct,Total,Accuracy\n")

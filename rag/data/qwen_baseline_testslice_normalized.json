@@ -349,7 +349,7 @@
     "database": "car_1",
     "generated_query": "db.cars_data.aggregate([\n    {\"$match\": {\"Year\": {\"$lt\": \"1980\"}}},\n    {\"$group\": {\"_id\": null, \"average_horsepower\": {\"$avg\": \"$Horsepower\"}}}\n])",
     "latency_s": 3.198,
-    "normalized_query": "db.cars_data.aggregate([{'$match': {'Year': {'$lt': '1980'}}}, {'$group': {'_id': null, 'average_horsepower': {'$avg': '$Horsepower'}}}])"
+    "normalized_query": "db.cars_data.aggregate([{'$match': {'Year': {'$lt': '1980'}}}, {'$group': {'_id': None, 'average_horsepower': {'$avg': '$Horsepower'}}}])"
   },
   {
     "id": "spider-car_1-44",
@@ -453,7 +453,7 @@
     "database": "dog_kennels",
     "generated_query": "db.dogs.aggregate([\n    {\"$lookup\": {\n        \"from\": \"treatments\",\n        \"localField\": \"dog_id\",\n        \"foreignField\": \"dog_id\",\n        \"as\": \"treatments\"\n    }},\n    {\"$match\": {\"treatments\": {\"$exists\": True}}},\n    {\"$group\": {\"_id\": null, \"average_age\": {\"$avg\": \"$age\"}}}\n])",
     "latency_s": 4.066,
-    "normalized_query": "db.dogs.aggregate([{'$lookup': {'from': 'treatments', 'localField': 'dog_id', 'foreignField': 'dog_id', 'as': 'treatments'}}, {'$match': {'treatments': {'$exists': True}}}, {'$group': {'_id': null, 'average_age': {'$avg': '$age'}}}])"
+    "normalized_query": "db.dogs.aggregate([{'$lookup': {'from': 'treatments', 'localField': 'dog_id', 'foreignField': 'dog_id', 'as': 'treatments'}}, {'$match': {'treatments': {'$exists': True}}}, {'$group': {'_id': None, 'average_age': {'$avg': '$age'}}}])"
   },
   {
     "id": "spider-dog_kennels-24",

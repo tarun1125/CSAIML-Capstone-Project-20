@@ -1,0 +1,54 @@
+# Dependencies for CSAIML-Capstone-Project-20 (evaluation-pipeline branch).
+# Generated from the actual import statements across the repo's .py files
+# and notebook %pip install cells, not a pip-freeze snapshot -- no
+# requirements.txt existed before this. Versions are left unpinned except
+# where a floor is needed for correctness; run inside a venv.
+#
+# Setup:
+#   python3 -m venv .venv
+#   source .venv/bin/activate      # macOS/Linux
+#   .venv\Scripts\activate         # Windows
+#   pip install -r requirements.txt
+
+# --- Atlas / MongoDB ---
+pymongo>=4.6            # also provides the `bson` module used throughout
+                        # (execute_queries.py, atlas_verify_and_load.py, etc.)
+                        # -- do NOT `pip install bson` separately, that's a
+                        # different, incompatible package on PyPI.
+
+# --- Retrieval (rag/embed_utils.py, rag/build_prompts.py) ---
+faiss-cpu               # exact IndexFlatIP search, CPU-only by design -- no
+                        # GPU build needed on any platform, Mac included
+numpy
+scikit-learn            # rag/build_split.py: train_test_split for the
+                        # train/test split that produced rag_test.json
+
+# --- Model inference (baseline + RAG notebooks) ---
+torch>=2.1              # 2.1+ for a solid MPS (Apple Silicon) backend --
+                        # on the Mac, verify with:
+                        #   python3 -c "import torch; print(torch.backends.mps.is_available())"
+transformers>=4.40      # Qwen2.5 support
+accelerate              # used for device_map="auto" in both notebooks
+sentencepiece           # tokenizer dependency, installed explicitly in
+                        # both notebooks' %pip install cells
+huggingface_hub         # model download from HF; atlas-credentials.env's
+                        # HF_TOKEN is for this
+
+# NOTE: bitsandbytes is deliberately NOT listed here. It's CUDA-only
+# quantization support and does not work on Apple Silicon/MPS -- see the
+# MacBook migration guide. It's fine on Colab (where the notebooks already
+# `%pip install` it directly in-cell) but do not add it to this file.
+
+# --- Metrics (baseline notebook cells 7 + 9) ---
+codebleu
+tree-sitter
+tree-sitter-python
+bert-score              # import name is bert_score
+
+# --- Data / plotting ---
+pandas
+matplotlib
+
+# --- Running the notebooks themselves ---
+jupyter
+notebook

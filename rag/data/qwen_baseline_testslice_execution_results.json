@@ -5,7 +5,7 @@
     "database": "pets_1",
     "query": "db.pets.aggregate([{'$group': {'max_weight': {'$max': '$weight'}}}])",
     "status": "FAIL",
-    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787071413, 1), 'signature': {'hash': b'\\x95\\xe4?\\xa1zG\\x02\\t\\x91\\xa5\\x9b\\xceP8+\\x84\\xd0A\\xf9\\xc8', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787071413, 1)}",
+    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787209773, 8), 'signature': {'hash': b'j\\xbf(\\xc7\\xb0\\xa3p\\xb4\\xeb\\xac\\xc8\\x9f\\xbf{\\x1e\\x8b*B\\x82{', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787209773, 8)}",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -141,16 +141,16 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "Netherlands",
-        "count": 1
-      },
-      {
         "_id": "United States",
         "count": 1
       },
       {
         "_id": "France",
         "count": 4
+      },
+      {
+        "_id": "Netherlands",
+        "count": 1
       }
     ],
     "non_empty_rate": true,
@@ -162,7 +162,7 @@
     "database": "concert_singer",
     "query": "db.concert_singer.aggregate([{'$group': {'avg_capacity': {'$avg': '$Capacity'}}}])",
     "status": "FAIL",
-    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787071414, 4), 'signature': {'hash': b'\\xe5\\xd3^\\xea\\x1c_\\xfe\\xfd\\xdd,z\\xbaX\\xd1V`\\x8d\\xe7\\xd5\\xc5', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787071414, 4)}",
+    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787209773, 9), 'signature': {'hash': b'j\\xbf(\\xc7\\xb0\\xa3p\\xb4\\xeb\\xac\\xc8\\x9f\\xbf{\\x1e\\x8b*B\\x82{', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787209773, 9)}",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -723,31 +723,7 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "nissan",
-        "count": 1
-      },
-      {
-        "_id": "kia",
-        "count": 1
-      },
-      {
-        "_id": "mazda",
-        "count": 1
-      },
-      {
-        "_id": "fiat",
-        "count": 1
-      },
-      {
-        "_id": "peugeaut",
-        "count": 1
-      },
-      {
-        "_id": "hyundai",
-        "count": 1
-      },
-      {
-        "_id": "subaru",
+        "_id": "ford",
         "count": 1
       },
       {
@@ -755,27 +731,11 @@
         "count": 1
       },
       {
-        "_id": "ford",
-        "count": 1
-      },
-      {
-        "_id": "amc",
-        "count": 1
-      },
-      {
-        "_id": "renault",
-        "count": 1
-      },
-      {
-        "_id": "saab",
-        "count": 1
-      },
-      {
         "_id": "triumph",
         "count": 1
       },
       {
-        "_id": "bmw",
+        "_id": "daimler benz",
         "count": 1
       },
       {
@@ -783,7 +743,15 @@
         "count": 1
       },
       {
-        "_id": "daimler benz",
+        "_id": "bmw",
+        "count": 1
+      },
+      {
+        "_id": "honda",
+        "count": 1
+      },
+      {
+        "_id": "citroen",
         "count": 1
       },
       {
@@ -795,11 +763,11 @@
         "count": 1
       },
       {
-        "_id": "citroen",
+        "_id": "nissan",
         "count": 1
       },
       {
-        "_id": "honda",
+        "_id": "volkswagen",
         "count": 1
       },
       {
@@ -807,7 +775,39 @@
         "count": 1
       },
       {
-        "_id": "volkswagen",
+        "_id": "fiat",
+        "count": 1
+      },
+      {
+        "_id": "mazda",
+        "count": 1
+      },
+      {
+        "_id": "kia",
+        "count": 1
+      },
+      {
+        "_id": "hyundai",
+        "count": 1
+      },
+      {
+        "_id": "peugeaut",
+        "count": 1
+      },
+      {
+        "_id": "subaru",
+        "count": 1
+      },
+      {
+        "_id": "saab",
+        "count": 1
+      },
+      {
+        "_id": "amc",
+        "count": 1
+      },
+      {
+        "_id": "renault",
         "count": 1
       }
     ],
@@ -869,9 +869,9 @@
     "id": "spider-car_1-39",
     "question": "What is the average horsepower of the cars before 1980?",
     "database": "car_1",
-    "query": "db.cars_data.aggregate([{'$match': {'Year': {'$lt': '1980'}}}, {'$group': {'_id': null, 'average_horsepower': {'$avg': '$Horsepower'}}}])",
-    "status": "FAIL",
-    "error": "REJECTED by safety check (unexpected name: null)",
+    "query": "db.cars_data.aggregate([{'$match': {'Year': {'$lt': '1980'}}}, {'$group': {'_id': None, 'average_horsepower': {'$avg': '$Horsepower'}}}])",
+    "status": "PASS",
+    "result": [],
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -893,7 +893,7 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "South America",
+        "_id": "Europe",
         "languages": []
       }
     ],
@@ -1143,9 +1143,9 @@
     "id": "spider-dog_kennels-12",
     "question": "What is the average age of the dogs who have gone through any treatments?",
     "database": "dog_kennels",
-    "query": "db.dogs.aggregate([{'$lookup': {'from': 'treatments', 'localField': 'dog_id', 'foreignField': 'dog_id', 'as': 'treatments'}}, {'$match': {'treatments': {'$exists': True}}}, {'$group': {'_id': null, 'average_age': {'$avg': '$age'}}}])",
-    "status": "FAIL",
-    "error": "REJECTED by safety check (unexpected name: null)",
+    "query": "db.dogs.aggregate([{'$lookup': {'from': 'treatments', 'localField': 'dog_id', 'foreignField': 'dog_id', 'as': 'treatments'}}, {'$match': {'treatments': {'$exists': True}}}, {'$group': {'_id': None, 'average_age': {'$avg': '$age'}}}])",
+    "status": "PASS",
+    "result": [],
     "non_empty_rate": false,
     "execution_accuracy": false
   },
