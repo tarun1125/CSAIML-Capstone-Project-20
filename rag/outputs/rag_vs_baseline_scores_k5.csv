@@ -1,0 +1,4 @@
+Arm,Correct,Total,Accuracy
+Qwen-Baseline(test-slice),3,61,4.92
+Qwen-RAG,14,61,22.95
+DatabaseRetrievalDiagnostic,59,61,96.72
