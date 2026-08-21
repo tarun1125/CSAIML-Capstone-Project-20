@@ -949,7 +949,7 @@
     "database": "dog_kennels",
     "generated_query": "db.professionals.aggregate([\n    {\"$match\": {\"role_code\": \"Dog Care Professional\"}},\n    {\"$lookup\": {\n        \"from\": \"treatments\",\n        \"localField\": \"professional_id\",\n        \"foreignField\": \"professional_id\",\n        \"as\": \"treatments\"\n    }},\n    {\"$unwind\": \"$treatments\"},\n    {\"$group\": {\n        \"_id\": null,\n        \"count\": {\"$sum\": 1}\n    }}\n])",
     "latency_s": 5.212,
-    "normalized_query": "db.professionals.aggregate([{'$match': {'role_code': 'Dog Care Professional'}}, {'$lookup': {'from': 'treatments', 'localField': 'professional_id', 'foreignField': 'professional_id', 'as': 'treatments'}}, {'$unwind': '$treatments'}, {'$group': {'_id': null, 'count': {'$sum': 1}}}])"
+    "normalized_query": "db.professionals.aggregate([{'$match': {'role_code': 'Dog Care Professional'}}, {'$lookup': {'from': 'treatments', 'localField': 'professional_id', 'foreignField': 'professional_id', 'as': 'treatments'}}, {'$unwind': '$treatments'}, {'$group': {'_id': None, 'count': {'$sum': 1}}}])"
   },
   {
     "id": "dk-c1",
@@ -965,7 +965,7 @@
     "database": "dog_kennels",
     "generated_query": "db.professionals.aggregate([\n    {\"$lookup\": {\n        \"from\": \"dogs\",\n        \"localField\": \"first_name\",\n        \"foreignField\": \"owner_id\",\n        \"as\": \"dog_info\"\n    }},\n    {\"$match\": {\n        \"$expr\": {\n            \"$and\": [\n                {\"$ne\": [\"$dog_info\", []]},\n                {\"$eq\": [\"$dog_info.name\", null]}\n            ]\n        }\n    }}\n])",
     "latency_s": 4.374,
-    "normalized_query": "db.professionals.aggregate([{'$lookup': {'from': 'dogs', 'localField': 'first_name', 'foreignField': 'owner_id', 'as': 'dog_info'}}, {'$match': {'$expr': {'$and': [{'$ne': ['$dog_info', []]}, {'$eq': ['$dog_info.name', null]}]}}}])"
+    "normalized_query": "db.professionals.aggregate([{'$lookup': {'from': 'dogs', 'localField': 'first_name', 'foreignField': 'owner_id', 'as': 'dog_info'}}, {'$match': {'$expr': {'$and': [{'$ne': ['$dog_info', []]}, {'$eq': ['$dog_info.name', None]}]}}}])"
   },
   {
     "id": "spider-concert_singer-1",
@@ -1005,7 +1005,7 @@
     "database": "concert_singer",
     "generated_query": "db.singer.aggregate([\n    {\"$group\": {\"_id\": \"$Song_Name\", \"avgAge\": {\"$avg\": \"$Age\"}}},\n    {\"$match\": {\"avgAge\": {\"$gt\": db.singer.aggregate([{\"$group\": {\"_id\": null, \"avgAge\": {\"$avg\": \"$Age\"}}}]).next()[\"avgAge\"]}}}\n])",
     "latency_s": 3.613,
-    "normalized_query": "db.singer.aggregate([{'$group': {'_id': '$Song_Name', 'avgAge': {'$avg': '$Age'}}}, {'$match': {'avgAge': {'$gt': db.singer.aggregate([{'$group': {'_id': null, 'avgAge': {'$avg': '$Age'}}}]).next()['avgAge']}}}])"
+    "normalized_query": "db.singer.aggregate([{'$group': {'_id': '$Song_Name', 'avgAge': {'$avg': '$Age'}}}, {'$match': {'avgAge': {'$gt': db.singer.aggregate([{'$group': {'_id': None, 'avgAge': {'$avg': '$Age'}}}]).next()['avgAge']}}}])"
   },
   {
     "id": "spider-concert_singer-7",
@@ -1053,7 +1053,7 @@
     "database": "concert_singer",
     "generated_query": "db.singer.aggregate([\n    {\"$match\": {\"Country\": \"France\"}},\n    {\"$group\": {\"_id\": null, \"averageAge\": {\"$avg\": \"$Age\"}, \"minAge\": {\"$min\": \"$Age\"}, \"maxAge\": {\"$max\": \"$Age\"}}}\n])",
     "latency_s": 3.014,
-    "normalized_query": "db.singer.aggregate([{'$match': {'Country': 'France'}}, {'$group': {'_id': null, 'averageAge': {'$avg': '$Age'}, 'minAge': {'$min': '$Age'}, 'maxAge': {'$max': '$Age'}}}])"
+    "normalized_query": "db.singer.aggregate([{'$match': {'Country': 'France'}}, {'$group': {'_id': None, 'averageAge': {'$avg': '$Age'}, 'minAge': {'$min': '$Age'}, 'maxAge': {'$max': '$Age'}}}])"
   },
   {
     "id": "spider-concert_singer-14",
@@ -1173,7 +1173,7 @@
     "database": "pets_1",
     "generated_query": "db.pets.aggregate([\n    {\"$match\": {\"Sex\": \"F\"}},\n    {\"$lookup\": {\n        \"from\": \"students\",\n        \"localField\": \"StuID\",\n        \"foreignField\": \"StuID\",\n        \"as\": \"student_info\"\n    }},\n    {\"$unwind\": \"$student_info\"},\n    {\"$group\": {\"_id\": null, \"count\": {\"$sum\": 1}}}\n])",
     "latency_s": 4.15,
-    "normalized_query": "db.pets.aggregate([{'$match': {'Sex': 'F'}}, {'$lookup': {'from': 'students', 'localField': 'StuID', 'foreignField': 'StuID', 'as': 'student_info'}}, {'$unwind': '$student_info'}, {'$group': {'_id': null, 'count': {'$sum': 1}}}])"
+    "normalized_query": "db.pets.aggregate([{'$match': {'Sex': 'F'}}, {'$lookup': {'from': 'students', 'localField': 'StuID', 'foreignField': 'StuID', 'as': 'student_info'}}, {'$unwind': '$student_info'}, {'$group': {'_id': None, 'count': {'$sum': 1}}}])"
   },
   {
     "id": "spider-pets_1-9",
@@ -1461,7 +1461,7 @@
     "database": "network_1",
     "generated_query": "db.highschooler.aggregate([\n    {\"$match\": {\"friend_id\": {\"$exists\": False}}},\n    {\"$group\": {\"_id\": null, \"min_grade\": {\"$min\": \"$grade\"}}}\n])",
     "latency_s": 4.793,
-    "normalized_query": "db.highschooler.aggregate([{'$match': {'friend_id': {'$exists': False}}}, {'$group': {'_id': null, 'min_grade': {'$min': '$grade'}}}])"
+    "normalized_query": "db.highschooler.aggregate([{'$match': {'friend_id': {'$exists': False}}}, {'$group': {'_id': None, 'min_grade': {'$min': '$grade'}}}])"
   },
   {
     "id": "spider-car_1-1",
@@ -1773,7 +1773,7 @@
     "database": "car_1",
     "generated_query": "db.cars_data.aggregate([\n    {\"$match\": {\"Year\": {\"$lt\": \"1980\"}}},\n    {\"$group\": {\"_id\": null, \"average_horsepower\": {\"$avg\": \"$Horsepower\"}}}\n])",
     "latency_s": 3.198,
-    "normalized_query": "db.cars_data.aggregate([{'$match': {'Year': {'$lt': '1980'}}}, {'$group': {'_id': null, 'average_horsepower': {'$avg': '$Horsepower'}}}])"
+    "normalized_query": "db.cars_data.aggregate([{'$match': {'Year': {'$lt': '1980'}}}, {'$group': {'_id': None, 'average_horsepower': {'$avg': '$Horsepower'}}}])"
   },
   {
     "id": "spider-car_1-40",
@@ -2037,7 +2037,7 @@
     "database": "world_1",
     "generated_query": "db.country.aggregate([\n    {\"$match\": {\"Continent\": \"Asia\"}},\n    {\"$group\": {\"_id\": null, \"total_population\": {\"$sum\": \"$Population\"}, \"max_gnp\": {\"$max\": \"$GNP\"}}}\n])",
     "latency_s": 2.578,
-    "normalized_query": "db.country.aggregate([{'$match': {'Continent': 'Asia'}}, {'$group': {'_id': null, 'total_population': {'$sum': '$Population'}, 'max_gnp': {'$max': '$GNP'}}}])"
+    "normalized_query": "db.country.aggregate([{'$match': {'Continent': 'Asia'}}, {'$group': {'_id': None, 'total_population': {'$sum': '$Population'}, 'max_gnp': {'$max': '$GNP'}}}])"
   },
   {
     "id": "spider-world_1-38",
@@ -2085,7 +2085,7 @@
     "database": "world_1",
     "generated_query": "db.countrylanguage.aggregate([\n    {\"$match\": {\"Language\": \"English\"}},\n    {\"$lookup\": {\n        \"from\": \"countrylanguage\",\n        \"localField\": \"CountryCode\",\n        \"foreignField\": \"CountryCode\",\n        \"as\": \"english_languages\"\n    }},\n    {\"$unwind\": \"$english_languages\"},\n    {\"$match\": {\"english_languages.Language\": \"Dutch\"}},\n    {\"$group\": {\"_id\": null, \"count\": {\"$sum\": 1}}}\n])",
     "latency_s": 5.109,
-    "normalized_query": "db.countrylanguage.aggregate([{'$match': {'Language': 'English'}}, {'$lookup': {'from': 'countrylanguage', 'localField': 'CountryCode', 'foreignField': 'CountryCode', 'as': 'english_languages'}}, {'$unwind': '$english_languages'}, {'$match': {'english_languages.Language': 'Dutch'}}, {'$group': {'_id': null, 'count': {'$sum': 1}}}])"
+    "normalized_query": "db.countrylanguage.aggregate([{'$match': {'Language': 'English'}}, {'$lookup': {'from': 'countrylanguage', 'localField': 'CountryCode', 'foreignField': 'CountryCode', 'as': 'english_languages'}}, {'$unwind': '$english_languages'}, {'$match': {'english_languages.Language': 'Dutch'}}, {'$group': {'_id': None, 'count': {'$sum': 1}}}])"
   },
   {
     "id": "spider-world_1-45",
@@ -2277,7 +2277,7 @@
     "database": "dog_kennels",
     "generated_query": "db.dogs.aggregate([\n    {\"$lookup\": {\n        \"from\": \"treatments\",\n        \"localField\": \"dog_id\",\n        \"foreignField\": \"dog_id\",\n        \"as\": \"treatments\"\n    }},\n    {\"$match\": {\"treatments\": {\"$exists\": True}}},\n    {\"$group\": {\"_id\": null, \"average_age\": {\"$avg\": \"$age\"}}}\n])",
     "latency_s": 4.066,
-    "normalized_query": "db.dogs.aggregate([{'$lookup': {'from': 'treatments', 'localField': 'dog_id', 'foreignField': 'dog_id', 'as': 'treatments'}}, {'$match': {'treatments': {'$exists': True}}}, {'$group': {'_id': null, 'average_age': {'$avg': '$age'}}}])"
+    "normalized_query": "db.dogs.aggregate([{'$lookup': {'from': 'treatments', 'localField': 'dog_id', 'foreignField': 'dog_id', 'as': 'treatments'}}, {'$match': {'treatments': {'$exists': True}}}, {'$group': {'_id': None, 'average_age': {'$avg': '$age'}}}])"
   },
   {
     "id": "spider-dog_kennels-13",
@@ -2341,7 +2341,7 @@
     "database": "dog_kennels",
     "generated_query": "db.dogs.aggregate([\n    {\"$group\": {\"_id\": \"$age\", \"count\": {\"$sum\": 1}}},\n    {\"$match\": {\"count\": {\"$lt\": db.dogs.aggregate([{\"$group\": {\"_id\": null, \"avgAge\": {\"$avg\": \"$age\"}}}])[0][\"avgAge\"]}}}\n])",
     "latency_s": 3.956,
-    "normalized_query": "db.dogs.aggregate([{'$group': {'_id': '$age', 'count': {'$sum': 1}}}, {'$match': {'count': {'$lt': db.dogs.aggregate([{'$group': {'_id': null, 'avgAge': {'$avg': '$age'}}}])[0]['avgAge']}}}])"
+    "normalized_query": "db.dogs.aggregate([{'$group': {'_id': '$age', 'count': {'$sum': 1}}}, {'$match': {'count': {'$lt': db.dogs.aggregate([{'$group': {'_id': None, 'avgAge': {'$avg': '$age'}}}])[0]['avgAge']}}}])"
   },
   {
     "id": "spider-dog_kennels-24",

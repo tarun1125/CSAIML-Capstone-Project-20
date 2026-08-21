@@ -66,7 +66,7 @@
     "database": "pets_1",
     "query": "db.pets.aggregate([{'$group': {'max_weight': {'$max': '$weight'}}}])",
     "status": "FAIL",
-    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787064164, 3), 'signature': {'hash': b'CQ\\x19P\\xa7Jf\\x97\\x9c\\xa2\\x14A\\xf1q\\xb2\\xeb\\xceLY\\x0c', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787064164, 3)}",
+    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787201917, 3), 'signature': {'hash': b'\\xee{\\xbe\\x04\\xbb^\\x85\\x11\\xdd\\xad4\\x16:k\\xd7\\xad~*\\x7fb', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787201917, 3)}",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -119,11 +119,7 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "2",
-        "count": 2
-      },
-      {
-        "_id": "1",
+        "_id": "9",
         "count": 1
       },
       {
@@ -131,11 +127,15 @@
         "count": 1
       },
       {
-        "_id": "9",
-        "count": 1
+        "_id": "2",
+        "count": 2
       },
       {
         "_id": "10",
+        "count": 1
+      },
+      {
+        "_id": "1",
         "count": 1
       }
     ],
@@ -539,16 +539,16 @@
     "status": "PASS",
     "result": [
       {
+        "_id": "United States",
+        "count": 1
+      },
+      {
         "_id": "Netherlands",
         "count": 1
       },
       {
         "_id": "France",
         "count": 4
-      },
-      {
-        "_id": "United States",
-        "count": 1
       }
     ],
     "non_empty_rate": true,
@@ -560,7 +560,7 @@
     "database": "concert_singer",
     "query": "db.concert_singer.aggregate([{'$group': {'avg_capacity': {'$avg': '$Capacity'}}}])",
     "status": "FAIL",
-    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787064164, 13), 'signature': {'hash': b'CQ\\x19P\\xa7Jf\\x97\\x9c\\xa2\\x14A\\xf1q\\xb2\\xeb\\xceLY\\x0c', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787064164, 13)}",
+    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787201918, 10), 'signature': {'hash': b'\\x9bs\\x0c&\\x15\\xc7W\\xd1\\xee;\\x1b\\xb0\\xb0\\xb7[;zR\\xfe\\xe2', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787201918, 10)}",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -928,7 +928,7 @@
     "database": "car_1",
     "query": "db.cars_data.find({'maker': 'Renault'}, {'maker': 0, 'model': 1})",
     "status": "FAIL",
-    "error": "Cannot do inclusion on field model in exclusion projection, full error: {'ok': 0.0, 'errmsg': 'Cannot do inclusion on field model in exclusion projection', 'code': 31253, 'codeName': 'Location31253', '$clusterTime': {'clusterTime': Timestamp(1787064165, 12), 'signature': {'hash': b',\\xd2\\x88@\\x87\\xfcT\\xec\\x04\\x86\\x87\\xc5\\xacm\\xf4u\\xcbq\\x1dS', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787064165, 12)}",
+    "error": "Cannot do inclusion on field model in exclusion projection, full error: {'ok': 0.0, 'errmsg': 'Cannot do inclusion on field model in exclusion projection', 'code': 31253, 'codeName': 'Location31253', '$clusterTime': {'clusterTime': Timestamp(1787201920, 1), 'signature': {'hash': b'v\\x93`Bf\\xfb\\xfcd\\xa0\\xe5\\x06\\xe7\\x95\\x0fl\\x8a2\\x90B\\xbe', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787201920, 1)}",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -1127,19 +1127,7 @@
     "status": "PASS",
     "result": [
       {
-        "_id": 1970,
-        "count": 35
-      },
-      {
-        "_id": 1971,
-        "count": 29
-      },
-      {
-        "_id": 1976,
-        "count": 34
-      },
-      {
-        "_id": 1980,
+        "_id": 1979,
         "count": 29
       },
       {
@@ -1159,12 +1147,16 @@
         "count": 31
       },
       {
-        "_id": 1975,
-        "count": 30
+        "_id": 1971,
+        "count": 29
       },
       {
-        "_id": 1979,
-        "count": 29
+        "_id": 1972,
+        "count": 28
+      },
+      {
+        "_id": 1970,
+        "count": 35
       },
       {
         "_id": 1973,
@@ -1175,8 +1167,16 @@
         "count": 27
       },
       {
-        "_id": 1972,
-        "count": 28
+        "_id": 1976,
+        "count": 34
+      },
+      {
+        "_id": 1980,
+        "count": 29
+      },
+      {
+        "_id": 1975,
+        "count": 30
       }
     ],
     "non_empty_rate": true,
@@ -1282,7 +1282,7 @@
     "database": "car_1",
     "query": "db.cars_data.aggregate([{'$group': {'max_acceleration_time': {'$max': '$accelerate'}}}])",
     "status": "FAIL",
-    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787064166, 3), 'signature': {'hash': b'_\\xf3\\x82\\xe8^\\x85`\\x9b\\xeb\\x92\\xfe\\x06u\\x9dL\\xa7#~\\xa6:', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787064166, 3)}",
+    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787201920, 6), 'signature': {'hash': b'v\\x93`Bf\\xfb\\xfcd\\xa0\\xe5\\x06\\xe7\\x95\\x0fl\\x8a2\\x90B\\xbe', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787201920, 6)}",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -1294,19 +1294,19 @@
     "status": "PASS",
     "result": [
       {
-        "_id": 9,
-        "count": 1
-      },
-      {
         "_id": 14,
         "count": 1
       },
       {
-        "_id": 18,
+        "_id": 9,
         "count": 1
       },
       {
         "_id": 16,
+        "count": 1
+      },
+      {
+        "_id": 18,
         "count": 1
       },
       {
@@ -1330,7 +1330,7 @@
         "count": 1
       },
       {
-        "_id": 22,
+        "_id": 3,
         "count": 1
       },
       {
@@ -1338,7 +1338,7 @@
         "count": 1
       },
       {
-        "_id": 3,
+        "_id": 22,
         "count": 1
       },
       {
@@ -1346,11 +1346,11 @@
         "count": 3
       },
       {
-        "_id": 13,
+        "_id": 2,
         "count": 2
       },
       {
-        "_id": 2,
+        "_id": 13,
         "count": 2
       },
       {
@@ -1358,12 +1358,12 @@
         "count": 1
       },
       {
-        "_id": 1,
-        "count": 1
-      },
-      {
         "_id": 8,
         "count": 2
+      },
+      {
+        "_id": 1,
+        "count": 1
       },
       {
         "_id": 11,
@@ -1374,12 +1374,12 @@
         "count": 1
       },
       {
-        "_id": 6,
-        "count": 4
-      },
-      {
         "_id": 4,
         "count": 5
+      },
+      {
+        "_id": 6,
+        "count": 4
       },
       {
         "_id": 10,
@@ -1838,7 +1838,7 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "FLK",
+        "_id": "NIU",
         "Population": 0
       }
     ],
@@ -2051,9 +2051,9 @@
     "id": "dk-h3",
     "question": "How many professionals did not operate any treatment on dogs?",
     "database": "dog_kennels",
-    "query": "db.professionals.aggregate([{'$match': {'role_code': 'Dog Care Professional'}}, {'$lookup': {'from': 'treatments', 'localField': 'professional_id', 'foreignField': 'professional_id', 'as': 'treatments'}}, {'$unwind': '$treatments'}, {'$group': {'_id': null, 'count': {'$sum': 1}}}])",
-    "status": "FAIL",
-    "error": "REJECTED by safety check (unexpected name: null)",
+    "query": "db.professionals.aggregate([{'$match': {'role_code': 'Dog Care Professional'}}, {'$lookup': {'from': 'treatments', 'localField': 'professional_id', 'foreignField': 'professional_id', 'as': 'treatments'}}, {'$unwind': '$treatments'}, {'$group': {'_id': None, 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [],
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -2071,9 +2071,9 @@
     "id": "dk-c2",
     "question": "Which first names are used for professionals or owners but not used as dog names?",
     "database": "dog_kennels",
-    "query": "db.professionals.aggregate([{'$lookup': {'from': 'dogs', 'localField': 'first_name', 'foreignField': 'owner_id', 'as': 'dog_info'}}, {'$match': {'$expr': {'$and': [{'$ne': ['$dog_info', []]}, {'$eq': ['$dog_info.name', null]}]}}}])",
-    "status": "FAIL",
-    "error": "REJECTED by safety check (unexpected name: null)",
+    "query": "db.professionals.aggregate([{'$lookup': {'from': 'dogs', 'localField': 'first_name', 'foreignField': 'owner_id', 'as': 'dog_info'}}, {'$match': {'$expr': {'$and': [{'$ne': ['$dog_info', []]}, {'$eq': ['$dog_info.name', None]}]}}}])",
+    "status": "PASS",
+    "result": [],
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -2164,7 +2164,7 @@
     "id": "spider-concert_singer-6",
     "question": "List all song names by singers above the average age.",
     "database": "concert_singer",
-    "query": "db.singer.aggregate([{'$group': {'_id': '$Song_Name', 'avgAge': {'$avg': '$Age'}}}, {'$match': {'avgAge': {'$gt': db.singer.aggregate([{'$group': {'_id': null, 'avgAge': {'$avg': '$Age'}}}]).next()['avgAge']}}}])",
+    "query": "db.singer.aggregate([{'$group': {'_id': '$Song_Name', 'avgAge': {'$avg': '$Age'}}}, {'$match': {'avgAge': {'$gt': db.singer.aggregate([{'$group': {'_id': None, 'avgAge': {'$avg': '$Age'}}}]).next()['avgAge']}}}])",
     "status": "FAIL",
     "error": "REJECTED by safety check (method not allowed: next)",
     "non_empty_rate": false,
@@ -2198,7 +2198,7 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "2014",
+        "_id": "2015",
         "count": 3
       }
     ],
@@ -2229,10 +2229,17 @@
     "id": "spider-concert_singer-13",
     "question": "What is the average, minimum, and maximum age of all singers from France?",
     "database": "concert_singer",
-    "query": "db.singer.aggregate([{'$match': {'Country': 'France'}}, {'$group': {'_id': null, 'averageAge': {'$avg': '$Age'}, 'minAge': {'$min': '$Age'}, 'maxAge': {'$max': '$Age'}}}])",
-    "status": "FAIL",
-    "error": "REJECTED by safety check (unexpected name: null)",
-    "non_empty_rate": false,
+    "query": "db.singer.aggregate([{'$match': {'Country': 'France'}}, {'$group': {'_id': None, 'averageAge': {'$avg': '$Age'}, 'minAge': {'$min': '$Age'}, 'maxAge': {'$max': '$Age'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "averageAge": 34.5,
+        "minAge": 25,
+        "maxAge": 43
+      }
+    ],
+    "non_empty_rate": true,
     "execution_accuracy": false
   },
   {
@@ -2275,7 +2282,7 @@
     "database": "concert_singer",
     "query": "db.concert.aggregate([{'$lookup': {'from': 'singer_in_concert', 'localField': 'concert_ID', 'foreignField': 'concert_ID', 'as': 'singers'}}, {'$group': {'_id': '$concert_ID', 'theme': {'$first': '$Theme'}, 'num_singers': {'$size': '$singers'}}}])",
     "status": "FAIL",
-    "error": "unknown group operator '$size', full error: {'ok': 0.0, 'errmsg': \"unknown group operator '$size'\", 'code': 15952, 'codeName': 'Location15952', '$clusterTime': {'clusterTime': Timestamp(1787064167, 10), 'signature': {'hash': b'\\xe3\\xfc.\\x14\\xadg+2S\\xef\\xd1\\x81\\xc5\\xba\\x1fK\\xad\\xcf^\\xb0', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787064167, 10)}",
+    "error": "unknown group operator '$size', full error: {'ok': 0.0, 'errmsg': \"unknown group operator '$size'\", 'code': 15952, 'codeName': 'Location15952', '$clusterTime': {'clusterTime': Timestamp(1787201922, 4), 'signature': {'hash': b'\\xf51\\x12J\\xc6\\xd5\\x83\\x0c\\xa5\"\\x95\\x93\\'\\xe3\\x99\\xff\\xe5\\t~\\x93', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787201922, 4)}",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -2287,19 +2294,7 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "Justin Brown",
-        "num_concerts": 1
-      },
-      {
-        "_id": "Rose White",
-        "num_concerts": 1
-      },
-      {
         "_id": "Timbaland",
-        "num_concerts": 1
-      },
-      {
-        "_id": "John Nizinik",
         "num_concerts": 1
       },
       {
@@ -2307,7 +2302,19 @@
         "num_concerts": 1
       },
       {
+        "_id": "John Nizinik",
+        "num_concerts": 1
+      },
+      {
         "_id": "Tribal King",
+        "num_concerts": 1
+      },
+      {
+        "_id": "Justin Brown",
+        "num_concerts": 1
+      },
+      {
+        "_id": "Rose White",
         "num_concerts": 1
       }
     ],
@@ -2414,9 +2421,9 @@
     "id": "spider-pets_1-7",
     "question": "Find the number of dog pets that are raised by female students (with sex F).",
     "database": "pets_1",
-    "query": "db.pets.aggregate([{'$match': {'Sex': 'F'}}, {'$lookup': {'from': 'students', 'localField': 'StuID', 'foreignField': 'StuID', 'as': 'student_info'}}, {'$unwind': '$student_info'}, {'$group': {'_id': null, 'count': {'$sum': 1}}}])",
-    "status": "FAIL",
-    "error": "REJECTED by safety check (unexpected name: null)",
+    "query": "db.pets.aggregate([{'$match': {'Sex': 'F'}}, {'$lookup': {'from': 'students', 'localField': 'StuID', 'foreignField': 'StuID', 'as': 'student_info'}}, {'$unwind': '$student_info'}, {'$group': {'_id': None, 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [],
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -2607,7 +2614,7 @@
     "database": "network_1",
     "query": "db.highschooler.find({'grade': {'$gt': 5}, 'friend_id': {'$size': {'$gte': 2}}})",
     "status": "FAIL",
-    "error": "Failed to parse $size. Expected a number in: $size: { $gte: 2 }, full error: {'ok': 0.0, 'errmsg': 'Failed to parse $size. Expected a number in: $size: { $gte: 2 }', 'code': 2, 'codeName': 'BadValue', '$clusterTime': {'clusterTime': Timestamp(1787064168, 6), 'signature': {'hash': b't\\\\\\x83T}\\x1c{\\x17\\x9d\\xc1\\x11\\xa6\\xbe\\x9a\\x15\\x0e\\xd1\\xa7\\x80v', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787064168, 6)}",
+    "error": "Failed to parse $size. Expected a number in: $size: { $gte: 2 }, full error: {'ok': 0.0, 'errmsg': 'Failed to parse $size. Expected a number in: $size: { $gte: 2 }', 'code': 2, 'codeName': 'BadValue', '$clusterTime': {'clusterTime': Timestamp(1787201923, 4), 'signature': {'hash': b'\\x9e\\xa1\\x82\\nKgQPz\\x17\\x90|I|\\xa8\\xb4\\xc8\\xd1\\xff\\xec', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787201923, 4)}",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -2795,9 +2802,9 @@
     "id": "spider-network_1-28",
     "question": "Find the minimum grade of students who have no friends.",
     "database": "network_1",
-    "query": "db.highschooler.aggregate([{'$match': {'friend_id': {'$exists': False}}}, {'$group': {'_id': null, 'min_grade': {'$min': '$grade'}}}])",
-    "status": "FAIL",
-    "error": "REJECTED by safety check (unexpected name: null)",
+    "query": "db.highschooler.aggregate([{'$match': {'friend_id': {'$exists': False}}}, {'$group': {'_id': None, 'min_grade': {'$min': '$grade'}}}])",
+    "status": "PASS",
+    "result": [],
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -7069,31 +7076,7 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "daimler benz",
-        "count": 1
-      },
-      {
-        "_id": "toyota",
-        "count": 1
-      },
-      {
-        "_id": "bmw",
-        "count": 1
-      },
-      {
-        "_id": "chrysler",
-        "count": 1
-      },
-      {
-        "_id": "nissan",
-        "count": 1
-      },
-      {
-        "_id": "opel",
-        "count": 1
-      },
-      {
-        "_id": "volkswagen",
+        "_id": "volvo",
         "count": 1
       },
       {
@@ -7105,27 +7088,43 @@
         "count": 1
       },
       {
-        "_id": "volvo",
+        "_id": "opel",
         "count": 1
       },
       {
-        "_id": "peugeaut",
+        "_id": "volkswagen",
         "count": 1
       },
       {
-        "_id": "hyundai",
+        "_id": "nissan",
         "count": 1
       },
       {
-        "_id": "mazda",
+        "_id": "bmw",
         "count": 1
       },
       {
-        "_id": "fiat",
+        "_id": "chrysler",
         "count": 1
       },
       {
-        "_id": "kia",
+        "_id": "daimler benz",
+        "count": 1
+      },
+      {
+        "_id": "toyota",
+        "count": 1
+      },
+      {
+        "_id": "subaru",
+        "count": 1
+      },
+      {
+        "_id": "gm",
+        "count": 1
+      },
+      {
+        "_id": "ford",
         "count": 1
       },
       {
@@ -7137,23 +7136,31 @@
         "count": 1
       },
       {
-        "_id": "ford",
-        "count": 1
-      },
-      {
-        "_id": "gm",
-        "count": 1
-      },
-      {
         "_id": "saab",
         "count": 1
       },
       {
-        "_id": "subaru",
+        "_id": "triumph",
         "count": 1
       },
       {
-        "_id": "triumph",
+        "_id": "mazda",
+        "count": 1
+      },
+      {
+        "_id": "fiat",
+        "count": 1
+      },
+      {
+        "_id": "peugeaut",
+        "count": 1
+      },
+      {
+        "_id": "kia",
+        "count": 1
+      },
+      {
+        "_id": "hyundai",
         "count": 1
       }
     ],
@@ -7168,39 +7175,9 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "daimler benz",
+        "_id": "volvo",
         "count": 1,
-        "maker_full_name": "Daimler Benz"
-      },
-      {
-        "_id": "toyota",
-        "count": 1,
-        "maker_full_name": "Toyota"
-      },
-      {
-        "_id": "bmw",
-        "count": 1,
-        "maker_full_name": "BMW"
-      },
-      {
-        "_id": "chrysler",
-        "count": 1,
-        "maker_full_name": "Chrysler"
-      },
-      {
-        "_id": "nissan",
-        "count": 1,
-        "maker_full_name": "Nissan Motors"
-      },
-      {
-        "_id": "opel",
-        "count": 1,
-        "maker_full_name": "Opel"
-      },
-      {
-        "_id": "volkswagen",
-        "count": 1,
-        "maker_full_name": "Volkswagen"
+        "maker_full_name": "Volvo"
       },
       {
         "_id": "citroen",
@@ -7213,34 +7190,54 @@
         "maker_full_name": "Honda"
       },
       {
-        "_id": "volvo",
+        "_id": "opel",
         "count": 1,
-        "maker_full_name": "Volvo"
+        "maker_full_name": "Opel"
       },
       {
-        "_id": "peugeaut",
+        "_id": "volkswagen",
         "count": 1,
-        "maker_full_name": "Peugeaut"
+        "maker_full_name": "Volkswagen"
       },
       {
-        "_id": "hyundai",
+        "_id": "nissan",
         "count": 1,
-        "maker_full_name": "Hyundai"
+        "maker_full_name": "Nissan Motors"
       },
       {
-        "_id": "mazda",
+        "_id": "bmw",
         "count": 1,
-        "maker_full_name": "Mazda"
+        "maker_full_name": "BMW"
       },
       {
-        "_id": "fiat",
+        "_id": "chrysler",
         "count": 1,
-        "maker_full_name": "Fiat"
+        "maker_full_name": "Chrysler"
       },
       {
-        "_id": "kia",
+        "_id": "daimler benz",
         "count": 1,
-        "maker_full_name": "Kia Motors"
+        "maker_full_name": "Daimler Benz"
+      },
+      {
+        "_id": "toyota",
+        "count": 1,
+        "maker_full_name": "Toyota"
+      },
+      {
+        "_id": "subaru",
+        "count": 1,
+        "maker_full_name": "Subaru"
+      },
+      {
+        "_id": "gm",
+        "count": 1,
+        "maker_full_name": "General Motors"
+      },
+      {
+        "_id": "ford",
+        "count": 1,
+        "maker_full_name": "Ford Motor Company"
       },
       {
         "_id": "amc",
@@ -7253,29 +7250,39 @@
         "maker_full_name": "Renault"
       },
       {
-        "_id": "ford",
-        "count": 1,
-        "maker_full_name": "Ford Motor Company"
-      },
-      {
-        "_id": "gm",
-        "count": 1,
-        "maker_full_name": "General Motors"
-      },
-      {
         "_id": "saab",
         "count": 1,
         "maker_full_name": "Saab"
       },
       {
-        "_id": "subaru",
-        "count": 1,
-        "maker_full_name": "Subaru"
-      },
-      {
         "_id": "triumph",
         "count": 1,
         "maker_full_name": "Triumph"
+      },
+      {
+        "_id": "mazda",
+        "count": 1,
+        "maker_full_name": "Mazda"
+      },
+      {
+        "_id": "fiat",
+        "count": 1,
+        "maker_full_name": "Fiat"
+      },
+      {
+        "_id": "peugeaut",
+        "count": 1,
+        "maker_full_name": "Peugeaut"
+      },
+      {
+        "_id": "kia",
+        "count": 1,
+        "maker_full_name": "Kia Motors"
+      },
+      {
+        "_id": "hyundai",
+        "count": 1,
+        "maker_full_name": "Hyundai"
       }
     ],
     "non_empty_rate": true,
@@ -7319,38 +7326,6 @@
     "status": "PASS",
     "result": [
       {
-        "_id": 1976,
-        "avg_weight": 3078.735294117647
-      },
-      {
-        "_id": 1972,
-        "avg_weight": 3237.714285714286
-      },
-      {
-        "_id": 1970,
-        "avg_weight": 3441.3142857142857
-      },
-      {
-        "_id": 1974,
-        "avg_weight": 2877.925925925926
-      },
-      {
-        "_id": 1973,
-        "avg_weight": 3419.025
-      },
-      {
-        "_id": 1980,
-        "avg_weight": 2436.655172413793
-      },
-      {
-        "_id": 1979,
-        "avg_weight": 3055.344827586207
-      },
-      {
-        "_id": 1975,
-        "avg_weight": 3176.8
-      },
-      {
         "_id": 1982,
         "avg_weight": 2453.548387096774
       },
@@ -7363,12 +7338,44 @@
         "avg_weight": 2861.8055555555557
       },
       {
+        "_id": 1971,
+        "avg_weight": 2960.344827586207
+      },
+      {
+        "_id": 1980,
+        "avg_weight": 2436.655172413793
+      },
+      {
         "_id": 1981,
         "avg_weight": 2532.1666666666665
       },
       {
-        "_id": 1971,
-        "avg_weight": 2960.344827586207
+        "_id": 1974,
+        "avg_weight": 2877.925925925926
+      },
+      {
+        "_id": 1973,
+        "avg_weight": 3419.025
+      },
+      {
+        "_id": 1976,
+        "avg_weight": 3078.735294117647
+      },
+      {
+        "_id": 1970,
+        "avg_weight": 3441.3142857142857
+      },
+      {
+        "_id": 1972,
+        "avg_weight": 3237.714285714286
+      },
+      {
+        "_id": 1975,
+        "avg_weight": 3176.8
+      },
+      {
+        "_id": 1979,
+        "avg_weight": 3055.344827586207
       }
     ],
     "non_empty_rate": true,
@@ -7380,7 +7387,7 @@
     "database": "car_1",
     "query": "db.cars_data.aggregate([{'$match': {'Cylinders': '3'}}, {'$group': {'maxHorsepower': {'$max': '$Horsepower'}}}, {'$lookup': {'from': 'cars_data', 'localField': 'maxHorsepower', 'foreignField': 'Horsepower', 'as': 'carModels'}}, {'$project': {'make': '$carModels.Maker', 'maxHorsepower': '$maxHorsepower'}}])",
     "status": "FAIL",
-    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787064169, 3), 'signature': {'hash': b'\\xe5\\x85\\x83b`\\xfc\\x1esK\\xa5\\xb3\\xdf\\x17\\xa8\\x9d\\x01G\\x94\\x08\\xab', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787064169, 3)}",
+    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787201925, 1), 'signature': {'hash': b'\\xb5\\xedfvioS\\xb5vc\\xf4Z\\xa5\\xa3\\x9c\\xbb\\x00\\xe7\\x15\\x9f', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787201925, 1)}",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -7544,9 +7551,9 @@
     "id": "spider-car_1-39",
     "question": "What is the average horsepower of the cars before 1980?",
     "database": "car_1",
-    "query": "db.cars_data.aggregate([{'$match': {'Year': {'$lt': '1980'}}}, {'$group': {'_id': null, 'average_horsepower': {'$avg': '$Horsepower'}}}])",
-    "status": "FAIL",
-    "error": "REJECTED by safety check (unexpected name: null)",
+    "query": "db.cars_data.aggregate([{'$match': {'Year': {'$lt': '1980'}}}, {'$group': {'_id': None, 'average_horsepower': {'$avg': '$Horsepower'}}}])",
+    "status": "PASS",
+    "result": [],
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -12551,10 +12558,16 @@
     "id": "spider-world_1-37",
     "question": "What is the total population and maximum GNP in Asia?",
     "database": "world_1",
-    "query": "db.country.aggregate([{'$match': {'Continent': 'Asia'}}, {'$group': {'_id': null, 'total_population': {'$sum': '$Population'}, 'max_gnp': {'$max': '$GNP'}}}])",
-    "status": "FAIL",
-    "error": "REJECTED by safety check (unexpected name: null)",
-    "non_empty_rate": false,
+    "query": "db.country.aggregate([{'$match': {'Continent': 'Asia'}}, {'$group': {'_id': None, 'total_population': {'$sum': '$Population'}, 'max_gnp': {'$max': '$GNP'}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "total_population": 3705025700,
+        "max_gnp": 3787042
+      }
+    ],
+    "non_empty_rate": true,
     "execution_accuracy": false
   },
   {
@@ -13078,7 +13091,7 @@
         "count": 46
       },
       {
-        "_id": "Federal Republic",
+        "_id": "Dependent Territory of the UK",
         "count": 2
       },
       {
@@ -13086,7 +13099,7 @@
         "count": 2
       },
       {
-        "_id": "Dependent Territory of the UK",
+        "_id": "Federal Republic",
         "count": 2
       },
       {
@@ -13094,15 +13107,7 @@
         "count": 1
       },
       {
-        "_id": "Occupied by Marocco",
-        "count": 1
-      },
-      {
-        "_id": "Socialistic State",
-        "count": 1
-      },
-      {
-        "_id": "Islamic Republic",
+        "_id": "Overseas Department of France",
         "count": 1
       },
       {
@@ -13110,7 +13115,15 @@
         "count": 1
       },
       {
-        "_id": "Overseas Department of France",
+        "_id": "Islamic Republic",
+        "count": 1
+      },
+      {
+        "_id": "Socialistic State",
+        "count": 1
+      },
+      {
+        "_id": "Occupied by Marocco",
         "count": 1
       }
     ],
@@ -13121,10 +13134,15 @@
     "id": "spider-world_1-44",
     "question": "How many countries speak both English and Dutch?",
     "database": "world_1",
-    "query": "db.countrylanguage.aggregate([{'$match': {'Language': 'English'}}, {'$lookup': {'from': 'countrylanguage', 'localField': 'CountryCode', 'foreignField': 'CountryCode', 'as': 'english_languages'}}, {'$unwind': '$english_languages'}, {'$match': {'english_languages.Language': 'Dutch'}}, {'$group': {'_id': null, 'count': {'$sum': 1}}}])",
-    "status": "FAIL",
-    "error": "REJECTED by safety check (unexpected name: null)",
-    "non_empty_rate": false,
+    "query": "db.countrylanguage.aggregate([{'$match': {'Language': 'English'}}, {'$lookup': {'from': 'countrylanguage', 'localField': 'CountryCode', 'foreignField': 'CountryCode', 'as': 'english_languages'}}, {'$unwind': '$english_languages'}, {'$match': {'english_languages.Language': 'Dutch'}}, {'$group': {'_id': None, 'count': {'$sum': 1}}}])",
+    "status": "PASS",
+    "result": [
+      {
+        "_id": null,
+        "count": 3
+      }
+    ],
+    "non_empty_rate": true,
     "execution_accuracy": false
   },
   {
@@ -13316,20 +13334,40 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "Part of Denmark",
-        "total_population": 43000
+        "_id": "Emirate Federation",
+        "total_population": 2441000
+      },
+      {
+        "_id": "Republic",
+        "total_population": 338610500
+      },
+      {
+        "_id": "Federation",
+        "total_population": 7160400
+      },
+      {
+        "_id": "Constitutional Monarchy",
+        "total_population": 272881000
+      },
+      {
+        "_id": "Special Administrative Region of China",
+        "total_population": 7255000
+      },
+      {
+        "_id": "Federal Republic",
+        "total_population": 440455500
+      },
+      {
+        "_id": "Constitutional Monarchy, Federation",
+        "total_population": 60272000
       },
       {
         "_id": "US Territory",
         "total_population": 329000
       },
       {
-        "_id": "Monarchy (Sultanate)",
-        "total_population": 328000
-      },
-      {
-        "_id": "Territorial Collectivity of France",
-        "total_population": 7000
+        "_id": "Nonmetropolitan Territory of The Netherlands",
+        "total_population": 320000
       },
       {
         "_id": "Dependent Territory of the UK",
@@ -13344,16 +13382,20 @@
         "total_population": 5605000
       },
       {
+        "_id": "Part of Denmark",
+        "total_population": 43000
+      },
+      {
         "_id": "Monarchy",
         "total_population": 599000
       },
       {
-        "_id": "Constitutional Monarchy (Emirate)",
-        "total_population": 1972000
+        "_id": "Monarchy (Sultanate)",
+        "total_population": 328000
       },
       {
-        "_id": "Nonmetropolitan Territory of France",
-        "total_population": 449000
+        "_id": "Territorial Collectivity of France",
+        "total_population": 7000
       },
       {
         "_id": "Overseas Department of France",
@@ -13372,36 +13414,12 @@
         "total_population": 11201000
       },
       {
-        "_id": "Constitutional Monarchy",
-        "total_population": 272881000
+        "_id": "Constitutional Monarchy (Emirate)",
+        "total_population": 1972000
       },
       {
-        "_id": "Special Administrative Region of China",
-        "total_population": 7255000
-      },
-      {
-        "_id": "Federal Republic",
-        "total_population": 440455500
-      },
-      {
-        "_id": "Emirate Federation",
-        "total_population": 2441000
-      },
-      {
-        "_id": "Republic",
-        "total_population": 338610500
-      },
-      {
-        "_id": "Federation",
-        "total_population": 7160400
-      },
-      {
-        "_id": "Nonmetropolitan Territory of The Netherlands",
-        "total_population": 320000
-      },
-      {
-        "_id": "Constitutional Monarchy, Federation",
-        "total_population": 60272000
+        "_id": "Nonmetropolitan Territory of France",
+        "total_population": 449000
       }
     ],
     "non_empty_rate": true,
@@ -13415,14 +13433,14 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "Asia",
-        "avg_life_expectancy": 67.44117647058823,
-        "total_population": 3705025700
-      },
-      {
         "_id": "South America",
         "avg_life_expectancy": 70.94615384615385,
         "total_population": 345780000
+      },
+      {
+        "_id": "Africa",
+        "avg_life_expectancy": 52.5719298245614,
+        "total_population": 784475000
       },
       {
         "_id": "Oceania",
@@ -13430,9 +13448,9 @@
         "total_population": 30401150
       },
       {
-        "_id": "Africa",
-        "avg_life_expectancy": 52.5719298245614,
-        "total_population": 784475000
+        "_id": "Asia",
+        "avg_life_expectancy": 67.44117647058823,
+        "total_population": 3705025700
       }
     ],
     "non_empty_rate": true,
@@ -13504,11 +13522,11 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "GRD",
+        "_id": "ESH",
         "percentage": 100.0
       },
       {
-        "_id": "BMU",
+        "_id": "GRD",
         "percentage": 100.0
       },
       {
@@ -13520,7 +13538,7 @@
         "percentage": 100.0
       },
       {
-        "_id": "ESH",
+        "_id": "BMU",
         "percentage": 100.0
       }
     ],
@@ -13535,7 +13553,7 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "SLV",
+        "_id": "CUB",
         "percentage": 100.0
       }
     ],
@@ -13669,9 +13687,9 @@
     "id": "spider-dog_kennels-12",
     "question": "What is the average age of the dogs who have gone through any treatments?",
     "database": "dog_kennels",
-    "query": "db.dogs.aggregate([{'$lookup': {'from': 'treatments', 'localField': 'dog_id', 'foreignField': 'dog_id', 'as': 'treatments'}}, {'$match': {'treatments': {'$exists': True}}}, {'$group': {'_id': null, 'average_age': {'$avg': '$age'}}}])",
-    "status": "FAIL",
-    "error": "REJECTED by safety check (unexpected name: null)",
+    "query": "db.dogs.aggregate([{'$lookup': {'from': 'treatments', 'localField': 'dog_id', 'foreignField': 'dog_id', 'as': 'treatments'}}, {'$match': {'treatments': {'$exists': True}}}, {'$group': {'_id': None, 'average_age': {'$avg': '$age'}}}])",
+    "status": "PASS",
+    "result": [],
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -13749,9 +13767,9 @@
     "id": "spider-dog_kennels-23",
     "question": "How many dogs have an age below the average?",
     "database": "dog_kennels",
-    "query": "db.dogs.aggregate([{'$group': {'_id': '$age', 'count': {'$sum': 1}}}, {'$match': {'count': {'$lt': db.dogs.aggregate([{'$group': {'_id': null, 'avgAge': {'$avg': '$age'}}}])[0]['avgAge']}}}])",
+    "query": "db.dogs.aggregate([{'$group': {'_id': '$age', 'count': {'$sum': 1}}}, {'$match': {'count': {'$lt': db.dogs.aggregate([{'$group': {'_id': None, 'avgAge': {'$avg': '$age'}}}])[0]['avgAge']}}}])",
     "status": "FAIL",
-    "error": "REJECTED by safety check (unexpected name: null)",
+    "error": "'CommandCursor' object is not subscriptable",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
