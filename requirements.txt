@@ -39,10 +39,56 @@ huggingface_hub         # model download from HF; atlas-credentials.env's
 # MacBook migration guide. It's fine on Colab (where the notebooks already
 # `%pip install` it directly in-cell) but do not add it to this file.
 
+# --- Fine-tuning (fine_tuning/ -- LoRA training via MLX-LM) ---
+# 2026-08-21: mlx-lm's own dependency graph (mlx, huggingface_hub, protobuf)
+# doesn't touch tree-sitter/codebleu at all, but a full `pip install -r
+# requirements.txt` resolve still fails: codebleu==0.7.0's declared PyPI
+# metadata requires tree-sitter<0.23.0, which directly conflicts with the
+# tree-sitter>=0.23.0,<0.24.0 pin below (needed for tree-sitter-python==
+# 0.23.6). This is a declared-metadata conflict only, NOT a real runtime
+# incompatibility -- tree-sitter 0.23.2 + codebleu 0.7.0 are already
+# installed together in this venv and have been computing CodeBLEU scores
+# successfully; codebleu's setup metadata is just stricter than what
+# actually works. Because pip resolves the whole file jointly, it refuses
+# to proceed rather than trust the already-satisfied pair.
+# WORKAROUND: install mlx-lm standalone, not via -r:
+#   pip install mlx-lm
+# This resolves only mlx-lm's own (unrelated) dependency tree and leaves
+# the already-working tree-sitter/codebleu pair untouched. Don't try to
+# "fix" this by loosening the tree-sitter pin -- tree-sitter-python==
+# 0.23.6 needs tree-sitter>=0.23, so any range satisfying both codebleu's
+# declared bound and tree-sitter-python's would be empty; the two
+# packages' metadata is simply incompatible on paper even though the
+# actual installed versions work.
+mlx-lm                  # Apple's MLX-native LoRA trainer + inference.
+                        # Install via `pip install mlx-lm` (pip or conda are
+                        # the only officially supported install paths --
+                        # deliberately NOT via `brew install mlx-lm`: a brew
+                        # formula exists but installs into Homebrew's own
+                        # Python, not this project's .venv, which would
+                        # silently split the environment `pip install -r
+                        # requirements.txt` is meant to keep single-source.
+                        # Apple Silicon + macOS required -- pulls in `mlx`
+                        # itself and `huggingface_hub` as dependencies.
+                        # Verify GPU/Metal is picked up with:
+                        #   python3 -c "import mlx.core as mx; print(mx.default_device())"
+
 # --- Metrics (baseline notebook cells 7 + 9) ---
-codebleu
-tree-sitter
-tree-sitter-python
+codebleu==0.7.0          # pinned deliberately -- 2026-08-21: a bare
+                        # `codebleu` let pip's resolver backtrack to the
+                        # old 0.6.1 (while resolving the fine_tuning/
+                        # mlx-lm addition below), which bundles
+                        # tree_sitter_languages and compiles multi-language
+                        # grammar C sources from scratch at install time.
+                        # That compile step fails on Apple Silicon
+                        # (`ld: symbol(s) not found for architecture
+                        # arm64`) -- a broken legacy build path in that
+                        # package, unrelated to anything in this repo.
+                        # 0.7.0 uses the already-listed tree-sitter-python
+                        # wheel instead and installs cleanly. Pinned so
+                        # pip has no reason to ever consider 0.6.1 again.
+tree-sitter>=0.23.0,<0.24.0
+tree-sitter-python==0.23.6
 bert-score              # import name is bert_score
 
 # --- Data / plotting ---

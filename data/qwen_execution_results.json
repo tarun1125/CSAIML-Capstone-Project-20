@@ -66,7 +66,7 @@
     "database": "pets_1",
     "query": "db.pets.aggregate([{'$group': {'max_weight': {'$max': '$weight'}}}])",
     "status": "FAIL",
-    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787201917, 3), 'signature': {'hash': b'\\xee{\\xbe\\x04\\xbb^\\x85\\x11\\xdd\\xad4\\x16:k\\xd7\\xad~*\\x7fb', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787201917, 3)}",
+    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787375985, 8), 'signature': {'hash': b'\\xdeF\\xa7$\\x15$\\xa7\\xb7\\xa4\\x16\\x9fy\\xcdS\\x1e\\xfb\\xfe\\x0bk\\xee', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787375985, 8)}",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -119,6 +119,14 @@
     "status": "PASS",
     "result": [
       {
+        "_id": "10",
+        "count": 1
+      },
+      {
+        "_id": "1",
+        "count": 1
+      },
+      {
         "_id": "9",
         "count": 1
       },
@@ -129,14 +137,6 @@
       {
         "_id": "2",
         "count": 2
-      },
-      {
-        "_id": "10",
-        "count": 1
-      },
-      {
-        "_id": "1",
-        "count": 1
       }
     ],
     "non_empty_rate": true,
@@ -495,11 +495,11 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "2014",
+        "_id": "2015",
         "count": 3
       },
       {
-        "_id": "2015",
+        "_id": "2014",
         "count": 3
       }
     ],
@@ -539,11 +539,11 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "United States",
+        "_id": "Netherlands",
         "count": 1
       },
       {
-        "_id": "Netherlands",
+        "_id": "United States",
         "count": 1
       },
       {
@@ -560,7 +560,7 @@
     "database": "concert_singer",
     "query": "db.concert_singer.aggregate([{'$group': {'avg_capacity': {'$avg': '$Capacity'}}}])",
     "status": "FAIL",
-    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787201918, 10), 'signature': {'hash': b'\\x9bs\\x0c&\\x15\\xc7W\\xd1\\xee;\\x1b\\xb0\\xb0\\xb7[;zR\\xfe\\xe2', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787201918, 10)}",
+    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787375986, 9), 'signature': {'hash': b'\\t\\x08R\\xabZ\\xbd\\xd0\\xf7T\\x93\\x11\\x17~\\xe7\\xc7\\xfb\\xa0e\\xa6\\x9a', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787375986, 9)}",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -928,7 +928,7 @@
     "database": "car_1",
     "query": "db.cars_data.find({'maker': 'Renault'}, {'maker': 0, 'model': 1})",
     "status": "FAIL",
-    "error": "Cannot do inclusion on field model in exclusion projection, full error: {'ok': 0.0, 'errmsg': 'Cannot do inclusion on field model in exclusion projection', 'code': 31253, 'codeName': 'Location31253', '$clusterTime': {'clusterTime': Timestamp(1787201920, 1), 'signature': {'hash': b'v\\x93`Bf\\xfb\\xfcd\\xa0\\xe5\\x06\\xe7\\x95\\x0fl\\x8a2\\x90B\\xbe', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787201920, 1)}",
+    "error": "Cannot do inclusion on field model in exclusion projection, full error: {'ok': 0.0, 'errmsg': 'Cannot do inclusion on field model in exclusion projection', 'code': 31253, 'codeName': 'Location31253', '$clusterTime': {'clusterTime': Timestamp(1787375987, 3), 'signature': {'hash': b'ca\\x8f\\xee\\xf1\\x93uU/\\\\\\x7fM\\xda\\xe5N\\xdf&\\x84q\\x02', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787375987, 3)}",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -1127,16 +1127,20 @@
     "status": "PASS",
     "result": [
       {
-        "_id": 1979,
+        "_id": 1973,
+        "count": 40
+      },
+      {
+        "_id": 1970,
+        "count": 35
+      },
+      {
+        "_id": 1971,
         "count": 29
       },
       {
-        "_id": 1977,
-        "count": 28
-      },
-      {
-        "_id": 1978,
-        "count": 36
+        "_id": 1980,
+        "count": 29
       },
       {
         "_id": 1981,
@@ -1147,36 +1151,32 @@
         "count": 31
       },
       {
-        "_id": 1971,
-        "count": 29
-      },
-      {
-        "_id": 1972,
+        "_id": 1977,
         "count": 28
       },
       {
-        "_id": 1970,
-        "count": 35
+        "_id": 1978,
+        "count": 36
       },
       {
-        "_id": 1973,
-        "count": 40
+        "_id": 1979,
+        "count": 29
       },
       {
-        "_id": 1974,
-        "count": 27
+        "_id": 1975,
+        "count": 30
       },
       {
         "_id": 1976,
         "count": 34
       },
       {
-        "_id": 1980,
-        "count": 29
+        "_id": 1972,
+        "count": 28
       },
       {
-        "_id": 1975,
-        "count": 30
+        "_id": 1974,
+        "count": 27
       }
     ],
     "non_empty_rate": true,
@@ -1241,18 +1241,6 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "5",
-        "count": 1
-      },
-      {
-        "_id": "6",
-        "count": 2
-      },
-      {
-        "_id": "8",
-        "count": 2
-      },
-      {
         "_id": "2",
         "count": 4
       },
@@ -1271,6 +1259,18 @@
       {
         "_id": "7",
         "count": 1
+      },
+      {
+        "_id": "5",
+        "count": 1
+      },
+      {
+        "_id": "6",
+        "count": 2
+      },
+      {
+        "_id": "8",
+        "count": 2
       }
     ],
     "non_empty_rate": true,
@@ -1282,7 +1282,7 @@
     "database": "car_1",
     "query": "db.cars_data.aggregate([{'$group': {'max_acceleration_time': {'$max': '$accelerate'}}}])",
     "status": "FAIL",
-    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787201920, 6), 'signature': {'hash': b'v\\x93`Bf\\xfb\\xfcd\\xa0\\xe5\\x06\\xe7\\x95\\x0fl\\x8a2\\x90B\\xbe', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787201920, 6)}",
+    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787375988, 1), 'signature': {'hash': b'\\x04\\xe5\\xb6Gx\\x13\\xe2Io\\x027\\xe3\\xb1+mh7\\xd8\\xf0\\xa1', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787375988, 1)}",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -1293,6 +1293,14 @@
     "query": "db.model_list.json.aggregate([{'$group': {'_id': '$Maker', 'count': {'$sum': 1}}}])",
     "status": "PASS",
     "result": [
+      {
+        "_id": 6,
+        "count": 4
+      },
+      {
+        "_id": 10,
+        "count": 1
+      },
       {
         "_id": 14,
         "count": 1
@@ -1318,6 +1326,14 @@
         "count": 1
       },
       {
+        "_id": 7,
+        "count": 1
+      },
+      {
+        "_id": 22,
+        "count": 1
+      },
+      {
         "_id": 12,
         "count": 1
       },
@@ -1326,19 +1342,11 @@
         "count": 1
       },
       {
-        "_id": 7,
-        "count": 1
-      },
-      {
         "_id": 3,
         "count": 1
       },
       {
         "_id": 21,
-        "count": 1
-      },
-      {
-        "_id": 22,
         "count": 1
       },
       {
@@ -1376,14 +1384,6 @@
       {
         "_id": 4,
         "count": 5
-      },
-      {
-        "_id": 6,
-        "count": 4
-      },
-      {
-        "_id": 10,
-        "count": 1
       }
     ],
     "non_empty_rate": true,
@@ -1838,7 +1838,7 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "NIU",
+        "_id": "MNP",
         "Population": 0
       }
     ],
@@ -2282,7 +2282,7 @@
     "database": "concert_singer",
     "query": "db.concert.aggregate([{'$lookup': {'from': 'singer_in_concert', 'localField': 'concert_ID', 'foreignField': 'concert_ID', 'as': 'singers'}}, {'$group': {'_id': '$concert_ID', 'theme': {'$first': '$Theme'}, 'num_singers': {'$size': '$singers'}}}])",
     "status": "FAIL",
-    "error": "unknown group operator '$size', full error: {'ok': 0.0, 'errmsg': \"unknown group operator '$size'\", 'code': 15952, 'codeName': 'Location15952', '$clusterTime': {'clusterTime': Timestamp(1787201922, 4), 'signature': {'hash': b'\\xf51\\x12J\\xc6\\xd5\\x83\\x0c\\xa5\"\\x95\\x93\\'\\xe3\\x99\\xff\\xe5\\t~\\x93', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787201922, 4)}",
+    "error": "unknown group operator '$size', full error: {'ok': 0.0, 'errmsg': \"unknown group operator '$size'\", 'code': 15952, 'codeName': 'Location15952', '$clusterTime': {'clusterTime': Timestamp(1787375990, 1), 'signature': {'hash': b'\\x8f8~\\xc4K\\x10\\x8a\\x7f3\\x18d\\x08%C\\x80\\x85\\x83^\\x1a1', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787375990, 1)}",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -2294,7 +2294,19 @@
     "status": "PASS",
     "result": [
       {
+        "_id": "Justin Brown",
+        "num_concerts": 1
+      },
+      {
+        "_id": "Rose White",
+        "num_concerts": 1
+      },
+      {
         "_id": "Timbaland",
+        "num_concerts": 1
+      },
+      {
+        "_id": "Tribal King",
         "num_concerts": 1
       },
       {
@@ -2303,18 +2315,6 @@
       },
       {
         "_id": "John Nizinik",
-        "num_concerts": 1
-      },
-      {
-        "_id": "Tribal King",
-        "num_concerts": 1
-      },
-      {
-        "_id": "Justin Brown",
-        "num_concerts": 1
-      },
-      {
-        "_id": "Rose White",
         "num_concerts": 1
       }
     ],
@@ -2614,7 +2614,7 @@
     "database": "network_1",
     "query": "db.highschooler.find({'grade': {'$gt': 5}, 'friend_id': {'$size': {'$gte': 2}}})",
     "status": "FAIL",
-    "error": "Failed to parse $size. Expected a number in: $size: { $gte: 2 }, full error: {'ok': 0.0, 'errmsg': 'Failed to parse $size. Expected a number in: $size: { $gte: 2 }', 'code': 2, 'codeName': 'BadValue', '$clusterTime': {'clusterTime': Timestamp(1787201923, 4), 'signature': {'hash': b'\\x9e\\xa1\\x82\\nKgQPz\\x17\\x90|I|\\xa8\\xb4\\xc8\\xd1\\xff\\xec', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787201923, 4)}",
+    "error": "Failed to parse $size. Expected a number in: $size: { $gte: 2 }, full error: {'ok': 0.0, 'errmsg': 'Failed to parse $size. Expected a number in: $size: { $gte: 2 }', 'code': 2, 'codeName': 'BadValue', '$clusterTime': {'clusterTime': Timestamp(1787375991, 3), 'signature': {'hash': b'Y\\xec\\xd2\\xfe\\x97\\x0cz<\\x0f\\x8ee1\\xbe.\\xa1H\\x0f\\xfa\\xb3:', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787375991, 3)}",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -7076,6 +7076,22 @@
     "status": "PASS",
     "result": [
       {
+        "_id": "fiat",
+        "count": 1
+      },
+      {
+        "_id": "volkswagen",
+        "count": 1
+      },
+      {
+        "_id": "opel",
+        "count": 1
+      },
+      {
+        "_id": "nissan",
+        "count": 1
+      },
+      {
         "_id": "volvo",
         "count": 1
       },
@@ -7085,18 +7101,6 @@
       },
       {
         "_id": "honda",
-        "count": 1
-      },
-      {
-        "_id": "opel",
-        "count": 1
-      },
-      {
-        "_id": "volkswagen",
-        "count": 1
-      },
-      {
-        "_id": "nissan",
         "count": 1
       },
       {
@@ -7113,10 +7117,6 @@
       },
       {
         "_id": "toyota",
-        "count": 1
-      },
-      {
-        "_id": "subaru",
         "count": 1
       },
       {
@@ -7144,11 +7144,7 @@
         "count": 1
       },
       {
-        "_id": "mazda",
-        "count": 1
-      },
-      {
-        "_id": "fiat",
+        "_id": "subaru",
         "count": 1
       },
       {
@@ -7156,11 +7152,15 @@
         "count": 1
       },
       {
+        "_id": "hyundai",
+        "count": 1
+      },
+      {
         "_id": "kia",
         "count": 1
       },
       {
-        "_id": "hyundai",
+        "_id": "mazda",
         "count": 1
       }
     ],
@@ -7175,19 +7175,9 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "volvo",
+        "_id": "volkswagen",
         "count": 1,
-        "maker_full_name": "Volvo"
-      },
-      {
-        "_id": "citroen",
-        "count": 1,
-        "maker_full_name": "Citroen"
-      },
-      {
-        "_id": "honda",
-        "count": 1,
-        "maker_full_name": "Honda"
+        "maker_full_name": "Volkswagen"
       },
       {
         "_id": "opel",
@@ -7195,24 +7185,39 @@
         "maker_full_name": "Opel"
       },
       {
-        "_id": "volkswagen",
-        "count": 1,
-        "maker_full_name": "Volkswagen"
-      },
-      {
         "_id": "nissan",
         "count": 1,
         "maker_full_name": "Nissan Motors"
       },
       {
-        "_id": "bmw",
+        "_id": "mazda",
         "count": 1,
-        "maker_full_name": "BMW"
+        "maker_full_name": "Mazda"
+      },
+      {
+        "_id": "volvo",
+        "count": 1,
+        "maker_full_name": "Volvo"
+      },
+      {
+        "_id": "honda",
+        "count": 1,
+        "maker_full_name": "Honda"
+      },
+      {
+        "_id": "citroen",
+        "count": 1,
+        "maker_full_name": "Citroen"
       },
       {
         "_id": "chrysler",
         "count": 1,
         "maker_full_name": "Chrysler"
+      },
+      {
+        "_id": "bmw",
+        "count": 1,
+        "maker_full_name": "BMW"
       },
       {
         "_id": "daimler benz",
@@ -7225,9 +7230,9 @@
         "maker_full_name": "Toyota"
       },
       {
-        "_id": "subaru",
+        "_id": "triumph",
         "count": 1,
-        "maker_full_name": "Subaru"
+        "maker_full_name": "Triumph"
       },
       {
         "_id": "gm",
@@ -7255,19 +7260,14 @@
         "maker_full_name": "Saab"
       },
       {
-        "_id": "triumph",
+        "_id": "subaru",
         "count": 1,
-        "maker_full_name": "Triumph"
+        "maker_full_name": "Subaru"
       },
       {
-        "_id": "mazda",
+        "_id": "hyundai",
         "count": 1,
-        "maker_full_name": "Mazda"
-      },
-      {
-        "_id": "fiat",
-        "count": 1,
-        "maker_full_name": "Fiat"
+        "maker_full_name": "Hyundai"
       },
       {
         "_id": "peugeaut",
@@ -7280,9 +7280,9 @@
         "maker_full_name": "Kia Motors"
       },
       {
-        "_id": "hyundai",
+        "_id": "fiat",
         "count": 1,
-        "maker_full_name": "Hyundai"
+        "maker_full_name": "Fiat"
       }
     ],
     "non_empty_rate": true,
@@ -7326,16 +7326,16 @@
     "status": "PASS",
     "result": [
       {
-        "_id": 1982,
-        "avg_weight": 2453.548387096774
-      },
-      {
         "_id": 1977,
         "avg_weight": 2997.3571428571427
       },
       {
         "_id": 1978,
         "avg_weight": 2861.8055555555557
+      },
+      {
+        "_id": 1982,
+        "avg_weight": 2453.548387096774
       },
       {
         "_id": 1971,
@@ -7350,28 +7350,28 @@
         "avg_weight": 2532.1666666666665
       },
       {
-        "_id": 1974,
-        "avg_weight": 2877.925925925926
-      },
-      {
         "_id": 1973,
         "avg_weight": 3419.025
       },
       {
-        "_id": 1976,
-        "avg_weight": 3078.735294117647
-      },
-      {
-        "_id": 1970,
-        "avg_weight": 3441.3142857142857
+        "_id": 1974,
+        "avg_weight": 2877.925925925926
       },
       {
         "_id": 1972,
         "avg_weight": 3237.714285714286
       },
       {
+        "_id": 1970,
+        "avg_weight": 3441.3142857142857
+      },
+      {
         "_id": 1975,
         "avg_weight": 3176.8
+      },
+      {
+        "_id": 1976,
+        "avg_weight": 3078.735294117647
       },
       {
         "_id": 1979,
@@ -7387,7 +7387,7 @@
     "database": "car_1",
     "query": "db.cars_data.aggregate([{'$match': {'Cylinders': '3'}}, {'$group': {'maxHorsepower': {'$max': '$Horsepower'}}}, {'$lookup': {'from': 'cars_data', 'localField': 'maxHorsepower', 'foreignField': 'Horsepower', 'as': 'carModels'}}, {'$project': {'make': '$carModels.Maker', 'maxHorsepower': '$maxHorsepower'}}])",
     "status": "FAIL",
-    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787201925, 1), 'signature': {'hash': b'\\xb5\\xedfvioS\\xb5vc\\xf4Z\\xa5\\xa3\\x9c\\xbb\\x00\\xe7\\x15\\x9f', 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787201925, 1)}",
+    "error": "a group specification must include an _id, full error: {'ok': 0.0, 'errmsg': 'a group specification must include an _id', 'code': 15955, 'codeName': 'Location15955', '$clusterTime': {'clusterTime': Timestamp(1787375992, 3), 'signature': {'hash': b\"\\xb6'?\\xe4\\xf98Z\\xfa\\x19C\\t\\xfa\\x8e\\x1aJ\\xa7X\\x08\\xa5\\x90\", 'keyId': 7610923730616713217}}, 'operationTime': Timestamp(1787375992, 3)}",
     "non_empty_rate": false,
     "execution_accuracy": false
   },
@@ -7424,10 +7424,6 @@
     "status": "PASS",
     "result": [
       {
-        "_id": 6,
-        "max_accelerate": 21
-      },
-      {
         "_id": 4,
         "max_accelerate": 24.8
       },
@@ -7436,12 +7432,16 @@
         "max_accelerate": 13.5
       },
       {
+        "_id": 5,
+        "max_accelerate": 20.1
+      },
+      {
         "_id": 8,
         "max_accelerate": 22.2
       },
       {
-        "_id": 5,
-        "max_accelerate": 20.1
+        "_id": 6,
+        "max_accelerate": 21
       }
     ],
     "non_empty_rate": true,
@@ -13103,18 +13103,6 @@
         "count": 2
       },
       {
-        "_id": "Territorial Collectivity of France",
-        "count": 1
-      },
-      {
-        "_id": "Overseas Department of France",
-        "count": 1
-      },
-      {
-        "_id": "Monarchy",
-        "count": 1
-      },
-      {
         "_id": "Islamic Republic",
         "count": 1
       },
@@ -13124,6 +13112,18 @@
       },
       {
         "_id": "Occupied by Marocco",
+        "count": 1
+      },
+      {
+        "_id": "Territorial Collectivity of France",
+        "count": 1
+      },
+      {
+        "_id": "Overseas Department of France",
+        "count": 1
+      },
+      {
+        "_id": "Monarchy",
         "count": 1
       }
     ],
@@ -13334,40 +13334,20 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "Emirate Federation",
-        "total_population": 2441000
-      },
-      {
-        "_id": "Republic",
-        "total_population": 338610500
-      },
-      {
-        "_id": "Federation",
-        "total_population": 7160400
-      },
-      {
-        "_id": "Constitutional Monarchy",
-        "total_population": 272881000
-      },
-      {
-        "_id": "Special Administrative Region of China",
-        "total_population": 7255000
-      },
-      {
-        "_id": "Federal Republic",
-        "total_population": 440455500
-      },
-      {
-        "_id": "Constitutional Monarchy, Federation",
-        "total_population": 60272000
-      },
-      {
         "_id": "US Territory",
         "total_population": 329000
       },
       {
-        "_id": "Nonmetropolitan Territory of The Netherlands",
-        "total_population": 320000
+        "_id": "Part of Denmark",
+        "total_population": 43000
+      },
+      {
+        "_id": "Monarchy (Sultanate)",
+        "total_population": 328000
+      },
+      {
+        "_id": "Territorial Collectivity of France",
+        "total_population": 7000
       },
       {
         "_id": "Dependent Territory of the UK",
@@ -13382,20 +13362,16 @@
         "total_population": 5605000
       },
       {
-        "_id": "Part of Denmark",
-        "total_population": 43000
-      },
-      {
         "_id": "Monarchy",
         "total_population": 599000
       },
       {
-        "_id": "Monarchy (Sultanate)",
-        "total_population": 328000
+        "_id": "Constitutional Monarchy (Emirate)",
+        "total_population": 1972000
       },
       {
-        "_id": "Territorial Collectivity of France",
-        "total_population": 7000
+        "_id": "Nonmetropolitan Territory of France",
+        "total_population": 449000
       },
       {
         "_id": "Overseas Department of France",
@@ -13414,12 +13390,36 @@
         "total_population": 11201000
       },
       {
-        "_id": "Constitutional Monarchy (Emirate)",
-        "total_population": 1972000
+        "_id": "Constitutional Monarchy",
+        "total_population": 272881000
       },
       {
-        "_id": "Nonmetropolitan Territory of France",
-        "total_population": 449000
+        "_id": "Special Administrative Region of China",
+        "total_population": 7255000
+      },
+      {
+        "_id": "Federal Republic",
+        "total_population": 440455500
+      },
+      {
+        "_id": "Emirate Federation",
+        "total_population": 2441000
+      },
+      {
+        "_id": "Republic",
+        "total_population": 338610500
+      },
+      {
+        "_id": "Federation",
+        "total_population": 7160400
+      },
+      {
+        "_id": "Nonmetropolitan Territory of The Netherlands",
+        "total_population": 320000
+      },
+      {
+        "_id": "Constitutional Monarchy, Federation",
+        "total_population": 60272000
       }
     ],
     "non_empty_rate": true,
@@ -13433,6 +13433,11 @@
     "status": "PASS",
     "result": [
       {
+        "_id": "Oceania",
+        "avg_life_expectancy": 69.715,
+        "total_population": 30401150
+      },
+      {
         "_id": "South America",
         "avg_life_expectancy": 70.94615384615385,
         "total_population": 345780000
@@ -13441,11 +13446,6 @@
         "_id": "Africa",
         "avg_life_expectancy": 52.5719298245614,
         "total_population": 784475000
-      },
-      {
-        "_id": "Oceania",
-        "avg_life_expectancy": 69.715,
-        "total_population": 30401150
       },
       {
         "_id": "Asia",
@@ -13522,7 +13522,7 @@
     "status": "PASS",
     "result": [
       {
-        "_id": "ESH",
+        "_id": "BMU",
         "percentage": 100.0
       },
       {
@@ -13530,15 +13530,15 @@
         "percentage": 100.0
       },
       {
-        "_id": "SMR",
-        "percentage": 100.0
-      },
-      {
         "_id": "CUB",
         "percentage": 100.0
       },
       {
-        "_id": "BMU",
+        "_id": "SMR",
+        "percentage": 100.0
+      },
+      {
+        "_id": "ESH",
         "percentage": 100.0
       }
     ],

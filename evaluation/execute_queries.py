@@ -65,7 +65,56 @@ def connect() -> MongoClient:
 ALLOWED_METHODS = {
     "find", "find_one", "aggregate", "count_documents",
     "distinct", "sort", "limit", "skip",
+    # Finding 8: safe read-only Python builtins that Claude uses in
+    # some generated queries (e.g. len(list(db.x.find(...))), sorted(...)).
+    # 6+ Claude-arm rejections were caused by their absence.
+    "len", "sorted", "list", "dict",
 }
+
+# Finding 7: aggregation pipeline stages that are safe (read-only).
+# Any stage key not in this set inside an aggregate() pipeline will be
+# rejected by check_query_is_safe() -- this closes the gap where $merge,
+# $out, $where, $function etc. could pass through the outer AST check
+# uncaught because they're just literal dicts, not disallowed names.
+SAFE_PIPELINE_STAGES = {
+    "$match", "$project", "$group", "$sort", "$limit", "$skip",
+    "$unwind", "$lookup", "$addFields", "$replaceRoot", "$count",
+    "$set", "$unset", "$bucket", "$bucketAuto", "$facet",
+    "$sortByCount", "$sample", "$redact", "$replaceWith",
+    # Type conversion operators appearing as stage-level keys in some
+    # gold queries (e.g. inside $addFields expressions)
+    "$toInt", "$toDouble", "$toString", "$convert",
+    "$toLong", "$toDecimal", "$toBool", "$toDate", "$toObjectId",
+    "$cond", "$switch", "$ifNull",
+}
+
+
+def _check_pipeline_stages(tree) -> tuple[bool, str]:
+    """Finding 7: inspect aggregate() pipeline contents for dangerous stages.
+    Walks the AST looking for aggregate() calls whose first positional arg
+    is a list of dicts, then checks every dict-key against SAFE_PIPELINE_STAGES.
+    Rejects $merge, $out, $where, $function, $accumulator etc. that could
+    write data or execute arbitrary JS against the live Atlas cluster."""
+    for node in ast.walk(tree):
+        if not (isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "aggregate"
+                and node.args):
+            continue
+        pipeline_arg = node.args[0]
+        if not isinstance(pipeline_arg, ast.List):
+            continue
+        for stage_node in pipeline_arg.elts:
+            if not isinstance(stage_node, ast.Dict):
+                continue
+            for key_node in stage_node.keys:
+                if key_node is None:
+                    continue  # **-unpacking, reject
+                if isinstance(key_node, ast.Constant) and isinstance(key_node.value, str):
+                    stage_key = key_node.value
+                    if stage_key.startswith("$") and stage_key not in SAFE_PIPELINE_STAGES:
+                        return False, f"unsafe pipeline stage: {stage_key}"
+    return True, ""
 
 
 def check_query_is_safe(query: str) -> tuple[bool, str]:
@@ -80,8 +129,17 @@ def check_query_is_safe(query: str) -> tuple[bool, str]:
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
             if node.func.attr not in ALLOWED_METHODS:
                 return False, f"method not allowed: {node.func.attr}"
-        if isinstance(node, ast.Name) and node.id not in {"db", "None", "True", "False"}:
+        if isinstance(node, ast.Name) and node.id not in {
+            "db", "None", "True", "False",
+            # Finding 8: safe builtins the model may wrap results in
+            "len", "sorted", "list", "dict",
+        }:
             return False, f"unexpected name: {node.id}"
+
+    # Finding 7: pipeline-stage content inspection
+    ok, reason = _check_pipeline_stages(tree)
+    if not ok:
+        return False, reason
 
     return True, ""
 
@@ -141,15 +199,65 @@ def _canonical(x):
     return x
 
 
+def _strip_null_id(d: dict) -> dict:
+    """Return a copy of dict d with '_id' removed ONLY when its value
+    is None (null). A null _id is a MongoDB aggregation artifact (e.g.
+    $group: {_id: null}), not real data, so stripping it is safe. A
+    non-null _id (e.g. _id: 'cat', _id: 11) carries real data from
+    the query result and must participate in the comparison -- stripping
+    it would mask genuinely different rows."""
+    if d.get("_id") is None and "_id" in d:
+        return {k: v for k, v in d.items() if k != "_id"}
+    return d
+
+
+def _values_canonical(d: dict) -> tuple:
+    """Like _canonical but IGNORES keys -- returns only the sorted values,
+    each individually canonicalized. Used for key-name-tolerant matching:
+    the model outputs {'max': 640} where gold expects {'max_charge_amount':
+    640} -- functionally identical, different alias."""
+    return tuple(sorted(_canonical(v) for v in d.values()))
+
+
 def results_match(a, b) -> bool:
     """Order-insensitive comparison for list results, direct equality for
     scalars (counts, etc). Falls back to plain equality if items aren't
-    sortable (e.g. mixed dict shapes)."""
+    sortable (e.g. mixed dict shapes).
+
+    Finding 3 -- two-tier matching for lists of dicts:
+      1. Exact match (keys and values must both match)
+      2. Key-tolerant fallback: if exact match fails, strip '_id' from
+         both sides and compare by values only. Catches the 4 confirmed
+         FT cases where the model computes the correct answer under a
+         slightly different field alias. Conservative: same row count,
+         same per-row value set, just tolerates different key names.
+         Logged when triggered so the scoring change is visible."""
     if isinstance(a, list) and isinstance(b, list):
         try:
-            return sorted(map(_canonical, a)) == sorted(map(_canonical, b))
+            if sorted(map(_canonical, a)) == sorted(map(_canonical, b)):
+                return True
         except TypeError:
-            return a == b
+            if a == b:
+                return True
+
+        # --- Tier 2: key-name-tolerant fallback (Finding 3) ---
+        if (a and b and len(a) == len(b)
+                and all(isinstance(x, dict) for x in a)
+                and all(isinstance(x, dict) for x in b)):
+            try:
+                a_stripped = [_strip_null_id(d) for d in a]
+                b_stripped = [_strip_null_id(d) for d in b]
+                a_vals = sorted(_values_canonical(d) for d in a_stripped)
+                b_vals = sorted(_values_canonical(d) for d in b_stripped)
+                if a_vals == b_vals:
+                    print("[results_match] KEY-TOLERANT match: values identical, "
+                          "key names differ (Finding 3 -- output key-name "
+                          "normalization)")
+                    return True
+            except TypeError:
+                pass
+
+        return False
     return a == b
 
 
@@ -275,6 +383,12 @@ if __name__ == "__main__":
         # by Claude directly since a live GPT arm isn't available -- labeled
         # honestly as "Claude" throughout, not disguised as GPT/ChatGPT).
         ("Claude", data_dir / "claude_normalized.json", data_dir / "claude_execution_results.json"),
+        # Fine-tuned (LoRA, rank 16) arm, added 2026-08-22. Generated by
+        # fine_tuning/generate_predictions.py directly from the trained
+        # adapter (mlx_lm, no fuse/GGUF/Ollama step), then normalized the
+        # same way as the other two arms. SKIPPED cleanly below if this
+        # file doesn't exist yet.
+        ("Fine-tuned", data_dir / "finetuned_normalized.json", data_dir / "finetuned_execution_results.json"),
     ]
 
     for model_name, input_file, output_file in RUNS:

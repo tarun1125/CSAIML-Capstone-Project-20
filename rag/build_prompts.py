@@ -132,6 +132,12 @@ def render_schema_block(db_name: str, cards_by_db: dict) -> str:
     for c in cards:
         fields = ", ".join(f"{k} ({v})" for k, v in c["fields"].items())
         lines.append(f"- {c['collection']}: {{ {fields} }}")
+        # Finding 5: append FK (join) annotations so the model knows which
+        # fields link collections and whether a $toInt cast is needed.
+        fk_edges = c.get("fk_edges", [])
+        if fk_edges:
+            for fk in fk_edges:
+                lines.append(f"    FK: {fk}")
     return "\n".join(lines)
 
 

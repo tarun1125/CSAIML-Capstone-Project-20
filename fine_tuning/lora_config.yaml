@@ -1,0 +1,56 @@
+# LoRA fine-tuning config for the capstone's Qwen2.5-Coder-1.5B-Instruct
+# fine-tuning arm (baseline-style, see fine_tuning/README.md).
+#
+# Invoke with:
+#   mlx_lm.lora --config fine_tuning/lora_config.yaml
+#
+# CLI flags override any key here, which is how the smoke test uses this
+# same file without a second copy:
+#   mlx_lm.lora --config fine_tuning/lora_config.yaml \
+#     --iters 20 --adapter-path fine_tuning/adapters_smoketest \
+#     --steps-per-report 5 --steps-per-eval 10
+#
+# 2026-08-21: rank=16 / alpha=32 was the originally planned hyperparameter
+# pair. The installed mlx-lm (0.31.3) no longer takes a `--lora-parameters`
+# CLI flag at all -- LoRA hyperparameters only live in this YAML's
+# `lora_parameters` block now, and the block itself takes `scale` directly
+# rather than `alpha`. Converted here via the standard LoRA convention
+# scale = alpha / rank = 32 / 16 = 2.0 (confirmed against ml-explore/mlx-lm's
+# own docs and example config, not guessed).
+#
+# 2026-08-21: the smoke test OOM'd on the M5 Pro's Metal GPU during the
+# first backward pass (validation forward pass succeeded fine at loss=1.664
+# -- forward-only needs far less memory than backprop, which is why this
+# only showed up once real training started, not at model load or eval).
+# Fixed via batch_size 4->2 + grad_accumulation_steps=2: confirmed against
+# mlx-lm's own docs that `iters` still counts real optimizer weight
+# updates either way, and each update still sees an effective 4 examples
+# (2 micro-batches of 2, accumulated) -- so this changes ONLY peak memory
+# per step, not the training recipe/hyperparameter intent. grad_checkpoint
+# added as extra headroom (trades recompute time for memory on the
+# backward pass specifically, which is exactly where this OOM'd).
+
+model: "mlx-community/Qwen2.5-Coder-1.5B-Instruct-bf16"
+train: true
+fine_tune_type: lora
+data: "fine_tuning/data"
+adapter_path: "fine_tuning/adapters"
+
+iters: 200
+batch_size: 2
+grad_accumulation_steps: 2
+grad_checkpoint: true
+num_layers: 16
+max_seq_length: 2048
+val_batches: 25
+steps_per_report: 10
+steps_per_eval: 20
+save_every: 50
+
+optimizer: adamw
+learning_rate: 1.0e-5
+
+lora_parameters:
+  rank: 16
+  scale: 2.0
+  dropout: 0.0
