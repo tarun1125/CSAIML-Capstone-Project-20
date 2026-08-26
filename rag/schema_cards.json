@@ -1,0 +1,1102 @@
+[
+  {
+    "id": "concert_singer.stadium",
+    "database": "concert_singer",
+    "collection": "stadium",
+    "fields": {
+      "Stadium_ID": "int",
+      "Location": "str",
+      "Name": "str",
+      "Capacity": "int",
+      "Highest": "int",
+      "Lowest": "int",
+      "Average": "int"
+    },
+    "doc_count": 9,
+    "text": "database: concert_singer\ncollection: stadium\nfields: Stadium_ID (int), Location (str), Name (str), Capacity (int), Highest (int), Lowest (int), Average (int)"
+  },
+  {
+    "id": "concert_singer.concert",
+    "database": "concert_singer",
+    "collection": "concert",
+    "fields": {
+      "concert_ID": "int",
+      "concert_Name": "str",
+      "Theme": "str",
+      "Stadium_ID": "str",
+      "Year": "str"
+    },
+    "doc_count": 6,
+    "text": "database: concert_singer\ncollection: concert\nfields: concert_ID (int), concert_Name (str), Theme (str), Stadium_ID (str), Year (str)"
+  },
+  {
+    "id": "concert_singer.singer",
+    "database": "concert_singer",
+    "collection": "singer",
+    "fields": {
+      "Singer_ID": "int",
+      "Name": "str",
+      "Country": "str",
+      "Song_Name": "str",
+      "Song_release_year": "str",
+      "Age": "int",
+      "Is_male": "str"
+    },
+    "doc_count": 6,
+    "text": "database: concert_singer\ncollection: singer\nfields: Singer_ID (int), Name (str), Country (str), Song_Name (str), Song_release_year (str), Age (int), Is_male (str)"
+  },
+  {
+    "id": "concert_singer.singer_in_concert",
+    "database": "concert_singer",
+    "collection": "singer_in_concert",
+    "fields": {
+      "concert_ID": "int",
+      "Singer_ID": "str"
+    },
+    "doc_count": 10,
+    "text": "database: concert_singer\ncollection: singer_in_concert\nfields: concert_ID (int), Singer_ID (str)"
+  },
+  {
+    "id": "pets_1.Student",
+    "database": "pets_1",
+    "collection": "Student",
+    "fields": {
+      "StuID": "int",
+      "LName": "str",
+      "Fname": "str",
+      "Age": "int",
+      "Sex": "str",
+      "Major": "int",
+      "Advisor": "int",
+      "city_code": "str"
+    },
+    "doc_count": 34,
+    "text": "database: pets_1\ncollection: Student\nfields: StuID (int), LName (str), Fname (str), Age (int), Sex (str), Major (int), Advisor (int), city_code (str)"
+  },
+  {
+    "id": "pets_1.Has_Pet",
+    "database": "pets_1",
+    "collection": "Has_Pet",
+    "fields": {
+      "StuID": "int",
+      "PetID": "int"
+    },
+    "doc_count": 3,
+    "text": "database: pets_1\ncollection: Has_Pet\nfields: StuID (int), PetID (int)"
+  },
+  {
+    "id": "pets_1.Pets",
+    "database": "pets_1",
+    "collection": "Pets",
+    "fields": {
+      "PetID": "int",
+      "PetType": "str",
+      "pet_age": "int",
+      "weight": "float"
+    },
+    "doc_count": 3,
+    "text": "database: pets_1\ncollection: Pets\nfields: PetID (int), PetType (str), pet_age (int), weight (float)"
+  },
+  {
+    "id": "network_1.Friend",
+    "database": "network_1",
+    "collection": "Friend",
+    "fields": {
+      "student_id": "int",
+      "friend_id": "int"
+    },
+    "doc_count": 20,
+    "text": "database: network_1\ncollection: Friend\nfields: student_id (int), friend_id (int)"
+  },
+  {
+    "id": "network_1.Highschooler",
+    "database": "network_1",
+    "collection": "Highschooler",
+    "fields": {
+      "ID": "int",
+      "name": "str",
+      "grade": "int"
+    },
+    "doc_count": 16,
+    "text": "database: network_1\ncollection: Highschooler\nfields: ID (int), name (str), grade (int)"
+  },
+  {
+    "id": "network_1.Likes",
+    "database": "network_1",
+    "collection": "Likes",
+    "fields": {
+      "student_id": "int",
+      "liked_id": "int"
+    },
+    "doc_count": 10,
+    "text": "database: network_1\ncollection: Likes\nfields: student_id (int), liked_id (int)"
+  },
+  {
+    "id": "car_1.continents",
+    "database": "car_1",
+    "collection": "continents",
+    "fields": {
+      "ContId": "int",
+      "Continent": "str"
+    },
+    "doc_count": 5,
+    "text": "database: car_1\ncollection: continents\nfields: ContId (int), Continent (str)"
+  },
+  {
+    "id": "car_1.car_makers",
+    "database": "car_1",
+    "collection": "car_makers",
+    "fields": {
+      "Id": "int",
+      "Maker": "str",
+      "FullName": "str",
+      "Country": "str"
+    },
+    "doc_count": 22,
+    "text": "database: car_1\ncollection: car_makers\nfields: Id (int), Maker (str), FullName (str), Country (str)"
+  },
+  {
+    "id": "car_1.countries",
+    "database": "car_1",
+    "collection": "countries",
+    "fields": {
+      "CountryId": "int",
+      "CountryName": "str",
+      "Continent": "int"
+    },
+    "doc_count": 15,
+    "text": "database: car_1\ncollection: countries\nfields: CountryId (int), CountryName (str), Continent (int)"
+  },
+  {
+    "id": "car_1.model_list.json",
+    "database": "car_1",
+    "collection": "model_list.json",
+    "fields": {
+      "ModelId": "int",
+      "Maker": "int",
+      "Model": "str"
+    },
+    "doc_count": 36,
+    "text": "database: car_1\ncollection: model_list.json\nfields: ModelId (int), Maker (int), Model (str)"
+  },
+  {
+    "id": "car_1.cars_data",
+    "database": "car_1",
+    "collection": "cars_data",
+    "fields": {
+      "Id": "int",
+      "MPG": "str",
+      "Cylinders": "int",
+      "Edispl": "float",
+      "Horsepower": "str",
+      "Weight": "int",
+      "Accelerate": "float",
+      "Year": "int"
+    },
+    "doc_count": 406,
+    "text": "database: car_1\ncollection: cars_data\nfields: Id (int), MPG (str), Cylinders (int), Edispl (float), Horsepower (str), Weight (int), Accelerate (float), Year (int)"
+  },
+  {
+    "id": "car_1.car_names",
+    "database": "car_1",
+    "collection": "car_names",
+    "fields": {
+      "MakeId": "int",
+      "Model": "str",
+      "Make": "str"
+    },
+    "doc_count": 406,
+    "text": "database: car_1\ncollection: car_names\nfields: MakeId (int), Model (str), Make (str)"
+  },
+  {
+    "id": "world_1.city",
+    "database": "world_1",
+    "collection": "city",
+    "fields": {
+      "ID": "int",
+      "Name": "str",
+      "CountryCode": "str",
+      "District": "str",
+      "Population": "int"
+    },
+    "doc_count": 4079,
+    "text": "database: world_1\ncollection: city\nfields: ID (int), Name (str), CountryCode (str), District (str), Population (int)"
+  },
+  {
+    "id": "world_1.country",
+    "database": "world_1",
+    "collection": "country",
+    "fields": {
+      "Code": "str",
+      "Name": "str",
+      "Continent": "str",
+      "Region": "str",
+      "SurfaceArea": "float",
+      "IndepYear": "int, nullable",
+      "Population": "int",
+      "LifeExpectancy": "float, nullable",
+      "GNP": "float",
+      "GNPOld": "float, nullable",
+      "LocalName": "str",
+      "GovernmentForm": "str",
+      "HeadOfState": "str, nullable",
+      "Capital": "int, nullable",
+      "Code2": "str"
+    },
+    "doc_count": 239,
+    "text": "database: world_1\ncollection: country\nfields: Code (str), Name (str), Continent (str), Region (str), SurfaceArea (float), IndepYear (int, nullable), Population (int), LifeExpectancy (float, nullable), GNP (float), GNPOld (float, nullable), LocalName (str), GovernmentForm (str), HeadOfState (str, nullable), Capital (int, nullable), Code2 (str)"
+  },
+  {
+    "id": "world_1.countrylanguage",
+    "database": "world_1",
+    "collection": "countrylanguage",
+    "fields": {
+      "CountryCode": "str",
+      "Language": "str",
+      "IsOfficial": "str",
+      "Percentage": "float"
+    },
+    "doc_count": 984,
+    "text": "database: world_1\ncollection: countrylanguage\nfields: CountryCode (str), Language (str), IsOfficial (str), Percentage (float)"
+  },
+  {
+    "id": "dog_kennels.Breeds",
+    "database": "dog_kennels",
+    "collection": "Breeds",
+    "fields": {
+      "breed_code": "str",
+      "breed_name": "str"
+    },
+    "doc_count": 3,
+    "text": "database: dog_kennels\ncollection: Breeds\nfields: breed_code (str), breed_name (str)"
+  },
+  {
+    "id": "dog_kennels.Charges",
+    "database": "dog_kennels",
+    "collection": "Charges",
+    "fields": {
+      "charge_id": "int",
+      "charge_type": "str",
+      "charge_amount": "int"
+    },
+    "doc_count": 3,
+    "text": "database: dog_kennels\ncollection: Charges\nfields: charge_id (int), charge_type (str), charge_amount (int)"
+  },
+  {
+    "id": "dog_kennels.Sizes",
+    "database": "dog_kennels",
+    "collection": "Sizes",
+    "fields": {
+      "size_code": "str",
+      "size_description": "str"
+    },
+    "doc_count": 3,
+    "text": "database: dog_kennels\ncollection: Sizes\nfields: size_code (str), size_description (str)"
+  },
+  {
+    "id": "dog_kennels.Treatment_Types",
+    "database": "dog_kennels",
+    "collection": "Treatment_Types",
+    "fields": {
+      "treatment_type_code": "str",
+      "treatment_type_description": "str"
+    },
+    "doc_count": 3,
+    "text": "database: dog_kennels\ncollection: Treatment_Types\nfields: treatment_type_code (str), treatment_type_description (str)"
+  },
+  {
+    "id": "dog_kennels.Owners",
+    "database": "dog_kennels",
+    "collection": "Owners",
+    "fields": {
+      "owner_id": "int",
+      "first_name": "str",
+      "last_name": "str",
+      "street": "str",
+      "city": "str",
+      "state": "str",
+      "zip_code": "str",
+      "email_address": "str",
+      "home_phone": "str",
+      "cell_number": "str"
+    },
+    "doc_count": 15,
+    "text": "database: dog_kennels\ncollection: Owners\nfields: owner_id (int), first_name (str), last_name (str), street (str), city (str), state (str), zip_code (str), email_address (str), home_phone (str), cell_number (str)"
+  },
+  {
+    "id": "dog_kennels.Dogs",
+    "database": "dog_kennels",
+    "collection": "Dogs",
+    "fields": {
+      "dog_id": "int",
+      "owner_id": "int",
+      "abandoned_yn": "str",
+      "breed_code": "str",
+      "size_code": "str",
+      "name": "str",
+      "age": "str",
+      "date_of_birth": "str",
+      "gender": "str",
+      "weight": "str",
+      "date_arrived": "str",
+      "date_adopted": "str",
+      "date_departed": "str"
+    },
+    "doc_count": 15,
+    "text": "database: dog_kennels\ncollection: Dogs\nfields: dog_id (int), owner_id (int), abandoned_yn (str), breed_code (str), size_code (str), name (str), age (str), date_of_birth (str), gender (str), weight (str), date_arrived (str), date_adopted (str), date_departed (str)"
+  },
+  {
+    "id": "dog_kennels.Professionals",
+    "database": "dog_kennels",
+    "collection": "Professionals",
+    "fields": {
+      "professional_id": "int",
+      "role_code": "str",
+      "first_name": "str",
+      "street": "str",
+      "city": "str",
+      "state": "str",
+      "zip_code": "str",
+      "last_name": "str",
+      "email_address": "str",
+      "home_phone": "str",
+      "cell_number": "str"
+    },
+    "doc_count": 15,
+    "text": "database: dog_kennels\ncollection: Professionals\nfields: professional_id (int), role_code (str), first_name (str), street (str), city (str), state (str), zip_code (str), last_name (str), email_address (str), home_phone (str), cell_number (str)"
+  },
+  {
+    "id": "dog_kennels.Treatments",
+    "database": "dog_kennels",
+    "collection": "Treatments",
+    "fields": {
+      "treatment_id": "int",
+      "dog_id": "int",
+      "professional_id": "int",
+      "treatment_type_code": "str",
+      "date_of_treatment": "str",
+      "cost_of_treatment": "int"
+    },
+    "doc_count": 15,
+    "text": "database: dog_kennels\ncollection: Treatments\nfields: treatment_id (int), dog_id (int), professional_id (int), treatment_type_code (str), date_of_treatment (str), cost_of_treatment (int)"
+  },
+  {
+    "id": "college_2.classroom",
+    "database": "college_2",
+    "collection": "classroom",
+    "fields": {
+      "building": "str",
+      "room_number": "str",
+      "capacity": "int"
+    },
+    "doc_count": 30,
+    "text": "database: college_2\ncollection: classroom\nfields: building (str), room_number (str), capacity (int)"
+  },
+  {
+    "id": "college_2.department",
+    "database": "college_2",
+    "collection": "department",
+    "fields": {
+      "dept_name": "str",
+      "building": "str",
+      "budget": "float"
+    },
+    "doc_count": 20,
+    "text": "database: college_2\ncollection: department\nfields: dept_name (str), building (str), budget (float)"
+  },
+  {
+    "id": "college_2.course",
+    "database": "college_2",
+    "collection": "course",
+    "fields": {
+      "course_id": "str",
+      "title": "str",
+      "dept_name": "str",
+      "credits": "int"
+    },
+    "doc_count": 200,
+    "text": "database: college_2\ncollection: course\nfields: course_id (str), title (str), dept_name (str), credits (int)"
+  },
+  {
+    "id": "college_2.instructor",
+    "database": "college_2",
+    "collection": "instructor",
+    "fields": {
+      "ID": "str",
+      "name": "str",
+      "dept_name": "str",
+      "salary": "float"
+    },
+    "doc_count": 50,
+    "text": "database: college_2\ncollection: instructor\nfields: ID (str), name (str), dept_name (str), salary (float)"
+  },
+  {
+    "id": "college_2.section",
+    "database": "college_2",
+    "collection": "section",
+    "fields": {
+      "course_id": "str",
+      "sec_id": "str",
+      "semester": "str",
+      "year": "int",
+      "building": "str",
+      "room_number": "str",
+      "time_slot_id": "str"
+    },
+    "doc_count": 100,
+    "text": "database: college_2\ncollection: section\nfields: course_id (str), sec_id (str), semester (str), year (int), building (str), room_number (str), time_slot_id (str)"
+  },
+  {
+    "id": "college_2.teaches",
+    "database": "college_2",
+    "collection": "teaches",
+    "fields": {
+      "ID": "str",
+      "course_id": "str",
+      "sec_id": "str",
+      "semester": "str",
+      "year": "int"
+    },
+    "doc_count": 100,
+    "text": "database: college_2\ncollection: teaches\nfields: ID (str), course_id (str), sec_id (str), semester (str), year (int)"
+  },
+  {
+    "id": "college_2.student",
+    "database": "college_2",
+    "collection": "student",
+    "fields": {
+      "ID": "str",
+      "name": "str",
+      "dept_name": "str",
+      "tot_cred": "int"
+    },
+    "doc_count": 2000,
+    "text": "database: college_2\ncollection: student\nfields: ID (str), name (str), dept_name (str), tot_cred (int)"
+  },
+  {
+    "id": "college_2.takes",
+    "database": "college_2",
+    "collection": "takes",
+    "fields": {
+      "ID": "str",
+      "course_id": "str",
+      "sec_id": "str",
+      "semester": "str",
+      "year": "int",
+      "grade": "str"
+    },
+    "doc_count": 30000,
+    "text": "database: college_2\ncollection: takes\nfields: ID (str), course_id (str), sec_id (str), semester (str), year (int), grade (str)"
+  },
+  {
+    "id": "college_2.advisor",
+    "database": "college_2",
+    "collection": "advisor",
+    "fields": {
+      "s_ID": "str",
+      "i_ID": "str"
+    },
+    "doc_count": 2000,
+    "text": "database: college_2\ncollection: advisor\nfields: s_ID (str), i_ID (str)"
+  },
+  {
+    "id": "college_2.time_slot",
+    "database": "college_2",
+    "collection": "time_slot",
+    "fields": {
+      "time_slot_id": "str",
+      "day": "str",
+      "start_hr": "int",
+      "start_min": "int",
+      "end_hr": "int",
+      "end_min": "int"
+    },
+    "doc_count": 20,
+    "text": "database: college_2\ncollection: time_slot\nfields: time_slot_id (str), day (str), start_hr (int), start_min (int), end_hr (int), end_min (int)"
+  },
+  {
+    "id": "college_2.prereq",
+    "database": "college_2",
+    "collection": "prereq",
+    "fields": {
+      "course_id": "str",
+      "prereq_id": "str"
+    },
+    "doc_count": 100,
+    "text": "database: college_2\ncollection: prereq\nfields: course_id (str), prereq_id (str)"
+  },
+  {
+    "id": "college_1.CLASS",
+    "database": "college_1",
+    "collection": "CLASS",
+    "fields": {
+      "CLASS_CODE": "str",
+      "CRS_CODE": "str",
+      "CLASS_SECTION": "str",
+      "CLASS_TIME": "str",
+      "CLASS_ROOM": "str",
+      "PROF_NUM": "int"
+    },
+    "doc_count": 13,
+    "text": "database: college_1\ncollection: CLASS\nfields: CLASS_CODE (str), CRS_CODE (str), CLASS_SECTION (str), CLASS_TIME (str), CLASS_ROOM (str), PROF_NUM (int)"
+  },
+  {
+    "id": "college_1.COURSE",
+    "database": "college_1",
+    "collection": "COURSE",
+    "fields": {
+      "CRS_CODE": "str",
+      "DEPT_CODE": "str",
+      "CRS_DESCRIPTION": "str",
+      "CRS_CREDIT": "float"
+    },
+    "doc_count": 6,
+    "text": "database: college_1\ncollection: COURSE\nfields: CRS_CODE (str), DEPT_CODE (str), CRS_DESCRIPTION (str), CRS_CREDIT (float)"
+  },
+  {
+    "id": "college_1.DEPARTMENT",
+    "database": "college_1",
+    "collection": "DEPARTMENT",
+    "fields": {
+      "DEPT_CODE": "str",
+      "DEPT_NAME": "str",
+      "SCHOOL_CODE": "str",
+      "EMP_NUM": "int",
+      "DEPT_ADDRESS": "str",
+      "DEPT_EXTENSION": "str"
+    },
+    "doc_count": 11,
+    "text": "database: college_1\ncollection: DEPARTMENT\nfields: DEPT_CODE (str), DEPT_NAME (str), SCHOOL_CODE (str), EMP_NUM (int), DEPT_ADDRESS (str), DEPT_EXTENSION (str)"
+  },
+  {
+    "id": "college_1.EMPLOYEE",
+    "database": "college_1",
+    "collection": "EMPLOYEE",
+    "fields": {
+      "EMP_NUM": "int",
+      "EMP_LNAME": "str",
+      "EMP_FNAME": "str",
+      "EMP_INITIAL": "str",
+      "EMP_JOBCODE": "str",
+      "EMP_HIREDATE": "str",
+      "EMP_DOB": "str"
+    },
+    "doc_count": 37,
+    "text": "database: college_1\ncollection: EMPLOYEE\nfields: EMP_NUM (int), EMP_LNAME (str), EMP_FNAME (str), EMP_INITIAL (str), EMP_JOBCODE (str), EMP_HIREDATE (str), EMP_DOB (str)"
+  },
+  {
+    "id": "college_1.ENROLL",
+    "database": "college_1",
+    "collection": "ENROLL",
+    "fields": {
+      "CLASS_CODE": "str",
+      "STU_NUM": "int",
+      "ENROLL_GRADE": "str"
+    },
+    "doc_count": 6,
+    "text": "database: college_1\ncollection: ENROLL\nfields: CLASS_CODE (str), STU_NUM (int), ENROLL_GRADE (str)"
+  },
+  {
+    "id": "college_1.PROFESSOR",
+    "database": "college_1",
+    "collection": "PROFESSOR",
+    "fields": {
+      "EMP_NUM": "int",
+      "DEPT_CODE": "str",
+      "PROF_OFFICE": "str",
+      "PROF_EXTENSION": "str",
+      "PROF_HIGH_DEGREE": "str"
+    },
+    "doc_count": 22,
+    "text": "database: college_1\ncollection: PROFESSOR\nfields: EMP_NUM (int), DEPT_CODE (str), PROF_OFFICE (str), PROF_EXTENSION (str), PROF_HIGH_DEGREE (str)"
+  },
+  {
+    "id": "college_1.STUDENT",
+    "database": "college_1",
+    "collection": "STUDENT",
+    "fields": {
+      "STU_NUM": "int",
+      "STU_LNAME": "str",
+      "STU_FNAME": "str",
+      "STU_INIT": "str",
+      "STU_DOB": "str",
+      "STU_HRS": "int",
+      "STU_CLASS": "str",
+      "STU_GPA": "float",
+      "STU_TRANSFER": "int",
+      "DEPT_CODE": "str",
+      "STU_PHONE": "str",
+      "PROF_NUM": "int"
+    },
+    "doc_count": 8,
+    "text": "database: college_1\ncollection: STUDENT\nfields: STU_NUM (int), STU_LNAME (str), STU_FNAME (str), STU_INIT (str), STU_DOB (str), STU_HRS (int), STU_CLASS (str), STU_GPA (float), STU_TRANSFER (int), DEPT_CODE (str), STU_PHONE (str), PROF_NUM (int)"
+  },
+  {
+    "id": "hr_1.regions",
+    "database": "hr_1",
+    "collection": "regions",
+    "fields": {
+      "REGION_ID": "int",
+      "REGION_NAME": "str"
+    },
+    "doc_count": 4,
+    "text": "database: hr_1\ncollection: regions\nfields: REGION_ID (int), REGION_NAME (str)"
+  },
+  {
+    "id": "hr_1.countries",
+    "database": "hr_1",
+    "collection": "countries",
+    "fields": {
+      "COUNTRY_ID": "str",
+      "COUNTRY_NAME": "str",
+      "REGION_ID": "int"
+    },
+    "doc_count": 25,
+    "text": "database: hr_1\ncollection: countries\nfields: COUNTRY_ID (str), COUNTRY_NAME (str), REGION_ID (int)"
+  },
+  {
+    "id": "hr_1.departments",
+    "database": "hr_1",
+    "collection": "departments",
+    "fields": {
+      "DEPARTMENT_ID": "int",
+      "DEPARTMENT_NAME": "str",
+      "MANAGER_ID": "int",
+      "LOCATION_ID": "int"
+    },
+    "doc_count": 27,
+    "text": "database: hr_1\ncollection: departments\nfields: DEPARTMENT_ID (int), DEPARTMENT_NAME (str), MANAGER_ID (int), LOCATION_ID (int)"
+  },
+  {
+    "id": "hr_1.jobs",
+    "database": "hr_1",
+    "collection": "jobs",
+    "fields": {
+      "JOB_ID": "str",
+      "JOB_TITLE": "str",
+      "MIN_SALARY": "int",
+      "MAX_SALARY": "int"
+    },
+    "doc_count": 19,
+    "text": "database: hr_1\ncollection: jobs\nfields: JOB_ID (str), JOB_TITLE (str), MIN_SALARY (int), MAX_SALARY (int)"
+  },
+  {
+    "id": "hr_1.employees",
+    "database": "hr_1",
+    "collection": "employees",
+    "fields": {
+      "EMPLOYEE_ID": "int",
+      "FIRST_NAME": "str",
+      "LAST_NAME": "str",
+      "EMAIL": "str",
+      "PHONE_NUMBER": "str",
+      "HIRE_DATE": "str",
+      "JOB_ID": "str",
+      "SALARY": "int",
+      "COMMISSION_PCT": "int",
+      "MANAGER_ID": "int",
+      "DEPARTMENT_ID": "int"
+    },
+    "doc_count": 107,
+    "text": "database: hr_1\ncollection: employees\nfields: EMPLOYEE_ID (int), FIRST_NAME (str), LAST_NAME (str), EMAIL (str), PHONE_NUMBER (str), HIRE_DATE (str), JOB_ID (str), SALARY (int), COMMISSION_PCT (int), MANAGER_ID (int), DEPARTMENT_ID (int)"
+  },
+  {
+    "id": "hr_1.job_history",
+    "database": "hr_1",
+    "collection": "job_history",
+    "fields": {
+      "EMPLOYEE_ID": "int",
+      "START_DATE": "str",
+      "END_DATE": "str",
+      "JOB_ID": "str",
+      "DEPARTMENT_ID": "int"
+    },
+    "doc_count": 11,
+    "text": "database: hr_1\ncollection: job_history\nfields: EMPLOYEE_ID (int), START_DATE (str), END_DATE (str), JOB_ID (str), DEPARTMENT_ID (int)"
+  },
+  {
+    "id": "hr_1.locations",
+    "database": "hr_1",
+    "collection": "locations",
+    "fields": {
+      "LOCATION_ID": "int",
+      "STREET_ADDRESS": "str",
+      "POSTAL_CODE": "str",
+      "CITY": "str",
+      "STATE_PROVINCE": "str",
+      "COUNTRY_ID": "str"
+    },
+    "doc_count": 23,
+    "text": "database: hr_1\ncollection: locations\nfields: LOCATION_ID (int), STREET_ADDRESS (str), POSTAL_CODE (str), CITY (str), STATE_PROVINCE (str), COUNTRY_ID (str)"
+  },
+  {
+    "id": "store_1.artists",
+    "database": "store_1",
+    "collection": "artists",
+    "fields": {
+      "id": "int",
+      "name": "str"
+    },
+    "doc_count": 275,
+    "text": "database: store_1\ncollection: artists\nfields: id (int), name (str)"
+  },
+  {
+    "id": "store_1.albums",
+    "database": "store_1",
+    "collection": "albums",
+    "fields": {
+      "id": "int",
+      "title": "str",
+      "artist_id": "int"
+    },
+    "doc_count": 347,
+    "text": "database: store_1\ncollection: albums\nfields: id (int), title (str), artist_id (int)"
+  },
+  {
+    "id": "store_1.employees",
+    "database": "store_1",
+    "collection": "employees",
+    "fields": {
+      "id": "int",
+      "last_name": "str",
+      "first_name": "str",
+      "title": "str",
+      "reports_to": "int, nullable",
+      "birth_date": "str",
+      "hire_date": "str",
+      "address": "str",
+      "city": "str",
+      "state": "str",
+      "country": "str",
+      "postal_code": "str",
+      "phone": "str",
+      "fax": "str",
+      "email": "str"
+    },
+    "doc_count": 8,
+    "text": "database: store_1\ncollection: employees\nfields: id (int), last_name (str), first_name (str), title (str), reports_to (int, nullable), birth_date (str), hire_date (str), address (str), city (str), state (str), country (str), postal_code (str), phone (str), fax (str), email (str)"
+  },
+  {
+    "id": "store_1.customers",
+    "database": "store_1",
+    "collection": "customers",
+    "fields": {
+      "id": "int",
+      "first_name": "str",
+      "last_name": "str",
+      "company": "str, nullable",
+      "address": "str",
+      "city": "str",
+      "state": "str, nullable",
+      "country": "str",
+      "postal_code": "str, nullable",
+      "phone": "str, nullable",
+      "fax": "str, nullable",
+      "email": "str",
+      "support_rep_id": "int"
+    },
+    "doc_count": 59,
+    "text": "database: store_1\ncollection: customers\nfields: id (int), first_name (str), last_name (str), company (str, nullable), address (str), city (str), state (str, nullable), country (str), postal_code (str, nullable), phone (str, nullable), fax (str, nullable), email (str), support_rep_id (int)"
+  },
+  {
+    "id": "store_1.genres",
+    "database": "store_1",
+    "collection": "genres",
+    "fields": {
+      "id": "int",
+      "name": "str"
+    },
+    "doc_count": 25,
+    "text": "database: store_1\ncollection: genres\nfields: id (int), name (str)"
+  },
+  {
+    "id": "store_1.invoices",
+    "database": "store_1",
+    "collection": "invoices",
+    "fields": {
+      "id": "int",
+      "customer_id": "int",
+      "invoice_date": "str",
+      "billing_address": "str",
+      "billing_city": "str",
+      "billing_state": "str, nullable",
+      "billing_country": "str",
+      "billing_postal_code": "str, nullable",
+      "total": "float"
+    },
+    "doc_count": 412,
+    "text": "database: store_1\ncollection: invoices\nfields: id (int), customer_id (int), invoice_date (str), billing_address (str), billing_city (str), billing_state (str, nullable), billing_country (str), billing_postal_code (str, nullable), total (float)"
+  },
+  {
+    "id": "store_1.media_types",
+    "database": "store_1",
+    "collection": "media_types",
+    "fields": {
+      "id": "int",
+      "name": "str"
+    },
+    "doc_count": 5,
+    "text": "database: store_1\ncollection: media_types\nfields: id (int), name (str)"
+  },
+  {
+    "id": "store_1.tracks",
+    "database": "store_1",
+    "collection": "tracks",
+    "fields": {
+      "id": "int",
+      "name": "str",
+      "album_id": "int",
+      "media_type_id": "int",
+      "genre_id": "int",
+      "composer": "str, nullable",
+      "milliseconds": "int",
+      "bytes": "int",
+      "unit_price": "float"
+    },
+    "doc_count": 3503,
+    "text": "database: store_1\ncollection: tracks\nfields: id (int), name (str), album_id (int), media_type_id (int), genre_id (int), composer (str, nullable), milliseconds (int), bytes (int), unit_price (float)"
+  },
+  {
+    "id": "store_1.invoice_lines",
+    "database": "store_1",
+    "collection": "invoice_lines",
+    "fields": {
+      "id": "int",
+      "invoice_id": "int",
+      "track_id": "int",
+      "unit_price": "float",
+      "quantity": "int"
+    },
+    "doc_count": 2240,
+    "text": "database: store_1\ncollection: invoice_lines\nfields: id (int), invoice_id (int), track_id (int), unit_price (float), quantity (int)"
+  },
+  {
+    "id": "store_1.playlists",
+    "database": "store_1",
+    "collection": "playlists",
+    "fields": {
+      "id": "int",
+      "name": "str"
+    },
+    "doc_count": 18,
+    "text": "database: store_1\ncollection: playlists\nfields: id (int), name (str)"
+  },
+  {
+    "id": "store_1.playlist_tracks",
+    "database": "store_1",
+    "collection": "playlist_tracks",
+    "fields": {
+      "playlist_id": "int",
+      "track_id": "int"
+    },
+    "doc_count": 8715,
+    "text": "database: store_1\ncollection: playlist_tracks\nfields: playlist_id (int), track_id (int)"
+  },
+  {
+    "id": "bike_1.station",
+    "database": "bike_1",
+    "collection": "station",
+    "fields": {
+      "id": "int",
+      "name": "str",
+      "lat": "float",
+      "long": "float",
+      "dock_count": "int",
+      "city": "str",
+      "installation_date": "str"
+    },
+    "doc_count": 70,
+    "text": "database: bike_1\ncollection: station\nfields: id (int), name (str), lat (float), long (float), dock_count (int), city (str), installation_date (str)"
+  },
+  {
+    "id": "bike_1.status",
+    "database": "bike_1",
+    "collection": "status",
+    "fields": {
+      "station_id": "int",
+      "bikes_available": "int",
+      "docks_available": "int",
+      "time": "str"
+    },
+    "doc_count": 8487,
+    "text": "database: bike_1\ncollection: status\nfields: station_id (int), bikes_available (int), docks_available (int), time (str)"
+  },
+  {
+    "id": "bike_1.trip",
+    "database": "bike_1",
+    "collection": "trip",
+    "fields": {
+      "id": "int",
+      "duration": "int",
+      "start_date": "str",
+      "start_station_name": "str",
+      "start_station_id": "int",
+      "end_date": "str",
+      "end_station_name": "str",
+      "end_station_id": "int",
+      "bike_id": "int",
+      "subscription_type": "str",
+      "zip_code": "int"
+    },
+    "doc_count": 9959,
+    "text": "database: bike_1\ncollection: trip\nfields: id (int), duration (int), start_date (str), start_station_name (str), start_station_id (int), end_date (str), end_station_name (str), end_station_id (int), bike_id (int), subscription_type (str), zip_code (int)"
+  },
+  {
+    "id": "bike_1.weather",
+    "database": "bike_1",
+    "collection": "weather",
+    "fields": {
+      "date": "str",
+      "max_temperature_f": "int",
+      "mean_temperature_f": "int",
+      "min_temperature_f": "int",
+      "max_dew_point_f": "int",
+      "mean_dew_point_f": "int",
+      "min_dew_point_f": "int",
+      "max_humidity": "int",
+      "mean_humidity": "int",
+      "min_humidity": "int",
+      "max_sea_level_pressure_inches": "float",
+      "mean_sea_level_pressure_inches": "float",
+      "min_sea_level_pressure_inches": "float",
+      "max_visibility_miles": "int",
+      "mean_visibility_miles": "int",
+      "min_visibility_miles": "int",
+      "max_wind_Speed_mph": "int",
+      "mean_wind_speed_mph": "int",
+      "max_gust_speed_mph": "int",
+      "precipitation_inches": "int",
+      "cloud_cover": "int",
+      "events": "str",
+      "wind_dir_degrees": "int",
+      "zip_code": "int"
+    },
+    "doc_count": 3665,
+    "text": "database: bike_1\ncollection: weather\nfields: date (str), max_temperature_f (int), mean_temperature_f (int), min_temperature_f (int), max_dew_point_f (int), mean_dew_point_f (int), min_dew_point_f (int), max_humidity (int), mean_humidity (int), min_humidity (int), max_sea_level_pressure_inches (float), mean_sea_level_pressure_inches (float), min_sea_level_pressure_inches (float), max_visibility_miles (int), mean_visibility_miles (int), min_visibility_miles (int), max_wind_Speed_mph (int), mean_wind_speed_mph (int), max_gust_speed_mph (int), precipitation_inches (int), cloud_cover (int), events (str), wind_dir_degrees (int), zip_code (int)"
+  },
+  {
+    "id": "flight_2.airlines",
+    "database": "flight_2",
+    "collection": "airlines",
+    "fields": {
+      "uid": "int",
+      "Airline": "str",
+      "Abbreviation": "str",
+      "Country": "str"
+    },
+    "doc_count": 12,
+    "text": "database: flight_2\ncollection: airlines\nfields: uid (int), Airline (str), Abbreviation (str), Country (str)"
+  },
+  {
+    "id": "flight_2.airports",
+    "database": "flight_2",
+    "collection": "airports",
+    "fields": {
+      "City": "str",
+      "AirportCode": "str",
+      "AirportName": "str",
+      "Country": "str",
+      "CountryAbbrev": "str"
+    },
+    "doc_count": 100,
+    "text": "database: flight_2\ncollection: airports\nfields: City (str), AirportCode (str), AirportName (str), Country (str), CountryAbbrev (str)"
+  },
+  {
+    "id": "flight_2.flights",
+    "database": "flight_2",
+    "collection": "flights",
+    "fields": {
+      "Airline": "int",
+      "FlightNo": "int",
+      "SourceAirport": "str",
+      "DestAirport": "str"
+    },
+    "doc_count": 1200,
+    "text": "database: flight_2\ncollection: flights\nfields: Airline (int), FlightNo (int), SourceAirport (str), DestAirport (str)"
+  },
+  {
+    "id": "apartment_rentals.Apartment_Buildings",
+    "database": "apartment_rentals",
+    "collection": "Apartment_Buildings",
+    "fields": {
+      "building_id": "int",
+      "building_short_name": "str",
+      "building_full_name": "str",
+      "building_description": "str",
+      "building_address": "str",
+      "building_manager": "str",
+      "building_phone": "str"
+    },
+    "doc_count": 15,
+    "text": "database: apartment_rentals\ncollection: Apartment_Buildings\nfields: building_id (int), building_short_name (str), building_full_name (str), building_description (str), building_address (str), building_manager (str), building_phone (str)"
+  },
+  {
+    "id": "apartment_rentals.Apartments",
+    "database": "apartment_rentals",
+    "collection": "Apartments",
+    "fields": {
+      "apt_id": "int",
+      "building_id": "int",
+      "apt_type_code": "str",
+      "apt_number": "str",
+      "bathroom_count": "int",
+      "bedroom_count": "int",
+      "room_count": "str"
+    },
+    "doc_count": 15,
+    "text": "database: apartment_rentals\ncollection: Apartments\nfields: apt_id (int), building_id (int), apt_type_code (str), apt_number (str), bathroom_count (int), bedroom_count (int), room_count (str)"
+  },
+  {
+    "id": "apartment_rentals.Apartment_Facilities",
+    "database": "apartment_rentals",
+    "collection": "Apartment_Facilities",
+    "fields": {
+      "apt_id": "int",
+      "facility_code": "str"
+    },
+    "doc_count": 7,
+    "text": "database: apartment_rentals\ncollection: Apartment_Facilities\nfields: apt_id (int), facility_code (str)"
+  },
+  {
+    "id": "apartment_rentals.Guests",
+    "database": "apartment_rentals",
+    "collection": "Guests",
+    "fields": {
+      "guest_id": "int",
+      "gender_code": "str",
+      "guest_first_name": "str",
+      "guest_last_name": "str",
+      "date_of_birth": "str"
+    },
+    "doc_count": 15,
+    "text": "database: apartment_rentals\ncollection: Guests\nfields: guest_id (int), gender_code (str), guest_first_name (str), guest_last_name (str), date_of_birth (str)"
+  },
+  {
+    "id": "apartment_rentals.Apartment_Bookings",
+    "database": "apartment_rentals",
+    "collection": "Apartment_Bookings",
+    "fields": {
+      "apt_booking_id": "int",
+      "apt_id": "int",
+      "guest_id": "int",
+      "booking_status_code": "str",
+      "booking_start_date": "str",
+      "booking_end_date": "str"
+    },
+    "doc_count": 15,
+    "text": "database: apartment_rentals\ncollection: Apartment_Bookings\nfields: apt_booking_id (int), apt_id (int), guest_id (int), booking_status_code (str), booking_start_date (str), booking_end_date (str)"
+  },
+  {
+    "id": "apartment_rentals.View_Unit_Status",
+    "database": "apartment_rentals",
+    "collection": "View_Unit_Status",
+    "fields": {
+      "apt_id": "int",
+      "apt_booking_id": "int",
+      "status_date": "str",
+      "available_yn": "int"
+    },
+    "doc_count": 20,
+    "text": "database: apartment_rentals\ncollection: View_Unit_Status\nfields: apt_id (int), apt_booking_id (int), status_date (str), available_yn (int)"
+  }
+]
