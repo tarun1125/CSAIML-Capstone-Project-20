@@ -1,0 +1,103 @@
+# LoRA fine-tuning config for a SECOND adapter -- trained on all 23
+# databases via BATCHED schema prompts (see fine_tuning/prepare_data_23db.py
+# for why batching, not one 23-db monolith prompt per example). A separate
+# file from fine_tuning/lora_config.yaml (untouched), pointed at a separate
+# data dir and adapter path, so the original 6-db adapter/training run is
+# never at risk of being overwritten.
+#
+# Invoke with:
+#   mlx_lm.lora --config fine_tuning/lora_config_23db_1000iter.yaml
+#
+# STILL RECOMMENDED FIRST: a smoke test, same pattern the original config's
+# own header comment established --
+#   mlx_lm.lora --config fine_tuning/lora_config_23db_1000iter.yaml \
+#     --iters 20 --adapter-path fine_tuning/adapters_23db_1000iter_smoketest \
+#     --steps-per-report 5 --steps-per-eval 10
+# Less critical than it was for the (abandoned) 23-db-monolith version of
+# this config -- batching keeps examples close to the original 6-db
+# design's size class -- but still cheap insurance before a 200-iteration
+# run, and the only way to confirm the token-estimate below against real
+# tokenizer output on your actual hardware.
+#
+# ---------------------------------------------------------------------
+# WHY THIS CONFIG IS CLOSE TO THE ORIGINAL 6-DB CONFIG, NOT A REWRITE
+# ---------------------------------------------------------------------
+# max_seq_length: 2048 -> 4096 (not 8192).
+#   fine_tuning/prepare_data_23db.py's main() was actually run against real
+#   repo data (23 databases split into 6 batches of up to 4 each): worst-
+#   case batch is 8,909 characters (~2,227-2,545 tokens) -- the smallest is
+#   2,968 characters (~742-848 tokens). That's the same size class as the
+#   original single 6-db prompt (~3,700 chars), NOT the ~22,900-character
+#   monolith an earlier, abandoned version of this file was sized for. 4096
+#   leaves comfortable headroom above the ~2,545-token worst-case batch plus
+#   the question and assistant answer (~20-400 more tokens) -- the char-to-
+#   token ratio is still an ESTIMATE (no real tokenizer was available in the
+#   sandboxed verification environment), so if mlx_lm.lora's own startup
+#   logging reports truncated examples, raise this further before trusting
+#   the run.
+#
+# batch_size / grad_accumulation_steps / num_layers: UNCHANGED from the
+#   original working config (2 / 2 / 16), not the aggressive 1/4/8
+#   compromise the monolith version needed. The original config already
+#   needed batch_size 4->2 plus grad_checkpoint=true to avoid an OOM on
+#   the M5 Pro's 24GB unified memory at ~1,000-token average examples.
+#   This run's batches run up to ~2,545 tokens -- meaningfully longer, so
+#   there IS more memory pressure than the original run had, which is
+#   exactly why the smoke test above still matters -- but nowhere near
+#   the ~6-7x-longer monolith version, so starting from the already-proven
+#   config (rather than pre-emptively dropping to batch_size=1) is the
+#   more evidence-based starting point. If the smoke test OOMs anyway,
+#   batch_size=1 (next) and num_layers=8 (after that) are the same levers
+#   documented in this file's git history / the project status doc.
+#
+# grad_checkpoint: kept true -- no evidence it's unneeded now, and it was
+#   exactly what fixed the original OOM, so there's no reason to remove it
+#   pre-emptively for a run using longer sequences, not shorter ones.
+#
+# iters / learning_rate / lora_parameters: unchanged from the original --
+#   these govern LoRA hyperparameters and training length, not
+#   memory/sequence-length, so there's no evidence-based reason to change
+#   them here.
+
+# ---------------------------------------------------------------------
+# EPOCH-PARITY FIX (2026-08-28): the original fine_tuning/lora_config_23db.yaml
+# kept iters=200 identical to the 6-db adapter's config as a deliberate
+# controlled variable (isolate "did more data help" from "did we also train
+# longer"). The side effect, computed directly from fine_tuning/data_23db/
+# split_manifest.json's train count (1,091 examples) and this config's own
+# batch_size=2 x grad_accumulation_steps=2 (effective batch 4):
+#   6-db adapter:  200 iters x 4 = 800 examples seen / 219 train  = ~3.65 epochs
+#   23-db adapter: 200 iters x 4 = 800 examples seen / 1091 train = ~0.73 epochs
+# i.e. the 23-db adapter saw under 3/4 of ONE pass over its own training set.
+# This config restores the SAME ~3.65-epoch coverage on the larger 1,091-
+# example set: iters raised 200 -> 1000 (1000 x 4 = 4000 / 1091 = ~3.67 epochs),
+# nothing else touched (rank, num_layers, batch_size, grad_accumulation_steps,
+# learning_rate all identical to the original) so this isolates iteration
+# count as the single changed variable. adapter_path and save_every are also
+# changed below so this run writes to a NEW location and never overwrites the
+# already-reported 73/304 (24.0%) adapter/result.
+# ---------------------------------------------------------------------
+model: "mlx-community/Qwen2.5-Coder-1.5B-Instruct-bf16"
+train: true
+fine_tune_type: lora
+data: "fine_tuning/data_23db"
+adapter_path: "fine_tuning/adapters_23db_1000iter"
+
+iters: 1000
+batch_size: 2
+grad_accumulation_steps: 2
+grad_checkpoint: true
+num_layers: 16
+max_seq_length: 4096
+val_batches: 25
+steps_per_report: 10
+steps_per_eval: 20
+save_every: 100
+
+optimizer: adamw
+learning_rate: 1.0e-5
+
+lora_parameters:
+  rank: 16
+  scale: 2.0
+  dropout: 0.0

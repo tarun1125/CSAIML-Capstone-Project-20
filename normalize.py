@@ -3,10 +3,14 @@ import json
 import re
 import sys
 
-# Defaults keep this a no-argument, Qwen-only script like before. Pass two
-# paths on the command line to reuse it for the GPT arm instead of
-# duplicating the whole file:
-#   python normalize.py data/gpt_results.json data/gpt_normalized.json
+# 2026-08-28 fix: this comment used to say the no-argument default was
+# "Qwen-only" -- it never was; INPUT/OUTPUT below default to the Claude
+# arm's files. Confirmed real by a full codebase audit this session (the
+# comment and the code had silently disagreed since whichever commit last
+# touched the defaults without updating the words above it). Pass two paths
+# on the command line to reuse this script for any other arm instead of
+# duplicating the whole file, e.g.:
+#   python normalize.py data/qwen_results.json data/qwen_normalized.json
 INPUT = sys.argv[1] if len(sys.argv) > 1 else "data/claude_baseline_results.json"
 OUTPUT = sys.argv[2] if len(sys.argv) > 2 else "data/claude_normalized.json"
 

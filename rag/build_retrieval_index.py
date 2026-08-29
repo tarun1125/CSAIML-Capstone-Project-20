@@ -1,4 +1,4 @@
-# Embeds the 100-example few-shot pool (rag/data/rag_fewshot_pool.json,
+# Embeds the few-shot pool (rag/data/rag_fewshot_pool.json -- 1,213 examples as of round 3's dataset expansion; started at 100, then 244, then 588 -- read the pool's own length at runtime below rather than trusting a number in this comment again,
 # produced by build_split.py) with all-MiniLM-L6-v2 and builds a flat FAISS
 # index over the embeddings. Index + row-aligned metadata are saved into
 # rag/data/ alongside the rest of the RAG-specific artifacts.

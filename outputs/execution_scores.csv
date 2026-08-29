@@ -1,8 +1,3 @@
 Model,Accuracy,NonEmptyRate,RanOK
 Claude,55.41,91.15,93.77
-Qwen2.5,4.26,30.82,85.57
-
-
-RanOK --> Queries Ran without syntax errors
-NonEmptyRate --> Queries fetch non-zero/empty results
-Accuracy --> How many of them matched wit Golden Dataset response
+Qwen2.5,4.26,31.8,88.52

@@ -63,6 +63,10 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 log = logging.getLogger("rag.build_prompts")
 
 TOP_K = int(sys.argv[1]) if len(sys.argv) > 1 else 10
+# 2026-08-28, Finding 5 A/B test (MLX-adapted -- see docs/finding5_ab_test_guide.md):
+#   python rag/build_prompts.py 10        # FK annotations included (default, current behavior)
+#   python rag/build_prompts.py 10 nofk   # FK annotations omitted -- reproduces the pre-Finding-5 prompt
+INCLUDE_FK = not (len(sys.argv) > 2 and sys.argv[2].lower() == "nofk")
 
 PROMPT_HEADER = (
     "You are a MongoDB query expert.\n"
@@ -84,7 +88,15 @@ PROMPT_RULES = (
     "match the expected answer even if every other field is correct.\n"
     "6. Follow the style of the example query/answer pairs above -- same "
     "operators, same level of nesting -- when the current question is "
-    "similar in shape to one of them"
+    "similar in shape to one of them\n"
+    "7. $size inside a $match/find() FILTER only accepts a literal integer "
+    "for an exact array-length match, e.g. {\"field\": {\"$size\": 3}}. It "
+    "does NOT accept a comparison operator -- {\"field\": {\"$size\": "
+    "{\"$gte\": 4}}} is INVALID and will error at query time. For "
+    "'at least/more than/fewer than N items', either (a) use $expr with the "
+    "aggregation $size operator: {\"$expr\": {\"$gte\": [{\"$size\": "
+    "\"$field\"}, 4]}}, or (b) compute a count via $group/$addFields first, "
+    "then $match on that count field."
 )
 
 # Restores a warning that existed in the baseline arm's system prompt
@@ -107,11 +119,54 @@ def render_numeric_string_note(db_name: str) -> str:
     fields = STRING_TYPED_NUMERIC_FIELDS.get(db_name)
     if not fields:
         return ""
-    return (
+    note = (
         "\nNote: some logically-numeric fields in this schema are stored as "
         f"strings ({', '.join(fields)}) -- use $toInt / $toDouble when "
         "comparing, filtering, or joining on these.\n"
     )
+    if db_name == "car_1":
+        # cars_data.Horsepower/MPG also hold the LITERAL STRING "null" for
+        # some rows (not a real null, not missing -- an actual "null" text
+        # value). $toDouble/$toInt on that value throws a MongoDB server
+        # error and fails the whole query. Confirmed cause of two real
+        # scored failures (spider-car_1-44, spider-car_1-81) -- both cast
+        # Horsepower/MPG straight to $toDouble with no "null"-string guard.
+        note += (
+            "IMPORTANT: cars_data.Horsepower and cars_data.MPG contain the "
+            "literal string \"null\" for some rows. ALWAYS exclude it first, "
+            "e.g. add {\"MPG\": {\"$ne\": \"null\"}} to your $match stage "
+            "BEFORE any $toDouble/$toInt/$avg/$max/$min on that field.\n"
+        )
+    return note
+
+
+# 2026-08-28: chinook_1/store_1 retrieval-confusion finding, verified and
+# CORRECTED this session. Round 2's dataset-expansion note claimed store_1
+# is "confirmed identical underlying data" to chinook_1 -- true for 9 of 11
+# collections (Album/Artist/Customer/Employee/Genre/InvoiceLine/MediaType/
+# Playlist/Track match byte-for-byte on every field, verified directly
+# against database/mongodb/{chinook_1,store_1}/*.json), but NOT exactly:
+# Invoice.InvoiceDate is offset by a constant 2 years between the two
+# exports (chinook_1's 2009-01-01 == store_1's 2007-01-01, same invoice,
+# same amount, same customer, same address), and PlaylistTrack's actual
+# playlist/track associations differ between the two dumps (not just
+# reordered -- different membership). Because of this, chinook_1 and store_1
+# were deliberately NOT merged into one database label this session, even
+# though doing so would fix RAG's retrieval confusion (chinook_1's few-shot
+# neighbors currently vote store_1 100% of the time, 0 exceptions -- they're
+# similar enough in embedding space that content-based retrieval structurally
+# cannot tell them apart). A full merge would need to rewrite each of
+# chinook_1's ~42 gold queries into store_1's naming AND verify none of them
+# touch InvoiceDate or PlaylistTrack (where the merge would silently produce
+# a wrong-but-plausible answer) -- not done, flagged as a real follow-up if
+# this confusion turns out to matter more than documenting it here. The
+# college_1/college_2/college_3 batch-collision bug (see
+# fine_tuning/prepare_data_23db.py's COLLISION_GROUPS) is a DIFFERENT root
+# cause even though it looks similar on the surface -- that one is a
+# fine-tuning batch-composition bug with a clean, low-risk fix (never put
+# same-domain databases in one training batch); this one is a RAG
+# retrieval-ambiguity problem inherent to the data itself, with no
+# equivalently clean fix available.
 
 
 def majority_vote_database(neighbor_dbs: list[str]) -> str:
@@ -126,7 +181,7 @@ def majority_vote_database(neighbor_dbs: list[str]) -> str:
     return neighbor_dbs[0]  # tie-break: rank-1 neighbor
 
 
-def render_schema_block(db_name: str, cards_by_db: dict) -> str:
+def render_schema_block(db_name: str, cards_by_db: dict, include_fk: bool = True) -> str:
     cards = cards_by_db.get(db_name, [])
     lines = [f"Schema ({db_name}, {len(cards)} collection(s) -- retrieved database, full schema):\n"]
     for c in cards:
@@ -134,7 +189,11 @@ def render_schema_block(db_name: str, cards_by_db: dict) -> str:
         lines.append(f"- {c['collection']}: {{ {fields} }}")
         # Finding 5: append FK (join) annotations so the model knows which
         # fields link collections and whether a $toInt cast is needed.
-        fk_edges = c.get("fk_edges", [])
+        # include_fk=False reproduces the pre-Finding-5 prompt exactly, for
+        # the A/B test (see docs/finding5_ab_test_guide.md) -- run this
+        # script twice, once per value, rather than diffing two prompt
+        # styles that also happen to differ in ways unrelated to FK lines.
+        fk_edges = c.get("fk_edges", []) if include_fk else []
         if fk_edges:
             for fk in fk_edges:
                 lines.append(f"    FK: {fk}")
@@ -191,7 +250,7 @@ def main():
             PROMPT_HEADER
             + render_examples_block(neighbors)
             + "\n"
-            + render_schema_block(predicted_database, cards_by_db)
+            + render_schema_block(predicted_database, cards_by_db, include_fk=INCLUDE_FK)
             + render_numeric_string_note(predicted_database)
             + "\n"
             + PROMPT_RULES
@@ -213,9 +272,22 @@ def main():
                   case_id, gold_database, predicted_database, database_match,
                   [n["id"] for n in neighbors])
 
-    out_name = "rag_prompts.json" if TOP_K == 10 else f"rag_prompts_k{TOP_K}.json"
+    if not INCLUDE_FK:
+        out_name = "rag_prompts_nofk.json"
+    elif TOP_K == 10:
+        out_name = "rag_prompts.json"
+    else:
+        out_name = f"rag_prompts_k{TOP_K}.json"
     out_path = rag_data_dir / out_name
     out_path.write_text(json.dumps(prompts, indent=2), encoding="utf-8")
+    if INCLUDE_FK and TOP_K == 10:
+        # Also keep a stably-named FK copy for the A/B test (see
+        # docs/finding5_ab_test_guide.md) so rag_prompts.json can keep
+        # changing with future K-sweeps/database expansions without the
+        # A/B test's "fk" reference silently going stale.
+        fk_copy_path = rag_data_dir / "rag_prompts_fk.json"
+        fk_copy_path.write_text(json.dumps(prompts, indent=2), encoding="utf-8")
+        log.info("Also wrote FK copy -> %s", fk_copy_path)
 
     accuracy = db_match_count / len(test_cases)
     log.info("SUMMARY  TOP_K=%d  database retrieval accuracy: %d/%d = %.1f%%",

@@ -1,0 +1,4 @@
+Split,Correct,Total,Accuracy
+InScope,29,80,36.25
+OutOfScopeGeneralization,19,224,8.48
+AllPooled_DO_NOT_QUOTE_ALONE,48,304,15.79

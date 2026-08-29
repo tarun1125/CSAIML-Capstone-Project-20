@@ -1,0 +1,2738 @@
+[
+  {
+    "id": "spider-car_1-39",
+    "question": "What is the average horsepower of the cars before 1980?",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.cars_data.aggregate([{\"$match\": {\"Year\": {\"$lt\": 1980}, \"Horsepower\": {\"$ne\": \"null\"}}}, {\"$addFields\": {\"HorsepowerNum\": {\"$toInt\": \"$Horsepower\"}}}, {\"$group\": {\"_id\": None, \"avg_horsepower\": {\"$avg\": \"$HorsepowerNum\"}}}, {\"$project\": {\"_id\": 0, \"avg_horsepower\": 1}}])"
+  },
+  {
+    "id": "spider-dog_kennels-39",
+    "question": "How much does the most expensive charge type costs?",
+    "database": "dog_kennels",
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Charges.aggregate([{\"$group\": {\"_id\": None, \"max_charge\": {\"$max\": \"$charge_amount\"}}}, {\"$project\": {\"_id\": 0, \"max_charge\": 1}}])"
+  },
+  {
+    "id": "car-h3",
+    "question": "Report all Asian automakers: their full name and country name.",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "high",
+    "generated_query": "db.car_makers.find({\"Country\": \"Asia\"}, {\"_id\": 0, \"FullName\": 1, \"CountryName\": 1})"
+  },
+  {
+    "id": "spider-car_1-14",
+    "question": "Which are the car makers which produce at least 2 models and more than 3 car makers ? List the id and the maker .",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.car_makers.aggregate([{\"$match\": {\"$expr\": {\"$and\": [{\"$gte\": [{\"$size\": \"$models\"}, 2]}, {\"$gt\": [{\"$size\": \"$makers\"}, 3]}]}}}, {\"$project\": {\"_id\": 0, \"Maker\": 1}}])"
+  },
+  {
+    "id": 12,
+    "question": "For each maker, find the model with the highest horsepower.",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "complex",
+    "generated_query": "db.car_names.aggregate([\n    {\"$lookup\": {\"from\": \"cars_data\", \"localField\": \"MakeId\", \"foreignField\": \"Id\", \"as\": \"car_data\"}},\n    {\"$unwind\": \"$car_data\"},\n    {\"$group\": {\"_id\": \"$Make\", \"max_horsepower\": {\"$max\": \"$car_data.Horsepower\"}}},\n    {\"$lookup\": {\"from\": \"car_names\", \"localField\": \"max_horsepower\", \"foreignField\": \"Id\", \"as\": \"car_name\"}},\n    {\"$project\": {\"_id\": 0, \"Make\": \"$_id\", \"Model\": \"$car_name.Model\"}}\n])"
+  },
+  {
+    "id": "dk-e1",
+    "question": "What is the average age of all the dogs?",
+    "database": "dog_kennels",
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Dogs.aggregate([{\"$addFields\": {\"age_num\": {\"$toInt\": \"$age\"}}}, {\"$group\": {\"_id\": None, \"avg_age\": {\"$avg\": \"$age_num\"}}}, {\"$project\": {\"_id\": 0, \"avg_age\": 1}}])"
+  },
+  {
+    "id": "car-h2",
+    "question": "List all Volvo cars produced between 1977 and 1981 inclusive. Report the name of the car and the year.",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "high",
+    "generated_query": "db.cars_data.find({\"Year\": {\"$gte\": 1977, \"$lte\": 1981}, \"Make\": \"Volvo\"}, {\"_id\": 0, \"Model\": 1, \"Year\": 1})"
+  },
+  {
+    "id": "dk-e3",
+    "question": "How many dogs went through any treatment?",
+    "database": "dog_kennels",
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Dogs.aggregate([{\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"dog_id\", \"foreignField\": \"dog_id\", \"as\": \"t\"}}, {\"$match\": {\"t\": {\"$ne\": []}}}, {\"$count\": \"count\"}])"
+  },
+  {
+    "id": "spider-pets_1-10",
+    "question": "Find the id of students who do not have a cat pet.",
+    "database": "pets_1",
+    "predicted_database": "pets_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Student.aggregate([\n    {\"$lookup\": {\"from\": \"Has_Pet\", \"let\": {\"sid\": \"$StuID\"}, \"pipeline\": [\n        {\"$match\": {\"$expr\": {\"$eq\": [\"$StuID\", \"$$sid\"]}}}, \n        {\"$lookup\": {\"from\": \"Pets\", \"localField\": \"PetID\", \"foreignField\": \"PetID\", \"as\": \"p\"}}, \n        {\"$unwind\": \"$p\"}, \n        {\"$match\": {\"p.PetType\": \"cat\"}}\n    ]}, \n    {\"$match\": {\"cat_pets\": {\"$eq\": []}}}, \n    {\"$project\": {\"_id\": 0, \"StuID\": 1}}\n])"
+  },
+  {
+    "id": "spider-network_1-12",
+    "question": "How many friends does the high school student Kyle have?",
+    "database": "network_1",
+    "predicted_database": "network_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Highschooler.aggregate([\n    {\"$match\": {\"name\": \"Kyle\"}},\n    {\"$lookup\": {\"from\": \"Friend\", \"localField\": \"ID\", \"foreignField\": \"student_id\", \"as\": \"friends\"}},\n    {\"$unwind\": \"$friends\"},\n    {\"$project\": {\"_id\": 0, \"friend_count\": 1}},\n    {\"$sort\": {\"friend_count\": -1}}\n])"
+  },
+  {
+    "id": "spider-world_1-35",
+    "question": "What are the region and population of Angola?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.country.find({\"Name\": \"Angola\"}, {\"Region\": 1, \"Population\": 1})"
+  },
+  {
+    "id": "nw-m3",
+    "question": "Which student IDs appear most often as the 'student_id' side of a friendship, and how many friends do they list?",
+    "database": "network_1",
+    "predicted_database": "network_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Friend.aggregate([\n    {\"$group\": {\"_id\": \"$student_id\", \"friend_count\": {\"$sum\": 1}}},\n    {\"$sort\": {\"friend_count\": -1}},\n    {\"$limit\": 1}\n])"
+  },
+  {
+    "id": "spider-dog_kennels-26",
+    "question": "What are the arriving date and the departing date of all the dogs?",
+    "database": "dog_kennels",
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Dogs.aggregate([{\"$project\": {\"_id\": 0, \"date_arrived\": 1, \"date_departed\": 1}}])"
+  },
+  {
+    "id": "car-c2",
+    "question": "Find how many different car makers produced a vehicle heavier than 4000 lbs.",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "complex",
+    "generated_query": "db.car_makers.distinct(\"FullName\", {\"cars_data.Weight\": {\"$gt\": 4000}})"
+  },
+  {
+    "id": "wl-e7",
+    "question": "What are the codes of countries that do not speak English?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.countrylanguage.aggregate([{\"$group\": {\"_id\": \"$CountryCode\", \"langs\": {\"$addToSet\": \"$Language\"}}}, {\"$match\": {\"$expr\": {\"$not\": {\"$in\": [\"English\", \"$langs\"]}}}}, {\"$project\": {\"_id\": 0, \"CountryCode\": \"$_id\"}}, {\"$sort\": {\"CountryCode\": 1}}])"
+  },
+  {
+    "id": "spider-world_1-49",
+    "question": "What are the name, independence year, and surface area of the country with the smallest population?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.country.find({}, {\"_id\": 0, \"Name\": 1, \"IndepYear\": 1, \"SurfaceArea\": 1}).sort([(\"Population\", 1)]).limit(1)"
+  },
+  {
+    "id": "spider-pets_1-15",
+    "question": "Find the average and maximum age for each type of pet.",
+    "database": "pets_1",
+    "predicted_database": "pets_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Pets.aggregate([\n    {\"$group\": {\"_id\": \"$PetType\", \"avg_age\": {\"$avg\": \"$pet_age\"}, \"max_age\": {\"$max\": \"$pet_age\"}}},\n    {\"$project\": {\"_id\": 0, \"PetType\": \"$_id\", \"avg_age\": 1, \"max_age\": 1}}\n])"
+  },
+  {
+    "id": "spider-world_1-2",
+    "question": "Which continent has the most diverse languages?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.countrylanguage.aggregate([\n    {\"$group\": {\"_id\": \"$Continent\", \"unique_languages\": {\"$size\": \"$Language\"}}},\n    {\"$sort\": {\"unique_languages\": -1}},\n    {\"$limit\": 1},\n    {\"$project\": {\"_id\": 0, \"Continent\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-car_1-20",
+    "question": "How many car models are produced by each maker ? Only list the count and the maker full name .",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.model_list.json.aggregate([\n    {\"$lookup\": {\"from\": \"car_makers\", \"localField\": \"Maker\", \"foreignField\": \"Id\", \"as\": \"maker\"}},\n    {\"$unwind\": \"$maker\"},\n    {\"$group\": {\"_id\": \"$maker.FullName\", \"count\": {\"$sum\": 1}}},\n    {\"$sort\": {\"count\": -1}}\n])"
+  },
+  {
+    "id": "spider-world_1-23",
+    "question": "What is the official language spoken in the country whose head of state is Beatrix?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.country.aggregate([{\"$match\": {\"HeadOfState\": \"Beatrix\"}}, {\"$lookup\": {\"from\": \"countrylanguage\", \"localField\": \"Code\", \"foreignField\": \"CountryCode\", \"as\": \"langs\"}}, {\"$unwind\": \"$langs\"}, {\"$match\": {\"langs.IsOfficial\": \"T\"}}, {\"$project\": {\"_id\": 0, \"Language\": \"$langs.Language\"}}])"
+  },
+  {
+    "id": "spider-car_1-6",
+    "question": "What are the countries having at least one car maker? List name and id.",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.countries.aggregate([\n    {\"$lookup\": {\"from\": \"car_makers\", \"localField\": \"CountryId\", \"foreignField\": \"Country\", \"as\": \"makers\"}},\n    {\"$match\": {\"makers\": {\"$ne\": []}}},\n    {\"$project\": {\"_id\": 0, \"CountryName\": 1, \"CountryId\": 1}}\n])"
+  },
+  {
+    "id": "spider-car_1-44",
+    "question": "What is the maximum miles per gallon of the car with 8 cylinders or produced before 1980 ?",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.cars_data.aggregate([{\"$match\": {\"Cylinders\": 8, \"Year\": {\"$lt\": 1980}, \"MPG\": {\"$ne\": \"null\"}}}, {\"$group\": {\"_id\": None, \"max_mpg\": {\"$max\": {\"$toDouble\": \"$MPG\"}}}}, {\"$project\": {\"_id\": 0}}])"
+  },
+  {
+    "id": "cs-e8",
+    "question": "Find the singer whose song is named 'Love'.",
+    "database": "concert_singer",
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.singer.find({\"Song_Name\": \"Love\"}, {\"_id\": 0, \"Name\": 1})"
+  },
+  {
+    "id": "cs-m2",
+    "question": "What is the total capacity of all stadiums combined?",
+    "database": "concert_singer",
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.stadium.aggregate([{\"$group\": {\"_id\": None, \"total_capacity\": {\"$sum\": \"$Capacity\"}}}, {\"$project\": {\"_id\": 0, \"total_capacity\": 1}}])"
+  },
+  {
+    "id": "cs-m8",
+    "question": "What is the average stadium capacity?",
+    "database": "concert_singer",
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.stadium.aggregate([{\"$group\": {\"_id\": None, \"average_capacity\": {\"$avg\": \"$Capacity\"}}}, {\"$project\": {\"_id\": 0}}])"
+  },
+  {
+    "id": "spider-network_1-26",
+    "question": "How many likes does Kyle have?",
+    "database": "network_1",
+    "predicted_database": "network_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Likes.find({\"student_id\": 1}, {\"_id\": 0, \"like_count\": 1})"
+  },
+  {
+    "id": "spider-world_1-32",
+    "question": "What is the total surface area of the countries in the Caribbean region?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.country.aggregate([{\"$match\": {\"Region\": \"Caribbean\"}}, {\"$group\": {\"_id\": None, \"total_surface_area\": {\"$sum\": \"$SurfaceArea\"}}}, {\"$project\": {\"_id\": 0, \"total_surface_area\": 1}}])"
+  },
+  {
+    "id": "spider-car_1-28",
+    "question": "What is the average edispl of the cars of model volvo?",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.cars_data.aggregate([{\"$match\": {\"Model\": \"volvo\"}}, {\"$group\": {\"_id\": None, \"avg_edispl\": {\"$avg\": \"$Edispl\"}}}, {\"$project\": {\"_id\": 0}}])"
+  },
+  {
+    "id": "dk-h1",
+    "question": "Which states have both owners and professionals living there?",
+    "database": "dog_kennels",
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "complexity": "high",
+    "generated_query": "db.Owners.aggregate([{\"$group\": {\"_id\": None, \"owner_states\": {\"$addToSet\": \"$state\"}}}, {\"$lookup\": {\"from\": \"Professionals\", \"pipeline\": [{\"$group\": {\"_id\": None, \"prof_states\": {\"$addToSet\": \"$state\"}}}], \"as\": \"p\"}}, {\"$unwind\": \"$p\"}, {\"$project\": {\"_id\": 0, \"states\": {\"$setIntersection\": [\"$owner_states\", \"$p.prof_states\"]}}}, {\"$unwind\": \"$states\"}, {\"$project\": {\"_id\": 0, \"state\": \"$states\"}}, {\"$sort\": {\"state\": 1}}])"
+  },
+  {
+    "id": "spider-car_1-29",
+    "question": "What is the maximum accelerate for different number of cylinders?",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.cars_data.aggregate([{\"$group\": {\"_id\": \"$Cylinders\", \"max_accelerate\": {\"$max\": \"$Accelerate\"}}}, {\"$project\": {\"Cylinders\": \"$_id\", \"max_accelerate\": \"$max_accelerate\"}}])"
+  },
+  {
+    "id": "car-e1",
+    "question": "How many cars are in the database?",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.cars_data.count_documents()"
+  },
+  {
+    "id": "spider-network_1-18",
+    "question": "Show all the grades of the high schoolers.",
+    "database": "network_1",
+    "predicted_database": "network_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Highschooler.find({}, {\"_id\": 0, \"grade\": 1}).sort({\"grade\": 1})"
+  },
+  {
+    "id": "spider-pets_1-14",
+    "question": "Find the type and weight of the youngest pet.",
+    "database": "pets_1",
+    "predicted_database": "pets_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Pets.find({\"pet_age\": {\"$lt\": {\"$max\": \"$pet_age\"}}}, {\"_id\": 0, \"PetType\": 1, \"weight\": 1})"
+  },
+  {
+    "id": 6,
+    "question": "Find pet types that have more than one pet, with their counts.",
+    "database": "pets_1",
+    "predicted_database": "pets_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Pets.aggregate([\n    {\"$group\": {\"_id\": \"$PetType\", \"count\": {\"$sum\": 1}}},\n    {\"$match\": {\"count\": {\"$gt\": 1}}},\n    {\"$project\": {\"_id\": 1, \"count\": 1}}\n])"
+  },
+  {
+    "id": "spider-concert_singer-17",
+    "question": "What is the average and maximum capacities for all stadiums ?",
+    "database": "concert_singer",
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.stadium.aggregate([{\"$group\": {\"_id\": None, \"average\": {\"$avg\": \"$Capacity\"}, \"max_capacity\": {\"$max\": \"$Capacity\"}}}, {\"$project\": {\"_id\": 0}}])"
+  },
+  {
+    "id": "spider-pets_1-20",
+    "question": "Find the last name of the student who has a cat that is age 3.",
+    "database": "pets_1",
+    "predicted_database": "pets_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Student.aggregate([\n    {\"$lookup\": {\"from\": \"Has_Pet\", \"localField\": \"StuID\", \"foreignField\": \"StuID\", \"as\": \"pet\"}},\n    {\"$unwind\": \"$pet\"},\n    {\"$match\": {\"pet.PetType\": \"cat\", \"pet.pet_age\": 3}},\n    {\"$project\": {\"_id\": 0, \"LName\": \"$student.LName\"}}\n])"
+  },
+  {
+    "id": "cs-e2",
+    "question": "How many stadiums are there?",
+    "database": "concert_singer",
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.stadium.countDocuments({})"
+  },
+  {
+    "id": "spider-pets_1-3",
+    "question": "Find the first name and gender of student who have more than one pet.",
+    "database": "pets_1",
+    "predicted_database": "pets_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.Student.aggregate([\n    {\"$lookup\": {\"from\": \"Has_Pet\", \"localField\": \"StuID\", \"foreignField\": \"StuID\", \"as\": \"pet\"}},\n    {\"$unwind\": \"$pet\"},\n    {\"$group\": {\"_id\": \"$StuID\", \"pet_count\": {\"$sum\": 1}}},\n    {\"$match\": {\"pet_count\": {\"$gt\": 1}}},\n    {\"$project\": {\"_id\": 0, \"Fname\": \"$Fname\", \"Sex\": \"$Sex\"}}\n])"
+  },
+  {
+    "id": "cs-m7",
+    "question": "How many singers are there for each country?",
+    "database": "concert_singer",
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.singer.aggregate([\n    {\"$group\": {\"_id\": \"$Country\", \"singer_count\": {\"$sum\": 1}}},\n    {\"$project\": {\"_id\": 0, \"Country\": \"$_id\", \"singer_count\": 1}}\n])"
+  },
+  {
+    "id": "cs-e10",
+    "question": "What is the theme of the concert called 'Super bootcamp'?",
+    "database": "concert_singer",
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.concert.find({\"concert_Name\": \"Super bootcamp\"}, {\"_id\": 0, \"Theme\": 1})"
+  },
+  {
+    "id": "spider-dog_kennels-41",
+    "question": "What are all the possible breed type and size type combinations?",
+    "database": "dog_kennels",
+    "predicted_database": "pets_1",
+    "database_match": false,
+    "complexity": "easy",
+    "generated_query": "db.Dogs.aggregate([{\"$group\": {\"_id\": {\"breed_code\": \"$breed_code\", \"size_code\": \"$size_code\"}}}, {\"$project\": {\"_id\": 0, \"breed_code\": \"$_id.breed_code\", \"size_code\": \"$_id.size_code\"}}])"
+  },
+  {
+    "id": 3,
+    "question": "Find the maximum weight of all pets.",
+    "database": "pets_1",
+    "predicted_database": "pets_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Pets.aggregate([{\"$group\": {\"_id\": None, \"max_weight\": {\"$max\": \"$weight\"}}}, {\"$project\": {\"_id\": 0}}])"
+  },
+  {
+    "id": "spider-world_1-22",
+    "question": "What is the total number of people living in the nations that do not use English?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.country.aggregate([{\"$match\": {\"Language\": {\"$ne\": \"English\"}}}, {\"$group\": {\"_id\": None, \"total_population\": {\"$sum\": \"$Population\"}}}, {\"$project\": {\"_id\": 0, \"total_population\": 1}}])"
+  },
+  {
+    "id": "dk-e5",
+    "question": "What is the most expensive charge amount?",
+    "database": "dog_kennels",
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Charges.aggregate([{\"$group\": {\"_id\": None, \"max_charge\": {\"$max\": \"$charge_amount\"}}}, {\"$project\": {\"_id\": 0, \"max_charge\": 1}}])"
+  },
+  {
+    "id": "spider-world_1-54",
+    "question": "What are names of countries with the top 3 largest population?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.country.find({}, {\"_id\": 0, \"Name\": 1}).sort({\"Population\": -1}).limit(3)"
+  },
+  {
+    "id": "car-m3",
+    "question": "What is the average weight of all cars?",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.cars_data.aggregate([{\"$group\": {\"_id\": None, \"avg_weight\": {\"$avg\": \"$Weight\"}}}, {\"$project\": {\"_id\": 0}}])"
+  },
+  {
+    "id": "spider-car_1-37",
+    "question": "What are all the makers and models?",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.model_list.json.find({}, {\"_id\": 0, \"Maker\": 1, \"Model\": 1})"
+  },
+  {
+    "id": "spider-network_1-23",
+    "question": "Show name of all students who have some friends and also are liked by someone else.",
+    "database": "network_1",
+    "predicted_database": "network_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Friend.aggregate([\n    {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"student_id\", \"foreignField\": \"ID\", \"as\": \"student\"}},\n    {\"$lookup\": {\"from\": \"Likes\", \"localField\": \"student_id\", \"foreignField\": \"liked_id\", \"as\": \"likes\"}},\n    {\"$match\": {\"student.likes\": {\"$ne\": []}}},\n    {\"$project\": {\"_id\": 0, \"name\": \"$student.name\"}}\n])"
+  },
+  {
+    "id": "spider-world_1-29",
+    "question": "What are the Asian countries which have a population larger than that of any country in Africa?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.country.aggregate([{\"$facet\": {\"threshold\": [{\"$match\": {\"Continent\": \"Africa\"}}, {\"$group\": {\"_id\": None, \"val\": {\"$max\": \"$Population\"}}}], \"all\": [{\"$match\": {\"Continent\": \"Asia\"}}, {\"$project\": {\"_id\": 0, \"Name\": 1, \"Population\": 1}}]}}, {\"$unwind\": \"$threshold\"}, {\"$unwind\": \"$all\"}, {\"$match\": {\"$expr\": {\"$gt\": [\"$all.Population\", \"$threshold.val\"]}}}, {\"$project\": {\"_id\": 0, \"Name\": \"$all.Name\"}}, {\"$sort\": {\"Name\": 1}}])"
+  },
+  {
+    "id": "cs-e9",
+    "question": "List the names of singers who are not from France.",
+    "database": "concert_singer",
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.singer.find({\"Country\": {\"$ne\": \"France\"}}, {\"_id\": 0, \"Name\": 1})"
+  },
+  {
+    "id": "spider-world_1-62",
+    "question": "What is the total population and average area of countries in the continent of North America whose area is bigger than 3000 ?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.country.aggregate([{\"$match\": {\"Continent\": \"North America\", \"SurfaceArea\": {\"$gt\": 3000}}}, {\"$group\": {\"_id\": None, \"total_population\": {\"$sum\": \"$Population\"}, \"avg_surface_area\": {\"$avg\": \"$SurfaceArea\"}}}])"
+  },
+  {
+    "id": "spider-dog_kennels-24",
+    "question": "How much does the most recent treatment cost?",
+    "database": "dog_kennels",
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Treatments.aggregate([{\"$sort\": {\"date_of_treatment\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"cost_of_treatment\": 1}}])"
+  },
+  {
+    "id": "spider-network_1-15",
+    "question": "Show the ids of high schoolers who have friends and are also liked by someone else.",
+    "database": "network_1",
+    "predicted_database": "network_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Friend.aggregate([\n    {\"$lookup\": {\"from\": \"Highschooler\", \"localField\": \"student_id\", \"foreignField\": \"ID\", \"as\": \"hs\"}},\n    {\"$lookup\": {\"from\": \"Likes\", \"localField\": \"friend_id\", \"foreignField\": \"student_id\", \"as\": \"likes\"}},\n    {\"$match\": {\"hs.ID\": {\"$ne\": null}, \"likes.student_id\": {\"$ne\": null}}},\n    {\"$project\": {\"_id\": 1}}\n])"
+  },
+  {
+    "id": "spider-world_1-5",
+    "question": "Which cities are in European countries where English is not the official language?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.city.find({\"CountryCode\": {\"$in\": db.country.find({\"Continent\": \"Europe\", \"GovernmentForm\": {\"$ne\": \"Republic\"}}).distinct(\"Code\")}, \"Name\": 1, \"_id\": 0})"
+  },
+  {
+    "id": "cs-m5",
+    "question": "What is the age of the youngest singer?",
+    "database": "concert_singer",
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.singer.find({}, {\"_id\": 0, \"Age\": 1}).sort({\"Age\": 1}).limit(1)"
+  },
+  {
+    "id": 11,
+    "question": "Find students who have more friends than the average number of friends per student.",
+    "database": "network_1",
+    "predicted_database": "network_1",
+    "database_match": true,
+    "complexity": "complex",
+    "generated_query": "db.Highschooler.aggregate([\n    {\"$lookup\": {\"from\": \"Friend\", \"localField\": \"ID\", \"foreignField\": \"student_id\", \"as\": \"friends\"}},\n    {\"$group\": {\"_id\": \"$ID\", \"friend_count\": {\"$sum\": 1}}},\n    {\"$match\": {\"friend_count\": {\"$gt\": {\"$avg\": \"$friend_count\"}}}},\n    {\"$project\": {\"_id\": 0}}\n])"
+  },
+  {
+    "id": "pt-m5",
+    "question": "Which advisor has the most advisees, and how many do they have?",
+    "database": "pets_1",
+    "predicted_database": "college_2",
+    "database_match": false,
+    "complexity": "medium",
+    "generated_query": "db.advisor.aggregate([\n    {\"$group\": {\"_id\": \"$i_ID\", \"count\": {\"$sum\": 1}}},\n    {\"$sort\": {\"count\": -1}},\n    {\"$limit\": 1}\n])"
+  },
+  {
+    "id": "spider-world_1-3",
+    "question": "Which language is the most popular on the Asian continent?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.countrylanguage.aggregate([{\"$match\": {\"Continent\": \"Asia\"}}, {\"$group\": {\"_id\": \"$Language\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"Language\": \"$_id\"}}])"
+  },
+  {
+    "id": "wl-e1",
+    "question": "What are the names of all the countries that became independent after 1950?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.country.find({\"IndepYear\": {\"$gt\": 1950}}, {\"_id\": 0, \"Name\": 1})"
+  },
+  {
+    "id": "spider-network_1-14",
+    "question": "Show names of all high school students who do not have any friends.",
+    "database": "network_1",
+    "predicted_database": "network_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Highschooler.aggregate([\n    {\"$lookup\": {\"from\": \"Friend\", \"localField\": \"ID\", \"foreignField\": \"student_id\", \"as\": \"friends\"}},\n    {\"$match\": {\"friends\": {\"$eq\": []}}},\n    {\"$project\": {\"_id\": 0, \"name\": \"$name\"}},\n    {\"$sort\": {\"name\": 1}}\n])"
+  },
+  {
+    "id": "spider-dog_kennels-12",
+    "question": "What is the average age of the dogs who have gone through any treatments?",
+    "database": "dog_kennels",
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Dogs.aggregate([{\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"dog_id\", \"foreignField\": \"dog_id\", \"as\": \"t\"}}, {\"$match\": {\"t\": {\"$ne\": []}}}, {\"$group\": {\"_id\": None, \"avg_age\": {\"$avg\": \"$age\"}}}, {\"$project\": {\"_id\": 0, \"avg_age\": 1}}])"
+  },
+  {
+    "id": "spider-store_1-29",
+    "question": "What is the total amount of money spent by Lucas Mancini?",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.customers.aggregate([{\"$match\": {\"first_name\": \"Lucas\", \"last_name\": \"Mancini\"}}, {\"$lookup\": {\"from\": \"invoices\", \"localField\": \"id\", \"foreignField\": \"customer_id\", \"as\": \"inv\"}}, {\"$unwind\": \"$inv\"}, {\"$group\": {\"_id\": None, \"total\": {\"$sum\": \"$inv.total\"}}}, {\"$project\": {\"_id\": 0, \"total\": 1}}])"
+  },
+  {
+    "id": "spider-college_2-59",
+    "question": "What is the title of the prerequisite class of International Finance course?",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.course.aggregate([{\"$match\": {\"title\": \"International Finance\"}}, {\"$lookup\": {\"from\": \"prereq\", \"localField\": \"course_id\", \"foreignField\": \"course_id\", \"as\": \"p\"}}, {\"$unwind\": \"$p\"}, {\"$lookup\": {\"from\": \"course\", \"localField\": \"p.prereq_id\", \"foreignField\": \"course_id\", \"as\": \"pc\"}}, {\"$unwind\": \"$pc\"}, {\"$project\": {\"_id\": 0, \"title\": \"$pc.title\"}}])"
+  },
+  {
+    "id": "spider-college_2-2",
+    "question": "Find the title, credit, and department name of courses that have more than one prerequisites?",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.course.aggregate([{\"$lookup\": {\"from\": \"prereq\", \"localField\": \"course_id\", \"foreignField\": \"course_id\", \"as\": \"p\"}}, {\"$match\": {\"$expr\": {\"$gt\": [{\"$size\": \"$p\"}, 1]}}}, {\"$project\": {\"_id\": 0, \"title\": 1, \"credits\": 1, \"dept_name\": 1}}])"
+  },
+  {
+    "id": "spider-flight_2-3",
+    "question": "What is the code of airport that has the highest number of flights?",
+    "database": "flight_2",
+    "predicted_database": "flight_2",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.airports.aggregate([\n    {\"$lookup\": {\"from\": \"flights\", \"localField\": \"AirportCode\", \"foreignField\": \"DestAirport\", \"as\": \"as_dest\"}},\n    {\"$lookup\": {\"from\": \"flights\", \"localField\": \"AirportCode\", \"foreignField\": \"SourceAirport\", \"as\": \"as_source\"}},\n    {\"$addFields\": {\"flight_count\": {\"$add\": [{\"$size\": \"$as_dest\"}, {\"$size\": \"$as_source\"}]}}},\n    {\"$sort\": {\"flight_count\": -1}},\n    {\"$limit\": 1},\n    {\"$project\": {\"_id\": 0, \"AirportCode\": 1}}\n])"
+  },
+  {
+    "id": "spider-college_1-82",
+    "question": "What is the first name of the student whose last name starting with the letter S and is taking ACCT-211 class?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.STUDENT.aggregate([{\"$match\": {\"STU_LNAME\": {\"$regex\": \"^S\"}}}, {\"$lookup\": {\"from\": \"ENROLL\", \"localField\": \"STU_NUM\", \"foreignField\": \"STU_NUM\", \"as\": \"e\"}}, {\"$unwind\": \"$e\"}, {\"$lookup\": {\"from\": \"CLASS\", \"localField\": \"e.CLASS_CODE\", \"foreignField\": \"CLASS_CODE\", \"as\": \"cl\"}}, {\"$unwind\": \"$cl\"}, {\"$match\": {\"cl.CRS_CODE\": \"ACCT-211\"}}, {\"$project\": {\"_id\": 0, \"STU_FNAME\": 1}}])"
+  },
+  {
+    "id": "spider-hr_1-7",
+    "question": "display those departments where more than ten employees work who got a commission percentage.",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.employees.aggregate([\n    {\"$match\": {\"COMMISSION_PCT\": {\"$ne\": None}}},\n    {\"$group\": {\"_id\": \"$DEPARTMENT_ID\", \"count\": {\"$sum\": 1}}},\n    {\"$match\": {\"count\": {\"$gte\": 10}}},\n    {\"$project\": {\"_id\": 0, \"DEPARTMENT_ID\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-college_2-41",
+    "question": "Find the buildings which have rooms with capacity more than 50.",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.classroom.find({\"capacity\": {\"$gt\": 50}}, {\"building\": 1, \"_id\": 0})"
+  },
+  {
+    "id": "spider-apartment_rentals-15",
+    "question": "How many apartment bookings are there in total?",
+    "database": "apartment_rentals",
+    "predicted_database": "apartment_rentals",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Apartment_Bookings.count_documents({})"
+  },
+  {
+    "id": "spider-store_1-49",
+    "question": "List the name of tracks belongs to genre Rock or genre Jazz.",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.tracks.aggregate([{\"$lookup\": {\"from\": \"genres\", \"localField\": \"genre_id\", \"foreignField\": \"id\", \"as\": \"genre\"}}, {\"$unwind\": \"$genre\"}, {\"$match\": {\"$or\": [{\"genre.name\": \"Rock\"}, {\"genre.name\": \"Jazz\"}]}}, {\"$project\": {\"_id\": 0, \"name\": 1}}])"
+  },
+  {
+    "id": "spider-hr_1-21",
+    "question": "find the name of all departments that do actually have one or more employees assigned to them.",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.departments.find({\"DEPARTMENT_ID\": {\"$exists\": True}}, {\"_id\": 0, \"department_name\": 1})"
+  },
+  {
+    "id": "spider-bike_1-4",
+    "question": "Give me the zip code where the average mean humidity is below 70 and at least 100 trips took place.",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.weather.aggregate([\n    {\"$group\": {\"_id\": \"$zip_code\", \"avg_hum\": {\"$avg\": \"$mean_humidity\"}}},\n    {\"$match\": {\"avg_hum\": {\"$lt\": 70}}},\n    {\"$lookup\": {\"from\": \"trip\", \"localField\": \"_id\", \"foreignField\": \"zip_code\", \"as\": \"t\"}},\n    {\"$match\": {\"$expr\": {\"$gte\": [{\"$size\": \"$t\"}, 100]}}},\n    {\"$project\": {\"_id\": 0, \"zip_code\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-store_1-26",
+    "question": "List top 10 employee work longest in the company. List employee's first and last name.",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.employees.find({}, {\"_id\": 0, \"first_name\": 1, \"last_name\": 1}).sort({\"hire_date\": -1}).limit(10)"
+  },
+  {
+    "id": "spider-dog_kennels-42",
+    "question": "Which breed do the most dogs have? Give me the breed name.",
+    "database": "dog_kennels",
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.Dogs.aggregate([\n    {\"$group\": {\"_id\": \"$breed_code\", \"dog_count\": {\"$sum\": 1}}},\n    {\"$sort\": {\"dog_count\": -1}},\n    {\"$limit\": 1},\n    {\"$lookup\": {\"from\": \"Breeds\", \"localField\": \"_id\", \"foreignField\": \"breed_code\", \"as\": \"b\"}},\n    {\"$unwind\": \"$b\"},\n    {\"$project\": {\"_id\": 0, \"breed_name\": \"$b.breed_name\"}}\n])"
+  },
+  {
+    "id": "spider-world_1-33",
+    "question": "What region does Angola belong to and what is its population?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.country.find({\"Name\": \"Angola\"}, {\"Region\": 1, \"Population\": 1})"
+  },
+  {
+    "id": "spider-college_2-66",
+    "question": "Find the name of instructors who didn't teach any courses?",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.instructor.aggregate([{\"$lookup\": {\"from\": \"teaches\", \"localField\": \"ID\", \"foreignField\": \"ID\", \"as\": \"t\"}}, {\"$match\": {\"t\": []}}, {\"$project\": {\"_id\": 0, \"name\": 1}}])"
+  },
+  {
+    "id": "spider-bike_1-49",
+    "question": "Find the day in which the difference between the max temperature and min temperature was the smallest. Also report the difference.",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.weather.aggregate([\n    {\"$match\": {\"max_temperature_f\": {\"$type\": \"number\"}, \"min_temperature_f\": {\"$type\": \"number\"}}},\n    {\"$project\": {\"date\": 1, \"range\": {\"$subtract\": [\"$max_temperature_f\", \"$min_temperature_f\"]}}},\n    {\"$sort\": {\"range\": 1}},\n    {\"$limit\": 1},\n    {\"$project\": {\"_id\": 0, \"date\": 1, \"range\": 1}}\n])"
+  },
+  {
+    "id": "spider-bike_1-20",
+    "question": "On which day and in which zip code was the min dew point lower than any day in zip code 94107?",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.weather.aggregate([{\"$lookup\": {\"from\": \"weather\", \"pipeline\": [{\"$match\": {\"zip_code\": 94107}}, {\"$group\": {\"_id\": None, \"min_dp\": {\"$min\": \"$min_dew_point_f\"}}}], \"as\": \"ref\"}}, {\"$unwind\": \"$ref\"}, {\"$match\": {\"$expr\": {\"$lt\": [\"$min_dew_point_f\", \"$ref.min_dp\"]}}}, {\"$project\": {\"_id\": 0, \"date\": 1, \"zip_code\": 1}}])"
+  },
+  {
+    "id": "spider-pets_1-31",
+    "question": "How many different types of pet are there?",
+    "database": "pets_1",
+    "predicted_database": "pets_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Pets.distinct(\"PetType\")"
+  },
+  {
+    "id": "spider-apartment_rentals-34",
+    "question": "Show each gender code and the corresponding count of guests sorted by the count in descending order.",
+    "database": "apartment_rentals",
+    "predicted_database": "apartment_rentals",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Guests.aggregate([\n    {\"$group\": {\"_id\": \"$gender_code\", \"count\": {\"$sum\": 1}}},\n    {\"$sort\": {\"count\": -1}}\n])"
+  },
+  {
+    "id": "spider-flight_2-20",
+    "question": "What are flight numbers of Airline \"United Airlines\"?",
+    "database": "flight_2",
+    "predicted_database": "flight_2",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.flights.find({\"Airline\": \"United Airlines\"}, {\"FlightNo\": 1})"
+  },
+  {
+    "id": "spider-network_1-44",
+    "question": "What is Kyle's id?",
+    "database": "network_1",
+    "predicted_database": "network_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Highschooler.find({\"name\": \"Kyle\"}, {\"_id\": 0, \"ID\": 1})"
+  },
+  {
+    "id": "spider-college_1-39",
+    "question": "Find the total credits of all classes offered by each department.",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.CLASS.aggregate([\n    {\"$lookup\": {\"from\": \"COURSE\", \"localField\": \"CRS_CODE\", \"foreignField\": \"CRS_CODE\", \"as\": \"course\"}},\n    {\"$unwind\": \"$course\"},\n    {\"$group\": {\"_id\": \"$course.DEPT_CODE\", \"total_credit\": {\"$sum\": \"$course.CRS_CREDIT\"}}},\n    {\"$project\": {\"_id\": 0, \"total_credit\": 1, \"dept_code\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-hr_1-22",
+    "question": "get the details of employees who manage a department.",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.employees.aggregate([\n    {\"$lookup\": {\"from\": \"departments\", \"localField\": \"MANAGER_ID\", \"foreignField\": \"EMPLOYEE_ID\", \"as\": \"manager\"}},\n    {\"$unwind\": \"$manager\"},\n    {\"$project\": {\"_id\": 0, \"employee_id\": \"$_id\", \"first_name\": \"$first_name\", \"last_name\": \"$last_name\", \"department_name\": \"$manager.DEPARTMENT_NAME\"}}\n])"
+  },
+  {
+    "id": "spider-college_2-80",
+    "question": "Find courses that ran in Fall 2009 but not in Spring 2010.",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.section.aggregate([\n    {\"$match\": {\"$or\": [{\"semester\": \"Fall\", \"year\": 2009}, {\"semester\": \"Spring\", \"year\": 2010}]}},\n    {\"$group\": {\"_id\": \"$course_id\"}},\n    {\"$project\": {\"_id\": 0, \"course_id\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-flight_2-25",
+    "question": "List all airline names and their abbreviations in \"USA\".",
+    "database": "flight_2",
+    "predicted_database": "flight_2",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.airlines.find({\"Country\": \"USA\"}, {\"_id\": 0, \"Airline\": 1, \"Abbreviation\": 1})"
+  },
+  {
+    "id": "spider-college_1-81",
+    "question": "Find the name of department that offers the class whose description has the word \"Statistics\".",
+    "database": "college_1",
+    "predicted_database": "college_2",
+    "database_match": false,
+    "complexity": "medium",
+    "generated_query": "db.course.aggregate([{\"$match\": {\"CRS_DESCRIPTION\": {\"$regex\": \"Statistics\"}}}, {\"$lookup\": {\"from\": \"DEPARTMENT\", \"localField\": \"DEPT_CODE\", \"foreignField\": \"DEPT_CODE\", \"as\": \"d\"}}, {\"$unwind\": \"$d\"}, {\"$project\": {\"_id\": 0, \"DEPT_NAME\": \"$d.DEPT_NAME\"}}])"
+  },
+  {
+    "id": "spider-college_1-13",
+    "question": "Find the name, address, number of students in the departments that have the top 3 highest number of students.",
+    "database": "college_1",
+    "predicted_database": "college_2",
+    "database_match": false,
+    "complexity": "hard",
+    "generated_query": "db.department.aggregate([\n    {\"$group\": {\"_id\": \"$dept_name\", \"count\": {\"$sum\": 1}}},\n    {\"$sort\": {\"count\": -1}},\n    {\"$limit\": 3},\n    {\"$lookup\": {\"from\": \"DEPARTMENT\", \"localField\": \"_id\", \"foreignField\": \"DEPT_CODE\", \"as\": \"dept\"}},\n    {\"$unwind\": \"$dept\"},\n    {\"$project\": {\"_id\": 0, \"dept_name\": \"$dept.DEPT_NAME\", \"dept_address\": \"$dept.DEPT_ADDRESS\", \"count\": \"$count\"}}\n])"
+  },
+  {
+    "id": "spider-car_1-58",
+    "question": "What is the number of countries with more than 2 car makers ?",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.countries.aggregate([{\"$lookup\": {\"from\": \"car_makers\", \"let\": {\"cid\": \"$CountryId\"}, \"pipeline\": [{\"$addFields\": {\"CountryInt\": {\"$toInt\": \"$Country\"}}}, {\"$match\": {\"$expr\": {\"$eq\": [\"$CountryInt\", \"$$cid\"]}}}], \"as\": \"makers\"}}, {\"$match\": {\"makers\": {\"$eq\": []}}}, {\"$project\": {\"_id\": 0, \"CountryName\": 1}}, {\"$sort\": {\"CountryName\": 1}}])"
+  },
+  {
+    "id": "spider-college_1-80",
+    "question": "Find the first name and office of history professor who did not get a Ph.D. degree.",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.PROFESSOR.aggregate([\n    {\"$lookup\": {\"from\": \"EMPLOYEE\", \"localField\": \"EMP_NUM\", \"foreignField\": \"EMP_NUM\", \"as\": \"e\"}},\n    {\"$unwind\": \"$e\"},\n    {\"$lookup\": {\"from\": \"DEPARTMENT\", \"localField\": \"DEPT_CODE\", \"foreignField\": \"DEPT_CODE\", \"as\": \"d\"}},\n    {\"$unwind\": \"$d\"},\n    {\"$match\": {\"d.DEPT_NAME\": \"History\", \"PROF_HIGH_DEGREE\": {\"$ne\": \"Ph.D.\"}}},\n    {\"$project\": {\"_id\": 0, \"EMP_FNAME\": \"$e.EMP_FNAME\", \"PROF_OFFICE\": \"$PROF_OFFICE\"}}\n])"
+  },
+  {
+    "id": "spider-college_1-6",
+    "question": "What is the name of the department that has the largest number of students enrolled?",
+    "database": "college_1",
+    "predicted_database": "college_2",
+    "database_match": false,
+    "complexity": "hard",
+    "generated_query": "db.CLASS.aggregate([\n    {\"$lookup\": {\"from\": \"ENROLL\", \"localField\": \"CLASS_CODE\", \"foreignField\": \"CLASS_CODE\", \"as\": \"e\"}},\n    {\"$unwind\": \"$e\"},\n    {\"$lookup\": {\"from\": \"COURSE\", \"localField\": \"CRS_CODE\", \"foreignField\": \"CRS_CODE\", \"as\": \"c\"}},\n    {\"$unwind\": \"$c\"},\n    {\"$group\": {\"_id\": \"$c.DEPT_CODE\", \"count\": {\"$sum\": 1}}},\n    {\"$sort\": {\"count\": -1}},\n    {\"$limit\": 1},\n    {\"$lookup\": {\"from\": \"DEPARTMENT\", \"localField\": \"_id\", \"foreignField\": \"DEPT_CODE\", \"as\": \"d\"}},\n    {\"$unwind\": \"$d\"},\n    {\"$project\": {\"_id\": 0, \"DEPT_NAME\": \"$d.DEPT_NAME\"}}\n])"
+  },
+  {
+    "id": "spider-bike_1-9",
+    "question": "For each zip code, return the average mean temperature of August there.",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.weather.aggregate([\n    {\"$match\": {\"date\": {\"$regex\": \"Aug\"}}},\n    {\"$group\": {\"_id\": \"$zip_code\", \"avg_temp\": {\"$avg\": \"$mean_temperature_f\"}}}\n])"
+  },
+  {
+    "id": "spider-college_1-37",
+    "question": "Find the max, average, and minimum gpa of all students in each department.",
+    "database": "college_1",
+    "predicted_database": "college_2",
+    "database_match": false,
+    "complexity": "medium",
+    "generated_query": "db.student.aggregate([\n    {\"$group\": {\"_id\": \"$dept_name\", \"max_gpa\": {\"$max\": \"$STU_GPA\"}, \"avg_gpa\": {\"$avg\": \"$STU_GPA\"}, \"min_gpa\": {\"$min\": \"$STU_GPA\"}}},\n    {\"$project\": {\"_id\": 0, \"max_gpa\": 1, \"avg_gpa\": 1, \"min_gpa\": 1, \"dept_name\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-hr_1-40",
+    "question": "What is the first name and job id for all employees in the Finance department?",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.employees.aggregate([{\"$lookup\": {\"from\": \"departments\", \"localField\": \"DEPARTMENT_ID\", \"foreignField\": \"DEPARTMENT_ID\", \"as\": \"dept\"}}, {\"$unwind\": \"$dept\"}, {\"$match\": {\"dept.DEPARTMENT_NAME\": \"Finance\"}}, {\"$project\": {\"_id\": 0, \"FIRST_NAME\": 1, \"JOB_ID\": 1}}])"
+  },
+  {
+    "id": "spider-college_1-36",
+    "question": "Find the total number of hours have done for all students in each department.",
+    "database": "college_1",
+    "predicted_database": "college_2",
+    "database_match": false,
+    "complexity": "medium",
+    "generated_query": "db.student.aggregate([{\"$group\": {\"_id\": \"$dept_name\", \"total_hrs\": {\"$sum\": \"$STU_HRS\"}}}, {\"$project\": {\"_id\": 0, \"total_hrs\": 1, \"dept_name\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-college_2-51",
+    "question": "How many rooms whose capacity is less than 50 does the Lamberton building have?",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.classroom.count_documents({\"building\": \"Lamberton\", \"capacity\": {\"$lt\": 50}})"
+  },
+  {
+    "id": "spider-college_1-43",
+    "question": "list names of all departments ordered by their names.",
+    "database": "college_1",
+    "predicted_database": "hr_1",
+    "database_match": false,
+    "complexity": "medium",
+    "generated_query": "db.DEPARTMENT.find({}, {\"_id\": 0, \"DEPT_NAME\": 1}).sort({\"DEPT_NAME\": 1})"
+  },
+  {
+    "id": "spider-apartment_rentals-23",
+    "question": "Return the apartment number and the number of rooms for each apartment.",
+    "database": "apartment_rentals",
+    "predicted_database": "apartment_rentals",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Apartments.aggregate([\n    {\"$project\": {\"_id\": 0, \"apt_number\": 1, \"room_count\": 1}}\n])"
+  },
+  {
+    "id": "spider-college_1-50",
+    "question": "How many professors are teaching class with code ACCT-211?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.CLASS.aggregate([{\"$match\": {\"CRS_CODE\": \"ACCT-211\"}}, {\"$group\": {\"_id\": \"$PROF_NUM\"}}, {\"$count\": \"professor_count\"}])"
+  },
+  {
+    "id": "spider-college_2-3",
+    "question": "list in alphabetic order all course names and their instructors' names in year 2008.",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.course.find({\"year\": 2008}, {\"_id\": 0, \"title\": 1, \"instructor\": 1}).sort({\"title\": 1})"
+  },
+  {
+    "id": "spider-store_1-33",
+    "question": "List the number of invoices from Chicago, IL.",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.invoices.count_documents({\"billing_city\": \"Chicago\", \"billing_state\": \"IL\"})"
+  },
+  {
+    "id": "spider-apartment_rentals-29",
+    "question": "Show the top 3 apartment type codes sorted by the average number of rooms in descending order.",
+    "database": "apartment_rentals",
+    "predicted_database": "apartment_rentals",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Apartments.aggregate([\n    {\"$addFields\": {\"room_count_num\": {\"$toDouble\": \"$room_count\"}}},\n    {\"$group\": {\"_id\": \"$apt_type_code\", \"avg_room_count\": {\"$avg\": \"$room_count_num\"}}},\n    {\"$sort\": {\"avg_room_count\": -1}},\n    {\"$limit\": 3},\n    {\"$project\": {\"_id\": 0, \"apt_type_code\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-college_2-61",
+    "question": "Find the names of students who have taken any course in the fall semester of year 2003.",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.student.aggregate([\n    {\"$lookup\": {\"from\": \"takes\", \"localField\": \"ID\", \"foreignField\": \"ID\", \"as\": \"tk\"}},\n    {\"$unwind\": \"$tk\"},\n    {\"$match\": {\"$or\": [{\"tk.year\": 2003}, {\"tk.semester\": \"Fall\"}]}},\n    {\"$group\": {\"_id\": \"$name\"}},\n    {\"$project\": {\"_id\": 0, \"name\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-college_2-62",
+    "question": "What is the title of the course that was offered at building Chandler during the fall semester in the year of 2010?",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.course.aggregate([\n    {\"$lookup\": {\"from\": \"section\", \"localField\": \"course_id\", \"foreignField\": \"course_id\", \"as\": \"s\"}},\n    {\"$unwind\": \"$s\"},\n    {\"$match\": {\"s.building\": \"Chandler\", \"s.semester\": \"Fall\", \"s.year\": 2010}},\n    {\"$project\": {\"_id\": 0, \"title\": 1}}\n])"
+  },
+  {
+    "id": "spider-college_1-30",
+    "question": "Find the number of classes offered for all class rooms that held at least 2 classes.",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.CLASS.aggregate([\n    {\"$group\": {\"_id\": \"$CLASS_ROOM\", \"count\": {\"$sum\": 1}}},\n    {\"$match\": {\"count\": {\"$gte\": 2}}},\n    {\"$project\": {\"_id\": 0, \"count\": 1, \"CLASS_ROOM\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-bike_1-18",
+    "question": "What is the average longitude of stations that never had bike availability more than 10?",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.station.aggregate([\n    {\"$lookup\": {\"from\": \"status\", \"localField\": \"id\", \"foreignField\": \"station_id\", \"as\": \"st\"}},\n    {\"$match\": {\"$expr\": {\"$eq\": [{\"$size\": {\"$filter\": {\"input\": \"$st\", \"cond\": {\"$gt\": [\"$$this.bikes_available\", 10]}}}}, 0]}}},\n    {\"$group\": {\"_id\": None, \"avg_long\": {\"$avg\": \"$long\"}}},\n    {\"$project\": {\"_id\": 0, \"avg_long\": 1}}\n])"
+  },
+  {
+    "id": "spider-world_1-85",
+    "question": "How many different forms of governments are there in Africa?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.country.aggregate([{\"$match\": {\"Continent\": \"Africa\"}}, {\"$group\": {\"_id\": \"$GovernmentForm\", \"count\": {\"$sum\": 1}}}, {\"$project\": {\"_id\": 0, \"count\": 1}}])"
+  },
+  {
+    "id": "spider-world_1-36",
+    "question": "Give the average life expectancy for countries in Africa which are republics?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.country.aggregate([{\"$match\": {\"Continent\": \"Africa\", \"GovernmentForm\": \"Republic\"}}, {\"$group\": {\"_id\": None, \"avg_life_expectancy\": {\"$avg\": \"$LifeExpectancy\"}}}, {\"$project\": {\"_id\": 0, \"avg_life_expectancy\": 1}}])"
+  },
+  {
+    "id": "spider-bike_1-26",
+    "question": "What is the average latitude and longitude of stations located in San Jose city?",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.station.aggregate([{\"$match\": {\"city\": \"San Jose\"}}, {\"$group\": {\"_id\": None, \"avg_lat\": {\"$avg\": \"$lat\"}, \"avg_long\": {\"$avg\": \"$long\"}}}, {\"$project\": {\"_id\": 0, \"avg_lat\": 1, \"avg_long\": 1}}])"
+  },
+  {
+    "id": "spider-college_2-34",
+    "question": "Find the total credits of courses provided by different department.",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.course.aggregate([\n    {\"$group\": {\"_id\": \"$dept_name\", \"total_credits\": {\"$sum\": \"$credits\"}}},\n    {\"$project\": {\"_id\": 0, \"total_credits\": 1, \"dept_name\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-hr_1-17",
+    "question": "return the smallest salary for every departments.",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.employees.aggregate([{\"$group\": {\"_id\": \"$DEPARTMENT_ID\", \"min_salary\": {\"$min\": \"$SALARY\"}}}, {\"$project\": {\"_id\": 0, \"min_salary\": 1, \"DEPARTMENT_ID\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-college_2-14",
+    "question": "What is the name of the student who has the highest total credits in the History department.",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.student.find({\"dept_name\": \"History\"}, {\"_id\": 0, \"name\": 1}).sort({\"tot_cred\": -1}).limit(1)"
+  },
+  {
+    "id": "spider-bike_1-14",
+    "question": "What are the ids of stations that are located in San Francisco and have average bike availability above 10.",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.station.aggregate([{\"$match\": {\"city\": \"San Francisco\"}}, {\"$group\": {\"_id\": \"$id\", \"avg_bikes\": {\"$avg\": \"$bikes_available\"}}}, {\"$match\": {\"avg_bikes\": {\"$gt\": 10}}}, {\"$project\": {\"_id\": 0, \"id\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-apartment_rentals-11",
+    "question": "Show the total number of rooms of all apartments with facility code \"Gym\".",
+    "database": "apartment_rentals",
+    "predicted_database": "apartment_rentals",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Apartments.aggregate([\n    {\"$match\": {\"apt_facilities.facility_code\": \"Gym\"}},\n    {\"$group\": {\"_id\": None, \"total_rooms\": {\"$sum\": \"$room_count\"}}},\n    {\"$project\": {\"_id\": 0, \"total_rooms\": 1}}\n])"
+  },
+  {
+    "id": "spider-dog_kennels-54",
+    "question": "List the arrival date and the departure date for all the dogs.",
+    "database": "dog_kennels",
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Dogs.aggregate([{\"$project\": {\"_id\": 0, \"date_arrived\": 1, \"date_departed\": 1}}])"
+  },
+  {
+    "id": "spider-apartment_rentals-8",
+    "question": "Show the start dates and end dates of all the apartment bookings made by guests with gender code \"Female\".",
+    "database": "apartment_rentals",
+    "predicted_database": "apartment_rentals",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Apartment_Bookings.aggregate([\n    {\"$lookup\": {\"from\": \"Guests\", \"localField\": \"guest_id\", \"foreignField\": \"guest_id\", \"as\": \"guest\"}},\n    {\"$unwind\": \"$guest\"},\n    {\"$match\": {\"guest.gender_code\": \"Female\"}},\n    {\"$project\": {\"_id\": 0, \"booking_start_date\": 1, \"booking_end_date\": 1}}\n])"
+  },
+  {
+    "id": "spider-college_1-35",
+    "question": "Find the number of students for each department.",
+    "database": "college_1",
+    "predicted_database": "college_2",
+    "database_match": false,
+    "complexity": "medium",
+    "generated_query": "db.student.aggregate([{\"$group\": {\"_id\": \"$dept_name\", \"count\": {\"$sum\": 1}}}, {\"$project\": {\"_id\": 0, \"count\": 1, \"dept_name\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-hr_1-45",
+    "question": "display the employee number and name( first name and last name ) for all employees who work in a department with any employee whose name contains a \u2019T\u2019.",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.employees.aggregate([\n    {\"$lookup\": {\"from\": \"employees\", \"pipeline\": [{\"$match\": {\"FIRST_NAME\": {\"$regex\": \"T\"}}}, {\"$project\": {\"_id\": 0, \"DEPARTMENT_ID\": 1}}], \"as\": \"match_dept\"}},\n    {\"$match\": {\"$expr\": {\"$in\": [\"$DEPARTMENT_ID\", \"$match_dept.DEPARTMENT_ID\"]}}},\n    {\"$project\": {\"_id\": 0, \"EMPLOYEE_ID\": 1, \"FIRST_NAME\": 1, \"LAST_NAME\": 1}}\n])"
+  },
+  {
+    "id": "spider-college_1-25",
+    "question": "How many different locations does each school have?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.DEPARTMENT.aggregate([{\"$group\": {\"_id\": \"$SCHOOL_CODE\", \"names\": {\"$addToSet\": \"$DEPT_ADDRESS\"}}}, {\"$project\": {\"_id\": 0, \"count\": {\"$size\": \"$names\"}, \"SCHOOL_CODE\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-car_1-81",
+    "question": "What is the maximum mpg of the cars that had 8 cylinders or that were produced before 1980 ?",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.cars_data.aggregate([{\"$match\": {\"$or\": [{\"Cylinders\": 8}, {\"Year\": {\"$lt\": 1980}}]}}, {\"$group\": {\"_id\": None, \"max_mpg\": {\"$max\": {\"$toDouble\": \"$MPG\"}}}}, {\"$project\": {\"_id\": 0}}])"
+  },
+  {
+    "id": "spider-hr_1-8",
+    "question": "Find the ids of the departments where any manager is managing 4 or more employees.",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.departments.aggregate([\n    {\"$lookup\": {\"from\": \"employees\", \"localField\": \"MANAGER_ID\", \"foreignField\": \"EMPLOYEE_ID\", \"as\": \"manager\"}},\n    {\"$match\": {\"manager\": {\"$size\": {\"$gte\": 4}}}},\n    {\"$project\": {\"_id\": 1}}\n])"
+  },
+  {
+    "id": "spider-store_1-2",
+    "question": "List the top 10 customers by total gross sales. List customers' first and last name and total gross sales.",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.customers.aggregate([\n    {\"$lookup\": {\"from\": \"invoices\", \"localField\": \"id\", \"foreignField\": \"customer_id\", \"as\": \"inv\"}},\n    {\"$project\": {\"_id\": 0, \"first_name\": 1, \"last_name\": 1, \"total_sales\": {\"$sum\": \"$inv.total\"}}},\n    {\"$sort\": {\"total_sales\": -1}},\n    {\"$limit\": 10}\n])"
+  },
+  {
+    "id": "spider-hr_1-4",
+    "question": "display the full name (first and last), hire date, salary, and department number for those employees whose first name does not containing the letter M and make the result set in ascending order by department number.",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.employees.find({\"FIRST_NAME\": {\"$not\": {\"$regex\": \"M\"}}}, {\"_id\": 0, \"FIRST_NAME\": 1, \"LAST_NAME\": 1, \"HIRE_DATE\": 1, \"SALARY\": 1, \"DEPARTMENT_ID\": 1}).sort({\"DEPARTMENT_ID\": 1})"
+  },
+  {
+    "id": "spider-bike_1-39",
+    "question": "List the name and the number of stations for all the cities that have at least 15 stations.",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.station.aggregate([\n    {\"$group\": {\"_id\": \"$city\", \"count\": {\"$sum\": 1}}},\n    {\"$match\": {\"count\": {\"$gte\": 15}}},\n    {\"$project\": {\"_id\": 0, \"city\": \"$_id\", \"count\": 1}}\n])"
+  },
+  {
+    "id": "spider-flight_2-34",
+    "question": "Find the name of airports which do not have any flight in and out.",
+    "database": "flight_2",
+    "predicted_database": "flight_4",
+    "database_match": false,
+    "complexity": "medium",
+    "generated_query": "db.airports.aggregate([\n    {\"$lookup\": {\"from\": \"flights\", \"localField\": \"apid\", \"foreignField\": \"DestAirport\", \"as\": \"as_dest\"}},\n    {\"$lookup\": {\"from\": \"flights\", \"localField\": \"apid\", \"foreignField\": \"SourceAirport\", \"as\": \"as_source\"}},\n    {\"$addFields\": {\"flight_count\": {\"$add\": [{\"$size\": \"$as_dest\"}, {\"$size\": \"$as_source\"}]}}},\n    {\"$match\": {\"flight_count\": 0}},\n    {\"$project\": {\"_id\": 0, \"name\": 1}}\n])"
+  },
+  {
+    "id": "spider-bike_1-2",
+    "question": "Give me ids for all the trip that took place in a zip code area with average mean temperature above 60.",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.trip.aggregate([\n    {\"$lookup\": {\"from\": \"weather\", \"localField\": \"zip_code\", \"foreignField\": \"zip_code\", \"as\": \"w\"}},\n    {\"$match\": {\"w.mean_temperature_f\": {\"$gt\": 60}}},\n    {\"$project\": {\"_id\": 1}}\n])"
+  },
+  {
+    "id": "spider-apartment_rentals-19",
+    "question": "Show the addresses and phones of all the buildings managed by \"Brenden\".",
+    "database": "apartment_rentals",
+    "predicted_database": "apartment_rentals",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Apartment_Buildings.find({\"building_manager\": \"Brenden\"}, {\"_id\": 0, \"building_address\": 1, \"building_phone\": 1})"
+  },
+  {
+    "id": "spider-college_1-75",
+    "question": "Find the first name and office of the professor who is in the history department and has a Ph.D. degree.",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.PROFESSOR.aggregate([\n    {\"$lookup\": {\"from\": \"DEPARTMENT\", \"localField\": \"DEPT_CODE\", \"foreignField\": \"DEPT_CODE\", \"as\": \"dept\"}},\n    {\"$unwind\": \"$dept\"},\n    {\"$match\": {\"dept.DEPT_NAME\": \"History\", \"PROF_HIGH_DEGREE\": \"Ph.D.\"}},\n    {\"$project\": {\"_id\": 0, \"EMP_FNAME\": 1, \"PROF_OFFICE\": \"$dept.DEPT_NAME\"}}\n])"
+  },
+  {
+    "id": "spider-apartment_rentals-21",
+    "question": "What is the minimum and maximum number of bathrooms of all the apartments?",
+    "database": "apartment_rentals",
+    "predicted_database": "apartment_rentals",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Apartments.aggregate([\n    {\"$group\": {\"_id\": None, \"min_bathroom_count\": {\"$min\": \"$bathroom_count\"}}, \n     {\"$group\": {\"_id\": None, \"max_bathroom_count\": {\"$max\": \"$bathroom_count\"}}}\n])"
+  },
+  {
+    "id": "spider-store_1-25",
+    "question": "Who is the youngest employee in the company? List employee's first and last name.",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.employees.find({}, {\"_id\": 0, \"first_name\": 1, \"last_name\": 1}).sort({\"birth_date\": 1}).limit(1)"
+  },
+  {
+    "id": "spider-store_1-3",
+    "question": "List the top 5 genres by number of tracks. List genres name and total tracks.",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.genres.aggregate([\n    {\"$lookup\": {\"from\": \"tracks\", \"localField\": \"id\", \"foreignField\": \"genre_id\", \"as\": \"trk\"}},\n    {\"$project\": {\"_id\": 0, \"name\": 1, \"count\": {\"$size\": \"$trk\"}}},\n    {\"$sort\": {\"count\": -1}},\n    {\"$limit\": 5}\n])"
+  },
+  {
+    "id": "spider-store_1-34",
+    "question": "List the number of invoices and the invoice total from California.",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.invoices.aggregate([\n    {\"$match\": {\"billing_state\": \"CA\"}},\n    {\"$group\": {\"_id\": None, \"total\": {\"$sum\": \"$total\"}, \"invoice_count\": {\"$sum\": 1}}},\n    {\"$project\": {\"_id\": 0, \"total\": 1, \"invoice_count\": 1}}\n])"
+  },
+  {
+    "id": "spider-concert_singer-21",
+    "question": "What is the name and country of origin of every singer who has a song with the word 'Hey' in its title?",
+    "database": "concert_singer",
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.singer.find({\"Song_Name\": {\"$regex\": \"Hey\", \"$options\": \"i\"}}, {\"_id\": 0, \"Name\": 1, \"Country\": 1})"
+  },
+  {
+    "id": "spider-hr_1-15",
+    "question": "display job title and average salary of employees.",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.employees.aggregate([\n    {\"$group\": {\"_id\": \"$JOB_ID\", \"avg_salary\": {\"$avg\": \"$SALARY\"}}},\n    {\"$project\": {\"_id\": 0, \"job_title\": \"$_id\", \"avg_salary\": 1}}\n])"
+  },
+  {
+    "id": "spider-store_1-42",
+    "question": "How many employees are living in Canada?",
+    "database": "store_1",
+    "predicted_database": "hr_1",
+    "database_match": false,
+    "complexity": "easy",
+    "generated_query": "db.employees.count_documents({\"country\": \"Canada\"})"
+  },
+  {
+    "id": "spider-college_1-8",
+    "question": "What is the name of department where has the largest number of professors with a Ph.D. degree?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.PROFESSOR.aggregate([{\"$match\": {\"PROF_HIGH_DEGREE\": \"Ph.D.\"}}, {\"$group\": {\"_id\": \"$DEPT_CODE\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"DEPARTMENT\", \"localField\": \"_id\", \"foreignField\": \"DEPT_CODE\", \"as\": \"dept\"}}, {\"$unwind\": \"$dept\"}, {\"$project\": {\"_id\": 0, \"dept_name\": \"$dept.DEPT_NAME\"}}])"
+  },
+  {
+    "id": "spider-college_2-26",
+    "question": "Which department has the lowest budget?",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.department.find({}, {\"dept_name\": 1, \"budget\": 1}).sort({\"budget\": 1}).limit(1)"
+  },
+  {
+    "id": "spider-world_1-97",
+    "question": "Give the total population and average surface area corresponding to countries in North America that have a surface area greater than 3000 .",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.country.aggregate([{\"$match\": {\"Continent\": \"North America\", \"SurfaceArea\": {\"$gt\": 3000}}}, {\"$group\": {\"_id\": None, \"total_population\": {\"$sum\": \"$Population\"}, \"avg_surface_area\": {\"$avg\": \"$SurfaceArea\"}}}])"
+  },
+  {
+    "id": "spider-hr_1-56",
+    "question": "display the full name (first and last name), and salary of those employees who working in any department located in London.",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.employees.aggregate([\n    {\"$lookup\": {\"from\": \"locations\", \"localField\": \"DEPARTMENT_ID\", \"foreignField\": \"LOCATION_ID\", \"as\": \"loc\"}},\n    {\"$match\": {\"loc.CITY\": \"London\"}},\n    {\"$project\": {\"_id\": 0, \"FIRST_NAME\": 1, \"LAST_NAME\": 1, \"SALARY\": 1}}\n])"
+  },
+  {
+    "id": "spider-college_2-82",
+    "question": "Find the names and average salaries of all departments whose average salary is greater than 42000.",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.department.aggregate([\n    {\"$match\": {\"avg_salary\": {\"$gt\": 42000}}},\n    {\"$project\": {\"_id\": 0, \"dept_name\": 1, \"avg_salary\": 1}}\n])"
+  },
+  {
+    "id": "spider-college_2-46",
+    "question": "How many departments offer courses?",
+    "database": "college_2",
+    "predicted_database": "college_1",
+    "database_match": false,
+    "complexity": "easy",
+    "generated_query": "db.DEPARTMENT.aggregate([{\"$group\": {\"_id\": \"$DEPT_NAME\"}}, {\"$count\": \"department_count\"}])"
+  },
+  {
+    "id": "spider-store_1-24",
+    "question": "find the full name of employees who report to Nancy Edwards?",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.employees.find({\"reports_to\": \"Nancy Edwards\"}, {\"first_name\": 1, \"last_name\": 1})"
+  },
+  {
+    "id": "spider-hr_1-37",
+    "question": "display all the details from Employees table for those employees who was hired before 2002-06-21.",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.employees.find({\"HIRE_DATE\": {\"$lt\": \"2002-06-21\"}}, {\"_id\": 0})"
+  },
+  {
+    "id": "spider-bike_1-25",
+    "question": "What are the names of stations that have latitude lower than 37.5?",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.station.find({\"lat\": {\"$lt\": 37.5}}, {\"_id\": 0, \"name\": 1})"
+  },
+  {
+    "id": "spider-store_1-48",
+    "question": "List the name of tracks belongs to genre Rock or media type is MPEG audio file.",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.tracks.aggregate([\n    {\"$lookup\": {\"from\": \"genres\", \"localField\": \"genre_id\", \"foreignField\": \"id\", \"as\": \"genre\"}},\n    {\"$unwind\": \"$genre\"},\n    {\"$lookup\": {\"from\": \"media_types\", \"localField\": \"media_type_id\", \"foreignField\": \"id\", \"as\": \"media_type\"}},\n    {\"$unwind\": \"$media_type\"},\n    {\"$match\": {\"$or\": [{\"genre.name\": \"Rock\"}, {\"media_type.name\": \"MPEG audio file\"}]}},\n    {\"$project\": {\"_id\": 0, \"name\": 1}}\n])"
+  },
+  {
+    "id": "spider-college_1-64",
+    "question": "How many professors who has a either Ph.D. or MA degree?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.PROFESSOR.count_documents({\"$or\": [{\"PROF_HIGH_DEGREE\": \"Ph.D.\"}, {\"PROF_HIGH_DEGREE\": \"MA\"}]})"
+  },
+  {
+    "id": "spider-college_2-55",
+    "question": "Find the total number of instructors who teach a course in the Spring 2010 semester.",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.teaches.aggregate([{\"$match\": {\"semester\": \"Spring\", \"year\": 2010}}, {\"$group\": {\"_id\": \"$ID\"}}, {\"$count\": \"instructor_count\"}])"
+  },
+  {
+    "id": "spider-college_3-24",
+    "question": "What are the phones of departments in Room 268?",
+    "database": "college_3",
+    "predicted_database": "college_1",
+    "database_match": false,
+    "complexity": "easy",
+    "generated_query": "db.DEPARTMENT.aggregate([{\"$match\": {\"CLASS_ROOM\": \"268\"}}, {\"$lookup\": {\"from\": \"DEPARTMENT\", \"localField\": \"_id\", \"foreignField\": \"DEPT_CODE\", \"as\": \"d\"}}, {\"$unwind\": \"$d\"}, {\"$project\": {\"_id\": 0, \"DEPT_NAME\": \"$d.DEPT_NAME\", \"DEPT_ADDRESS\": \"$d.DEPT_ADDRESS\", \"STU_PHONE\": \"$d.STU_PHONE\"}}])"
+  },
+  {
+    "id": "spider-college_3-3",
+    "question": "What are the first and last names of the instructors who teach the top 3 number of courses?",
+    "database": "college_3",
+    "predicted_database": "college_2",
+    "database_match": false,
+    "complexity": "hard",
+    "generated_query": "db.instructor.aggregate([{\"$lookup\": {\"from\": \"teaches\", \"localField\": \"ID\", \"foreignField\": \"ID\", \"as\": \"t\"}}, {\"$unwind\": \"$t\"}, {\"$group\": {\"_id\": \"$name\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1}}, {\"$limit\": 3}, {\"$project\": {\"_id\": 0, \"first_name\": \"$_id\", \"last_name\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-college_3-31",
+    "question": "What is the maximum and minimum grade point of students who live in NYC?",
+    "database": "college_3",
+    "predicted_database": "network_1",
+    "database_match": false,
+    "complexity": "medium",
+    "generated_query": "db.Student.aggregate([{\"$match\": {\"city\": \"NYC\"}}, {\"$group\": {\"_id\": None, \"max_gradepoint\": {\"$max\": \"$STU_GPA\"}, \"min_gradepoint\": {\"$min\": \"$STU_GPA\"}}}, {\"$project\": {\"_id\": 0, \"max_gradepoint\": 1, \"min_gradepoint\": 1}}])"
+  },
+  {
+    "id": "spider-college_1-123",
+    "question": "What are the first names of all students in course ACCT-211?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.STUDENT.aggregate([\n    {\"$lookup\": {\"from\": \"ENROLL\", \"localField\": \"STU_NUM\", \"foreignField\": \"STU_NUM\", \"as\": \"e\"}},\n    {\"$unwind\": \"$e\"},\n    {\"$lookup\": {\"from\": \"CLASS\", \"localField\": \"e.CLASS_CODE\", \"foreignField\": \"CLASS_CODE\", \"as\": \"cl\"}},\n    {\"$unwind\": \"$cl\"},\n    {\"$match\": {\"cl.CRS_CODE\": \"ACCT-211\"}},\n    {\"$project\": {\"_id\": 0, \"STU_FNAME\": 1}}\n])"
+  },
+  {
+    "id": "spider-college_1-84",
+    "question": "Which school has the fewest professors?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.DEPARTMENT.aggregate([\n    {\"$lookup\": {\"from\": \"PROFESSOR\", \"localField\": \"DEPT_CODE\", \"foreignField\": \"DEPT_CODE\", \"as\": \"profs\"}},\n    {\"$unwind\": \"$profs\"},\n    {\"$group\": {\"_id\": \"$SCHOOL_CODE\", \"count\": {\"$sum\": 1}}},\n    {\"$sort\": {\"count\": 1}},\n    {\"$limit\": 1}\n])"
+  },
+  {
+    "id": "spider-bike_1-77",
+    "question": "What are the names of all stations with a latitude smaller than 37.5?",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.station.find({\"lat\": {\"$lt\": 37.5}}, {\"_id\": 0, \"name\": 1})"
+  },
+  {
+    "id": "spider-apartment_rentals-74",
+    "question": "Sort the gender codes in descending order of their corresponding number of guests. Return both the gender codes and counts.",
+    "database": "apartment_rentals",
+    "predicted_database": "apartment_rentals",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Guests.aggregate([\n    {\"$group\": {\"_id\": \"$gender_code\", \"count\": {\"$sum\": 1}}},\n    {\"$sort\": {\"count\": -1}}\n])"
+  },
+  {
+    "id": "spider-college_2-161",
+    "question": "List the distinct names of the instructors, ordered by name.",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.instructor.aggregate([{\"$group\": {\"_id\": \"$name\"}}, {\"$sort\": {\"_id\": 1}}, {\"$project\": {\"_id\": 0, \"name\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-flight_4-3",
+    "question": "Find the name and city of the airport which is the source for the most number of flight routes.",
+    "database": "flight_4",
+    "predicted_database": "flight_4",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.routes.aggregate([\n    {\"$group\": {\"_id\": \"$src_apid\", \"count\": {\"$sum\": 1}}},\n    {\"$sort\": {\"count\": -1}},\n    {\"$limit\": 1},\n    {\"$lookup\": {\"from\": \"airports\", \"localField\": \"_id\", \"foreignField\": \"apid\", \"as\": \"a\"}},\n    {\"$unwind\": \"$a\"},\n    {\"$project\": {\"_id\": 0, \"name\": \"$a.name\", \"city\": \"$a.city\", \"src_apid\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-chinook_1-15",
+    "question": "What is the first name and last name employee helps the customer with first name Leonie?",
+    "database": "chinook_1",
+    "predicted_database": "store_1",
+    "database_match": false,
+    "complexity": "medium",
+    "generated_query": "db.customers.find({\"first_name\": \"Leonie\"}, {\"first_name\": 1, \"last_name\": 1})"
+  },
+  {
+    "id": "spider-bike_1-53",
+    "question": "What are the names and ids of all stations that have more than 14 bikes available on average or had bikes installed in December?",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.station.aggregate([\n    {\"$lookup\": {\"from\": \"status\", \"localField\": \"id\", \"foreignField\": \"station_id\", \"as\": \"status\"}},\n    {\"$unwind\": \"$status\"},\n    {\"$group\": {\"_id\": \"$id\", \"name\": {\"$first\": \"$name\"}, \"avg_bikes\": {\"$avg\": \"$status.bikes_available\"}}},\n    {\"$match\": {\"avg_bikes\": {\"$gt\": 14}, \"$expr\": {\"$or\": [{\"$eq\": [\"$status.installation_date\", {\"$regex\": \"^12/\"}}], {\"$gte\": [\"$status.bikes_available\", 14]}}}}},\n    {\"$project\": {\"_id\": 0, \"name\": 1, \"id\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-inn_1-25",
+    "question": "What is the decor of room Recluse and defiance?",
+    "database": "inn_1",
+    "predicted_database": "inn_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Rooms.find({\"roomName\": \"Recluse and defiance\"}, {\"decor\": 1, \"_id\": 0})"
+  },
+  {
+    "id": "spider-wine_1-39",
+    "question": "Find the average price of wines that are not produced from Sonoma county.",
+    "database": "wine_1",
+    "predicted_database": "wine_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.wine.aggregate([{\"$match\": {\"County\": {\"$ne\": \"Sonoma\"}}}, {\"$group\": {\"_id\": None, \"avg_price\": {\"$avg\": \"$Price\"}}}, {\"$project\": {\"_id\": 0, \"avg_price\": 1}}])"
+  },
+  {
+    "id": "spider-car_1-105",
+    "question": "What is the maximum accelerate for all the different cylinders?",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.cars_data.aggregate([{\"$group\": {\"_id\": \"$Cylinders\", \"max_accelerate\": {\"$max\": \"$Accelerate\"}}}, {\"$project\": {\"_id\": 0, \"Cylinders\": \"$_id\", \"max_accelerate\": \"$max_accelerate\"}}])"
+  },
+  {
+    "id": "spider-college_2-87",
+    "question": "Show all titles and their instructors' names for courses in 2008, in alphabetical order by title.",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.course.find({\"year\": 2008}, {\"title\": 1, \"instructor.name\": 1}).sort({\"title\": 1})"
+  },
+  {
+    "id": "spider-bike_1-61",
+    "question": "For each zip code, what is the average mean temperature for all dates that start with '8'?",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.weather.aggregate([{\"$match\": {\"start_date\": {\"$regex\": \"^8\"}}}, {\"$group\": {\"_id\": \"$zip_code\", \"avg_temp\": {\"$avg\": \"$mean_temperature_f\"}}}])"
+  },
+  {
+    "id": "spider-csu_1-2",
+    "question": "How many faculty lines are there in the university that conferred the most number of degrees in year 2002?",
+    "database": "csu_1",
+    "predicted_database": "csu_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.faculty.aggregate([{\"$match\": {\"Year\": 2002}}, {\"$lookup\": {\"from\": \"Campuses\", \"localField\": \"Campus\", \"foreignField\": \"Id\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$match\": {\"c.Campus\": \"University of California, Los Angeles\"}}, {\"$project\": {\"_id\": 0, \"Faculty\": 1}}])"
+  },
+  {
+    "id": "spider-bike_1-97",
+    "question": "For each start station id, what is its name, longitude and average duration of trips started there?",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.trip.aggregate([\n    {\"$group\": {\"_id\": \"$start_station_id\", \"name\": {\"$first\": \"$start_station_name\"}, \"avg_duration\": {\"$avg\": \"$duration\"}}},\n    {\"$lookup\": {\"from\": \"station\", \"localField\": \"_id\", \"foreignField\": \"id\", \"as\": \"station\"}},\n    {\"$unwind\": \"$station\"},\n    {\"$project\": {\"_id\": 0, \"name\": \"$station.name\", \"long\": \"$station.long\", \"avg_duration\": 1}}\n])"
+  },
+  {
+    "id": "spider-college_2-104",
+    "question": "What are the titles of courses that are in the Statistics department but not the Psychology department?",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.course.aggregate([{\"$match\": {\"dept_name\": \"Statistics\"}}, {\"$lookup\": {\"from\": \"course\", \"localField\": \"title\", \"foreignField\": \"title\", \"as\": \"c2\"}}, {\"$match\": {\"$expr\": {\"$ne\": [\"Psychology\", \"$c2.dept_name\"]}}}, {\"$project\": {\"_id\": 0, \"title\": 1}}])"
+  },
+  {
+    "id": "spider-apartment_rentals-64",
+    "question": "Find the average room count of the apartments that have the \"Studio\" type code.",
+    "database": "apartment_rentals",
+    "predicted_database": "apartment_rentals",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Apartments.aggregate([\n    {\"$match\": {\"apt_type_code\": \"Studio\"}},\n    {\"$addFields\": {\"room_count_num\": {\"$toDouble\": \"$room_count\"}}},\n    {\"$group\": {\"_id\": None, \"avg_room_count\": {\"$avg\": \"$room_count_num\"}}},\n    {\"$project\": {\"_id\": 0, \"avg_room_count\": 1}}\n])"
+  },
+  {
+    "id": "spider-college_1-137",
+    "question": "What is the course description and number of credits for QM-261?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.COURSE.find({\"CRS_CODE\": \"QM-261\"}, {\"_id\": 0, \"CRS_DESCRIPTION\": 1, \"CRS_CREDIT\": 1})"
+  },
+  {
+    "id": "spider-flight_2-72",
+    "question": "Which airports do not have departing or arriving flights?",
+    "database": "flight_2",
+    "predicted_database": "flight_2",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.airports.find({}, {\"_id\": 0, \"City\": 1, \"AirportCode\": 1, \"AirportName\": 1})"
+  },
+  {
+    "id": "spider-college_1-142",
+    "question": "What is the number of different class sections offered in the course ACCT-211?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.CLASS.aggregate([{\"$match\": {\"CRS_CODE\": \"ACCT-211\"}}, {\"$group\": {\"_id\": \"$CLASS_SECTION\", \"count\": {\"$sum\": 1}}}, {\"$project\": {\"_id\": 0, \"count\": 1, \"CLASS_SECTION\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-chinook_1-23",
+    "question": "How many albums are there?",
+    "database": "chinook_1",
+    "predicted_database": "store_1",
+    "database_match": false,
+    "complexity": "easy",
+    "generated_query": "db.albums.count_documents({})"
+  },
+  {
+    "id": "spider-formula_1-7",
+    "question": "What are the maximum fastest lap speed in races held after 2004 grouped by race name and ordered by year?",
+    "database": "formula_1",
+    "predicted_database": "formula_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.races.aggregate([{\"$match\": {\"year\": {\"$gt\": 2004}}}, {\"$lookup\": {\"from\": \"results\", \"localField\": \"raceId\", \"foreignField\": \"raceId\", \"as\": \"r\"}}, {\"$unwind\": \"$r\"}, {\"$addFields\": {\"speedNum\": {\"$convert\": {\"input\": \"$r.fastestLapSpeed\", \"to\": \"double\", \"onError\": None, \"onNull\": None}}}}, {\"$match\": {\"speedNum\": {\"$ne\": None}}}, {\"$group\": {\"_id\": \"$name\", \"max_speed\": {\"$max\": \"$speedNum\"}, \"year\": {\"$first\": \"$year\"}}}, {\"$sort\": {\"year\": 1}}, {\"$project\": {\"_id\": 0, \"max_speed\": 1, \"name\": \"$_id\", \"year\": 1}}])"
+  },
+  {
+    "id": "spider-college_3-32",
+    "question": "Find the names of courses that have either 3 credits or 1 credit but 4 hours.",
+    "database": "college_3",
+    "predicted_database": "college_2",
+    "database_match": false,
+    "complexity": "medium",
+    "generated_query": "db.course.find({\"$or\": [{\"Credits\": 3}, {\"Credits\": 1}], \"time_slot\": {\"$size\": 4}})"
+  },
+  {
+    "id": "spider-hr_1-69",
+    "question": "What are the job ids for jobs done more than once for a period of more than 300 days?",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.job_history.aggregate([{\"$addFields\": {\"start_dt\": {\"$dateFromString\": {\"dateString\": \"$START_DATE\", \"onError\": None, \"onNull\": None}}, \"end_dt\": {\"$dateFromString\": {\"dateString\": \"$END_DATE\", \"onError\": None, \"onNull\": None}}}}, {\"$match\": {\"start_dt\": {\"$ne\": None}, \"end_dt\": {\"$ne\": None}}}, {\"$addFields\": {\"days\": {\"$dateDiff\": {\"startDate\": \"$start_dt\", \"endDate\": \"$end_dt\", \"unit\": \"day\"}}}}, {\"$match\": {\"days\": {\"$gt\": 300}}}, {\"$group\": {\"_id\": \"$JOB_ID\", \"count\": {\"$sum\": 1}}}, {\"$match\": {\"count\": {\"$gte\": 2}}}, {\"$project\": {\"_id\": 0, \"JOB_ID\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-college_2-106",
+    "question": "What are the names of the students who took classes in 2009 or 2010?",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.student.aggregate([{\"$lookup\": {\"from\": \"takes\", \"localField\": \"ID\", \"foreignField\": \"ID\", \"as\": \"tk\"}}, {\"$unwind\": \"$tk\"}, {\"$match\": {\"$or\": [{\"tk.year\": 2009}, {\"tk.year\": 2010}]}}, {\"$group\": {\"_id\": \"$name\"}}, {\"$project\": {\"_id\": 0, \"name\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-hr_1-114",
+    "question": "What are full names and salaries of employees working in the city of London?",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.employees.find({\"LOCATION_ID\": {\"$in\": [db.locations.find({\"CITY\": \"London\"}, {\"LOCATION_ID\": 1})[\"LOCATION_ID\"]]}}, {\"_id\": 0, \"FIRST_NAME\": 1, \"LAST_NAME\": 1, \"SALARY\": 1})"
+  },
+  {
+    "id": "spider-chinook_1-7",
+    "question": "What are the album titles for albums containing both 'Reggae' and 'Rock' genre tracks?",
+    "database": "chinook_1",
+    "predicted_database": "store_1",
+    "database_match": false,
+    "complexity": "hard",
+    "generated_query": "db.albums.aggregate([{\"$lookup\": {\"from\": \"tracks\", \"localField\": \"id\", \"foreignField\": \"album_id\", \"as\": \"trk\"}}, {\"$match\": {\"$expr\": {\"$and\": [{\"$in\": [\"Reggae\", \"$trk.genre_id\"]}, {\"$in\": [\"Rock\", \"$trk.genre_id\"]}]}}}, {\"$project\": {\"_id\": 0, \"title\": 1}}])"
+  },
+  {
+    "id": "spider-wta_1-4",
+    "question": "Find the first name and country code of the oldest player.",
+    "database": "wta_1",
+    "predicted_database": "wta_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.players.find({}, {\"_id\": 0, \"first_name\": 1, \"country_code\": 1}).sort({\"birth_date\": 1}).limit(1)"
+  },
+  {
+    "id": "spider-college_2-141",
+    "question": "What are the names and salaries of instructors who advises students in the History department?",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.advisor.aggregate([{\"$lookup\": {\"from\": \"student\", \"localField\": \"s_ID\", \"foreignField\": \"ID\", \"as\": \"s\"}}, {\"$unwind\": \"$s\"}, {\"$match\": {\"s.dept_name\": \"History\"}}, {\"$lookup\": {\"from\": \"instructor\", \"localField\": \"i_ID\", \"foreignField\": \"ID\", \"as\": \"i\"}}, {\"$unwind\": \"$i\"}, {\"$project\": {\"_id\": 0, \"name\": \"$i.name\", \"salary\": \"$i.salary\"}}])"
+  },
+  {
+    "id": "spider-wine_1-10",
+    "question": "Give me the average prices of wines that are produced by appelations in Sonoma County.",
+    "database": "wine_1",
+    "predicted_database": "wine_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.wine.aggregate([{\"$match\": {\"Appelation\": \"Sonoma County\"}}, {\"$group\": {\"_id\": None, \"avg_price\": {\"$avg\": \"$Price\"}}}, {\"$project\": {\"_id\": 0, \"avg_price\": 1}}])"
+  },
+  {
+    "id": "spider-csu_1-26",
+    "question": "List the campus that have between 600 and 1000 faculty lines in year 2004.",
+    "database": "csu_1",
+    "predicted_database": "csu_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.faculty.aggregate([\n    {\"$match\": {\"Year\": 2004}},\n    {\"$lookup\": {\"from\": \"Campuses\", \"localField\": \"Campus\", \"foreignField\": \"Id\", \"as\": \"c\"}},\n    {\"$unwind\": \"$c\"},\n    {\"$match\": {\"c.Faculty\": {\"$gte\": 600, \"$lte\": 1000}}},\n    {\"$project\": {\"_id\": 0, \"Campus\": \"$c.Campus\"}}\n])"
+  },
+  {
+    "id": "spider-college_3-23",
+    "question": "What is the number of departments in Division \"AS\"?",
+    "database": "college_3",
+    "predicted_database": "college_1",
+    "database_match": false,
+    "complexity": "easy",
+    "generated_query": "db.DEPARTMENT.find({\"Division\": \"AS\"}, {\"_id\": 0, \"count\": {\"$sum\": 1}})"
+  },
+  {
+    "id": "spider-sakila_1-4",
+    "question": "Which film actor (actress) starred the most films? List his or her first name, last name and actor id.",
+    "database": "sakila_1",
+    "predicted_database": "sakila_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.film_actor.aggregate([{\"$group\": {\"_id\": \"$actor_id\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"actor\", \"localField\": \"_id\", \"foreignField\": \"actor_id\", \"as\": \"a\"}}, {\"$unwind\": \"$a\"}, {\"$project\": {\"_id\": 0, \"first_name\": \"$a.first_name\", \"last_name\": \"$a.last_name\", \"actor_id\": \"$a.actor_id\"}}])"
+  },
+  {
+    "id": "spider-chinook_1-29",
+    "question": "Find the names of all the tracks that contain the word \"you\".",
+    "database": "chinook_1",
+    "predicted_database": "store_1",
+    "database_match": false,
+    "complexity": "easy",
+    "generated_query": "db.tracks.find({\"name\": {\"$regex\": \"you\", \"$options\": \"i\"}})"
+  },
+  {
+    "id": "spider-baseball_1-28",
+    "question": "How many games in 1885 postseason resulted in ties (that is, the value of \"ties\" is '1')?",
+    "database": "baseball_1",
+    "predicted_database": "baseball_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.postseason.aggregate([\n    {\"$match\": {\"year\": 1885, \"ties\": 1}},\n    {\"$count\": \"count\"}\n])"
+  },
+  {
+    "id": "spider-bike_1-104",
+    "question": "What is the average latitude and longitude of all starting stations for the trips?",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.trip.aggregate([{\"$lookup\": {\"from\": \"station\", \"localField\": \"start_station_id\", \"foreignField\": \"id\", \"as\": \"station\"}}, {\"$unwind\": \"$station\"}, {\"$group\": {\"_id\": None, \"avg_lat\": {\"$avg\": \"$station.lat\"}, \"avg_long\": {\"$avg\": \"$station.long\"}}}, {\"$project\": {\"_id\": 0, \"avg_lat\": 1, \"avg_long\": 1}}])"
+  },
+  {
+    "id": "spider-college_1-138",
+    "question": "How many schools are there in the department?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.DEPARTMENT.aggregate([{\"$group\": {\"_id\": \"$SCHOOL_CODE\"}}, {\"$count\": \"count\"}])"
+  },
+  {
+    "id": "spider-flight_2-75",
+    "question": "Count the number of flights departing from 'APG'.",
+    "database": "flight_2",
+    "predicted_database": "flight_2",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.flights.count_documents({\"SourceAirport\": \"APG\"})"
+  },
+  {
+    "id": "spider-apartment_rentals-59",
+    "question": "What are the address and phone number of the buildings managed by \"Brenden\"?",
+    "database": "apartment_rentals",
+    "predicted_database": "apartment_rentals",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Apartment_Buildings.find({\"building_manager\": \"Brenden\"}, {\"building_address\": 1, \"building_phone\": 1})"
+  },
+  {
+    "id": "spider-network_1-60",
+    "question": "What are the names and grades for each high schooler?",
+    "database": "network_1",
+    "predicted_database": "network_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Highschooler.find({}, {\"_id\": 0, \"name\": 1, \"grade\": 1})"
+  },
+  {
+    "id": "spider-college_1-154",
+    "question": "What is the first name, GPA, and phone number of the students with the top 5 GPAs?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.STUDENT.find({}, {\"_id\": 0, \"STU_FNAME\": 1, \"STU_GPA\": 1, \"STU_PHONE\": 1}).sort({\"STU_GPA\": -1}).limit(5)"
+  },
+  {
+    "id": "spider-wta_1-2",
+    "question": "List the names of all winners who played in both 2013 and 2016.",
+    "database": "wta_1",
+    "predicted_database": "wta_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.matches.find({\"year\": {\"$in\": [2013, 2016]}}, {\"_id\": 0, \"winner_name\": 1})"
+  },
+  {
+    "id": "spider-college_2-165",
+    "question": "What are the distinct salaries of all instructors who earned less than the maximum salary?",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.instructor.aggregate([{\"$lookup\": {\"from\": \"instructor\", \"pipeline\": [{\"$group\": {\"_id\": None, \"maxSalary\": {\"$max\": \"$salary\"}}}], \"as\": \"m\"}}, {\"$unwind\": \"$m\"}, {\"$match\": {\"$expr\": {\"$lt\": [\"$salary\", \"$m.maxSalary\"]}}}, {\"$group\": {\"_id\": \"$salary\"}}, {\"$project\": {\"_id\": 0, \"salary\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-hr_1-88",
+    "question": "Return the phone numbers of employees with salaries between 8000 and 12000.",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.employees.find({\"SALARY\": {\"$gte\": 8000, \"$lte\": 12000}}, {\"_id\": 0, \"PHONE_NUMBER\": 1})"
+  },
+  {
+    "id": "spider-store_1-95",
+    "question": "In which country does Roberto Almeida?",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.customers.find({\"first_name\": \"Roberto\", \"last_name\": \"Almeida\"}, {\"_id\": 0, \"country\": 1})"
+  },
+  {
+    "id": "spider-csu_1-25",
+    "question": "How many faculty lines are there in \"San Francisco State University\" in year 2004?",
+    "database": "csu_1",
+    "predicted_database": "csu_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.faculty.aggregate([{\"$match\": {\"Year\": 2004}}, {\"$lookup\": {\"from\": \"Campuses\", \"localField\": \"Campus\", \"foreignField\": \"Id\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$match\": {\"c.Campus\": \"San Francisco State University\"}}, {\"$project\": {\"_id\": 0, \"Faculty\": 1}}])"
+  },
+  {
+    "id": "spider-dog_kennels-76",
+    "question": "How many dogs went through any treatments?",
+    "database": "dog_kennels",
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Dogs.aggregate([{\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"dog_id\", \"foreignField\": \"dog_id\", \"as\": \"t\"}}, {\"$count\": \"count\"}])"
+  },
+  {
+    "id": "spider-formula_1-30",
+    "question": "What are the names of races held after 12:00:00 or before 09:00:00?",
+    "database": "formula_1",
+    "predicted_database": "formula_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.races.find({\"date\": {\"$gte\": \"2023-04-01T12:00:00Z\", \"$lte\": \"2023-04-01T09:00:00Z\"}}, {\"_id\": 0, \"name\": 1})"
+  },
+  {
+    "id": "spider-bike_1-59",
+    "question": "What is the station station and end station for the trips with the three smallest ids?",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.trip.find({}, {\"_id\": 0, \"start_station_name\": 1, \"end_station_name\": 1}).sort({\"id\": 1}).limit(3)"
+  },
+  {
+    "id": "spider-apartment_rentals-61",
+    "question": "Give me the minimum and maximum bathroom count among all the apartments.",
+    "database": "apartment_rentals",
+    "predicted_database": "apartment_rentals",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Apartments.aggregate([\n    {\"$group\": {\"_id\": None, \"min_bathroom_count\": {\"$min\": \"$bathroom_count\"}}, \n     {\"$group\": {\"_id\": None, \"max_bathroom_count\": {\"$max\": \"$bathroom_count\"}}}\n])"
+  },
+  {
+    "id": "spider-sakila_1-35",
+    "question": "What is the first name and the last name of the customer who made the earliest rental?",
+    "database": "sakila_1",
+    "predicted_database": "store_1",
+    "database_match": false,
+    "complexity": "medium",
+    "generated_query": "db.rental.aggregate([{\"$sort\": {\"rental_date\": 1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"first_name\": 1, \"last_name\": 1}}])"
+  },
+  {
+    "id": "spider-college_1-95",
+    "question": "What is the name, address, and number of students in the departments that have the 3 most students?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.DEPARTMENT.aggregate([{\"$group\": {\"_id\": \"$DEPT_CODE\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1}}, {\"$limit\": 3}, {\"$lookup\": {\"from\": \"STUDENT\", \"localField\": \"_id\", \"foreignField\": \"DEPT_CODE\", \"as\": \"s\"}}, {\"$unwind\": \"$s\"}, {\"$project\": {\"_id\": 0, \"DEPT_NAME\": \"$d.DEPT_NAME\", \"DEPT_ADDRESS\": \"$d.DEPT_ADDRESS\", \"count\": \"$s.count\"}}])"
+  },
+  {
+    "id": "spider-wta_1-8",
+    "question": "Find the year that has the most number of matches.",
+    "database": "wta_1",
+    "predicted_database": "wta_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.matches.aggregate([{\"$group\": {\"_id\": \"$year\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"year\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-concert_singer-42",
+    "question": "What is the name and capacity for the stadium with the highest average attendance?",
+    "database": "concert_singer",
+    "predicted_database": "concert_singer",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.stadium.find({}, {\"_id\": 0, \"Name\": 1, \"Capacity\": 1}).sort({\"Average\": -1}).limit(1)"
+  },
+  {
+    "id": "spider-hr_1-95",
+    "question": "What is all the information about employees hired before June 21, 2002?",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.employees.find({\"HIRE_DATE\": {\"$lt\": \"2002-06-21\"}}, {\"_id\": 0})"
+  },
+  {
+    "id": "spider-hr_1-62",
+    "question": "What are the full name, hire data, salary and department id for employees without the letter M in their first name, ordered by ascending department id?",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.employees.find({\"FIRST_NAME\": {\"$not\": {\"$regex\": \"M\"}}}, {\"_id\": 0, \"FIRST_NAME\": 1, \"LAST_NAME\": 1, \"HIRE_DATE\": 1, \"SALARY\": 1, \"DEPARTMENT_ID\": 1}).sort({\"DEPARTMENT_ID\": 1})"
+  },
+  {
+    "id": "spider-baseball_1-2",
+    "question": "What are the first name, last name and id of the player with the most all star game experiences? Also list the count.",
+    "database": "baseball_1",
+    "predicted_database": "wta_1",
+    "database_match": false,
+    "complexity": null,
+    "generated_query": "db.all_star.aggregate([\n    {\"$group\": {\"_id\": \"$player_id\", \"count\": {\"$sum\": 1}}},\n    {\"$sort\": {\"count\": -1}},\n    {\"$limit\": 1},\n    {\"$project\": {\"_id\": 0, \"first_name\": 1, \"last_name\": 1, \"player_id\": 1}}\n])"
+  },
+  {
+    "id": "spider-bike_1-67",
+    "question": "What are the 3 most common cloud covers in the zip code of 94107?",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.weather.aggregate([{\"$match\": {\"zip_code\": 94107}}, {\"$group\": {\"_id\": \"$cloud_cover\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1}}, {\"$limit\": 3}, {\"$project\": {\"_id\": 0, \"cloud_cover\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-formula_1-22",
+    "question": "Find all the forenames of distinct drivers who won in position 1 as driver standing and had more than 20 points?",
+    "database": "formula_1",
+    "predicted_database": "formula_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.driverStandings.aggregate([\n    {\"$match\": {\"position\": 1, \"wins\": 1, \"points\": {\"$gt\": 20}}},\n    {\"$lookup\": {\"from\": \"drivers\", \"localField\": \"driverId\", \"foreignField\": \"driverId\", \"as\": \"d\"}},\n    {\"$unwind\": \"$d\"},\n    {\"$group\": {\"_id\": \"$d.forename\"}},\n    {\"$project\": {\"_id\": 0, \"forename\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-college_2-122",
+    "question": "What is the name of the deparment with the highest enrollment?",
+    "database": "college_2",
+    "predicted_database": "college_1",
+    "database_match": false,
+    "complexity": null,
+    "generated_query": "db.CLASS.aggregate([{\"$lookup\": {\"from\": \"ENROLL\", \"localField\": \"CLASS_CODE\", \"foreignField\": \"CLASS_CODE\", \"as\": \"e\"}}, {\"$unwind\": \"$e\"}, {\"$lookup\": {\"from\": \"COURSE\", \"localField\": \"CRS_CODE\", \"foreignField\": \"CRS_CODE\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$group\": {\"_id\": \"$c.DEPT_CODE\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"DEPARTMENT\", \"localField\": \"_id\", \"foreignField\": \"DEPT_CODE\", \"as\": \"d\"}}, {\"$unwind\": \"$d\"}, {\"$project\": {\"_id\": 0, \"DEPT_NAME\": \"$d.DEPT_NAME\"}}])"
+  },
+  {
+    "id": "spider-flight_4-12",
+    "question": "Find the name, city, and country of the airport that has the lowest altitude.",
+    "database": "flight_4",
+    "predicted_database": "flight_4",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.airports.find({}, {\"_id\": 0, \"name\": 1, \"city\": 1, \"country\": 1}).sort({\"elevation\": 1}).limit(1)"
+  },
+  {
+    "id": "spider-formula_1-6",
+    "question": "What is the id and last name of the driver who participated in the most races after 2010?",
+    "database": "formula_1",
+    "predicted_database": "formula_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.results.aggregate([{\"$match\": {\"date\": {\"$gte\": \"2010-01-01\"}}}, {\"$group\": {\"_id\": \"$driverId\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"drivers\", \"localField\": \"_id\", \"foreignField\": \"driverId\", \"as\": \"d\"}}, {\"$unwind\": \"$d\"}, {\"$project\": {\"_id\": 0, \"driverid\": \"$_id\", \"surname\": \"$d.surname\"}}])"
+  },
+  {
+    "id": "spider-college_1-83",
+    "question": "How many classes exist for each school?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.DEPARTMENT.aggregate([\n    {\"$lookup\": {\"from\": \"CLASS\", \"localField\": \"SCHOOL_CODE\", \"foreignField\": \"CLASS_ROOM\", \"as\": \"classes\"}},\n    {\"$unwind\": \"$classes\"},\n    {\"$group\": {\"_id\": \"$classes.CLASS_ROOM\", \"count\": {\"$sum\": 1}}},\n    {\"$project\": {\"_id\": 0, \"count\": 1, \"CLASS_ROOM\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-college_2-111",
+    "question": "What are the names and buildings of the deparments, sorted by budget descending?",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.department.find({}, {\"_id\": 0, \"dept_name\": 1, \"building\": 1}).sort({\"budget\": -1})"
+  },
+  {
+    "id": "spider-wine_1-5",
+    "question": "Find the county where produces the most number of wines with score higher than 90.",
+    "database": "wine_1",
+    "predicted_database": "wine_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.appellations.aggregate([\n    {\"$match\": {\"State\": \"California\"}},\n    {\"$group\": {\"_id\": \"$County\", \"count\": {\"$sum\": 1}}},\n    {\"$sort\": {\"count\": -1}},\n    {\"$limit\": 1}\n])"
+  },
+  {
+    "id": "spider-store_1-103",
+    "question": "What are the names of all Rock tracks that are stored on MPEG audio files?",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.tracks.aggregate([{\"$lookup\": {\"from\": \"genres\", \"localField\": \"genre_id\", \"foreignField\": \"id\", \"as\": \"genre\"}}, {\"$unwind\": \"$genre\"}, {\"$lookup\": {\"from\": \"media_types\", \"localField\": \"media_type_id\", \"foreignField\": \"id\", \"as\": \"media_type\"}}, {\"$unwind\": \"$media_type\"}, {\"$match\": {\"genre.name\": \"Rock\", \"media_type.name\": \"MPEG audio file\"}}, {\"$project\": {\"_id\": 0, \"name\": 1}}])"
+  },
+  {
+    "id": "spider-baseball_1-26",
+    "question": "List players' first name and last name who have weight greater than 220 or height shorter than 75.",
+    "database": "baseball_1",
+    "predicted_database": "wta_1",
+    "database_match": false,
+    "complexity": null,
+    "generated_query": "db.players.find({\"$or\": [{\"weight\": {\"$gt\": 220}}, {\"height\": {\"$lt\": 75}}]}, {\"_id\": 0, \"first_name\": 1, \"last_name\": 1})"
+  },
+  {
+    "id": "spider-sakila_1-14",
+    "question": "How many cities are in Australia?",
+    "database": "sakila_1",
+    "predicted_database": "sakila_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.city.count_documents({\"country_id\": 1})"
+  },
+  {
+    "id": "spider-flight_2-61",
+    "question": "What country is Jetblue Airways affiliated with?",
+    "database": "flight_2",
+    "predicted_database": "flight_2",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.airlines.find({\"Airline\": \"JetBlue Airways\"}, {\"_id\": 0, \"Country\": 1})"
+  },
+  {
+    "id": "spider-sakila_1-28",
+    "question": "What is the total amount of all payments?",
+    "database": "sakila_1",
+    "predicted_database": "store_1",
+    "database_match": false,
+    "complexity": "easy",
+    "generated_query": "db.payment.find({}, {\"_id\": 0, \"amount\": 1}).sort({\"amount\": -1}).limit(1)"
+  },
+  {
+    "id": "spider-college_3-15",
+    "question": "Find the department name and room of the course INTRODUCTION TO COMPUTER SCIENCE.",
+    "database": "college_3",
+    "predicted_database": "college_1",
+    "database_match": false,
+    "complexity": "medium",
+    "generated_query": "db.COURSE.aggregate([\n    {\"$match\": {\"CRS_CODE\": \"INTRODUCTION TO COMPUTER SCIENCE\"}},\n    {\"$lookup\": {\"from\": \"DEPARTMENT\", \"localField\": \"DEPT_CODE\", \"foreignField\": \"DEPT_CODE\", \"as\": \"dept\"}},\n    {\"$project\": {\"_id\": 0, \"dept.DEPT_NAME\": 1, \"CLASS_ROOM\": 1}}\n])"
+  },
+  {
+    "id": "spider-college_1-136",
+    "question": "What are the different locations of the school with the code BUS?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.DEPARTMENT.aggregate([{\"$match\": {\"SCHOOL_CODE\": \"BUS\"}}, {\"$group\": {\"_id\": \"$DEPT_ADDRESS\"}}, {\"$count\": \"count\"}])"
+  },
+  {
+    "id": "spider-flight_2-45",
+    "question": "Which airlines have at least 10 flights?",
+    "database": "flight_2",
+    "predicted_database": "flight_2",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.airlines.aggregate([{\"$lookup\": {\"from\": \"flights\", \"localField\": \"uid\", \"foreignField\": \"Airline\", \"as\": \"fl\"}}, {\"$addFields\": {\"count\": {\"$size\": \"$fl\"}}}, {\"$match\": {\"count\": {\"$gt\": 10}}}, {\"$project\": {\"_id\": 0, \"Airline\": 1}}])"
+  },
+  {
+    "id": "spider-college_1-140",
+    "question": "What are the number of different course codes?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.COURSE.aggregate([{\"$group\": {\"_id\": \"$CRS_CODE\"}}, {\"$count\": \"count\"}])"
+  },
+  {
+    "id": "spider-flight_4-40",
+    "question": "Find the id of routes whose source and destination airports are in the United States.",
+    "database": "flight_4",
+    "predicted_database": "flight_4",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.routes.find({\"src_apid\": {\"$in\": db.airports.find({\"country\": \"United States\"})[\"apid\"]}, \"dst_apid\": {\"$in\": db.airports.find({\"country\": \"United States\"})[\"apid\"]}})"
+  },
+  {
+    "id": "spider-store_1-94",
+    "question": "How many customers are from California?",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.customers.count_documents({\"state\": \"CA\"})"
+  },
+  {
+    "id": "spider-flight_4-22",
+    "question": "Find the number of routes for each source airport and the airport name.",
+    "database": "flight_4",
+    "predicted_database": "flight_4",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.routes.aggregate([\n    {\"$group\": {\"_id\": \"$src_apid\", \"count\": {\"$sum\": 1}, \"name\": {\"$first\": \"$src_ap\"}}, \n    {\"$project\": {\"_id\": 0, \"count\": 1, \"name\": 1}}\n])"
+  },
+  {
+    "id": "spider-hr_1-106",
+    "question": "What are the employee ids, full names, and job ids for employees who make more than the highest earning employee with title PU_MAN?",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.employees.aggregate([{\"$lookup\": {\"from\": \"employees\", \"pipeline\": [{\"$match\": {\"JOB_ID\": \"PU_MAN\"}}, {\"$group\": {\"_id\": None, \"max_salary\": {\"$max\": \"$SALARY\"}}}], \"as\": \"ref\"}}, {\"$unwind\": \"$ref\"}, {\"$match\": {\"$expr\": {\"$gt\": [\"$SALARY\", \"$ref.max_salary\"]}}}, {\"$project\": {\"_id\": 0, \"EMPLOYEE_ID\": 1, \"FIRST_NAME\": 1, \"LAST_NAME\": 1, \"JOB_ID\": 1}}])"
+  },
+  {
+    "id": "spider-college_2-110",
+    "question": "Give the name of the department with the lowest budget.",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.department.find({}, {\"_id\": 0, \"dept_name\": 1}).sort({\"budget\": 1}).limit(1)"
+  },
+  {
+    "id": "spider-flight_4-16",
+    "question": "Which countries has the most number of airlines whose active status is 'Y'?",
+    "database": "flight_4",
+    "predicted_database": "flight_2",
+    "database_match": false,
+    "complexity": "medium",
+    "generated_query": "db.airlines.aggregate([{\"$match\": {\"active\": \"Y\"}}, {\"$group\": {\"_id\": \"$country\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"country\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-store_1-74",
+    "question": "How many invoices were billed from each state?",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.invoices.aggregate([{\"$match\": {\"billing_state\": {\"$ne\": null}}}, {\"$group\": {\"_id\": \"$billing_state\", \"count\": {\"$sum\": 1}}}, {\"$project\": {\"_id\": 0, \"billing_state\": \"$_id\", \"count\": 1}}])"
+  },
+  {
+    "id": "spider-store_1-69",
+    "question": "What are the names of the countries and average invoice size of the top countries by size?",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.invoices.aggregate([{\"$group\": {\"_id\": \"$billing_country\", \"total\": {\"$sum\": \"$total\"}}}, {\"$sort\": {\"total\": -1}}, {\"$limit\": 8}, {\"$project\": {\"_id\": 0, \"billing_country\": \"$_id\", \"avg_total\": {\"$avg\": \"$total\"}}}])"
+  },
+  {
+    "id": "spider-apartment_rentals-76",
+    "question": "Which apartments have bookings with both status codes \"Provisional\" and \"Confirmed\"? Give me the apartment numbers.",
+    "database": "apartment_rentals",
+    "predicted_database": "apartment_rentals",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Apartment_Bookings.aggregate([{\"$match\": {\"booking_status_code\": {\"$in\": [\"Confirmed\", \"Provisional\"]}}}, {\"$lookup\": {\"from\": \"Apartments\", \"localField\": \"apt_id\", \"foreignField\": \"apt_id\", \"as\": \"apt\"}}, {\"$unwind\": \"$apt\"}, {\"$group\": {\"_id\": \"$apt.apt_number\", \"statuses\": {\"$addToSet\": \"$booking_status_code\"}}}, {\"$match\": {\"statuses\": {\"$all\": [\"Confirmed\", \"Provisional\"]}}}, {\"$project\": {\"_id\": 0, \"apt_number\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-college_1-86",
+    "question": "Which department offers the most credits all together?",
+    "database": "college_1",
+    "predicted_database": "college_2",
+    "database_match": false,
+    "complexity": null,
+    "generated_query": "db.course.aggregate([{\"$group\": {\"_id\": \"$dept_name\", \"total_credits\": {\"$sum\": \"$credits\"}}}, {\"$sort\": {\"total_credits\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"dept_name\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-college_2-166",
+    "question": "What are the names and average salaries for departments with average salary higher than 42000?",
+    "database": "college_2",
+    "predicted_database": "hr_1",
+    "database_match": false,
+    "complexity": null,
+    "generated_query": "db.department.aggregate([{\"$group\": {\"_id\": \"$dept_name\", \"avg_salary\": {\"$avg\": \"$salary\"}}}, {\"$match\": {\"avg_salary\": {\"$gt\": 42000}}}, {\"$project\": {\"_id\": 0, \"dept_name\": \"$_id\", \"avg_salary\": 1}}])"
+  },
+  {
+    "id": "spider-apartment_rentals-63",
+    "question": "What are the apartment number and the room count of each apartment?",
+    "database": "apartment_rentals",
+    "predicted_database": "apartment_rentals",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Apartments.find({}, {\"_id\": 0, \"apt_number\": 1, \"room_count\": 1})"
+  },
+  {
+    "id": "spider-csu_1-16",
+    "question": "Report the name of all campuses in Los Angeles county.",
+    "database": "csu_1",
+    "predicted_database": "csu_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Campuses.find({\"County\": \"Los Angeles\"}, {\"_id\": 0, \"Campus\": 1})"
+  },
+  {
+    "id": "spider-inn_1-21",
+    "question": "How many times does ROY SWEAZY has reserved a room.",
+    "database": "inn_1",
+    "predicted_database": "inn_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Reservations.aggregate([{\"$match\": {\"FirstName\": \"ROY\", \"LastName\": \"SWEAZY\"}}, {\"$group\": {\"_id\": \"$Room\", \"count\": {\"$sum\": 1}}}, {\"$project\": {\"_id\": 0, \"roomName\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-wine_1-25",
+    "question": "List the names of all distinct wines that have scores higher than 90.",
+    "database": "wine_1",
+    "predicted_database": "wine_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.wine.distinct(\"Name\", {\"Score\": {\"$gt\": 90}})"
+  },
+  {
+    "id": "spider-wta_1-1",
+    "question": "Find the name of tourney that has more than 10 matches.",
+    "database": "wta_1",
+    "predicted_database": "wta_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.matches.aggregate([\n    {\"$group\": {\"_id\": \"$tourney_name\", \"count\": {\"$sum\": 1}}},\n    {\"$match\": {\"count\": {\"$gt\": 10}}},\n    {\"$project\": {\"_id\": 0, \"tourney_name\": 1}}\n])"
+  },
+  {
+    "id": "spider-college_2-102",
+    "question": "Give the name of the lowest earning instructor in the Statistics department.",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.instructor.find({\"dept_name\": \"Statistics\"}, {\"_id\": 0, \"name\": 1}).sort({\"salary\": 1}).limit(1)"
+  },
+  {
+    "id": "spider-inn_1-7",
+    "question": "What is the average base price of different bed type? List bed type and average base price.",
+    "database": "inn_1",
+    "predicted_database": "inn_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Rooms.aggregate([{\"$group\": {\"_id\": \"$bedType\", \"avg_basePrice\": {\"$avg\": \"$basePrice\"}}}, {\"$project\": {\"_id\": 0, \"bedType\": \"$_id\", \"avg_basePrice\": \"$avg_basePrice\"}}])"
+  },
+  {
+    "id": "spider-college_2-121",
+    "question": "What is the year and semester with the most courses?",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.section.aggregate([\n    {\"$group\": {\"_id\": {\"semester\": \"$semester\", \"year\": \"$year\"}, \"count\": {\"$sum\": 1}}},\n    {\"$sort\": {\"count\": -1}},\n    {\"$limit\": 1},\n    {\"$project\": {\"_id\": 0, \"semester\": \"$_id.semester\", \"year\": \"$_id.year\"}}\n])"
+  },
+  {
+    "id": "spider-store_1-105",
+    "question": "What are the names of the tracks that are Rock or Jazz songs?",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.tracks.aggregate([{\"$match\": {\"$or\": [{\"genre_id\": {\"$in\": [1, 2]}}, {\"media_type_id\": {\"$in\": [1, 2]}}]}}, {\"$project\": {\"_id\": 0, \"name\": 1}}])"
+  },
+  {
+    "id": "spider-sakila_1-6",
+    "question": "Which customer, who has made at least one payment, has spent the least money? List his or her first name, last name, and the id.",
+    "database": "sakila_1",
+    "predicted_database": "store_1",
+    "database_match": false,
+    "complexity": "hard",
+    "generated_query": "db.customers.aggregate([\n    {\"$lookup\": {\"from\": \"invoices\", \"localField\": \"id\", \"foreignField\": \"customer_id\", \"as\": \"inv\"}},\n    {\"$match\": {\"inv.total\": {\"$ne\": 0}}},\n    {\"$group\": {\"_id\": \"$id\", \"total_spent\": {\"$sum\": \"$inv.total\"}}},\n    {\"$sort\": {\"total_spent\": 1}},\n    {\"$limit\": 1},\n    {\"$project\": {\"_id\": 0, \"first_name\": 1, \"last_name\": 1, \"id\": 1}}\n])"
+  },
+  {
+    "id": "spider-college_2-124",
+    "question": "Which semeseter and year had the fewest students?",
+    "database": "college_2",
+    "predicted_database": "pets_1",
+    "database_match": false,
+    "complexity": null,
+    "generated_query": "db.Student.aggregate([\n    {\"$group\": {\"_id\": {\"semester\": \"$semester\", \"year\": \"$year\"}, \"count\": {\"$sum\": 1}}},\n    {\"$sort\": {\"count\": 1}},\n    {\"$limit\": 1}\n])"
+  },
+  {
+    "id": "spider-car_1-114",
+    "question": "For a volvo model, how many cylinders does the version with least accelerate have?",
+    "database": "car_1",
+    "predicted_database": "car_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.car_names.aggregate([{\"$match\": {\"Model\": \"volvo\"}}, {\"$lookup\": {\"from\": \"cars_data\", \"localField\": \"MakeId\", \"foreignField\": \"Id\", \"as\": \"car_data\"}}, {\"$unwind\": \"$car_data\"}, {\"$sort\": {\"car_data.Accelerate\": 1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"Cylinders\": \"$car_data.Cylinders\"}}])"
+  },
+  {
+    "id": "spider-college_1-160",
+    "question": "What are the names of all students taking a course who received an A or C?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.STUDENT.aggregate([\n    {\"$lookup\": {\"from\": \"ENROLL\", \"localField\": \"STU_NUM\", \"foreignField\": \"STU_NUM\", \"as\": \"enroll\"}},\n    {\"$unwind\": \"$enroll\"},\n    {\"$match\": {\"enroll.ENROLL_GRADE\": {\"$in\": [\"A\", \"C\"]}}},\n    {\"$project\": {\"_id\": 0, \"stu_fname\": \"$STU_FNAME\", \"stu_lname\": \"$STU_LNAME\"}}\n])"
+  },
+  {
+    "id": "spider-sakila_1-7",
+    "question": "Which film has the most copies in the inventory? List both title and id.",
+    "database": "sakila_1",
+    "predicted_database": "sakila_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.inventory.aggregate([\n    {\"$group\": {\"_id\": \"$film_id\", \"count\": {\"$sum\": 1}}},\n    {\"$sort\": {\"count\": -1}},\n    {\"$limit\": 1},\n    {\"$lookup\": {\"from\": \"film\", \"localField\": \"_id\", \"foreignField\": \"film_id\", \"as\": \"f\"}},\n    {\"$unwind\": \"$f\"},\n    {\"$project\": {\"_id\": 0, \"title\": \"$f.title\", \"film_id\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-hr_1-68",
+    "question": "Give the country id and corresponding count of cities in each country.",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.locations.aggregate([\n    {\"$group\": {\"_id\": \"$COUNTRY_ID\", \"count\": {\"$sum\": 1}}},\n    {\"$project\": {\"_id\": 0, \"COUNTRY_ID\": \"$_id\", \"count\": 1}}\n])"
+  },
+  {
+    "id": "spider-flight_4-29",
+    "question": "Find the country of the airlines whose name starts with 'Orbit'.",
+    "database": "flight_4",
+    "predicted_database": "flight_2",
+    "database_match": false,
+    "complexity": "easy",
+    "generated_query": "db.airlines.find({\"Airline\": {\"$regex\": \"^Orbit\", \"$options\": \"i\"}}, {\"Country\": 1, \"_id\": 0})"
+  },
+  {
+    "id": "spider-wta_1-30",
+    "question": "List the number of all matches who played in years of 2013 or 2016.",
+    "database": "wta_1",
+    "predicted_database": "wta_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.matches.aggregate([\n    {\"$match\": {\"year\": {\"$in\": [2013, 2016]}}},\n    {\"$group\": {\"_id\": \"$year\", \"count\": {\"$sum\": 1}}}\n])"
+  },
+  {
+    "id": "spider-bike_1-76",
+    "question": "What are the dates with a maximum temperature higher than 85?",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.weather.find({\"max_temperature_f\": {\"$gt\": 85}}, {\"_id\": 0, \"date\": 1})"
+  },
+  {
+    "id": "spider-wine_1-30",
+    "question": "List the names of all distinct wines ordered by price.",
+    "database": "wine_1",
+    "predicted_database": "wine_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.wine.aggregate([{\"$group\": {\"_id\": \"$Name\"}}, {\"$project\": {\"_id\": 0, \"Name\": \"$_id\"}}, {\"$sort\": {\"Price\": 1}}])"
+  },
+  {
+    "id": "spider-inn_1-23",
+    "question": "How many kids stay in the room DAMIEN TRACHSEL checked in on Sep 21, 2010?",
+    "database": "inn_1",
+    "predicted_database": "inn_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Reservations.find({\"CheckIn\": \"21-SEP-10\", \"FirstName\": \"DAMIEN\", \"LastName\": \"TRACHSEL\"}, {\"_id\": 0, \"Kids\": 1})"
+  },
+  {
+    "id": "spider-chinook_1-22",
+    "question": "What is the average duration in milliseconds of tracks that belong to Latin or Pop genre?",
+    "database": "chinook_1",
+    "predicted_database": "store_1",
+    "database_match": false,
+    "complexity": "medium",
+    "generated_query": "db.tracks.aggregate([{\"$match\": {\"genre_id\": {\"$in\": [1, 2]}}}, {\"$group\": {\"_id\": None, \"avg_duration\": {\"$avg\": \"$milliseconds\"}}}, {\"$project\": {\"_id\": 0, \"avg_duration\": 1}}])"
+  },
+  {
+    "id": "spider-chinook_1-36",
+    "question": "What are the duration of the longest and shortest pop tracks in milliseconds?",
+    "database": "chinook_1",
+    "predicted_database": "bike_1",
+    "database_match": false,
+    "complexity": "medium",
+    "generated_query": "db.Track.aggregate([{\"$match\": {\"name\": {\"$regex\": \"pop\", \"$options\": \"i\"}}}, {\"$group\": {\"_id\": None, \"max_ms\": {\"$max\": \"$Milliseconds\"}, \"min_ms\": {\"$min\": \"$Milliseconds\"}}}, {\"$project\": {\"_id\": 0, \"max_ms\": 1, \"min_ms\": 1}}])"
+  },
+  {
+    "id": "spider-store_1-112",
+    "question": "What is the unit price of the tune \"Fast As a Shark\"?",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.tracks.find({\"name\": \"Fast As a Shark\"}, {\"_id\": 0, \"unit_price\": 1})"
+  },
+  {
+    "id": "spider-formula_1-37",
+    "question": "List the names of all distinct races in reversed  lexicographic order?",
+    "database": "formula_1",
+    "predicted_database": "formula_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.races.find({}, {\"name\": 1}).sort({\"name\": -1})"
+  },
+  {
+    "id": "spider-college_2-149",
+    "question": "What is the title of the course that is a prerequisite for Mobile Computing?",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.prereq.aggregate([{\"$lookup\": {\"from\": \"course\", \"localField\": \"course_id\", \"foreignField\": \"course_id\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$match\": {\"c.title\": \"Mobile Computing\"}}, {\"$lookup\": {\"from\": \"course\", \"localField\": \"prereq_id\", \"foreignField\": \"course_id\", \"as\": \"pc\"}}, {\"$unwind\": \"$pc\"}, {\"$project\": {\"_id\": 0, \"title\": \"$pc.title\"}}])"
+  },
+  {
+    "id": "spider-college_2-119",
+    "question": "How many courses are provided in each semester and year?",
+    "database": "college_2",
+    "predicted_database": "college_1",
+    "database_match": false,
+    "complexity": null,
+    "generated_query": "db.section.aggregate([\n    {\"$group\": {\"_id\": {\"semester\": \"$semester\", \"year\": \"$year\"}, \"count\": {\"$sum\": 1}}},\n    {\"$project\": {\"_id\": 0, \"semester\": \"$_id.semester\", \"year\": \"$_id.year\", \"count\": 1}}\n])"
+  },
+  {
+    "id": "spider-sakila_1-18",
+    "question": "What is the genre name of the film HUNGER ROOF?",
+    "database": "sakila_1",
+    "predicted_database": "sakila_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.film.find({\"title\": \"HUNGER ROOF\"}, {\"genre_id\": 1, \"_id\": 0})"
+  },
+  {
+    "id": "spider-college_1-103",
+    "question": "How many professors are in the accounting dept?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.PROFESSOR.aggregate([{\"$lookup\": {\"from\": \"DEPARTMENT\", \"localField\": \"DEPT_CODE\", \"foreignField\": \"DEPT_CODE\", \"as\": \"dept\"}}, {\"$unwind\": \"$dept\"}, {\"$match\": {\"dept.DEPT_NAME\": \"Accounting\"}}, {\"$count\": \"count\"}])"
+  },
+  {
+    "id": "spider-hr_1-102",
+    "question": "What are the full names and hire dates for employees in the same department as someone with the first name Clara, not including Clara?",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.employees.aggregate([{\"$lookup\": {\"from\": \"employees\", \"pipeline\": [{\"$match\": {\"FIRST_NAME\": \"Clara\"}}, {\"$project\": {\"_id\": 0, \"DEPARTMENT_ID\": 1}}], \"as\": \"ref\"}}, {\"$unwind\": \"$ref\"}, {\"$match\": {\"$expr\": {\"$ne\": [\"$DEPARTMENT_ID\", \"$ref.DEPARTMENT_ID\"]}}}, {\"$project\": {\"_id\": 0, \"FIRST_NAME\": 1, \"LAST_NAME\": 1, \"HIRE_DATE\": 1}}])"
+  },
+  {
+    "id": "spider-wta_1-17",
+    "question": "Find the highest rank of losers in all matches.",
+    "database": "wta_1",
+    "predicted_database": "wta_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.matches.aggregate([{\"$group\": {\"_id\": None, \"max_loser_rank\": {\"$max\": \"$loser_rank\"}}}, {\"$project\": {\"_id\": 0, \"max_loser_rank\": 1}}])"
+  },
+  {
+    "id": "spider-chinook_1-13",
+    "question": "How many tracks belong to rock genre?",
+    "database": "chinook_1",
+    "predicted_database": "store_1",
+    "database_match": false,
+    "complexity": "medium",
+    "generated_query": "db.tracks.aggregate([{\"$lookup\": {\"from\": \"genres\", \"localField\": \"genre_id\", \"foreignField\": \"id\", \"as\": \"genre\"}}, {\"$unwind\": \"$genre\"}, {\"$match\": {\"genre.name\": \"Rock\"}}, {\"$group\": {\"_id\": null, \"count\": {\"$sum\": 1}}}, {\"$project\": {\"_id\": 0, \"count\": 1}}])"
+  },
+  {
+    "id": "spider-store_1-90",
+    "question": "What is the number of invoices and total money billed in them from CA?",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.invoices.aggregate([{\"$match\": {\"billing_state\": \"CA\"}}, {\"$group\": {\"_id\": None, \"invoice_count\": {\"$sum\": 1}, \"total\": {\"$sum\": \"$total\"}}}, {\"$project\": {\"_id\": 0, \"invoice_count\": 1, \"total\": 1}}])"
+  },
+  {
+    "id": "spider-baseball_1-9",
+    "question": "What is average salary of the players in the team named 'Boston Red Stockings' ?",
+    "database": "baseball_1",
+    "predicted_database": "baseball_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.salary.aggregate([\n    {\"$match\": {\"team_id\": \"team_id_br\"}},\n    {\"$group\": {\"_id\": None, \"avg_salary\": {\"$avg\": \"$salary\"}}},\n    {\"$project\": {\"_id\": 0, \"avg_salary\": 1}}\n])"
+  },
+  {
+    "id": "spider-bike_1-81",
+    "question": "How many different cities have these stations?",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.station.distinct(\"city\")"
+  },
+  {
+    "id": "spider-world_1-99",
+    "question": "What is name of the country that speaks the largest number of languages?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.countrylanguage.aggregate([{\"$group\": {\"_id\": \"$CountryCode\", \"lang_count\": {\"$sum\": 1}}}, {\"$sort\": {\"lang_count\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"country\", \"localField\": \"_id\", \"foreignField\": \"Code\", \"as\": \"c\"}}, {\"$unwind\": \"$c\"}, {\"$project\": {\"_id\": 0, \"Name\": \"$c.Name\"}}])"
+  },
+  {
+    "id": "spider-flight_4-26",
+    "question": "How many airlines does Russia has?",
+    "database": "flight_4",
+    "predicted_database": "flight_2",
+    "database_match": false,
+    "complexity": "easy",
+    "generated_query": "db.airlines.count_documents({\"Country\": \"Russia\"})"
+  },
+  {
+    "id": "spider-apartment_rentals-51",
+    "question": "Find the total number of rooms in the apartments that have facility code \"Gym\".",
+    "database": "apartment_rentals",
+    "predicted_database": "apartment_rentals",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Apartments.aggregate([\n    {\"$lookup\": {\"from\": \"Apartment_Facilities\", \"localField\": \"apt_id\", \"foreignField\": \"apt_id\", \"as\": \"f\"}},\n    {\"$match\": {\"f.facility_code\": \"Gym\"}},\n    {\"$group\": {\"_id\": None, \"total_rooms\": {\"$sum\": \"$room_count\"}}},\n    {\"$project\": {\"_id\": 0, \"total_rooms\": 1}}\n])"
+  },
+  {
+    "id": "spider-hr_1-85",
+    "question": "What is all the information about the Marketing department?",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.departments.find({\"DEPARTMENT_NAME\": \"Marketing\"}, {\"_id\": 0})"
+  },
+  {
+    "id": "spider-inn_1-16",
+    "question": "Find the number of rooms with price higher than 120 for different decor.",
+    "database": "inn_1",
+    "predicted_database": "inn_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Rooms.aggregate([{\"$match\": {\"basePrice\": {\"$gt\": 120}}}, {\"$group\": {\"_id\": \"$decor\", \"count\": {\"$sum\": 1}}}, {\"$project\": {\"_id\": 0, \"decor\": \"$_id\", \"count\": 1}}])"
+  },
+  {
+    "id": "spider-baseball_1-25",
+    "question": "How many players born in USA are right-handed batters? That is, have the batter value 'R'.",
+    "database": "baseball_1",
+    "predicted_database": "wta_1",
+    "database_match": false,
+    "complexity": null,
+    "generated_query": "db.players.find({\"country_code\": \"USA\", \"hand\": \"R\"}, {\"_id\": 0, \"player_id\": 1}).count_documents({})"
+  },
+  {
+    "id": "spider-college_1-128",
+    "question": "What are the first and last names of the employee with the earliest date of birth?",
+    "database": "college_1",
+    "predicted_database": "hr_1",
+    "database_match": false,
+    "complexity": null,
+    "generated_query": "db.EMPLOYEE.find({}, {\"_id\": 0, \"EMP_FNAME\": 1, \"EMP_LNAME\": 1}).sort({\"EMP_DOB\": 1}).limit(1)"
+  },
+  {
+    "id": "spider-wine_1-6",
+    "question": "What is the name of the highest rated wine?",
+    "database": "wine_1",
+    "predicted_database": "wine_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.wine.find({}, {\"_id\": 0, \"Name\": 1}).sort({\"Score\": -1}).limit(1)"
+  },
+  {
+    "id": "spider-chinook_1-39",
+    "question": "How many distinct cities does the employees live in?",
+    "database": "chinook_1",
+    "predicted_database": "store_1",
+    "database_match": false,
+    "complexity": "easy",
+    "generated_query": "db.employees.aggregate([{\"$group\": {\"_id\": \"$city\", \"count\": {\"$sum\": 1}}}, {\"$project\": {\"_id\": 0, \"count\": 1, \"city\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-store_1-93",
+    "question": "How many customers live in the city of Prague?",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.customers.count_documents({\"city\": \"Prague\"})"
+  },
+  {
+    "id": "spider-flight_4-5",
+    "question": "Find the number of routes and airport name for each source airport, order the results by decreasing number of routes.",
+    "database": "flight_4",
+    "predicted_database": "flight_4",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.routes.aggregate([\n    {\"$group\": {\"_id\": \"$src_apid\", \"count\": {\"$sum\": 1}, \"airport_name\": {\"$first\": \"$src_ap\"}}, \n     {\"$sort\": {\"count\": -1}}\n])"
+  },
+  {
+    "id": "spider-college_1-156",
+    "question": "What is the first name and GPA of every student that has a GPA lower than average?",
+    "database": "college_1",
+    "predicted_database": "college_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.STUDENT.aggregate([{\"$match\": {\"STU_GPA\": {\"$lt\": {\"$avg\": \"$STU_GPA\"}}}}, {\"$project\": {\"_id\": 0, \"stu_fname\": \"$STU_FNAME\", \"stu_gpa\": \"$STU_GPA\"}}])"
+  },
+  {
+    "id": "spider-hr_1-65",
+    "question": "What are the department ids for which more than 10 employees had a commission?",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.employees.aggregate([{\"$group\": {\"_id\": \"$DEPARTMENT_ID\", \"count\": {\"$sum\": 1}}}, {\"$match\": {\"count\": {\"$gte\": 10}}}, {\"$project\": {\"_id\": 0}}])"
+  },
+  {
+    "id": "spider-wine_1-18",
+    "question": "Find the distinct names of all wines that have prices higher than some wines from John Anthony winery.",
+    "database": "wine_1",
+    "predicted_database": "wine_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.wine.aggregate([\n    {\"$match\": {\"Winery\": \"John Anthony\"}},\n    {\"$group\": {\"_id\": \"$Name\"}},\n    {\"$project\": {\"_id\": 0, \"Name\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-bike_1-99",
+    "question": "What are all the different zip codes that have a maximum dew point that was always below 70?",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.weather.aggregate([{\"$group\": {\"_id\": \"$zip_code\", \"max_dew\": {\"$max\": \"$max_dew_point_f\"}}}, {\"$match\": {\"max_dew\": {\"$lt\": 70}}}, {\"$project\": {\"_id\": 0, \"zip_code\": \"$_id\"}}])"
+  },
+  {
+    "id": "spider-formula_1-19",
+    "question": "How many drivers did not participate in the races held in 2009?",
+    "database": "formula_1",
+    "predicted_database": "formula_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.results.aggregate([{\"$match\": {\"raceId\": {\"$nin\": db.races.find({\"year\": 2009}, {\"_id\": 0, \"raceId\": 1})}}}, {\"$group\": {\"_id\": \"$driverId\", \"count\": {\"$sum\": 1}}}, {\"$match\": {\"count\": {\"$eq\": 0}}}, {\"$project\": {\"_id\": 0}}])"
+  },
+  {
+    "id": "spider-inn_1-36",
+    "question": "Find the name of rooms whose base price is between 120 and 150.",
+    "database": "inn_1",
+    "predicted_database": "inn_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Rooms.find({\"basePrice\": {\"$gte\": 120, \"$lte\": 150}}, {\"_id\": 0, \"roomName\": 1})"
+  },
+  {
+    "id": "spider-csu_1-32",
+    "question": "How many faculty is there in total in the year of 2002?",
+    "database": "csu_1",
+    "predicted_database": "college_1",
+    "database_match": false,
+    "complexity": "easy",
+    "generated_query": "db.faculty.aggregate([{\"$match\": {\"Year\": 2002}}, {\"$group\": {\"_id\": null, \"total_faculty\": {\"$sum\": 1}}}, {\"$project\": {\"_id\": 0, \"total_faculty\": 1}}])"
+  },
+  {
+    "id": "spider-college_2-154",
+    "question": "How many instructors are in the department with the highest budget, and what is their average salary?",
+    "database": "college_2",
+    "predicted_database": "college_2",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.department.aggregate([{\"$sort\": {\"budget\": -1}}, {\"$limit\": 1}, {\"$lookup\": {\"from\": \"instructor\", \"localField\": \"dept_name\", \"foreignField\": \"dept_name\", \"as\": \"instr\"}}, {\"$unwind\": \"$instr\"}, {\"$group\": {\"_id\": None, \"avg_salary\": {\"$avg\": \"$instr.salary\"}, \"count\": {\"$sum\": 1}}}, {\"$project\": {\"_id\": 0, \"avg_salary\": 1, \"count\": 1}}])"
+  },
+  {
+    "id": "spider-college_3-22",
+    "question": "Which courses are taught on days MTW?",
+    "database": "college_3",
+    "predicted_database": "college_2",
+    "database_match": false,
+    "complexity": "easy",
+    "generated_query": "db.section.find({\"day\": {\"$in\": [\"MTW\"]}})"
+  },
+  {
+    "id": "spider-hr_1-66",
+    "question": "What are department ids for departments with managers managing more than 3 employees?",
+    "database": "hr_1",
+    "predicted_database": "hr_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.employees.aggregate([{\"$lookup\": {\"from\": \"departments\", \"localField\": \"MANAGER_ID\", \"foreignField\": \"MANAGER_ID\", \"as\": \"match_dept\"}}, {\"$match\": {\"$expr\": {\"$gt\": [{\"$size\": \"$match_dept\"}, 3]}}}, {\"$project\": {\"_id\": 0, \"DEPARTMENT_ID\": 1}}])"
+  },
+  {
+    "id": "spider-store_1-79",
+    "question": "What is the count of customers that Steve Johnson supports?",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.employees.aggregate([{\"$match\": {\"first_name\": \"Steve\", \"last_name\": \"Johnson\"}}, {\"$lookup\": {\"from\": \"customers\", \"localField\": \"id\", \"foreignField\": \"support_rep_id\", \"as\": \"custs\"}}, {\"$unwind\": \"$custs\"}, {\"$count\": \"count\"}])"
+  },
+  {
+    "id": "spider-apartment_rentals-79",
+    "question": "What are the first names and last names of all the guests?",
+    "database": "apartment_rentals",
+    "predicted_database": "apartment_rentals",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Guests.find({}, {\"_id\": 0, \"guest_first_name\": 1, \"guest_last_name\": 1})"
+  },
+  {
+    "id": "spider-inn_1-13",
+    "question": "Find the number of rooms with king bed for each decor type.",
+    "database": "inn_1",
+    "predicted_database": "inn_1",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Rooms.aggregate([{\"$match\": {\"bedType\": \"King\"}}, {\"$group\": {\"_id\": \"$decor\", \"count\": {\"$sum\": 1}}}, {\"$project\": {\"_id\": 0, \"decor\": \"$_id\", \"count\": 1}}])"
+  },
+  {
+    "id": "spider-csu_1-21",
+    "question": "Which university is in Los Angeles county and opened after 1950?",
+    "database": "csu_1",
+    "predicted_database": "csu_1",
+    "database_match": true,
+    "complexity": "easy",
+    "generated_query": "db.Campuses.find({\"County\": \"Los Angeles\", \"Year\": {\"$gt\": 1950}}, {\"_id\": 0, \"Campus\": 1})"
+  },
+  {
+    "id": "spider-baseball_1-14",
+    "question": "What is the average height of the players from the college named 'Yale University'?",
+    "database": "baseball_1",
+    "predicted_database": "network_1",
+    "database_match": false,
+    "complexity": null,
+    "generated_query": "db.player_college.aggregate([{\"$match\": {\"college_name\": \"Yale University\"}}, {\"$lookup\": {\"from\": \"player\", \"localField\": \"college_id\", \"foreignField\": \"college_id\", \"as\": \"pc\"}}, {\"$addFields\": {\"height\": {\"$arrayElemAt\": [\"$pc.height\", 0]}}}, {\"$group\": {\"_id\": None, \"avg_height\": {\"$avg\": \"$height\"}}}, {\"$project\": {\"_id\": 0}}])"
+  },
+  {
+    "id": "spider-store_1-108",
+    "question": "What are the different names of the genres?",
+    "database": "store_1",
+    "predicted_database": "store_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.genres.distinct(\"name\")"
+  },
+  {
+    "id": "spider-dog_kennels-68",
+    "question": "Which dogs have not cost their owner more than 1000 for treatment ? List the dog names .",
+    "database": "dog_kennels",
+    "predicted_database": "dog_kennels",
+    "database_match": true,
+    "complexity": "medium",
+    "generated_query": "db.Dogs.aggregate([\n    {\"$lookup\": {\"from\": \"Treatments\", \"localField\": \"dog_id\", \"foreignField\": \"dog_id\", \"as\": \"t\"}},\n    {\"$addFields\": {\"total_cost\": {\"$sum\": \"$t.cost_of_treatment\"}}},\n    {\"$match\": {\"total_cost\": {\"$lte\": 1000}}},\n    {\"$project\": {\"_id\": 0, \"name\": 1}}\n])"
+  },
+  {
+    "id": "spider-bike_1-93",
+    "question": "For each zip code, select all those that have an average mean visiblity below 10.",
+    "database": "bike_1",
+    "predicted_database": "bike_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.weather.aggregate([\n    {\"$group\": {\"_id\": \"$zip_code\", \"avg_mean_visibility_miles\": {\"$avg\": \"$mean_visibility_miles\"}}},\n    {\"$match\": {\"avg_mean_visibility_miles\": {\"$lt\": 10}}},\n    {\"$project\": {\"_id\": 0, \"zip_code\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-world_1-102",
+    "question": "Which languages are spoken by only one country in republic governments?",
+    "database": "world_1",
+    "predicted_database": "world_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.country.aggregate([\n    {\"$match\": {\"GovernmentForm\": \"Republic\"}},\n    {\"$lookup\": {\"from\": \"countrylanguage\", \"localField\": \"Code\", \"foreignField\": \"CountryCode\", \"as\": \"langs\"}},\n    {\"$unwind\": \"$langs\"},\n    {\"$group\": {\"_id\": \"$langs.Language\", \"country_count\": {\"$sum\": 1}}},\n    {\"$match\": {\"country_count\": 1}},\n    {\"$project\": {\"_id\": 0, \"Language\": \"$_id\"}}\n])"
+  },
+  {
+    "id": "spider-wine_1-2",
+    "question": "What is the color of the grape whose wine products has the highest average price?",
+    "database": "wine_1",
+    "predicted_database": "wine_1",
+    "database_match": true,
+    "complexity": "hard",
+    "generated_query": "db.wine.aggregate([{\"$group\": {\"_id\": \"$Grape\", \"avg_price\": {\"$avg\": \"$Price\"}}}, {\"$sort\": {\"avg_price\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"Grape\": \"$_id\", \"Color\": \"$Grape.Color\"}}])"
+  },
+  {
+    "id": "spider-baseball_1-4",
+    "question": "What are the manager's first name, last name and id who won the most manager award?",
+    "database": "baseball_1",
+    "predicted_database": "baseball_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.manager.aggregate([{\"$lookup\": {\"from\": \"manager_award\", \"localField\": \"player_id\", \"foreignField\": \"player_id\", \"as\": \"a\"}}, {\"$addFields\": {\"count\": {\"$size\": \"$a\"}}}, {\"$sort\": {\"count\": -1}}, {\"$limit\": 1}, {\"$project\": {\"_id\": 0, \"name_first\": 1, \"name_last\": 1, \"player_id\": 1}}])"
+  },
+  {
+    "id": "spider-baseball_1-20",
+    "question": "What is the total salary paid by team Boston Red Stockings in 2010?",
+    "database": "baseball_1",
+    "predicted_database": "baseball_1",
+    "database_match": true,
+    "complexity": null,
+    "generated_query": "db.salary.aggregate([{\"$match\": {\"year\": 2010}}, {\"$group\": {\"_id\": None, \"total_salary\": {\"$sum\": \"$salary\"}}}, {\"$project\": {\"_id\": 0, \"total_salary\": 1}}])"
+  },
+  {
+    "id": "spider-chinook_1-32",
+    "question": "What is the first name and last name of the customer that has email \"luisg@embraer.com.br\"?",
+    "database": "chinook_1",
+    "predicted_database": "store_1",
+    "database_match": false,
+    "complexity": "easy",
+    "generated_query": "db.customers.find({\"email\": \"luisg@embraer.com.br\"}, {\"_id\": 0, \"first_name\": 1, \"last_name\": 1})"
+  },
+  {
+    "id": "spider-college_1-143",
+    "question": "How many employees are there all together?",
+    "database": "college_1",
+    "predicted_database": "hr_1",
+    "database_match": false,
+    "complexity": null,
+    "generated_query": "db.employees.count_documents({})"
+  }
+]
