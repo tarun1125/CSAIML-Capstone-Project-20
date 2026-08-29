@@ -1,0 +1,59 @@
+{
+  "source_pool": "rag/data/rag_fewshot_pool.json",
+  "source_holdout": "rag/data/rag_test.json",
+  "random_state": 42,
+  "valid_fraction": 0.1,
+  "training_style": "baseline (fixed full-6-database schema, no retrieved few-shot examples)",
+  "counts": {
+    "pool_total": 244,
+    "train": 219,
+    "valid": 25,
+    "holdout_eval_untouched": 61
+  },
+  "by_database": {
+    "train": {
+      "concert_singer": 34,
+      "car_1": 51,
+      "network_1": 27,
+      "world_1": 46,
+      "dog_kennels": 33,
+      "pets_1": 28
+    },
+    "valid": {
+      "concert_singer": 4,
+      "car_1": 6,
+      "dog_kennels": 4,
+      "world_1": 5,
+      "pets_1": 3,
+      "network_1": 3
+    },
+    "holdout_eval": {
+      "car_1": 14,
+      "dog_kennels": 9,
+      "pets_1": 8,
+      "network_1": 8,
+      "world_1": 13,
+      "concert_singer": 9
+    }
+  },
+  "by_complexity": {
+    "train": {
+      "complex": 6,
+      "medium": 104,
+      "easy": 69,
+      "hard": 27,
+      "high": 13
+    },
+    "valid": {
+      "medium": 14,
+      "complex": 3,
+      "easy": 7,
+      "hard": 1
+    }
+  },
+  "leakage_checks": {
+    "pool_vs_holdout_id_overlap": [],
+    "pool_vs_holdout_question_overlap": [],
+    "train_vs_valid_id_overlap": []
+  }
+}

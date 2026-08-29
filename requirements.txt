@@ -98,3 +98,4 @@ matplotlib
 # --- Running the notebooks themselves ---
 jupyter
 notebook
+streamlit

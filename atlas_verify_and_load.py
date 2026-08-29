@@ -4,52 +4,29 @@ import logging
 import sys
 from pathlib import Path
 
-from pymongo import MongoClient
-from pymongo.server_api import ServerApi
+from pymongo import MongoClient  # still used as a type hint below (verify, load_collection)
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "rag"))
 from schema_cards import COLLECTIONS  # noqa: E402  single source of truth -- see rag/schema_cards.py
 
+# 2026-08-28: load_env_file/mask_uri/connect used to be defined here AND,
+# separately and divergently, in evaluation/execute_queries.py -- a real DRY
+# gap flagged by this project's own code-smell audit. Both now import the
+# single shared implementation from atlas_env.py; this file keeps its own
+# `log.info`-style connect wrapper (rather than atlas_env.connect's default
+# print) since the rest of this script already uses `logging` throughout.
+sys.path.insert(0, str(ROOT))
+from atlas_env import connect as _shared_connect  # noqa: E402  reuse, don't reimplement
+
 log = logging.getLogger("atlas_verify_and_load")
 
 
-def load_env_file(path: Path) -> dict[str, str]:
-    values: dict[str, str] = {}
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, value = line.split("=", 1)
-        values[key.strip()] = value.strip().strip('"').strip("'")
-    return values
-
-
-def mask_uri(uri: str) -> str:
-    """mongodb+srv://user:password@host/... -> mongodb+srv://user:***@host/...
-    so connection details stay traceable in logs without leaking the secret."""
-    if "@" not in uri:
-        return uri
-    creds, rest = uri.split("@", 1)
-    if ":" in creds:
-        user, _password = creds.rsplit(":", 1)
-        return f"{user}:***@{rest}"
-    return f"{creds}@{rest}"
-
-
-def connect() -> MongoClient:
-    env_file = ROOT / "atlas-credentials.env"
-    if not env_file.exists():
-        raise RuntimeError(f"{env_file} not found -- this script must run where that file lives")
-
-    env_values = load_env_file(env_file)
-    uri = env_values.get("MONGODB_URI")
-    if not uri:
-        raise RuntimeError(f"MONGODB_URI not found in {env_file}")
-
-    log.info("Connecting to %s", mask_uri(uri))
-    client = MongoClient(uri, server_api=ServerApi("1"), serverSelectionTimeoutMS=8000)
-    client.admin.command("ping")
+def connect():
+    # atlas_env.connect() already prints "Connecting to <masked URI>" /
+    # "Pinged Atlas, connection OK" (verbose=True default) -- just add the
+    # one line this script's own log stream cares about on top of that.
+    client = _shared_connect()
     log.info("Connected OK")
     return client
 

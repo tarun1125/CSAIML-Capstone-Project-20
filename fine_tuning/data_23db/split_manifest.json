@@ -1,0 +1,314 @@
+{
+  "source_pool": "rag/data/rag_fewshot_pool.json",
+  "source_holdout": "rag/data/rag_test.json",
+  "random_state": 42,
+  "valid_fraction": 0.1,
+  "training_style": "baseline-style, BATCHED full schema (each example sees its own database's batch of up to BATCH_SIZE databases, not all 23) -- see module docstring for why this changed from the original all-23-at-once design",
+  "batch_size": 4,
+  "n_batches": 6,
+  "max_batch_prompt_chars": 9797,
+  "batches": [
+    {
+      "index": 0,
+      "databases": [
+        "apartment_rentals",
+        "baseball_1",
+        "bike_1",
+        "car_1"
+      ],
+      "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nSchema (4 databases, 42 collection(s) -- batch 1/6 of the fine-tuned arm's schema training prompt -- databases in this group: apartment_rentals, baseball_1, bike_1, car_1):\n\napartment_rentals:\n- Apartment_Bookings: { apt_booking_id (int), apt_id (int), guest_id (int), booking_status_code (str), booking_start_date (str), booking_end_date (str) }\n- Apartment_Buildings: { building_id (int), building_short_name (str), building_full_name (str), building_description (str), building_address (str), building_manager (str), building_phone (str) }\n- Apartment_Facilities: { apt_id (int), facility_code (str) }\n- Apartments: { apt_id (int), building_id (int), apt_type_code (str), apt_number (str), bathroom_count (int), bedroom_count (int), room_count (str) }\n- Guests: { guest_id (int), gender_code (str), guest_first_name (str), guest_last_name (str), date_of_birth (str) }\n- View_Unit_Status: { apt_id (int), apt_booking_id (int), status_date (str), available_yn (int) }\n\nbaseball_1:\n- all_star: { player_id (str), year (int), game_num (int), game_id (str), team_id (str), league_id (str), gp (int), starting_pos (int) }\n- appearances: { year (int), team_id (str), league_id (str), player_id (str), g_all (int), gs (str), g_batting (int), g_defense (int), g_p (int), g_c (int), g_1b (int), g_2b (int), g_3b (int), g_ss (int), g_lf (int), g_cf (int), g_rf (int), g_of (int), g_dh (str), g_ph (str), g_pr (str) }\n- batting: { player_id (str), year (int), stint (int), team_id (str), league_id (str), g (int), ab (int), r (int), h (int), double (int), triple (int), hr (int), rbi (int), sb (int), cs (int), bb (int), so (int), ibb (str), hbp (str), sh (str), sf (str), g_idp (str) }\n- batting_postseason: { year (int), round (str), player_id (str), team_id (str), league_id (str), g (int), ab (int), r (int), h (int), double (int), triple (int), hr (int), rbi (int), sb (int), cs (str), bb (int), so (int), ibb (int), hbp (str), sh (str), sf (str), g_idp (str) }\n- college: { college_id (str), name_full (str), city (str), state (str), country (str) }\n- fielding: { player_id (str), year (int), stint (int), team_id (str), league_id (str), pos (str), g (int), gs (str), inn_outs (str), po (int), a (int), e (int), dp (int), pb (str), wp (str), sb (str), cs (str), zr (str) }\n- fielding_outfield: { player_id (str), year (int), stint (int), glf (int), gcf (int), grf (int) }\n- fielding_postseason: { player_id (str), year (int), team_id (str), league_id (str), round (str), pos (str), g (int), gs (int), inn_outs (int), po (int), a (int), e (int), dp (int), tp (int), pb (str), sb (str), cs (str) }\n- hall_of_fame: { player_id (str), yearid (int), votedby (str), ballots (int), needed (int), votes (int), inducted (str), category (str), needed_note (str) }\n- home_game: { year (int), league_id (str), team_id (str), park_id (str), span_first (str), span_last (str), games (int), openings (int), attendance (int) }\n- manager: { player_id (str), year (int), team_id (str), league_id (str), inseason (int), g (int), w (int), l (int), rank (int), plyr_mgr (str) }\n- manager_award: { player_id (str), award_id (str), year (int), league_id (str), tie (str), notes (str) }\n- manager_award_vote: { award_id (str), year (int), league_id (str), player_id (str), points_won (int), points_max (int), votes_first (int) }\n- manager_half: { player_id (str), year (int), team_id (str), league_id (str), inseason (int), half (int), g (int), w (int), l (int), rank (int) }\n- park: { park_id (str), park_name (str), park_alias (str), city (str), state (str), country (str) }\n- pitching: { player_id (str), year (int), stint (int), team_id (str), league_id (str), w (int), l (int), g (int), gs (int), cg (int), sho (int), sv (int), ipouts (int), h (int), er (int), hr (int), bb (int), so (int), baopp (str), era (float), ibb (str), wp (str), hbp (str), bk (int), bfp (str), gf (str), r (int), sh (str), sf (str), g_idp (str) }\n- pitching_postseason: { player_id (str), year (int), round (str), team_id (str), league_id (str), w (int), l (int), g (int), gs (int), cg (int), sho (int), sv (int), ipouts (int), h (int), er (int), hr (int), bb (int), so (int), baopp (str), era (float), ibb (str), wp (str), hbp (str), bk (str), bfp (str), gf (int), r (int), sh (str), sf (str), g_idp (str) }\n- player: { player_id (str), birth_year (int), birth_month (int), birth_day (int), birth_country (str), birth_state (str), birth_city (str), death_year (str), death_month (str), death_day (str), death_country (str), death_state (str), death_city (str), name_first (str), name_last (str), name_given (str), weight (int), height (int), bats (str), throws (str), debut (str), final_game (str), retro_id (str), bbref_id (str) }\n- player_award: { player_id (str), award_id (str), year (int), league_id (str), tie (str), notes (str) }\n- player_award_vote: { award_id (str), year (int), league_id (str), player_id (str), points_won (int), points_max (int), votes_first (int) }\n- player_college: { player_id (str), college_id (str), year (int) }\n- postseason: { year (int), round (str), team_id_winner (str), league_id_winner (str), team_id_loser (str), league_id_loser (str), wins (int), losses (int), ties (int) }\n- salary: { year (int), team_id (str), league_id (str), player_id (str), salary (int) }\n- team: { year (int), league_id (str), team_id (str), franchise_id (str), div_id (str), rank (int), g (int), ghome (str), w (int), l (int), div_win (str), wc_win (str), lg_win (str), ws_win (str), r (int), ab (int), h (int), double (int), triple (int), hr (int), bb (int), so (int), sb (int), cs (str), hbp (str), sf (str), ra (int), er (int), era (float), cg (int), sho (int), sv (int), ipouts (int), ha (int), hra (int), bba (int), soa (int), e (int), dp (str), fp (float), name (str), park (str), attendance (str), bpf (int), ppf (int), team_id_br (str), team_id_lahman45 (str), team_id_retro (str) }\n- team_franchise: { franchise_id (str), franchise_name (str), active (str), na_assoc (str) }\n- team_half: { year (int), league_id (str), team_id (str), half (int), div_id (str), div_win (str), rank (int), g (int), w (int), l (int) }\n\nbike_1:\n- station: { id (int), name (str), lat (float), long (float), dock_count (int), city (str), installation_date (str) }\n- status: { station_id (int), bikes_available (int), docks_available (int), time (str) }\n- trip: { id (int), duration (int), start_date (str), start_station_name (str), start_station_id (int), end_date (str), end_station_name (str), end_station_id (int), bike_id (int), subscription_type (str), zip_code (int) }\n- weather: { date (str), max_temperature_f (int), mean_temperature_f (int), min_temperature_f (int), max_dew_point_f (int), mean_dew_point_f (int), min_dew_point_f (int), max_humidity (int), mean_humidity (int), min_humidity (int), max_sea_level_pressure_inches (float), mean_sea_level_pressure_inches (float), min_sea_level_pressure_inches (float), max_visibility_miles (int), mean_visibility_miles (int), min_visibility_miles (int), max_wind_Speed_mph (int), mean_wind_speed_mph (int), max_gust_speed_mph (int), precipitation_inches (int), cloud_cover (int), events (str), wind_dir_degrees (int), zip_code (int) }\n\ncar_1:\n- car_makers: { Id (int), Maker (str), FullName (str), Country (str) }\n    FK: Country -> countries.CountryId (str->int, use $toInt)\n    FK: Id -> model_list.json.Maker\n- car_names: { MakeId (int), Model (str), Make (str) }\n    FK: MakeId -> cars_data.Id\n- cars_data: { Id (int), MPG (str), Cylinders (int), Edispl (float), Horsepower (str), Weight (int), Accelerate (float), Year (int) }\n- continents: { ContId (int), Continent (str) }\n    FK: ContId -> countries.Continent\n- countries: { CountryId (int), CountryName (str), Continent (int) }\n- model_list.json: { ModelId (int), Maker (int), Model (str) }\n    FK: Model -> car_names.Model\n\nNote: several logically-numeric fields in the ORIGINAL 6 databases are stored as strings (concert.Stadium_ID, Dogs.age, Dogs.weight, cars_data.Horsepower, cars_data.MPG, singer_in_concert.Singer_ID) -- use $toInt / $toDouble when comparing or aggregating on these. This note has NOT been independently verified for the other databases below -- check field types in the schema itself if a comparison looks wrong.\nIMPORTANT: cars_data.Horsepower and cars_data.MPG also contain the LITERAL STRING \"null\" for some rows (not real nulls, not missing -- an actual \"null\" string value). Calling $toDouble/$toInt on that value throws a MongoDB server error and fails the whole query. ALWAYS exclude it first, e.g. add {\"MPG\": {\"$ne\": \"null\"}} to your $match stage BEFORE any $toDouble/$toInt/$avg/$max/$min on that field.\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. ALWAYS exclude the MongoDB-assigned _id field from your output -- include \"_id\": 0 in the projection argument of every find() call and in every $project stage, unless the question explicitly asks for the _id value itself.\n6. $size inside a $match/find() FILTER only accepts a literal integer for an exact array-length match, e.g. {\"field\": {\"$size\": 3}}. It does NOT accept a comparison operator -- {\"field\": {\"$size\": {\"$gte\": 4}}} is INVALID and will error at query time. For 'at least/more than/fewer than N items', either (a) use $expr with the aggregation $size operator: {\"$expr\": {\"$gte\": [{\"$size\": \"$field\"}, 4]}}, or (b) compute a count via $group/$addFields first, then $match on that count field.",
+      "chars": 9797,
+      "approx_tokens_range": [
+        2449,
+        2799
+      ],
+      "collections": 42,
+      "coverage": {
+        "covered": [
+          "apartment_rentals",
+          "baseball_1",
+          "bike_1",
+          "car_1"
+        ],
+        "missing": [],
+        "from_build_cards": [
+          "apartment_rentals",
+          "baseball_1",
+          "bike_1",
+          "car_1"
+        ],
+        "from_rag_prompts_fallback": []
+      }
+    },
+    {
+      "index": 1,
+      "databases": [
+        "chinook_1",
+        "college_1",
+        "concert_singer",
+        "csu_1"
+      ],
+      "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nSchema (4 databases, 28 collection(s) -- batch 2/6 of the fine-tuned arm's schema training prompt -- databases in this group: chinook_1, college_1, concert_singer, csu_1):\n\nchinook_1:\n- Album: { AlbumId (int), Title (str), ArtistId (int) }\n- Artist: { ArtistId (int), Name (str) }\n- Customer: { CustomerId (int), FirstName (str), LastName (str), Company (str, nullable), Address (str), City (str), State (str, nullable), Country (str), PostalCode (str, nullable), Phone (str, nullable), Fax (str, nullable), Email (str), SupportRepId (int) }\n- Employee: { EmployeeId (int), LastName (str), FirstName (str), Title (str), ReportsTo (int, nullable), BirthDate (str), HireDate (str), Address (str), City (str), State (str), Country (str), PostalCode (str), Phone (str), Fax (str), Email (str) }\n- Genre: { GenreId (int), Name (str) }\n- Invoice: { InvoiceId (int), CustomerId (int), InvoiceDate (str), BillingAddress (str), BillingCity (str), BillingState (str, nullable), BillingCountry (str), BillingPostalCode (str, nullable), Total (float) }\n- InvoiceLine: { InvoiceLineId (int), InvoiceId (int), TrackId (int), UnitPrice (float), Quantity (int) }\n- MediaType: { MediaTypeId (int), Name (str) }\n- Playlist: { PlaylistId (int), Name (str) }\n- PlaylistTrack: { PlaylistId (int), TrackId (int) }\n- Track: { TrackId (int), Name (str), AlbumId (int), MediaTypeId (int), GenreId (int), Composer (str, nullable), Milliseconds (int), Bytes (int), UnitPrice (float) }\n\ncollege_1:\n- CLASS: { CLASS_CODE (str), CRS_CODE (str), CLASS_SECTION (str), CLASS_TIME (str), CLASS_ROOM (str), PROF_NUM (int) }\n- COURSE: { CRS_CODE (str), DEPT_CODE (str), CRS_DESCRIPTION (str), CRS_CREDIT (float) }\n- DEPARTMENT: { DEPT_CODE (str), DEPT_NAME (str), SCHOOL_CODE (str), EMP_NUM (int), DEPT_ADDRESS (str), DEPT_EXTENSION (str) }\n- EMPLOYEE: { EMP_NUM (int), EMP_LNAME (str), EMP_FNAME (str), EMP_INITIAL (str), EMP_JOBCODE (str), EMP_HIREDATE (str), EMP_DOB (str) }\n- ENROLL: { CLASS_CODE (str), STU_NUM (int), ENROLL_GRADE (str) }\n- PROFESSOR: { EMP_NUM (int), DEPT_CODE (str), PROF_OFFICE (str), PROF_EXTENSION (str), PROF_HIGH_DEGREE (str) }\n- STUDENT: { STU_NUM (int), STU_LNAME (str), STU_FNAME (str), STU_INIT (str), STU_DOB (str), STU_HRS (int), STU_CLASS (str), STU_GPA (float), STU_TRANSFER (int), DEPT_CODE (str), STU_PHONE (str), PROF_NUM (int) }\n\nconcert_singer:\n- concert: { concert_ID (int), concert_Name (str), Theme (str), Stadium_ID (str), Year (str) }\n    FK: Stadium_ID -> stadium.Stadium_ID (str->int, use $toInt)\n- singer: { Singer_ID (int), Name (str), Country (str), Song_Name (str), Song_release_year (str), Age (int), Is_male (str) }\n- singer_in_concert: { concert_ID (int), Singer_ID (str) }\n    FK: concert_ID -> concert.concert_ID\n    FK: Singer_ID -> singer.Singer_ID (str->int, use $toInt)\n- stadium: { Stadium_ID (int), Location (str), Name (str), Capacity (int), Highest (int), Lowest (int), Average (int) }\n\ncsu_1:\n- Campuses: { Id (int), Campus (str), Location (str), County (str), Year (int) }\n- csu_fees: { Campus (int), Year (int), CampusFee (int) }\n- degrees: { Year (int), Campus (int), Degrees (int) }\n- discipline_enrollments: { Campus (int), Discipline (int), Year (int), Undergraduate (int), Graduate (int) }\n- enrollments: { Campus (int), Year (int), TotalEnrollment_AY (int), FTE_AY (int) }\n- faculty: { Campus (int), Year (int), Faculty (float) }\n\nNote: several logically-numeric fields in the ORIGINAL 6 databases are stored as strings (concert.Stadium_ID, Dogs.age, Dogs.weight, cars_data.Horsepower, cars_data.MPG, singer_in_concert.Singer_ID) -- use $toInt / $toDouble when comparing or aggregating on these. This note has NOT been independently verified for the other databases below -- check field types in the schema itself if a comparison looks wrong.\nIMPORTANT: cars_data.Horsepower and cars_data.MPG also contain the LITERAL STRING \"null\" for some rows (not real nulls, not missing -- an actual \"null\" string value). Calling $toDouble/$toInt on that value throws a MongoDB server error and fails the whole query. ALWAYS exclude it first, e.g. add {\"MPG\": {\"$ne\": \"null\"}} to your $match stage BEFORE any $toDouble/$toInt/$avg/$max/$min on that field.\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. ALWAYS exclude the MongoDB-assigned _id field from your output -- include \"_id\": 0 in the projection argument of every find() call and in every $project stage, unless the question explicitly asks for the _id value itself.\n6. $size inside a $match/find() FILTER only accepts a literal integer for an exact array-length match, e.g. {\"field\": {\"$size\": 3}}. It does NOT accept a comparison operator -- {\"field\": {\"$size\": {\"$gte\": 4}}} is INVALID and will error at query time. For 'at least/more than/fewer than N items', either (a) use $expr with the aggregation $size operator: {\"$expr\": {\"$gte\": [{\"$size\": \"$field\"}, 4]}}, or (b) compute a count via $group/$addFields first, then $match on that count field.",
+      "chars": 5367,
+      "approx_tokens_range": [
+        1342,
+        1533
+      ],
+      "collections": 28,
+      "coverage": {
+        "covered": [
+          "chinook_1",
+          "college_1",
+          "concert_singer",
+          "csu_1"
+        ],
+        "missing": [],
+        "from_build_cards": [
+          "chinook_1",
+          "college_1",
+          "concert_singer",
+          "csu_1"
+        ],
+        "from_rag_prompts_fallback": []
+      }
+    },
+    {
+      "index": 2,
+      "databases": [
+        "college_2",
+        "dog_kennels",
+        "flight_2",
+        "formula_1"
+      ],
+      "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nSchema (4 databases, 33 collection(s) -- batch 3/6 of the fine-tuned arm's schema training prompt -- databases in this group: college_2, dog_kennels, flight_2, formula_1):\n\ncollege_2:\n- advisor: { s_ID (str), i_ID (str) }\n- classroom: { building (str), room_number (str), capacity (int) }\n- course: { course_id (str), title (str), dept_name (str), credits (int) }\n- department: { dept_name (str), building (str), budget (float) }\n- instructor: { ID (str), name (str), dept_name (str), salary (float) }\n- prereq: { course_id (str), prereq_id (str) }\n- section: { course_id (str), sec_id (str), semester (str), year (int), building (str), room_number (str), time_slot_id (str) }\n- student: { ID (str), name (str), dept_name (str), tot_cred (int) }\n- takes: { ID (str), course_id (str), sec_id (str), semester (str), year (int), grade (str) }\n- teaches: { ID (str), course_id (str), sec_id (str), semester (str), year (int) }\n- time_slot: { time_slot_id (str), day (str), start_hr (int), start_min (int), end_hr (int), end_min (int) }\n\ndog_kennels:\n- Breeds: { breed_code (str), breed_name (str) }\n- Charges: { charge_id (int), charge_type (str), charge_amount (int) }\n- Dogs: { dog_id (int), owner_id (int), abandoned_yn (str), breed_code (str), size_code (str), name (str), age (str), date_of_birth (str), gender (str), weight (str), date_arrived (str), date_adopted (str), date_departed (str) }\n    FK: dog_id -> Treatments.dog_id\n    FK: owner_id -> Owners.owner_id\n    FK: breed_code -> Breeds.breed_code\n- Owners: { owner_id (int), first_name (str), last_name (str), street (str), city (str), state (str), zip_code (str), email_address (str), home_phone (str), cell_number (str) }\n- Professionals: { professional_id (int), role_code (str), first_name (str), street (str), city (str), state (str), zip_code (str), last_name (str), email_address (str), home_phone (str), cell_number (str) }\n    FK: professional_id -> Treatments.professional_id\n- Sizes: { size_code (str), size_description (str) }\n- Treatment_Types: { treatment_type_code (str), treatment_type_description (str) }\n- Treatments: { treatment_id (int), dog_id (int), professional_id (int), treatment_type_code (str), date_of_treatment (str), cost_of_treatment (int) }\n    FK: treatment_type_code -> Treatment_Types.treatment_type_code\n\nflight_2:\n- airlines: { uid (int), Airline (str), Abbreviation (str), Country (str) }\n- airports: { City (str), AirportCode (str), AirportName (str), Country (str), CountryAbbrev (str) }\n- flights: { Airline (int), FlightNo (int), SourceAirport (str), DestAirport (str) }\n\nformula_1:\n- circuits: { circuitId (int), circuitRef (str), name (str), location (str), country (str), lat (float), lng (float), alt (str), url (str) }\n- constructorResults: { constructorResultsId (int), raceId (int), constructorId (int), points (float), status (str) }\n- constructorStandings: { constructorStandingsId (int), raceId (int), constructorId (int), points (float), position (int), positionText (str), wins (int) }\n- constructors: { constructorId (int), constructorRef (str), name (str), nationality (str), url (str) }\n- driverStandings: { driverStandingsId (int), raceId (int), driverId (int), points (float), position (int), positionText (str), wins (int) }\n- drivers: { driverId (int), driverRef (str), number (str), code (str), forename (str), surname (str), dob (str), nationality (str), url (str) }\n- qualifying: { qualifyId (int), raceId (int), driverId (int), constructorId (int), number (int), position (int), q1 (str), q2 (str), q3 (str) }\n- races: { raceId (int), year (int), round (int), circuitId (int), name (str), date (str), time (str), url (str) }\n- results: { resultId (int), raceId (int), driverId (int), constructorId (int), number (int), grid (int), position (str), positionText (str), positionOrder (int), points (float), laps (str), time (str), milliseconds (str), fastestLap (str), rank (str), fastestLapTime (str), fastestLapSpeed (str), statusId (int) }\n- seasons: { year (int), url (str) }\n- status: { statusId (int), status (str) }\n\nNote: several logically-numeric fields in the ORIGINAL 6 databases are stored as strings (concert.Stadium_ID, Dogs.age, Dogs.weight, cars_data.Horsepower, cars_data.MPG, singer_in_concert.Singer_ID) -- use $toInt / $toDouble when comparing or aggregating on these. This note has NOT been independently verified for the other databases below -- check field types in the schema itself if a comparison looks wrong.\nIMPORTANT: cars_data.Horsepower and cars_data.MPG also contain the LITERAL STRING \"null\" for some rows (not real nulls, not missing -- an actual \"null\" string value). Calling $toDouble/$toInt on that value throws a MongoDB server error and fails the whole query. ALWAYS exclude it first, e.g. add {\"MPG\": {\"$ne\": \"null\"}} to your $match stage BEFORE any $toDouble/$toInt/$avg/$max/$min on that field.\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. ALWAYS exclude the MongoDB-assigned _id field from your output -- include \"_id\": 0 in the projection argument of every find() call and in every $project stage, unless the question explicitly asks for the _id value itself.\n6. $size inside a $match/find() FILTER only accepts a literal integer for an exact array-length match, e.g. {\"field\": {\"$size\": 3}}. It does NOT accept a comparison operator -- {\"field\": {\"$size\": {\"$gte\": 4}}} is INVALID and will error at query time. For 'at least/more than/fewer than N items', either (a) use $expr with the aggregation $size operator: {\"$expr\": {\"$gte\": [{\"$size\": \"$field\"}, 4]}}, or (b) compute a count via $group/$addFields first, then $match on that count field.",
+      "chars": 6043,
+      "approx_tokens_range": [
+        1511,
+        1727
+      ],
+      "collections": 33,
+      "coverage": {
+        "covered": [
+          "college_2",
+          "dog_kennels",
+          "flight_2",
+          "formula_1"
+        ],
+        "missing": [],
+        "from_build_cards": [
+          "college_2",
+          "dog_kennels",
+          "flight_2",
+          "formula_1"
+        ],
+        "from_rag_prompts_fallback": []
+      }
+    },
+    {
+      "index": 3,
+      "databases": [
+        "college_3",
+        "flight_4",
+        "hr_1",
+        "inn_1"
+      ],
+      "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nSchema (4 databases, 20 collection(s) -- batch 4/6 of the fine-tuned arm's schema training prompt -- databases in this group: college_3, flight_4, hr_1, inn_1):\n\ncollege_3:\n- Course: { CID (str), CName (str), Credits (int), Instructor (int), Days (str), Hours (str), DNO (int) }\n- Department: { DNO (int), Division (str), DName (str), Room (str), Building (str), DPhone (int) }\n- Enrolled_in: { StuID (int), CID (str), Grade (str) }\n- Faculty: { FacID (int), Lname (str), Fname (str), Rank (str), Sex (str), Phone (int), Room (str), Building (str) }\n- Gradeconversion: { lettergrade (str), gradepoint (float) }\n- Member_of: { FacID (int), DNO (int), Appt_Type (str) }\n- Minor_in: { StuID (int), DNO (int) }\n- Student: { StuID (int), LName (str), Fname (str), Age (int), Sex (str), Major (int), Advisor (int), city_code (str) }\n\nflight_4:\n- airlines: { alid (int), name (str), iata (str), icao (str), callsign (str, nullable), country (str, nullable), active (str) }\n- airports: { apid (int), name (str), city (str), country (str), x (float), y (float), elevation (int), iata (str), icao (str) }\n- routes: { rid (int), dst_apid (int), dst_ap (str), src_apid (int), src_ap (str), alid (int, nullable), airline (str), codeshare (str, nullable) }\n\nhr_1:\n- countries: { COUNTRY_ID (str), COUNTRY_NAME (str), REGION_ID (int) }\n- departments: { DEPARTMENT_ID (int), DEPARTMENT_NAME (str), MANAGER_ID (int), LOCATION_ID (int) }\n- employees: { EMPLOYEE_ID (int), FIRST_NAME (str), LAST_NAME (str), EMAIL (str), PHONE_NUMBER (str), HIRE_DATE (str), JOB_ID (str), SALARY (int), COMMISSION_PCT (int), MANAGER_ID (int), DEPARTMENT_ID (int) }\n- job_history: { EMPLOYEE_ID (int), START_DATE (str), END_DATE (str), JOB_ID (str), DEPARTMENT_ID (int) }\n- jobs: { JOB_ID (str), JOB_TITLE (str), MIN_SALARY (int), MAX_SALARY (int) }\n- locations: { LOCATION_ID (int), STREET_ADDRESS (str), POSTAL_CODE (str), CITY (str), STATE_PROVINCE (str), COUNTRY_ID (str) }\n- regions: { REGION_ID (int), REGION_NAME (str) }\n\ninn_1:\n- Reservations: { Code (int), Room (str), CheckIn (str), CheckOut (str), Rate (float), LastName (str), FirstName (str), Adults (int), Kids (int) }\n- Rooms: { RoomId (str), roomName (str), beds (int), bedType (str), maxOccupancy (int), basePrice (int), decor (str) }\n\nNote: several logically-numeric fields in the ORIGINAL 6 databases are stored as strings (concert.Stadium_ID, Dogs.age, Dogs.weight, cars_data.Horsepower, cars_data.MPG, singer_in_concert.Singer_ID) -- use $toInt / $toDouble when comparing or aggregating on these. This note has NOT been independently verified for the other databases below -- check field types in the schema itself if a comparison looks wrong.\nIMPORTANT: cars_data.Horsepower and cars_data.MPG also contain the LITERAL STRING \"null\" for some rows (not real nulls, not missing -- an actual \"null\" string value). Calling $toDouble/$toInt on that value throws a MongoDB server error and fails the whole query. ALWAYS exclude it first, e.g. add {\"MPG\": {\"$ne\": \"null\"}} to your $match stage BEFORE any $toDouble/$toInt/$avg/$max/$min on that field.\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. ALWAYS exclude the MongoDB-assigned _id field from your output -- include \"_id\": 0 in the projection argument of every find() call and in every $project stage, unless the question explicitly asks for the _id value itself.\n6. $size inside a $match/find() FILTER only accepts a literal integer for an exact array-length match, e.g. {\"field\": {\"$size\": 3}}. It does NOT accept a comparison operator -- {\"field\": {\"$size\": {\"$gte\": 4}}} is INVALID and will error at query time. For 'at least/more than/fewer than N items', either (a) use $expr with the aggregation $size operator: {\"$expr\": {\"$gte\": [{\"$size\": \"$field\"}, 4]}}, or (b) compute a count via $group/$addFields first, then $match on that count field.",
+      "chars": 4263,
+      "approx_tokens_range": [
+        1066,
+        1218
+      ],
+      "collections": 20,
+      "coverage": {
+        "covered": [
+          "college_3",
+          "flight_4",
+          "hr_1",
+          "inn_1"
+        ],
+        "missing": [],
+        "from_build_cards": [
+          "college_3",
+          "flight_4",
+          "hr_1",
+          "inn_1"
+        ],
+        "from_rag_prompts_fallback": []
+      }
+    },
+    {
+      "index": 4,
+      "databases": [
+        "network_1",
+        "pets_1",
+        "sakila_1",
+        "wine_1"
+      ],
+      "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nSchema (4 databases, 21 collection(s) -- batch 5/6 of the fine-tuned arm's schema training prompt -- databases in this group: network_1, pets_1, sakila_1, wine_1):\n\nnetwork_1:\n- Friend: { student_id (int), friend_id (int) }\n    FK: student_id -> Highschooler.ID\n- Highschooler: { ID (int), name (str), grade (int) }\n    FK: ID -> Likes.student_id\n- Likes: { student_id (int), liked_id (int) }\n\npets_1:\n- Has_Pet: { StuID (int), PetID (int) }\n    FK: PetID -> Pets.PetID\n    FK: StuID -> Student.StuID\n- Pets: { PetID (int), PetType (str), pet_age (int), weight (float) }\n- Student: { StuID (int), LName (str), Fname (str), Age (int), Sex (str), Major (int), Advisor (int), city_code (str) }\n\nsakila_1:\n- actor: { actor_id (int), first_name (str), last_name (str), last_update (str) }\n- address: { address_id (int), address (str), address2 (str, nullable), district (str), city_id (int), postal_code (str), phone (str), last_update (str) }\n- category: { category_id (int), name (str), last_update (str) }\n- city: { city_id (int), city (str), country_id (int), last_update (str) }\n- country: { country_id (int), country (str), last_update (str) }\n- customer: { customer_id (int), store_id (int), first_name (str), last_name (str), email (str), address_id (int), active (int), create_date (str), last_update (str) }\n- film: { film_id (int), title (str), description (str), release_year (int), language_id (int), original_language_id (unknown, nullable), rental_duration (int), rental_rate (float), length (int), replacement_cost (float), rating (str), special_features (str), last_update (str) }\n- film_actor: { actor_id (int), film_id (int), last_update (str) }\n- film_category: { film_id (int), category_id (int), last_update (str) }\n- inventory: { inventory_id (int), film_id (int), store_id (int), last_update (str) }\n- payment: { payment_id (int), customer_id (int), staff_id (int), rental_id (int, nullable), amount (float), payment_date (str), last_update (str) }\n- rental: { rental_id (int), rental_date (str), inventory_id (int), customer_id (int), return_date (str), staff_id (int), last_update (str) }\n\nwine_1:\n- appellations: { No (int), Appelation (str), County (str), State (str), Area (str), isAVA (str) }\n- grapes: { ID (int), Grape (str), Color (str) }\n- wine: { No (int), Grape (str), Winery (str), Appelation (str), State (str), Name (str), Year (int), Price (int), Score (int), Cases (int), Drink (str) }\n\nNote: several logically-numeric fields in the ORIGINAL 6 databases are stored as strings (concert.Stadium_ID, Dogs.age, Dogs.weight, cars_data.Horsepower, cars_data.MPG, singer_in_concert.Singer_ID) -- use $toInt / $toDouble when comparing or aggregating on these. This note has NOT been independently verified for the other databases below -- check field types in the schema itself if a comparison looks wrong.\nIMPORTANT: cars_data.Horsepower and cars_data.MPG also contain the LITERAL STRING \"null\" for some rows (not real nulls, not missing -- an actual \"null\" string value). Calling $toDouble/$toInt on that value throws a MongoDB server error and fails the whole query. ALWAYS exclude it first, e.g. add {\"MPG\": {\"$ne\": \"null\"}} to your $match stage BEFORE any $toDouble/$toInt/$avg/$max/$min on that field.\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. ALWAYS exclude the MongoDB-assigned _id field from your output -- include \"_id\": 0 in the projection argument of every find() call and in every $project stage, unless the question explicitly asks for the _id value itself.\n6. $size inside a $match/find() FILTER only accepts a literal integer for an exact array-length match, e.g. {\"field\": {\"$size\": 3}}. It does NOT accept a comparison operator -- {\"field\": {\"$size\": {\"$gte\": 4}}} is INVALID and will error at query time. For 'at least/more than/fewer than N items', either (a) use $expr with the aggregation $size operator: {\"$expr\": {\"$gte\": [{\"$size\": \"$field\"}, 4]}}, or (b) compute a count via $group/$addFields first, then $match on that count field.",
+      "chars": 4420,
+      "approx_tokens_range": [
+        1105,
+        1263
+      ],
+      "collections": 21,
+      "coverage": {
+        "covered": [
+          "network_1",
+          "pets_1",
+          "sakila_1",
+          "wine_1"
+        ],
+        "missing": [],
+        "from_build_cards": [
+          "network_1",
+          "pets_1",
+          "sakila_1",
+          "wine_1"
+        ],
+        "from_rag_prompts_fallback": []
+      }
+    },
+    {
+      "index": 5,
+      "databases": [
+        "store_1",
+        "world_1",
+        "wta_1"
+      ],
+      "system_prompt": "You are a MongoDB query expert.\nWhen given a natural-language question and a database schema, you output ONLY the raw PyMongo query \u2014 no explanation, no markdown, no prose.\n\nSchema (3 databases, 17 collection(s) -- batch 6/6 of the fine-tuned arm's schema training prompt -- databases in this group: store_1, world_1, wta_1):\n\nstore_1:\n- albums: { id (int), title (str), artist_id (int) }\n- artists: { id (int), name (str) }\n- customers: { id (int), first_name (str), last_name (str), company (str, nullable), address (str), city (str), state (str, nullable), country (str), postal_code (str, nullable), phone (str, nullable), fax (str, nullable), email (str), support_rep_id (int) }\n- employees: { id (int), last_name (str), first_name (str), title (str), reports_to (int, nullable), birth_date (str), hire_date (str), address (str), city (str), state (str), country (str), postal_code (str), phone (str), fax (str), email (str) }\n- genres: { id (int), name (str) }\n- invoice_lines: { id (int), invoice_id (int), track_id (int), unit_price (float), quantity (int) }\n- invoices: { id (int), customer_id (int), invoice_date (str), billing_address (str), billing_city (str), billing_state (str, nullable), billing_country (str), billing_postal_code (str, nullable), total (float) }\n- media_types: { id (int), name (str) }\n- playlist_tracks: { playlist_id (int), track_id (int) }\n- playlists: { id (int), name (str) }\n- tracks: { id (int), name (str), album_id (int), media_type_id (int), genre_id (int), composer (str, nullable), milliseconds (int), bytes (int), unit_price (float) }\n\nworld_1:\n- city: { ID (int), Name (str), CountryCode (str), District (str), Population (int) }\n- country: { Code (str), Name (str), Continent (str), Region (str), SurfaceArea (float), IndepYear (int, nullable), Population (int), LifeExpectancy (float, nullable), GNP (float), GNPOld (float, nullable), LocalName (str), GovernmentForm (str), HeadOfState (str, nullable), Capital (int, nullable), Code2 (str) }\n    FK: Code -> city.CountryCode\n    FK: Code -> countrylanguage.CountryCode\n- countrylanguage: { CountryCode (str), Language (str), IsOfficial (str), Percentage (float) }\n\nwta_1:\n- matches: { best_of (int), draw_size (int), loser_age (float), loser_entry (str), loser_hand (str), loser_ht (int), loser_id (int), loser_ioc (str), loser_name (str), loser_rank (int), loser_rank_points (int), loser_seed (int), match_num (int), minutes (int), round (str), score (str), surface (str), tourney_date (int), tourney_id (str), tourney_level (str), tourney_name (str), winner_age (float), winner_entry (str), winner_hand (str), winner_ht (int), winner_id (int), winner_ioc (str), winner_name (str), winner_rank (int), winner_rank_points (int), winner_seed (int), year (int) }\n- players: { player_id (int), first_name (str), last_name (str), hand (str), birth_date (int), country_code (str) }\n- rankings: { ranking_date (int), ranking (int), player_id (int), ranking_points (int), tours (int) }\n\nNote: several logically-numeric fields in the ORIGINAL 6 databases are stored as strings (concert.Stadium_ID, Dogs.age, Dogs.weight, cars_data.Horsepower, cars_data.MPG, singer_in_concert.Singer_ID) -- use $toInt / $toDouble when comparing or aggregating on these. This note has NOT been independently verified for the other databases below -- check field types in the schema itself if a comparison looks wrong.\nIMPORTANT: cars_data.Horsepower and cars_data.MPG also contain the LITERAL STRING \"null\" for some rows (not real nulls, not missing -- an actual \"null\" string value). Calling $toDouble/$toInt on that value throws a MongoDB server error and fails the whole query. ALWAYS exclude it first, e.g. add {\"MPG\": {\"$ne\": \"null\"}} to your $match stage BEFORE any $toDouble/$toInt/$avg/$max/$min on that field.\n\nRules:\n1. Output ONLY the PyMongo expression (e.g. list(db.singer.find({...})))\n2. Use db.<collection>.<method>() syntax -- use db['model_list.json'] for that one collection if it appears in the schema below\n3. Do NOT wrap in ```python or any markdown\n4. Do NOT add any explanation before or after\n5. ALWAYS exclude the MongoDB-assigned _id field from your output -- include \"_id\": 0 in the projection argument of every find() call and in every $project stage, unless the question explicitly asks for the _id value itself.\n6. $size inside a $match/find() FILTER only accepts a literal integer for an exact array-length match, e.g. {\"field\": {\"$size\": 3}}. It does NOT accept a comparison operator -- {\"field\": {\"$size\": {\"$gte\": 4}}} is INVALID and will error at query time. For 'at least/more than/fewer than N items', either (a) use $expr with the aggregation $size operator: {\"$expr\": {\"$gte\": [{\"$size\": \"$field\"}, 4]}}, or (b) compute a count via $group/$addFields first, then $match on that count field.",
+      "chars": 4802,
+      "approx_tokens_range": [
+        1200,
+        1372
+      ],
+      "collections": 17,
+      "coverage": {
+        "covered": [
+          "store_1",
+          "world_1",
+          "wta_1"
+        ],
+        "missing": [],
+        "from_build_cards": [
+          "store_1",
+          "world_1",
+          "wta_1"
+        ],
+        "from_rag_prompts_fallback": []
+      }
+    }
+  ],
+  "database_to_batch_index": {
+    "apartment_rentals": 0,
+    "baseball_1": 0,
+    "bike_1": 0,
+    "car_1": 0,
+    "chinook_1": 1,
+    "college_1": 1,
+    "concert_singer": 1,
+    "csu_1": 1,
+    "college_2": 2,
+    "dog_kennels": 2,
+    "flight_2": 2,
+    "formula_1": 2,
+    "college_3": 3,
+    "flight_4": 3,
+    "hr_1": 3,
+    "inn_1": 3,
+    "network_1": 4,
+    "pets_1": 4,
+    "sakila_1": 4,
+    "wine_1": 4,
+    "store_1": 5,
+    "world_1": 5,
+    "wta_1": 5
+  },
+  "counts": {
+    "pool_total": 1213,
+    "train": 1091,
+    "valid": 122,
+    "holdout_eval_reference_only": 304
+  },
+  "by_database": {
+    "train": {
+      "world_1": 67,
+      "dog_kennels": 50,
+      "apartment_rentals": 58,
+      "pets_1": 32,
+      "store_1": 76,
+      "bike_1": 75,
+      "college_2": 112,
+      "hr_1": 78,
+      "college_1": 113,
+      "chinook_1": 30,
+      "car_1": 64,
+      "sakila_1": 25,
+      "concert_singer": 43,
+      "csu_1": 20,
+      "inn_1": 25,
+      "flight_2": 29,
+      "baseball_1": 30,
+      "flight_4": 30,
+      "wine_1": 30,
+      "formula_1": 23,
+      "network_1": 32,
+      "college_3": 26,
+      "wta_1": 23
+    },
+    "valid": {
+      "csu_1": 2,
+      "bike_1": 8,
+      "college_3": 3,
+      "formula_1": 3,
+      "college_1": 13,
+      "chinook_1": 3,
+      "world_1": 8,
+      "pets_1": 4,
+      "hr_1": 9,
+      "baseball_1": 3,
+      "college_2": 13,
+      "dog_kennels": 6,
+      "inn_1": 3,
+      "flight_4": 3,
+      "apartment_rentals": 6,
+      "store_1": 8,
+      "sakila_1": 3,
+      "car_1": 7,
+      "flight_2": 3,
+      "network_1": 4,
+      "wine_1": 3,
+      "concert_singer": 5,
+      "wta_1": 2
+    },
+    "holdout_eval": {
+      "car_1": 18,
+      "dog_kennels": 13,
+      "pets_1": 9,
+      "network_1": 10,
+      "world_1": 19,
+      "concert_singer": 11,
+      "store_1": 22,
+      "college_2": 31,
+      "flight_2": 8,
+      "college_1": 32,
+      "hr_1": 22,
+      "apartment_rentals": 16,
+      "bike_1": 21,
+      "college_3": 7,
+      "flight_4": 8,
+      "chinook_1": 9,
+      "inn_1": 7,
+      "wine_1": 8,
+      "csu_1": 6,
+      "formula_1": 6,
+      "wta_1": 6,
+      "sakila_1": 7,
+      "baseball_1": 8
+    }
+  },
+  "leakage_checks": {
+    "pool_vs_holdout_id_overlap": [],
+    "pool_vs_holdout_question_overlap": [],
+    "train_vs_valid_id_overlap": []
+  }
+}

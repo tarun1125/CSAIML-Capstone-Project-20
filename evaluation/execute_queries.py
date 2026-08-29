@@ -17,40 +17,25 @@
 
 import ast
 import json
+import sys
 from datetime import date, datetime
 from pathlib import Path
 
 from bson import ObjectId
-from pymongo import MongoClient
-from pymongo.server_api import ServerApi
+from pymongo import MongoClient  # still used as a type hint below (run_model)
 
-
-# ---------------------------------------------------------------------------
-# Env / connection
-# ---------------------------------------------------------------------------
-
-def load_env_file(path: Path) -> dict[str, str]:
-    values: dict[str, str] = {}
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, value = line.split("=", 1)
-        values[key.strip()] = value.strip().strip('"').strip("'")
-    return values
-
-
-def connect() -> MongoClient:
-    project_root = Path(__file__).resolve().parents[1]
-    env_values = load_env_file(project_root / "atlas-credentials.env")
-    uri = env_values.get("MONGODB_URI")
-    if not uri:
-        raise RuntimeError("MONGODB_URI not found in atlas-credentials.env")
-
-    client = MongoClient(uri, server_api=ServerApi("1"))
-    client.admin.command("ping")
-    print("[connect] Pinged Atlas, connection OK")
-    return client
+# 2026-08-28: load_env_file/connect used to be defined here AND, separately
+# and divergently, in atlas_verify_and_load.py -- a real DRY gap flagged by
+# this project's own code-smell audit (the two connect()s had quietly grown
+# different behavior: only one had a connection timeout + password-masked
+# logging). Both now import the single shared implementation from
+# atlas_env.py at the repo root instead. connect/load_env_file are
+# re-exported under their original names so every existing
+# `from execute_queries import connect` call site (fine_tuning/score_*.py,
+# rag/score_rag.py, dump_atlas_to_local.py, evaluation/execute_gold.py)
+# keeps working unchanged.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from atlas_env import connect, load_env_file  # noqa: E402  reuse, don't reimplement
 
 
 # ---------------------------------------------------------------------------

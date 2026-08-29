@@ -30,8 +30,21 @@
 #   python rag/score_rag.py 5        # same, for K=5
 # The K suffix only touches RAG-specific filenames (prompts/normalized/
 # execution-results/summary) -- the baseline test-slice re-score doesn't
-# depend on K at all (same 61 ids regardless of how many few-shot examples
-# RAG used), so it's recomputed fresh each run rather than K-suffixed.
+# depend on K at all (same 61/304 ids regardless of how many few-shot
+# examples RAG used), so it's recomputed fresh each run rather than K-suffixed.
+#
+# MLX-unification addition (see generate_baseline_mlx.py /
+# rag/generate_rag_mlx.py at the repo root/rag/ -- Tarun's call to stop
+# comparing arms generated on different serving stacks): two more OPTIONAL
+# positional args let this same scoring code run against the new
+# MLX-generated files instead of the historical Colab/HF ones, without
+# touching the default (zero-arg) behavior at all --
+#   python rag/score_rag.py 10 data/qwen_baseline_mlx_testslice_normalized.json rag/data/qwen_rag_mlx_normalized.json
+# When either override is given, this run's own output files get an
+# "_mlx" marker (baseline_slice/execution-results/summary CSV) so it never
+# silently overwrites the historical Colab-era files sitting at the
+# original, un-suffixed names -- both runs' results stay on disk side by
+# side for comparison.
 
 import json
 import sys
@@ -42,7 +55,10 @@ sys.path.insert(0, str(ROOT / "evaluation"))
 from execute_queries import connect, run_model  # noqa: E402  reuse, don't reimplement
 
 TOP_K_ARG = sys.argv[1] if len(sys.argv) > 1 else None
+BASELINE_FILE_ARG = sys.argv[2] if len(sys.argv) > 2 else None
+RAG_NORMALIZED_FILE_ARG = sys.argv[3] if len(sys.argv) > 3 else None
 SUFFIX = "" if TOP_K_ARG in (None, "10") else f"_k{TOP_K_ARG}"
+RUN_MARKER = "_mlx" if (BASELINE_FILE_ARG or RAG_NORMALIZED_FILE_ARG) else ""
 
 
 def main():
@@ -50,37 +66,42 @@ def main():
     rag_data_dir = ROOT / "rag" / "data"  # RAG-specific artifacts
     rag_data_dir.mkdir(parents=True, exist_ok=True)
     print(f"[score_rag] K arg={TOP_K_ARG!r} -> file suffix={SUFFIX!r} "
-          f"(empty suffix = the original K=10 filenames)")
+          f"(empty suffix = the original K=10 filenames); "
+          f"baseline override={BASELINE_FILE_ARG!r}, rag-normalized override={RAG_NORMALIZED_FILE_ARG!r}, "
+          f"run marker={RUN_MARKER!r}")
 
     test_cases = json.loads((rag_data_dir / "rag_test.json").read_text(encoding="utf-8"))
     test_ids = {str(c["id"]) for c in test_cases}
     print(f"[score_rag] scoring against {len(test_ids)} held-out test ids: {sorted(test_ids)}")
 
-    rag_normalized_file = rag_data_dir / f"qwen_rag_normalized{SUFFIX}.json"
+    rag_normalized_file = Path(RAG_NORMALIZED_FILE_ARG) if RAG_NORMALIZED_FILE_ARG else rag_data_dir / f"qwen_rag_normalized{SUFFIX}.json"
     rag_prompts_file = rag_data_dir / f"rag_prompts{SUFFIX}.json"
     if not rag_normalized_file.exists():
         raise RuntimeError(
             f"{rag_normalized_file} not found. Run, in order: "
             f"1) python rag/build_prompts.py{' ' + TOP_K_ARG if TOP_K_ARG else ''} "
             f"(produces {rag_prompts_file.name}) "
-            f"2) the Colab RAG inference notebook, pointed at {rag_prompts_file.name} "
-            f"(produces rag/data/qwen_rag_results{SUFFIX}.json) "
-            f"3) python normalize.py rag/data/qwen_rag_results{SUFFIX}.json {rag_normalized_file}"
+            f"2) generation (rag/generate_rag_mlx.py, or the Colab RAG inference "
+            f"notebook), pointed at {rag_prompts_file.name} "
+            f"3) python normalize.py <results file> {rag_normalized_file}"
         )
 
-    # Slice the ORIGINAL full-golden-set baseline normalized predictions
-    # down to just the current test ids, so it's scored on the exact same
-    # slice as RAG.
-    baseline_all = json.loads((data_dir / "qwen_normalized.json").read_text(encoding="utf-8"))
+    # Baseline: either the historical full-golden-set file, sliced down to
+    # the current test ids (original behavior, unchanged), or -- when
+    # BASELINE_FILE_ARG is given -- a file that's already exactly this
+    # test slice (e.g. generate_baseline_mlx.py's output), in which case
+    # the "slice" below is a no-op filter that just confirms full coverage.
+    baseline_source = Path(BASELINE_FILE_ARG) if BASELINE_FILE_ARG else data_dir / "qwen_normalized.json"
+    baseline_all = json.loads(baseline_source.read_text(encoding="utf-8"))
     baseline_slice = [c for c in baseline_all if str(c["id"]) in test_ids]
     if len(baseline_slice) != len(test_ids):
         missing = test_ids - {str(c["id"]) for c in baseline_slice}
         print(f"[score_rag] WARNING: {len(missing)} test id(s) not found in "
-              f"qwen_normalized.json: {sorted(missing)}")
-    baseline_slice_file = rag_data_dir / "qwen_baseline_testslice_normalized.json"
+              f"{baseline_source.name}: {sorted(missing)}")
+    baseline_slice_file = rag_data_dir / f"qwen_baseline_testslice_normalized{RUN_MARKER}.json"
     baseline_slice_file.write_text(json.dumps(baseline_slice, indent=2), encoding="utf-8")
     print(f"[score_rag] sliced baseline: {len(baseline_slice)}/{len(baseline_all)} "
-          f"predictions kept -> {baseline_slice_file}")
+          f"predictions kept (source: {baseline_source.name}) -> {baseline_slice_file}")
 
     gold_raw = json.loads((data_dir / "gold_results.json").read_text(encoding="utf-8"))
     gold_results = {str(r["id"]): r for r in gold_raw if r.get("status") == "PASS"}
@@ -95,7 +116,7 @@ def main():
     print("=" * 80)
     baseline_results = run_model(
         client, "Qwen-Baseline(test-slice)",
-        baseline_slice_file, rag_data_dir / "qwen_baseline_testslice_execution_results.json",
+        baseline_slice_file, rag_data_dir / f"qwen_baseline_testslice_execution_results{RUN_MARKER}.json",
         gold_results,
     )
 
@@ -104,7 +125,7 @@ def main():
     print("=" * 80)
     rag_results = run_model(
         client, "Qwen-RAG",
-        rag_normalized_file, rag_data_dir / f"qwen_rag_execution_results{SUFFIX}.json",
+        rag_normalized_file, rag_data_dir / f"qwen_rag_execution_results{SUFFIX}{RUN_MARKER}.json",
         gold_results,
     )
 
@@ -144,7 +165,7 @@ def main():
     print(f"\n  NOTE: n={n_test} -- worst-case standard error at p~=0.5 is ~{se_pct:.0f} points, "
           f"so treat this as a directional signal, not a precise measurement.")
 
-    summary_path = ROOT / "rag" / "outputs" / f"rag_vs_baseline_scores{SUFFIX}.csv"
+    summary_path = ROOT / "rag" / "outputs" / f"rag_vs_baseline_scores{SUFFIX}{RUN_MARKER}.csv"
     summary_path.parent.mkdir(exist_ok=True)
     with summary_path.open("w", encoding="utf-8") as f:
         f.write("Arm,Correct,Total,Accuracy\n")
