@@ -193,8 +193,19 @@ def run_baseline(question: str, database: str, max_tokens: int = 300) -> dict:
 
 def run_rag(question: str, database: str, top_k: int = 10, max_tokens: int = 300) -> dict:
     """RAG: retrieve top_k few-shot examples for `question`, build a schema+examples prompt, no adapter."""
-    import faiss
+    # IMPORT ORDER IS LOAD-BEARING -- embed_utils (torch) BEFORE faiss. This
+    # venv ships three copies of libomp.dylib (torch, faiss, sklearn); if
+    # faiss's copy loads first, the first torch forward pass segfaults the
+    # interpreter. Here that meant the RAG tab took the whole Streamlit
+    # process down at the first embed() call -- SIGSEGV, not an exception, so
+    # execute_against_atlas()'s broad `except Exception` could never have
+    # caught it. Same bug fixed in rag/build_prompts.py and
+    # rag/build_retrieval_index.py; this call site was missed because it
+    # imports faiss directly rather than through build_prompts.
     from embed_utils import embed
+
+    import faiss  # noqa: E402  MUST come after embed_utils -- see above
+
     from build_prompts import (
         PROMPT_HEADER, PROMPT_RULES, render_examples_block, render_schema_block,
         render_numeric_string_note, majority_vote_database,
