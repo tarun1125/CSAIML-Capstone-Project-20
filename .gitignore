@@ -30,5 +30,12 @@ _to_delete/
 fine_tuning/adapters*/*.safetensors
 fine_tuning/adapters*/**/*.safetensors
 
+# Written deliverables (capstone report / defense deck). Kept out of the
+# public repo deliberately: they are large binaries that would add a full
+# fresh copy to history on every revision, and this repo is the code and
+# the results, not the write-up. Same call as the adapter weights above.
+*.pptx
+*.docx
+
 # macOS
 .DS_Store
