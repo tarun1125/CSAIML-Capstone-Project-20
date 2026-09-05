@@ -68,6 +68,14 @@
 # net either), so losing an hour of generation to one dropped connection
 # would be a real, avoidable cost.
 #
+# CONFIDENCE (added 2026-09-05): mirrors rag/generate_rag_mlx.py exactly, so
+# the two arms stay comparable on confidence the same way they were already
+# unified on serving stack. Each record now carries mean_logprob /
+# sum_logprob / token_logprobs / n_gen_tokens, trimmed to the span clean()
+# keeps. Generation is unchanged -- see that script's docstring and
+# spot_check.generate_with_logprobs for why streaming is text-identical to
+# the generate() call it replaces.
+#
 # Output feeds the same two steps every arm already uses:
 #   python normalize.py data/qwen_baseline_mlx_testslice_results.json data/qwen_baseline_mlx_testslice_normalized.json
 #   python rag/score_rag.py 10 data/qwen_baseline_mlx_testslice_normalized.json
@@ -79,11 +87,17 @@ import sys
 import time
 from pathlib import Path
 
-from mlx_lm import generate, load
+from mlx_lm import load
 
 REPO_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(REPO_ROOT / "fine_tuning"))
-from spot_check import STOP_MARKERS, clean  # noqa: E402  (reuse, don't re-derive)
+from spot_check import (  # noqa: E402  (reuse, don't re-derive)
+    STOP_MARKERS,
+    confidence_fields,
+    generate_with_logprobs,
+)
+
+from run_manifest import write_manifest  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("generate_baseline_mlx")
@@ -311,13 +325,18 @@ def main():
         prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
 
         case_start = time.monotonic()
-        raw = generate(model, tokenizer, prompt=prompt, max_tokens=args.max_tokens, verbose=False)
+        generated, kept_lps, lp_diag, _raw = generate_with_logprobs(
+            model, tokenizer, prompt, max_tokens=args.max_tokens
+        )
         elapsed = time.monotonic() - case_start
-        generated = clean(raw)
+        conf = confidence_fields(kept_lps)
 
         log.info(
-            "[%d/%d] id=%s db=%s (%.1fs) -> %s",
-            i, len(cases), case["id"], case["database"], elapsed, generated[:80].replace("\n", " "),
+            "[%d/%d] id=%s db=%s (%.1fs) mean_lp=%s (%d/%d tok kept) -> %s",
+            i, len(cases), case["id"], case["database"], elapsed,
+            f"{conf['mean_logprob']:.3f}" if conf["mean_logprob"] is not None else "n/a",
+            lp_diag["n_gen_tokens_kept"], lp_diag["n_gen_tokens_raw"],
+            generated[:80].replace("\n", " "),
         )
 
         done[case["id"]] = {
@@ -326,13 +345,34 @@ def main():
             "database": case["database"],
             "complexity": case.get("complexity"),
             "generated_query": generated,
+            **conf,
+            **lp_diag,
         }
         save_checkpoint(output_path, done, cases)  # write progress after EVERY case
 
     total_elapsed = time.monotonic() - run_start
-    n_generated_this_run = len(cases) - len(done) + len(done)  # kept for clarity; done now == len(cases)
     log.info("Generation complete: %d/%d cases in %s -> %.1fs total this run",
               len(done), len(cases), output_path, total_elapsed)
+
+    manifest_file = write_manifest(
+        output_path,
+        script=__file__,
+        arm="baseline",
+        model=MODEL,
+        adapter=None,
+        max_tokens=args.max_tokens,
+        temp=0.0,
+        samples=1,
+        decoding="greedy",
+        n_cases=len(done),
+        prompt_style="fixed full-schema (all test-slice databases)",
+        system_prompt_chars=len(system_prompt),
+        n_databases=len(coverage["covered"]),
+        n_collections=n_colls,
+        schema_coverage=coverage,
+        records_logprobs=True,
+    )
+    log.info("Wrote run manifest -> %s", manifest_file)
     log.info(
         "Next: python normalize.py %s data/qwen_baseline_mlx_testslice_normalized.json",
         output_path.relative_to(REPO_ROOT) if output_path.is_relative_to(REPO_ROOT) else output_path,
