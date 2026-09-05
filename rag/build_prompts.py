@@ -54,10 +54,32 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-import faiss
-
+# IMPORT ORDER IS LOAD-BEARING -- embed_utils (torch) BEFORE faiss.
+#
+# This venv ships three separate copies of libomp.dylib: torch/lib/,
+# faiss/.dylibs/ and sklearn/.dylibs/. Whichever one is loaded first wins the
+# process, and if faiss's copy wins, the first torch forward pass segfaults
+# the interpreter -- SIGSEGV, exit 139, no traceback, no Python-level error to
+# catch. Reproduced minimally: `import faiss` then torch -> crash on the first
+# model(**enc); `import torch` then faiss -> clean run, correct results.
+#
+# This script used to import faiss first (alphabetical), so `python
+# rag/build_prompts.py 10` -- step 3 of the README's "Reproducing a full run"
+# -- died silently right after "Embedder ready.", before the first prompt was
+# built. It is the likeliest reason rag_prompts.json and the RAG results
+# committed alongside it drifted out of sync (see this repo's run manifests).
+#
+# Ruff/isort will want to re-sort these back into one alphabetical block. Do
+# not let it: the blank line and this comment are what keep them apart.
+from embed_utils import MODEL_NAME as EMBED_MODEL_NAME
 from embed_utils import embed
+
+import faiss  # noqa: E402  MUST come after embed_utils -- see above
+
 from schema_cards import build_cards
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from run_manifest import write_manifest  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("rag.build_prompts")
@@ -238,7 +260,7 @@ def main():
         gold_database = case["database"]
 
         qvec = embed([question])
-        _scores, idxs = index.search(qvec, TOP_K)
+        scores, idxs = index.search(qvec, TOP_K)
         neighbors = [metadata[i] for i in idxs[0]]
         neighbor_dbs = [n["database"] for n in neighbors]
 
@@ -264,6 +286,17 @@ def main():
             "database_match": database_match,
             "retrieved_ids": [n["id"] for n in neighbors],
             "retrieved_neighbor_databases": neighbor_dbs,
+            # The FAISS similarity scores used to be computed and dropped on
+            # the floor (`_scores, idxs = index.search(...)`). Rank alone is
+            # enough for Recall@k / MRR / nDCG, but not enough to separate a
+            # RETRIEVAL GAP (the right exemplar was never retrieved at all)
+            # from RETRIEVAL NOISE (it was retrieved, but ranked below
+            # distractors that crowded it out) -- with ranks only you can see
+            # WHERE something placed but not how close the call was. The index
+            # is IndexFlatIP over normalized embeddings, so these are cosine
+            # similarities in [-1, 1], higher = more similar, in rank order.
+            # Purely additive: nothing above this line reads them.
+            "retrieved_scores": [float(s) for s in scores[0]],
             "complexity": case.get("complexity"),
             "system_prompt": system_prompt,
         })
@@ -280,6 +313,22 @@ def main():
         out_name = f"rag_prompts_k{TOP_K}.json"
     out_path = rag_data_dir / out_name
     out_path.write_text(json.dumps(prompts, indent=2), encoding="utf-8")
+    write_manifest(
+        out_path,
+        script=__file__,
+        stage="retrieval / prompt build",
+        top_k=TOP_K,
+        include_fk=INCLUDE_FK,
+        embedding_model=EMBED_MODEL_NAME,
+        faiss_index="rag/data/fewshot.index",
+        faiss_index_ntotal=index.ntotal,
+        faiss_index_type=type(index).__name__,
+        n_cases=len(prompts),
+        n_schema_databases=len(cards_by_db),
+        n_schema_cards=len(cards),
+        database_retrieval_accuracy=db_match_count / len(test_cases) if test_cases else None,
+        records_retrieved_scores=True,
+    )
     if INCLUDE_FK and TOP_K == 10:
         # Also keep a stably-named FK copy for the A/B test (see
         # docs/finding5_ab_test_guide.md) so rag_prompts.json can keep
