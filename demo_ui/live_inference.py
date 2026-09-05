@@ -280,13 +280,32 @@ def execute_against_atlas(query: str, database: str) -> dict:
     reimplementing BSON conversion.
     """
     from execute_queries import safe_eval_query, to_json_safe  # evaluation/execute_queries.py -- same AST-gated eval
+    from normalize import normalize  # normalize.py -- rewrites Mongo-shell/JS dialect habits into valid Python
     import atlas_env
 
     logger.info("execute_against_atlas(database=%s, query=%r)", database, query[:120])
     try:
+        # Every other script in this repo runs generate -> normalize -> execute (see spot_check.py,
+        # generate_baseline_mlx.py, generate_rag_mlx.py, fine_tuning/generate_predictions_23db.py --
+        # all call normalize.py before scoring). This function was calling safe_eval_query() directly
+        # on the RAW model output, skipping that step entirely. The model sometimes writes Mongo-
+        # shell/JS-style literals (bare `null`/`true`/`false`, or camelCase methods like
+        # `countDocuments`) instead of Python's `None`/`True`/`False` / `count_documents` -- valid
+        # Mongo shell syntax, but not valid Python. check_query_is_safe() parses the query as a
+        # Python AST and rejects any identifier it doesn't recognize (its allowlist is only
+        # {"db","None","True","False","len","sorted","list","dict"}), so a bare `null` shows up as
+        # an unrecognized ast.Name and gets rejected as "unexpected name: null" -- correctly refusing
+        # to eval something that isn't safe Python, but the query was never given the chance to be
+        # rewritten into safe Python first. Fixed 2026-08-29 by normalizing before executing, exactly
+        # like the rest of the pipeline.
+        normalized_query = normalize(query)
+        if normalized_query != query:
+            logger.info("normalize() rewrote the query before execution: %r -> %r",
+                        query[:120], normalized_query[:120])
+
         client = atlas_env.connect()
         db = client[database]
-        raw_result = safe_eval_query(query, db)
+        raw_result = safe_eval_query(normalized_query, db)
         raw_type = type(raw_result).__name__
 
         # Mirror evaluation/execute_queries.py's run_model() EXACTLY: a query like
