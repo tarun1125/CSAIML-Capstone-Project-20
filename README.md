@@ -138,6 +138,49 @@ tested as a controlled A/B run on MLX-LM - **FK-included 142/304 (46.7%) vs. no-
 (46.4%)**. A 1-case, 0.3-point difference. FK annotations don't measurably help
 or hurt on top of what schema + few-shot examples already provide.
 
+## Secondary metrics: CodeBLEU and BERTScore
+
+Execution accuracy (above) is this project's primary metric throughout — a query is
+scored by whether it returns the correct result when actually run, not by how closely
+its text resembles a reference. Two secondary, literature-comparability metrics were
+recomputed against the current, full 304-case test set:
+
+| Arm | n | CodeBLEU (3-component, canonical) | CodeBLEU (full, 4-component) |
+| --- | ---: | ---: | ---: |
+| Baseline (zero-shot) | 304 | 0.2270 | 0.4203 |
+| RAG (K=10, FK-included) | 304 | 0.2783 | 0.4587 |
+| Fine-tuned (23-db, 1,000-iter) | 304 | 0.2759 | 0.4570 |
+
+The 3-component score (n-gram, weighted n-gram, syntax match) is this project's
+canonical CodeBLEU figure — the 4th component, dataflow match, is designed for
+multi-statement code and degenerates to zero for the single-expression PyMongo output
+this task produces, so including it would silently deflate every arm's score by a
+constant, uninformative amount rather than measure anything real.
+
+**RAG and fine-tuning score within 0.0024 of each other on CodeBLEU (0.2783 vs. 0.2759)
+despite a 12.8-percentage-point gap in execution accuracy (46.7% vs. 33.9%)** — on this
+secondary metric the two arms look nearly indistinguishable, while on the metric this
+project treats as authoritative they are clearly separated. See
+`outputs/figures/codebleu_vs_execution_accuracy_304.png` and
+`outputs/codebleu_scores_304.csv`. This is not a contradiction: CodeBLEU rewards
+surface-level lexical/syntactic similarity to a single reference query, while execution
+accuracy asks whether the generated query actually returns the correct result — a query
+can borrow much of the reference's shape while filtering on the wrong condition, and a
+semantically correct query can legitimately diverge from the reference's literal token
+sequence and lose CodeBLEU credit for it regardless.
+
+**BERTScore F1 has not been recomputed at this scale.** Both compute environments
+available for this update sit behind a network restriction that blocks the Hugging Face
+Hub download BERTScore's underlying `roberta-large` model requires — confirmed directly
+in both environments (`OSError` resolving the model config; `httpx.ProxyError: 403
+Forbidden`), not assumed. A complete, ready-to-run script,
+[`compute_bertscore_304.py`](compute_bertscore_304.py) — mirroring this project's
+established BERTScore methodology exactly (`lang="en"`, `rescale_with_baseline=True`) —
+is included in this repository; running it needs only an environment with unrestricted
+Hugging Face Hub access. Both metrics were previously measured once, early in the
+project, on a 121-case subset (CodeBLEU: Claude 0.272, Qwen 0.225; BERTScore F1: Claude
+0.672, Qwen 0.472) but not at the current, full 304-case scale until this update.
+
 ## Fine-tuning: the epoch-parity fix
 
 When the fine-tuning arm was retrained to cover all 23 databases (up from the original
@@ -221,14 +264,107 @@ set against the full, current 304-case, MLX-unified results, written to
 `finetuned_accuracy_by_database_304.png`, plus `visualize_final_comparison.py`'s
 `final_arm_comparison_n304.png` and `old_run_vs_current_run.png`.
 
-**Known staleness, flagged rather than hidden**: the figures above were generated
-against the 200-iteration fine-tuned adapter (24.0%), before the epoch-parity retrain
-described above raised fine-tuning to 33.9%. Their fine-tuned bars/numbers are
-superseded by the tables in this README until those scripts are re-run against
-`data/finetuned_full304_23db_1000iter_execution_results.json`.
-`fine_tuning/outputs/figures/finetuned_23db_1000iter_outcome_breakdown.png` and
-`finetuned_23db_epoch_fix_comparison.png` are the up-to-date figures specific to the
-fine-tuned arm's before/after epoch-parity fix.
+**Now current, staleness resolved**: all figures above were regenerated against the
+current 1,000-iteration, epoch-parity-fixed fine-tuned adapter (33.9%) rather than the
+superseded 200-iteration run (24.0%) — closing a gap this README previously flagged
+explicitly rather than silently. Two incidental bugs were fixed in the same pass: a
+funnel-chart title-clipping defect (`draw_funnel()`'s figure width) and a deprecated
+`matplotlib.pyplot.cm.get_cmap` call.
+
+Two further figures were added this round, also in `outputs/figures/`:
+`finetuned_23db_1000iter_loss_and_memory.png` — train/validation
+loss and peak Metal memory vs. iteration over the full 1,000-iteration run, two stacked
+panels sharing an x-axis rather than a dual y-axis. Its source data,
+`fine_tuning/training_log_1000iter.txt`, is committed; the `plot_training_curve.py` script
+this README previously credited is **not in the repo** and never was, so the figure is
+currently not regenerable from a clean clone — flagged here rather than left as a
+dangling reference. Also added — 
+`codebleu_vs_execution_accuracy_304.png` (`visualize_codebleu_304.py`) — execution
+accuracy and CodeBLEU (3-component) side by side for all three arms, see
+[Secondary Metrics](#secondary-metrics-codebleu-and-bertscore) above.
+
+## Run provenance, confidence, and what a re-run actually reproduces
+
+Every generation and prompt-build step now writes a sibling `<name>.manifest.json`
+recording what produced the artifact next to it: model, adapter, `max_tokens`, decoding
+mode, `TOP_K`, whether FK annotations were on, the embedding model and FAISS index size,
+library versions, the git SHA, whether the tree was dirty, and a SHA-256 of the results
+file itself ([`run_manifest.py`](run_manifest.py)). A sibling file rather than a
+`_manifest` key inside the JSON, because every results file here is a list and every
+consumer iterates it — a dict at the top level would break all of them at once.
+
+This was added because three concrete problems had already happened and nothing in the
+repo could have caught any of them.
+
+**1. `rag/build_prompts.py` segfaulted — step 3 below did not run at all.** The venv
+carries three separate copies of `libomp.dylib` (torch, faiss, sklearn). Whichever loads
+first wins the process, and when faiss's copy won, the first torch forward pass killed
+the interpreter: SIGSEGV, exit 139, no traceback, no Python-level error, output ending
+silently after `Embedder ready.`. The script imported `faiss` before `embed_utils`
+(alphabetical order), so it hit this every time. Reproduced minimally in both directions
+and fixed by pinning the import order in `rag/build_prompts.py` and
+`rag/build_retrieval_index.py`; both carry a comment saying not to let isort re-sort them
+back. **Anyone who tried to rebuild the RAG prompts got a silent crash instead of
+prompts.**
+
+**2. `rag/data/qwen_rag_mlx_results.json` is stale and does not correspond to the
+prompts committed beside it.** Regenerating from the committed `rag_prompts.json`
+reproduces `rag/data/qwen_rag_mlx_fk_results.json` **bit-for-bit on all 304 cases**
+(identical text *and* identical per-token logprobs, across two independent runs) — but
+differs from `qwen_rag_mlx_results.json` on 103 of 304. The cause is dated: between
+commits `32d41f6` and `f396e3d` every one of the 304 `system_prompt`s changed while
+every `retrieved_ids` list stayed identical — the schema cards went from 76 cards / 0 FK
+edges to 161 cards / 19 FK edges, and rule 7 and the `"null"`-string warning were added.
+The results file was generated against the *older* prompts and then committed alongside
+the *newer* ones. **The published RAG figure is unaffected** — 142/304 (46.7%) was scored
+from the FK artifact, which reproduces exactly; `qwen_rag_mlx_results.json` is a leftover
+third file that matches neither A/B variant.
+
+**3. The same thing happened to the baseline arm, for a different reason.** The baseline
+uses one fixed system prompt shared by all 304 cases, assembled at runtime from whatever
+is dumped under `database/mongodb/` — which is gitignored. When that run was made,
+`college_3` and `chinook_1` had no local dump (the script's own docstring says so), so
+the shared prompt omitted two databases' schema; all 23 have dumps now. One input change
+therefore moved every case, and 181/304 regenerate differently. The current run's manifest
+records `schema_coverage.missing: []`, so this specific gap is now closed *and* recorded.
+
+Generation itself is deterministic on this stack: two independent full 304-case runs came
+out identical down to the per-token logprobs. What was missing was never determinism — it
+was any record of which inputs a given artifact was produced from.
+
+### Confidence signals
+
+Nothing in this repo used to emit a probability anywhere, so no calibration analysis
+(ECE, reliability diagrams, temperature scaling) was possible from its outputs. Both
+base-model arms now record confidence:
+
+- **Mean token logprob** — `mean_logprob`, `sum_logprob`, `token_logprobs`,
+  `n_gen_tokens` on every record. Generation is unchanged: in mlx-lm 0.31.3 `generate()`
+  is literally `"".join(r.text for r in stream_generate(...))`, so streaming to capture
+  per-step logprobs runs the identical decode path — confirmed empirically as well as by
+  construction.
+  The logprobs are **trimmed to the span `clean()` keeps**, not averaged over the raw
+  generation. Because of mlx-lm issue #973 the model keeps sampling past `<|im_end|>` to
+  `max_tokens`, so a raw generation is a short answer followed by a long discarded tail —
+  across the 304 RAG cases only 19,876 of 22,139 generated tokens (89.8%) survive
+  `clean()`. Averaging over the other 10% would describe text that was thrown away. The
+  trim reproduces `clean()`'s edits at character level and is checked against `clean()`
+  itself per case, falling back to a conservative stop-marker trim and recording which
+  rule it used (`logprob_trim_method`) rather than guessing.
+- **Self-consistency** — `python rag/generate_rag_mlx.py --samples 5 --temp 0.7` samples
+  k generations per case and reports the fraction agreeing with the modal answer, with
+  **all k generations persisted**, not just the winner. Agreement is decided on
+  `normalize.py`'s AST-canonical form, not on raw strings, so two correct queries that
+  differ only in whitespace or quoting count as agreement instead of splitting the vote.
+  `--samples > 1` with `--temp 0` is rejected: k greedy samples are k identical samples
+  and would report a self-consistency of 1.0 for every case.
+
+`rag/data/rag_prompts.json` additionally now keeps the FAISS similarity scores
+(`retrieved_scores`) that `index.search()` always computed and immediately discarded.
+Ranks alone support Recall@k / MRR / nDCG, but not telling a *retrieval gap* (the right
+exemplar was never retrieved) from *retrieval noise* (it was retrieved but outranked).
+Verified additive: rebuilding changed 0 of 304 `system_prompt`s and 0 of 304
+`retrieved_ids`, and added exactly one key.
 
 ## Reproducing a full run
 
@@ -250,6 +386,14 @@ python rag/score_rag.py 10 data/qwen_baseline_mlx_testslice_normalized.json rag/
 python fine_tuning/generate_predictions_23db.py
 python normalize.py data/finetuned_full304_23db_1000iter_results.json data/finetuned_full304_23db_1000iter_normalized.json
 python fine_tuning/score_finetuned_23db.py
+```
+
+Optional, for calibration work — self-consistency at k=5 (writes its own file, so a crash
+mid-sampling cannot damage the greedy results):
+
+```bash
+python rag/generate_rag_mlx.py --samples 5 --temp 0.7 \
+    --output rag/data/qwen_rag_mlx_selfconsistency_k5.json
 ```
 
 Retraining the adapter from scratch: `mlx_lm.lora --config fine_tuning/lora_config_23db_1000iter.yaml`
