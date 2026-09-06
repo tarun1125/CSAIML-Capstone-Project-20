@@ -73,6 +73,38 @@ class ModelUnavailable(RuntimeError):
     """Raised when mlx_lm or a required model/adapter path isn't available on this machine."""
 
 
+_KNOWN_DATABASES_CACHE = None
+
+
+def known_databases() -> set:
+    """The databases this project actually owns -- the allowlist for anything
+    that reaches the live cluster.
+
+    Derived from the local schema dumps under database/mongodb/ (the same
+    source rag/schema_cards.py builds prompts from), unioned with the 23-db
+    adapter's training manifest, so it can never be narrower than what the
+    demo legitimately needs. Returns an empty set if neither source is
+    readable, and the caller treats that as "cannot validate, do not block" --
+    a demo that refuses to run because a schema dump is missing would be a
+    worse failure than the one this guards against."""
+    global _KNOWN_DATABASES_CACHE
+    if _KNOWN_DATABASES_CACHE is not None:
+        return _KNOWN_DATABASES_CACHE
+
+    names = set()
+    try:
+        from schema_cards import build_cards
+        names |= {c["database"] for c in build_cards()}
+    except Exception as exc:  # noqa: BLE001 -- best effort; falls back to the manifest
+        logger.warning("Could not derive database allowlist from schema cards: %s", exc)
+    if KNOWN_23DB_DATABASES:
+        names |= set(KNOWN_23DB_DATABASES)
+
+    logger.info("Database allowlist for live Atlas execution: %d database(s)", len(names))
+    _KNOWN_DATABASES_CACHE = names
+    return names
+
+
 _MODEL_CACHE = {}  # keyed by adapter_path string (or "" for none) -> (model, tokenizer)
 
 
@@ -114,7 +146,7 @@ def _get_model(adapter_path: Path | None):
 
 def _generate(model, tokenizer, system_prompt: str, question: str, max_tokens: int = 300) -> str:
     from mlx_lm import generate
-    from spot_check import clean  # fine_tuning/spot_check.py -- canonical post-processing, reused verbatim
+    from generation_utils import clean  # fine_tuning/generation_utils.py -- canonical post-processing, reused verbatim
 
     messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": question}]
     prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
@@ -290,12 +322,28 @@ def execute_against_atlas(query: str, database: str) -> dict:
     result happened to carry a raw ObjectId. Fixed 2026-08-29 -- reusing to_json_safe(), not
     reimplementing BSON conversion.
     """
-    from execute_queries import safe_eval_query, to_json_safe  # evaluation/execute_queries.py -- same AST-gated eval
+    from execute_queries import materialize_result, safe_eval_query, to_json_safe  # evaluation/execute_queries.py -- same AST-gated eval
     from normalize import normalize  # normalize.py -- rewrites Mongo-shell/JS dialect habits into valid Python
     import atlas_env
 
     logger.info("execute_against_atlas(database=%s, query=%r)", database, query[:120])
     try:
+        # The database name comes from a free-text st.text_input in app.py and
+        # goes straight into client[database]. run_finetuned() validates it
+        # against KNOWN_23DB_DATABASES, but the baseline and RAG arms did not,
+        # so the demo would happily execute a generated query against ANY
+        # database on the cluster -- including ones this project does not own.
+        # Streamlit has no auth and binds every interface by default, so on
+        # conference wifi that is reachable by anyone on the network.
+        # Restricted here, at the one place that actually touches Atlas, so
+        # every arm is covered by one check rather than three.
+        allowed = known_databases()
+        if allowed and database not in allowed:
+            raise ValueError(
+                f"'{database}' is not one of this project's databases. "
+                f"Known: {sorted(allowed)}"
+            )
+
         # Every other script in this repo runs generate -> normalize -> execute (see spot_check.py,
         # generate_baseline_mlx.py, generate_rag_mlx.py, fine_tuning/generate_predictions_23db.py --
         # all call normalize.py before scoring). This function was calling safe_eval_query() directly
@@ -328,10 +376,7 @@ def execute_against_atlas(query: str, database: str) -> dict:
         # through it, got stringified into something like "<pymongo.cursor.Cursor object at ...>"
         # by Streamlit's JSON encoder, and a bare string at the JSON root is exactly what makes
         # the frontend's JSON viewer throw "src property must be a valid json object".)
-        if isinstance(raw_result, (int, float, str, bool)):
-            pass
-        elif not isinstance(raw_result, list):
-            raw_result = list(raw_result)
+        raw_result = materialize_result(raw_result)
 
         result = to_json_safe(raw_result)
         logger.info("Atlas execution OK, raw type=%s -> materialized+JSON-safe result of type=%s",
