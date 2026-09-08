@@ -138,6 +138,105 @@ tested as a controlled A/B run on MLX-LM - **FK-included 142/304 (46.7%) vs. no-
 (46.4%)**. A 1-case, 0.3-point difference. FK annotations don't measurably help
 or hurt on top of what schema + few-shot examples already provide.
 
+## Ground-truth and scorer verification
+
+Two independent audits were added, both reproducible from a clean checkout and
+neither needing an Atlas connection. Which file each published number comes
+from — and which same-named sibling is superseded — is now recorded in
+[`CANONICAL_ARTIFACTS.md`](CANONICAL_ARTIFACTS.md).
+
+### 1. Is the gold data right? SQL ↔ PyMongo cross-check
+
+[`evaluation/crosscheck_sql_gold.py`](evaluation/crosscheck_sql_gold.py) checks
+the hand-written PyMongo gold against **Spider's own gold SQL**, executed on
+Spider's original SQLite databases. All 23 databases are present in the Spider
+distribution, and all **1,396** Spider-derived cases match a Spider example on
+`(db_id, question text)` exactly, so the SQL is fully recoverable. The Mongo side
+is read from the already-executed `data/gold_results.json`; only the SQL side is
+run, locally.
+
+**1,409 cases execute on both sides; 1,264 (89.7%) agree** — 87.2% on the
+304-case test slice. Zero SQL errors. The comparison is value-based and tolerant
+of column naming, column order, row order, float representation, `$facet`
+set-difference shapes, and Mongo carrying an extra computed column the SQL
+doesn't project, so what remains is semantic rather than cosmetic.
+
+The 145 disagreements are auto-classified into causes in
+`outputs/sql_crosscheck.csv`, and most are **not** gold defects:
+
+| Likely cause | n | What it means |
+| --- | ---: | --- |
+| `UNCLASSIFIED` | 43 | No pattern matched — read these first. |
+| `TEXT_TYPED_NUMERIC` | 38 | The column is TEXT in SQLite and a string in Mongo. SQL compares it numerically; a plain `$gt` on a string silently matches nothing. |
+| `TIE_OR_RANK` | 37 | `ORDER BY x LIMIT 1` with a **tie** at the top. |
+| `AGGREGATE_OVER_TEXT` | 12 | SQL `AVG`/`SUM` coerces TEXT; Mongo's `$avg` over a string yields null without `$toDouble`. |
+| `SET_OP` | 7 | SQL `EXCEPT`/`INTERSECT`, expressed in Mongo via `$facet`. |
+| `JOIN_FANOUT` | 6 | Same distinct rows, different row counts — one side's join duplicates. |
+| `SUBQUERY` | 2 | Correlated/nested `SELECT`. |
+
+The most interesting class is `TIE_OR_RANK`: **the question itself is
+under-determined**. `spider-network_1-7` asks which grade has the most high
+schoolers when grades 9, 10, 11 and 12 all have exactly 4 — SQL's arbitrary pick
+is 12, the gold PyMongo adds an `_id` tiebreak and picks 9. A model answering
+"12" is scored wrong for giving an equally correct answer. That is a property of
+the questions, not of either query language, and it caps how high any arm's
+measurable accuracy can go.
+
+Gold health separately: **0** of 1,517 gold queries fail to execute and only
+**4** return empty (`spider-flight_2-37/38/75/76`, all `flight_2`).
+
+### 2. Is the *scorer* right? False-positive audit
+
+[`evaluation/audit_false_positives.py`](evaluation/audit_false_positives.py)
+asks the complementary question: how often does a **semantically wrong** query
+score correct because its *result* happened to match? `results_match()` compares
+result sets, and four properties of that let a wrong query through — empty
+matches empty, scalar matches scalar by coincidence, order is never compared,
+and low-cardinality collections make "top N" degenerate.
+
+The script flags candidates mechanically and keeps human verdicts in a registry
+keyed by **(arm, id)** — a false positive is a property of a generated query,
+not of a test case. That distinction is load-bearing: on `spider-flight_2-75`
+and `spider-apartment_rentals-29`, fine-tuning's query is defective while RAG's
+is correct, so an id-keyed registry would have blamed RAG for both.
+
+| Arm | Published | AST-identical to gold | Confirmed false positives | Corrected |
+| --- | ---: | ---: | ---: | ---: |
+| Zero-shot baseline | 15/304 (4.9%) | 3 | 2 (13.3% of correct) | 13/304 (4.3%) |
+| RAG (K=10) | 141/304 \* | 72 | **3 (2.1%)** | 138/304 (45.4%) |
+| LoRA fine-tuned | 103/304 (33.9%) | 51 | **9 (8.7%)** | 94/304 (30.9%) |
+
+<sub>\* the case-level file surviving the FK A/B overwrite; the canonical
+aggregate is 142/304 — see [`CANONICAL_ARTIFACTS.md`](CANONICAL_ARTIFACTS.md).</sub>
+
+Representative confirmed cases: fine-tuning filters `DestAirport` where the
+question says *departing* (`spider-flight_2-75` — both return 0, and empty
+matches empty); drops the `PetType == "cat"` filter and matches on age alone
+(`spider-pets_1-20`); drops the `COMMISSION_PCT != null` filter
+(`spider-hr_1-65`); averages a **string** `room_count` and returns the top-3 in
+the wrong ranking, which passes because there are exactly 3 distinct values
+(`spider-apartment_rentals-29`). RAG reverses a sort direction on "worked
+longest" over a collection of ≤10 employees (`spider-store_1-26`).
+
+Errors run the other way too — 6 RAG, 2 fine-tuned and 2 baseline cases are
+scored wrong when a stricter reading says they are right, most because the model
+simply didn't project `_id` away.
+
+**The headline conclusion survives, and strengthens.** Fine-tuning's
+false-positive rate is **4× RAG's**, which is what the mechanism predicts: LoRA
+teaches the *shape* of a correct query, so it emits structurally plausible
+pipelines with wrong predicates — exactly the failure mode result-comparison
+cannot see. Correcting both directions widens the RAG-vs-fine-tuned gap from
+12.8 to ~15.4 points.
+
+Both audits write CSVs (`outputs/false_positive_audit.csv`,
+`outputs/sql_crosscheck.csv`) and neither modifies any published number.
+
+```bash
+python evaluation/audit_false_positives.py
+python evaluation/crosscheck_sql_gold.py --spider-root ../spider_data
+```
+
 ## Secondary metrics: CodeBLEU and BERTScore
 
 Execution accuracy (above) is this project's primary metric throughout — a query is
@@ -332,6 +431,24 @@ Generation itself is deterministic on this stack: two independent full 304-case 
 out identical down to the per-token logprobs. What was missing was never determinism — it
 was any record of which inputs a given artifact was produced from.
 
+**Problem 3 is now fixed, not just recorded.** `rag/schema_cards.py` falls back to
+the committed `rag/schema_cards.json` when `database/mongodb/` is absent, so a clean
+clone builds the baseline arm's full-schema prompt instead of silently building a
+*schema-free* one. The snapshot is verified byte-identical to a live build, and the
+fallback logs loudly that it is a snapshot rather than live schema. Regenerate it with
+`python rag/schema_cards.py` after any future dataset expansion.
+
+Two other housekeeping fixes in the same pass. `clean()`, `STOP_MARKERS`,
+`clean_with_logprobs()`, `generate_with_logprobs()` and `confidence_fields()` moved out of
+`fine_tuning/spot_check.py` — a CLI sanity-check script whose own docstring says it is
+"not a scored metric" — into `fine_tuning/generation_utils.py`, which is what five scripts
+across all three arms and the demo UI were actually importing. Same functions, byte-identical
+post-processing; `spot_check.py` re-exports the names, so any older call site or notebook
+still works. And `data/reference_queries.json`'s `complexity` field used three spellings for
+one bucket — 16 `high` and 12 `complex` alongside 148 `hard`. Normalized at the source to
+`hard` (176). The visualization scripts already mapped `high`/`complex` → `hard`, so the
+by-complexity table is unchanged, verified: Easy 75 / Medium 111 / Hard 39 / Unknown 79.
+
 ### Confidence signals
 
 Nothing in this repo used to emit a probability anywhere, so no calibration analysis
@@ -365,6 +482,34 @@ Ranks alone support Recall@k / MRR / nDCG, but not telling a *retrieval gap* (th
 exemplar was never retrieved) from *retrieval noise* (it was retrieved but outranked).
 Verified additive: rebuilding changed 0 of 304 `system_prompt`s and 0 of 304
 `retrieved_ids`, and added exactly one key.
+
+## Tests
+
+There were none before. `tests/test_scoring.py` (47 tests, no network, no Atlas)
+pins the two pieces of logic every published number depends on: `results_match()`
+— what counts as a correct query — and `normalize()` — what the model's raw
+output is rewritten into before it executes. The four known false-positive
+classes are included as explicit **characterization** tests: they assert that a
+wrong query currently scores correct, so anyone tightening the scorer sees
+exactly which assertions flip rather than being surprised.
+
+```bash
+python -m pytest tests/ -q
+```
+
+Writing them found a real hole in the `eval()` guard: **`$where` — arbitrary
+server-side JavaScript — passed `check_query_is_safe()` inside a `find()`
+filter.** The pipeline-stage check only inspected `aggregate()` pipelines, and to
+the outer AST allowlist a filter is just a literal dict. Closed with
+`FORBIDDEN_OPERATORS`, which walks every dict at every depth, `$lookup`
+sub-pipelines included. No query in any arm's results uses one of these
+operators, so **no published number changes**; the hole is closed before one does.
+
+Re-running the guard over all 2,350 stored queries surfaced a second,
+pre-existing gap in the opposite direction: 7 **gold** queries using `$unionWith`
+or `$setWindowFields` were stored with `status: PASS` but would now be rejected,
+so `execute_gold.py` could no longer regenerate 7 of its own gold results. Both
+operators are read-only and are now allowlisted; all 2,350 queries pass.
 
 ## Reproducing a full run
 

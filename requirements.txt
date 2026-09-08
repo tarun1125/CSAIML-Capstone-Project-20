@@ -99,3 +99,9 @@ matplotlib
 jupyter
 notebook
 streamlit
+
+# --- Tests -----------------------------------------------------------------
+# tests/test_scoring.py pins results_match() and normalize() -- the two pieces
+# of logic every published number depends on. No network, no Atlas, no model:
+#   python -m pytest tests/ -q
+pytest

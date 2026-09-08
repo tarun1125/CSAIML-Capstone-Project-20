@@ -69,7 +69,7 @@
     "id": 7,
     "question": "What are the names of singers who performed in a concert in 2014?",
     "database": "concert_singer",
-    "complexity": "complex",
+    "complexity": "hard",
     "gold_collections": [
       "concert_singer.singer_in_concert",
       "concert_singer.concert",
@@ -82,7 +82,7 @@
     "id": 8,
     "question": "Find the first names of students who have a dog as a pet.",
     "database": "pets_1",
-    "complexity": "complex",
+    "complexity": "hard",
     "gold_collections": [
       "pets_1.Has_Pet",
       "pets_1.Pets",
@@ -95,7 +95,7 @@
     "id": 9,
     "question": "For each country of origin, find the average miles per gallon of cars.",
     "database": "car_1",
-    "complexity": "complex",
+    "complexity": "hard",
     "gold_collections": [
       "car_1.cars_data",
       "car_1.model_list.json",
@@ -109,7 +109,7 @@
     "id": 10,
     "question": "Find singers who have not participated in any concert.",
     "database": "concert_singer",
-    "complexity": "high",
+    "complexity": "hard",
     "gold_collections": [
       "concert_singer.singer",
       "concert_singer.singer_in_concert"
@@ -121,7 +121,7 @@
     "id": 11,
     "question": "Find students who have more friends than the average number of friends per student.",
     "database": "network_1",
-    "complexity": "complex",
+    "complexity": "hard",
     "gold_collections": [
       "network_1.Friend",
       "network_1.Highschooler"
@@ -133,7 +133,7 @@
     "id": 12,
     "question": "For each maker, find the model with the highest horsepower.",
     "database": "car_1",
-    "complexity": "complex",
+    "complexity": "hard",
     "gold_collections": [
       "car_1.cars_data",
       "car_1.model_list.json",
@@ -344,7 +344,7 @@
     "id": "cs-h1",
     "question": "How many concerts were held at each stadium? Include the stadium name.",
     "database": "concert_singer",
-    "complexity": "high",
+    "complexity": "hard",
     "gold_collections": [
       "concert_singer.concert",
       "concert_singer.stadium"
@@ -356,7 +356,7 @@
     "id": "cs-h2",
     "question": "List the names of singers who performed in the concert called 'Auditions'.",
     "database": "concert_singer",
-    "complexity": "high",
+    "complexity": "hard",
     "gold_collections": [
       "concert_singer.concert",
       "concert_singer.singer_in_concert",
@@ -369,7 +369,7 @@
     "id": "cs-c1",
     "question": "List the names of singers and the stadium name where they performed, for concerts held in 2015.",
     "database": "concert_singer",
-    "complexity": "complex",
+    "complexity": "hard",
     "gold_collections": [
       "concert_singer.singer_in_concert",
       "concert_singer.concert",
@@ -548,7 +548,7 @@
     "id": "pt-h1",
     "question": "What are the first and last names of students who own a cat?",
     "database": "pets_1",
-    "complexity": "high",
+    "complexity": "hard",
     "gold_collections": [
       "pets_1.Has_Pet",
       "pets_1.Pets",
@@ -561,7 +561,7 @@
     "id": "pt-h2",
     "question": "For each pet type, what is the average weight?",
     "database": "pets_1",
-    "complexity": "high",
+    "complexity": "hard",
     "gold_collections": [
       "pets_1.Pets"
     ],
@@ -693,7 +693,7 @@
     "id": "nw-h1",
     "question": "List the names of highschoolers who appear as the 'student_id' side of at least one friendship.",
     "database": "network_1",
-    "complexity": "high",
+    "complexity": "hard",
     "gold_collections": [
       "network_1.Friend",
       "network_1.Highschooler"
@@ -705,7 +705,7 @@
     "id": "nw-h2",
     "question": "How many friends does each highschooler have, by name?",
     "database": "network_1",
-    "complexity": "high",
+    "complexity": "hard",
     "gold_collections": [
       "network_1.Friend",
       "network_1.Highschooler"
@@ -717,7 +717,7 @@
     "id": "nw-c1",
     "question": "List the names of highschoolers who are friends with someone in grade 12.",
     "database": "network_1",
-    "complexity": "complex",
+    "complexity": "hard",
     "gold_collections": [
       "network_1.Friend",
       "network_1.Highschooler"
@@ -916,7 +916,7 @@
     "id": "car-h1",
     "question": "List car makers with more than 2 models. Report the full name and the model count.",
     "database": "car_1",
-    "complexity": "high",
+    "complexity": "hard",
     "gold_collections": [
       "car_1.model_list.json",
       "car_1.car_makers"
@@ -928,7 +928,7 @@
     "id": "car-h2",
     "question": "List all Volvo cars produced between 1977 and 1981 inclusive. Report the name of the car and the year.",
     "database": "car_1",
-    "complexity": "high",
+    "complexity": "hard",
     "gold_collections": [
       "car_1.car_names",
       "car_1.cars_data"
@@ -940,7 +940,7 @@
     "id": "car-h3",
     "question": "Report all Asian automakers: their full name and country name.",
     "database": "car_1",
-    "complexity": "high",
+    "complexity": "hard",
     "gold_collections": [
       "car_1.car_makers",
       "car_1.countries"
@@ -952,7 +952,7 @@
     "id": "car-c1",
     "question": "For each Saab released after 1978, report the full name, the year, and the ratio of weight to horsepower.",
     "database": "car_1",
-    "complexity": "complex",
+    "complexity": "hard",
     "gold_collections": [
       "car_1.car_names",
       "car_1.cars_data"
@@ -964,7 +964,7 @@
     "id": "car-c2",
     "question": "Find how many different car makers produced a vehicle heavier than 4000 lbs.",
     "database": "car_1",
-    "complexity": "complex",
+    "complexity": "hard",
     "gold_collections": [
       "car_1.cars_data",
       "car_1.model_list.json"
@@ -1123,7 +1123,7 @@
   {
     "id": "wl-h1",
     "database": "world_1",
-    "complexity": "high",
+    "complexity": "hard",
     "question": "Return the country name and number of languages spoken for each country that speaks at least 3 languages.",
     "gold_collections": [
       "world_1.country",
@@ -1135,7 +1135,7 @@
   {
     "id": "wl-h2",
     "database": "world_1",
-    "complexity": "high",
+    "complexity": "hard",
     "question": "Which languages are spoken by only one country among republic governments?",
     "gold_collections": [
       "world_1.country",
@@ -1147,7 +1147,7 @@
   {
     "id": "wl-h3",
     "database": "world_1",
-    "complexity": "high",
+    "complexity": "hard",
     "question": "What is the total population and average surface area of countries in North America with a surface area bigger than 3000?",
     "gold_collections": [
       "world_1.country"
@@ -1158,7 +1158,7 @@
   {
     "id": "wl-c1",
     "database": "world_1",
-    "complexity": "complex",
+    "complexity": "hard",
     "question": "Which countries have a greater surface area than every country in Oceania?",
     "gold_collections": [
       "world_1.country"
@@ -1317,7 +1317,7 @@
   {
     "id": "dk-h1",
     "database": "dog_kennels",
-    "complexity": "high",
+    "complexity": "hard",
     "question": "Which states have both owners and professionals living there?",
     "gold_collections": [
       "dog_kennels.Owners",
@@ -1329,7 +1329,7 @@
   {
     "id": "dk-h2",
     "database": "dog_kennels",
-    "complexity": "high",
+    "complexity": "hard",
     "question": "Which owner has paid the largest amount of money in total for their dogs' treatments? Show the owner id and zip code.",
     "gold_collections": [
       "dog_kennels.Owners",
@@ -1342,7 +1342,7 @@
   {
     "id": "dk-h3",
     "database": "dog_kennels",
-    "complexity": "high",
+    "complexity": "hard",
     "question": "How many professionals did not operate any treatment on dogs?",
     "gold_collections": [
       "dog_kennels.Professionals",
@@ -1354,7 +1354,7 @@
   {
     "id": "dk-c1",
     "database": "dog_kennels",
-    "complexity": "complex",
+    "complexity": "hard",
     "question": "Which dogs have not cost their owner more than 1000 in total treatment cost? List the dog names.",
     "gold_collections": [
       "dog_kennels.Dogs",
@@ -1366,7 +1366,7 @@
   {
     "id": "dk-c2",
     "database": "dog_kennels",
-    "complexity": "complex",
+    "complexity": "hard",
     "question": "Which first names are used for professionals or owners but not used as dog names?",
     "gold_collections": [
       "dog_kennels.Professionals",

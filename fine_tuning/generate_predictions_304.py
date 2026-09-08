@@ -79,7 +79,7 @@ ROOT = Path(__file__).resolve().parent
 REPO_ROOT = ROOT.parent
 sys.path.insert(0, str(ROOT))
 from prepare_data import SYSTEM_PROMPT  # noqa: E402  verbatim in-scope (6-db) prompt
-from spot_check import STOP_MARKERS, clean  # noqa: E402  reuse, don't re-derive
+from generation_utils import STOP_MARKERS, clean  # noqa: E402  reuse, don't re-derive
 
 sys.path.insert(0, str(REPO_ROOT))
 from generate_baseline_mlx import (  # noqa: E402  reuse the baseline arm's own schema assembly

@@ -91,7 +91,7 @@ from mlx_lm import load
 
 REPO_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(REPO_ROOT / "fine_tuning"))
-from spot_check import (  # noqa: E402  (reuse, don't re-derive)
+from generation_utils import (  # noqa: E402  (reuse, don't re-derive)
     STOP_MARKERS,
     confidence_fields,
     generate_with_logprobs,
