@@ -156,25 +156,59 @@ Execution accuracy did not follow:
 | Bi-encoder, K=5 | 0.9638 | 0.8928 | 141/304 (46.4%) |
 | + rerank, K=5 | 0.9836 | 0.8987 | 129/304 (42.4%) |
 | + rerank on question+query, K=5 | 0.9803 | 0.9088 | 131/304 (43.1%) |
-| Bi-encoder, K=10 | 0.9638 | 0.8928 | 141/304 (46.4%) |
+| Bi-encoder, K=10 | 0.9638 | 0.8928 | 143/304 (47.0%) |
 | + rerank, K=10 | 0.9836 | 0.8987 | 141/304 (46.4%) |
 
-At K=10 reranking flipped **48 of 304** cases and split them exactly **24 lost / 24
-gained** — McNemar exact **p = 1.0000**. Not a weak intervention: ~40% of the exemplars
-in every prompt changed, and identical ordering survived in 0/304 cases. The change was
-pure churn with respect to correctness.
+At K=10 reranking flipped **42 of 304** cases, 20 gained against 22 lost — McNemar exact
+**p = 0.8776**. Not a weak intervention: ~40% of the exemplars in every prompt changed,
+and identical ordering survived in 0/304 cases. The change was pure churn with respect to
+correctness.
 
-Per-case nDCG@10 correlates with execution correctness at **r = 0.298** (p = 1.2e-07) —
+Per-case nDCG@10 correlates with execution correctness at **r = 0.307** (p = 4.7e-08) —
 real, but explaining under 9% of the variance. And the correlation *weakens* as nDCG
 improves: the best-ranked arm (nDCG 0.909) is the weakest predictor (r = 0.200).
 Optimising the metric made it a worse proxy for the thing that matters.
 
 **Why**: the bi-encoder was already at recall@10 = 0.987. Exemplar ranking was saturated
-before the experiment began, so there was nothing for a reranker to win. Database
-*prediction* is where the retrieval headroom actually is — see the majority-vote section.
-Full write-up in [`docs/FINDING-reranking.md`](docs/FINDING-reranking.md); spec in
+before the experiment began, so there was nothing for a reranker to win. Full write-up in
+[`docs/FINDING-reranking.md`](docs/FINDING-reranking.md); spec in
 [`docs/EXPERIMENT-reranking.md`](docs/EXPERIMENT-reranking.md); numbers in
 `results/retrieval_eval.json`.
+
+### Dropping the majority vote does what reranking couldn't
+
+The retrieval headroom was never in exemplar ranking — it was in **database prediction**.
+Replacing the majority vote over the top-10 neighbours' databases with the single nearest
+neighbour (`python rag/build_prompts.py 10 --db-policy rank1`):
+
+| | database prediction | execution accuracy |
+|---|---|---|
+| majority vote, K=10 *(current default)* | 258/304 (84.9%) | 143/304 (47.0%) |
+| **pure rank-1, K=10** | **275/304 (90.5%)** | **149/304 (49.0%)** |
+
+Paired over the same 304 cases: **6 discordant, 6 gained, 0 lost**, McNemar exact
+**p = 0.031**. Rank-1 did not lose a case. Five of the six gains are mechanical — rank-1
+put the right schema in the prompt and the model then wrote the right query.
+
+The contrast with reranking is the point: reranking rewrote 300 of 304 prompts and
+produced churn; rank-1 touched 27 and every discordant case went the right way.
+**Precision of intervention beat volume**, and the metric the field would have told you to
+optimise pointed at the intervention that did nothing.
+
+Two things fell out of running it:
+
+- **The execution oracle is not fully deterministic.** One case in 277 flipped with a
+  byte-identical prompt and a byte-identical generated query: a `$sort`/`$limit 1` on a
+  tied count, where MongoDB returns whichever row it likes. ≈0.4%, worth knowing when
+  reading any paired result here. *Generation* is fully deterministic — 277/277 identical
+  prompts gave identical output.
+- **The missing FK case-level file is regenerated.**
+  `rag/data/qwen_rag_fk_k10_execution_results.json` (143/304), which
+  [`CANONICAL_ARTIFACTS.md`](CANONICAL_ARTIFACTS.md) notes would close its documented
+  1-case gap.
+
+Full write-up in [`docs/FINDING-rank1-vote.md`](docs/FINDING-rank1-vote.md). **The default
+is unchanged** — this is a flag, and `rag_prompts.json` still rebuilds byte-identically.
 
 ## Ground-truth and scorer verification
 

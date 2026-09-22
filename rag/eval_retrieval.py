@@ -40,12 +40,16 @@ from run_manifest import write_manifest  # noqa: E402
 RAG_DATA = REPO_ROOT / "rag" / "data"
 RESULTS_DIR = REPO_ROOT / "results"
 
-# The canonical 304-case RAG execution run: the K=10 bi-encoder baseline, scored
-# against the execution oracle. `execution_accuracy is True` is the correctness
-# field -- NOT `status`, which only says the query ran without throwing. 290 of
-# 304 cases have status PASS but only 141 are actually correct, and reading the
-# wrong field would inflate the baseline by 49 points.
-BASELINE_EXECUTION_RESULTS = RAG_DATA / "qwen_rag_execution_results_mlx.json"
+# The K=10 bi-encoder baseline, FK-included, scored against the execution oracle.
+#
+# `execution_accuracy is True` is the correctness field -- NOT `status`, which
+# only says the query ran without throwing. Roughly 290 of 304 cases have status
+# PASS while ~143 are actually correct; reading the wrong field would inflate the
+# baseline by nearly 50 points.
+#
+# See EXECUTION_ARMS below for why this is the re-scored FK file and not
+# qwen_rag_execution_results_mlx.json.
+BASELINE_EXECUTION_RESULTS = RAG_DATA / "qwen_rag_fk_k10_execution_results.json"
 
 # From rag/data/rag_prompts.manifest.json -- the K=10 bi-encoder run this
 # experiment is measured against. Used as the §3 sanity-check target.
@@ -145,8 +149,24 @@ EXECUTION_ARMS = [
     ("bi_encoder_k5",  "bi_encoder",                 5,  "qwen_rag_k5_execution_results.json"),
     ("rerankQ_k5",     "rerank_question_only",       5,  "qwen_rag_rerankQ_k5_execution_results.json"),
     ("rerankQQ_k5",    "rerank_question_plus_query", 5,  "qwen_rag_rerankQQ_k5_execution_results.json"),
-    ("bi_encoder_k10", "bi_encoder",                 10, "qwen_rag_execution_results_mlx.json"),
+    # FK-INCLUDED, and that matters. rag/data/qwen_rag_execution_results_mlx.json
+    # -- the obvious file to reach for -- is the **no-FK** run's per-case
+    # results: the FK variant's case-level JSON was overwritten by the
+    # FK-vs-no-FK A/B run (documented in CANONICAL_ARTIFACTS.md). Every arm in
+    # this experiment is built with FK annotations ON, so using that file as the
+    # K=10 baseline silently varies FK **as well as** the exemplar list, and no
+    # difference could be attributed to either. Re-scored from
+    # qwen_rag_mlx_fk_normalized.json, which is the FK generation this
+    # experiment's arms are actually comparable to.
+    ("bi_encoder_k10", "bi_encoder",                 10, "qwen_rag_fk_k10_execution_results.json"),
     ("rerankQ_k10",    "rerank_question_only",       10, "qwen_rag_rerankQ_k10_execution_results.json"),
+    # The rank-1 arm reuses the bi-encoder's RANKING metrics unchanged -- it
+    # retrieves exactly the same exemplars in exactly the same order. Only the
+    # database-prediction policy differs, which changes the schema block. Its
+    # ranking-metric columns are therefore identical to bi_encoder_k10 BY
+    # CONSTRUCTION, and that is the point: any execution difference cannot be
+    # attributed to ranking.
+    ("rank1_k10",      "bi_encoder",                 10, "qwen_rag_rank1_k10_execution_results.json"),
 ]
 
 
@@ -366,7 +386,7 @@ def main():
                      sum(corr.values()), len(corr), sum(corr.values()) / len(corr) * 100)
 
         for base, arms_at_k in (("bi_encoder_k5", ("rerankQ_k5", "rerankQQ_k5")),
-                                ("bi_encoder_k10", ("rerankQ_k10",))):
+                                ("bi_encoder_k10", ("rerankQ_k10", "rank1_k10"))):
             if base not in correctness:
                 continue
             for arm_label in arms_at_k:

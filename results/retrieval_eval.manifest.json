@@ -1,7 +1,7 @@
 {
   "manifest_schema_version": 1,
-  "generated_at": "2026-09-22T05:54:58Z",
-  "git_sha": "9ba761899f8591dc8afa6a5f6dff786e7439e324",
+  "generated_at": "2026-09-22T06:46:37Z",
+  "git_sha": "3aab76c62d33d02dd3988e3a8db0ecd2f64b8ac9",
   "git_dirty": true,
   "git_branch": "ground-truth-verification",
   "python_version": "3.12.11",
@@ -22,6 +22,6 @@
   "sanity_check_passed": true,
   "script": "rag/eval_retrieval.py",
   "results_file": "results/retrieval_eval.json",
-  "results_sha256": "a09e8de8d6e90d7e81797d90d774818dddb441745a422883aa8ef3347b15f646",
-  "results_bytes": 58688
+  "results_sha256": "b298a9c605e67f48b413f0c50f4a2b03e967e3f557bcea49d6055ede9726ed8e",
+  "results_bytes": 59547
 }

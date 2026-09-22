@@ -93,6 +93,33 @@ log = logging.getLogger("rag.build_prompts")
 # vote, schema block, prompt header, rules -- is untouched, which is the whole
 # point: the ONLY variable between the baseline and a rerank arm is the
 # exemplar list.
+# Database-prediction policy (docs/EXPERIMENT-rank1-vote.md). Same argv-stripping
+# trick as --rerank below, for the same reason: every existing invocation must
+# stay byte-identical.
+#
+#   vote    (default) majority vote over the top-K neighbours' databases --
+#           unchanged, current behaviour
+#   rank1   take the single nearest neighbour's database, no vote at all
+#
+# WHY THIS IS WORTH AN ARM: on the recorded retrieval in rag_prompts.json, pure
+# rank-1 predicts the database correctly on 275/304 (90.5%) against the vote's
+# 258/304 (84.9%) -- better on 20 cases, worse on 3, McNemar exact p = 0.0005.
+# The mechanism is in the README: an unweighted k-NN vote keeps counts and
+# discards similarity magnitude, so for near-degenerate sibling databases the
+# expected neighbour count is proportional to POOL FREQUENCY rather than
+# relevance, and the rarer sibling can never win however close it actually is.
+#
+# The open question this flag exists to answer is whether that +5.6-point
+# retrieval gain reaches execution accuracy -- the same question the reranking
+# experiment asked, on the lever that still has headroom.
+DB_POLICY = "vote"
+if "--db-policy" in sys.argv:
+    _i = sys.argv.index("--db-policy")
+    DB_POLICY = sys.argv[_i + 1]
+    del sys.argv[_i:_i + 2]
+    if DB_POLICY not in ("vote", "rank1"):
+        raise SystemExit(f"--db-policy must be 'vote' or 'rank1', got {DB_POLICY!r}")
+
 RERANK_FILE = None
 RERANK_LABEL = None
 if "--rerank" in sys.argv:
@@ -309,7 +336,14 @@ def main():
         neighbors = [metadata[i] for i in neighbor_rows]
         neighbor_dbs = [n["database"] for n in neighbors]
 
-        predicted_database = majority_vote_database(neighbor_dbs)
+        # rank1 deliberately ignores neighbours 2..K for the DATABASE decision
+        # only -- all K exemplars still go into the prompt. The two jobs the
+        # retrieved list does (pick a schema, supply examples) are separable,
+        # and this arm separates them.
+        predicted_database = (
+            neighbor_dbs[0] if DB_POLICY == "rank1"
+            else majority_vote_database(neighbor_dbs)
+        )
         database_match = predicted_database == gold_database
         db_match_count += database_match
 
@@ -355,7 +389,10 @@ def main():
                   case_id, gold_database, predicted_database, database_match,
                   [n["id"] for n in neighbors])
 
-    if RERANK_LABEL:
+    if DB_POLICY != "vote":
+        suffix = f"_{RERANK_LABEL}" if RERANK_LABEL else ""
+        out_name = f"rag_prompts_{DB_POLICY}{suffix}_k{TOP_K}.json"
+    elif RERANK_LABEL:
         out_name = f"rag_prompts_{RERANK_LABEL}_k{TOP_K}.json"
     elif not INCLUDE_FK:
         out_name = "rag_prompts_nofk.json"
@@ -380,10 +417,11 @@ def main():
         n_schema_cards=len(cards),
         database_retrieval_accuracy=db_match_count / len(test_cases) if test_cases else None,
         records_retrieved_scores=True,
+        db_policy=DB_POLICY,
         rerank_arm=RERANK_LABEL,
         rerank_neighbors_file=RERANK_FILE,
     )
-    if INCLUDE_FK and TOP_K == 10 and not RERANK_LABEL:
+    if INCLUDE_FK and TOP_K == 10 and not RERANK_LABEL and DB_POLICY == "vote":
         # Also keep a stably-named FK copy for the A/B test (see
         # docs/finding5_ab_test_guide.md) so rag_prompts.json can keep
         # changing with future K-sweeps/database expansions without the

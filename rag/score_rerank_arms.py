@@ -40,6 +40,10 @@ ARMS = {
     "rerankQ_k5": "qwen_rag_mlx_rerankQ_k5_results.json",
     "rerankQQ_k5": "qwen_rag_mlx_rerankQQ_k5_results.json",
     "rerankQ_k10": "qwen_rag_mlx_rerankQ_k10_results.json",
+    # Database-prediction policy arm (docs/EXPERIMENT-rank1-vote.md): identical
+    # exemplars to the K=10 baseline, only the predicted database -- and so the
+    # schema block -- differs.
+    "rank1_k10": "qwen_rag_mlx_rank1_k10_results.json",
 }
 
 

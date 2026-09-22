@@ -39,6 +39,7 @@ Supporting inputs, all canonical:
 | RAG self-consistency, k=5, T=0.7 | `rag/data/qwen_rag_mlx_selfconsistency_k5.json` |
 | Retrieval-ranking + reranking evaluation | `results/retrieval_eval.json` |
 | Cross-encoder pair scores (both arms, cached) | `rag/data/rerank_scores.json` |
+| RAG K=10 FK-included, case-level execution (re-scored) | `rag/data/qwen_rag_fk_k10_execution_results.json` |
 
 ---
 

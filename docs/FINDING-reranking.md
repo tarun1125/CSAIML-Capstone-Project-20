@@ -4,18 +4,21 @@
 **Status:** complete, 2026-09-22. All five arms run end to end on the same 304 held-out cases.
 **Artifacts:** `results/retrieval_eval.json` (+ `.manifest.json`)
 
-> **On 141/304 vs the README's 142/304.** Every execution number here is scored from
-> per-case files, and the K=10 baseline row reads
-> `rag/data/qwen_rag_execution_results_mlx.json` at **141/304** — not the canonical
-> **142/304** aggregate. That 1-case gap is pre-existing and documented in
-> [`CANONICAL_ARTIFACTS.md`](../CANONICAL_ARTIFACTS.md): the FK variant's case-level JSON
-> was overwritten by the FK-vs-no-FK A/B run, so every per-case analysis in this repo
-> reads the 141-case file while the headline quotes the 142 aggregate. A paired
-> McNemar test needs per-case outcomes and cannot be run on an aggregate, so the
-> 141-case file is the correct source here. All four new arms were scored by the same
-> code against the same gold, so the comparison is internally consistent either way.
-
----
+> **On the K=10 baseline, and a correction.** An earlier version of this write-up used
+> `rag/data/qwen_rag_execution_results_mlx.json` (141/304) as the K=10 baseline. **That was
+> wrong**: as [`CANONICAL_ARTIFACTS.md`](../CANONICAL_ARTIFACTS.md) documents, the FK
+> variant's case-level JSON was overwritten by the FK-vs-no-FK A/B run, so the surviving
+> file is the **no-FK** arm. Every arm in this experiment is built with FK annotations
+> **on**, so that file varied FK *as well as* the exemplar list and no difference could be
+> attributed to either. The K=10 baseline is now re-scored from
+> `rag/data/qwen_rag_mlx_fk_normalized.json` into
+> `rag/data/qwen_rag_fk_k10_execution_results.json` — **143/304 (47.04%)**, which also
+> closes the 1-case gap that file's absence had left open. The K=5 rows were never
+> affected; that baseline was generated here with FK on.
+>
+> The correction does not change this experiment's conclusion — the K=10 reranking null
+> went from 24/24 (p=1.0000) to 22/20 (p=0.8776) — but every number below is the corrected
+> one.
 
 ## 0. The headline
 
@@ -29,7 +32,7 @@ happened. It happened, and it is cleaner than expected:
 | Bi-encoder, K=5 | 0.9638 | 0.9288 | 0.8928 | **141/304 = 46.38%** |
 | + rerank from top-50, K=5 | 0.9836 | 0.9493 | 0.8987 | **129/304 = 42.43%** |
 | + rerank on question+query, K=5 | 0.9803 | 0.9510 | 0.9088 | **131/304 = 43.09%** |
-| Bi-encoder, K=10 *(current default)* | 0.9638 | 0.9288 | 0.8928 | **141/304 = 46.38%** |
+| Bi-encoder, K=10 *(current default)* | 0.9638 | 0.9288 | 0.8928 | **143/304 = 47.04%** |
 | + rerank from top-50, K=10 | 0.9836 | 0.9493 | 0.8987 | **141/304 = 46.38%** |
 
 Reranking moved recall@5 up 2 points, MRR@10 up 2 points, nDCG@10 up 0.6–1.6 points,
@@ -38,8 +41,8 @@ down ~4 points at K=5**. Not one arm beat the bi-encoder baseline.
 
 ### The cleanest number in the experiment
 
-At K=10, reranking flipped the outcome on **48 of 304 cases** — and the split was
-exactly **24 cases lost, 24 cases gained**. McNemar's exact p = **1.0000**.
+At K=10, reranking flipped the outcome on **42 of 304 cases** — 22 lost, 20 gained.
+McNemar's exact p = **0.8776**.
 
 That is not "the intervention was too small to measure". Reranking changed ~40% of
 the exemplars in every prompt and changed the final answer on one case in six. It
@@ -59,11 +62,11 @@ per-case nDCG@10 against per-case execution correctness gives:
 
 | | r | p | mean nDCG when correct | mean nDCG when wrong |
 |---|---|---|---|---|
-| nDCG@10 vs correctness | **+0.298** | 1.16e-07 | 0.949 | 0.844 |
+| nDCG@10 vs correctness | **+0.307** | 4.74e-08 | 0.950 | 0.842 |
 | MRR@10 vs correctness | +0.274 | 1.17e-06 | — | — |
 
 The relationship is **real but weak**: p ≈ 1e-07 is not noise at n=304, and
-r = 0.298 means ranking quality explains **8.9% of the variance** in whether the
+r = 0.307 means ranking quality explains **9.4% of the variance** in whether the
 generated query returns the right rows. The other 91% lives in the generator, not
 the retriever.
 
@@ -73,7 +76,7 @@ Correlation with correctness **weakens as nDCG improves**:
 
 | Arm | nDCG@10 | r (nDCG vs correctness) |
 |---|---|---|
-| Bi-encoder, K=10 | 0.8928 | **+0.298** |
+| Bi-encoder, K=10 | 0.8928 | **+0.307** |
 | + rerank (question), K=10 | 0.8987 | +0.259 |
 | + rerank (question), K=5 | 0.8987 | +0.254 |
 | + rerank (question+query), K=5 | **0.9088** | **+0.200** |
@@ -153,14 +156,15 @@ the exemplar list. So the test is McNemar's exact over the discordant cases.
 |---|---|---|---|---|---|---|
 | rerank-Q K=5 vs bi-encoder K=5 | 112 | 146 | **29** | 17 | 46 | 0.1038 |
 | rerank-Q+query K=5 vs bi-encoder K=5 | 112 | 144 | **29** | 19 | 48 | 0.1934 |
-| rerank-Q K=10 vs bi-encoder K=10 | 117 | 139 | **24** | **24** | 48 | **1.0000** |
+| rerank-Q K=10 vs bi-encoder K=10 | 121 | 141 | **22** | 20 | 42 | **0.8776** |
+| *(for contrast)* rank-1 vote K=10 vs bi-encoder K=10 | 143 | 155 | **0** | **6** | 6 | **0.0313** |
 
 No arm is significantly worse. **No arm is even numerically better.** At K=5 the
 direction is consistently negative (29 lost vs 17–19 gained); at K=10 it is a dead
 heat. The honest summary is: reranking bought nothing, and may have cost a little at
 small K.
 
-**Discordance is high — 46–48 cases, one in six.** The prompts really did change:
+**Discordance is high — 42–48 cases, one in seven.** The prompts really did change:
 
 | Comparison | identical order | identical set | mean top-K overlap |
 |---|---|---|---|
@@ -292,10 +296,13 @@ Fixing it deserves its own before/after.
 
 - **Do not spend further effort on retrieval ranking for this pipeline.** It is
   saturated, and improving it demonstrably does not move the task metric.
-- **Do not adopt nDCG/MRR as a cheap proxy for execution accuracy here.** r = 0.298
+- **Do not adopt nDCG/MRR as a cheap proxy for execution accuracy here.** r = 0.307
   at baseline, falling to 0.200 on the best-ranked arm.
-- **The 46% ceiling is a generation problem, not a retrieval problem.** 139 of 304
-  cases were wrong under *both* K=10 arms regardless of which exemplars were supplied.
+- **The retrieval headroom is in database prediction, not exemplar ranking.** Replacing
+  the majority vote with pure rank-1 gained 6 cases and lost none (p = 0.031) — see
+  [`docs/FINDING-rank1-vote.md`](FINDING-rank1-vote.md).
+- **The ~47% ceiling is mostly a generation problem.** 141 of 304 cases were wrong
+  under *both* K=10 reranking arms regardless of which exemplars were supplied.
   That set is where the next experiment belongs.
 - **Worth reporting as a negative result.** Most published reranking work stops at
   nDCG because it has no task-level oracle to check against. This repo has one, used
