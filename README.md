@@ -138,6 +138,62 @@ tested as a controlled A/B run on MLX-LM - **FK-included 142/304 (46.7%) vs. no-
 (46.4%)**. A 1-case, 0.3-point difference. FK annotations don't measurably help
 or hurt on top of what schema + few-shot examples already provide.
 
+### The majority vote is the weakest part of RAG retrieval
+
+`majority_vote_database()` breaks a tie by returning the rank-1 FAISS neighbor
+*outright*, without checking it is one of the tied databases — on neighbors
+`[A, B, B, C, C]` it returns `A`, which lost the vote. That reads like an
+off-by-one bug. It was investigated rather than patched, and the behaviour is
+**kept**; `rag/analyze_vote_policies.py` replays every aggregation policy over the
+recorded retrieval in `rag_prompts.json` (offline, no re-embedding) and reproduces
+the whole table.
+
+Two findings came out of it, and only the second one matters.
+
+**The tie-break itself is unresolvable on this split.** Restricting the tie-break to
+the tied set changes exactly 3 of 304 cases. A paired exact test on 3 discordant
+pairs bottoms out at p=0.25 — the *smallest* p-value reachable at n=3 — so no result
+here could have been significant in either direction. Changing behaviour on those 3
+cases would be fitting noise.
+
+**But rank-1 beats the vote decisively, and that is significant.** Dropping the vote
+entirely and always taking the nearest neighbor's database:
+
+| database-prediction policy | correct | accuracy |
+|---|---|---|
+| majority vote, rank-1 tie-break (current) | 258/304 | 84.9% |
+| majority vote, tie-break restricted to tied set | 255/304 | 83.9% |
+| **pure rank-1, no vote at all** | **275/304** | **90.5%** |
+
+Better on 20 cases, worse on 3 — McNemar exact **p=0.0005**, bootstrap 95% CI on the
+gap **[+2.6, +8.6] points**. Reliability is monotone in how concentrated the vote is:
+where the top count is 8+/10 the vote and rank-1 agree and both are 94–99% right, but
+at a top count of 5/10 the vote collapses to 39.3% while rank-1 holds 64.3%.
+
+The mechanism is the same near-identical-database problem the fine-tuning arm hit. An
+unweighted k-NN vote keeps counts and discards similarity *magnitude*. When two
+databases are near-degenerate in embedding space, every pool example from either
+sibling sits at roughly the same distance from the query, so the expected neighbor
+count for sibling *c* is ≈ `K · N_c / Σ N_sibling` — proportional to **pool
+frequency, not relevance**. `argmax` over counts degenerates into `argmax` over pool
+frequency, and the rarer sibling can never win however close it actually is. Measured,
+that is total: `chinook_1` (33 pool examples) loses **all 9** of its test cases to
+`store_1` (84), and `college_3` (29) loses **all 7** to `college_1`/`college_2`
+(126/125). Rank-1 recovers 3 and 2 of those. These are the same collision families
+`fine_tuning/prepare_data_23db.py`'s `COLLISION_GROUPS` already handles — the same
+data property breaks both arms, by different routes.
+
+Ten townspeople asked which of two identical twins you are looking at will always name
+whichever twin has more friends in town. The one person standing closest to you will not.
+
+**Not changed here.** Switching to pure rank-1 alters the predicted database — and so
+the prompt's schema block — on ~17 more cases, invalidating every downstream artifact
+(`qwen_rag_*.json`, the score CSVs, the cross-arm figures), none of which can be
+regenerated without the MLX/Qwen stack. It is a re-run, not a one-line change, and is
+left as an explicit follow-up. Note also that database-retrieval accuracy is a
+diagnostic on step 2, not end-to-end query accuracy: the +17 is a prediction about
+better schema selection, not a measured end-to-end gain.
+
 ## Fine-tuning: the epoch-parity fix
 
 When the fine-tuning arm was retrained to cover all 23 databases (up from the original
@@ -184,7 +240,10 @@ Metal memory ~15.4GB.
 - **Database prediction**: majority vote across the top-K retrieved neighbors' source
   database — 258/304 (84.9%) database-retrieval accuracy across the current 23 candidate
   databases (down from 96.7% on the original 6-database slice, as expected for a harder
-  23-way retrieval problem).
+  23-way retrieval problem). The vote's tie-break deliberately lets the rank-1 neighbor
+  win outright; measured against the alternatives, the vote is itself the weakest link
+  here — see *The majority vote is the weakest part of RAG retrieval* above, and
+  `rag/analyze_vote_policies.py`.
 - **Schema scope**: once a database is predicted, its entire schema (every collection)
   is included in the prompt, with FK-relationship annotations included by default
   (A/B tested against omitting them — see above, a null result either way).
