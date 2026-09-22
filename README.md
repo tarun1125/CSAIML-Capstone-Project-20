@@ -138,6 +138,44 @@ tested as a controlled A/B run on MLX-LM - **FK-included 142/304 (46.7%) vs. no-
 (46.4%)**. A 1-case, 0.3-point difference. FK annotations don't measurably help
 or hurt on top of what schema + few-shot examples already provide.
 
+### Cross-encoder reranking — ranking metrics improved, execution accuracy did not
+
+Retrieval was only ever evaluated by one number (`database retrieval accuracy`) and by
+downstream execution accuracy, so nothing said how well *ranked* the retrieved exemplars
+were. A cross-encoder (`ms-marco-MiniLM-L-6-v2`) reranking the FAISS top-50 was A/B
+tested against the bi-encoder on the same 304 cases, with the model, decoding, schema
+cards and scorer all held fixed — the exemplar list was the only variable.
+
+Every ranking metric improved. recall@1 0.905 → 0.931, recall@3 0.938 → 0.977,
+recall@10 0.987 → **1.000**, MRR@10 0.929 → 0.951, nDCG@10 0.893 → 0.909.
+
+Execution accuracy did not follow:
+
+| Arm | recall@5 | nDCG@10 | execution accuracy |
+|---|---|---|---|
+| Bi-encoder, K=5 | 0.9638 | 0.8928 | 141/304 (46.4%) |
+| + rerank, K=5 | 0.9836 | 0.8987 | 129/304 (42.4%) |
+| + rerank on question+query, K=5 | 0.9803 | 0.9088 | 131/304 (43.1%) |
+| Bi-encoder, K=10 | 0.9638 | 0.8928 | 141/304 (46.4%) |
+| + rerank, K=10 | 0.9836 | 0.8987 | 141/304 (46.4%) |
+
+At K=10 reranking flipped **48 of 304** cases and split them exactly **24 lost / 24
+gained** — McNemar exact **p = 1.0000**. Not a weak intervention: ~40% of the exemplars
+in every prompt changed, and identical ordering survived in 0/304 cases. The change was
+pure churn with respect to correctness.
+
+Per-case nDCG@10 correlates with execution correctness at **r = 0.298** (p = 1.2e-07) —
+real, but explaining under 9% of the variance. And the correlation *weakens* as nDCG
+improves: the best-ranked arm (nDCG 0.909) is the weakest predictor (r = 0.200).
+Optimising the metric made it a worse proxy for the thing that matters.
+
+**Why**: the bi-encoder was already at recall@10 = 0.987. Exemplar ranking was saturated
+before the experiment began, so there was nothing for a reranker to win. Database
+*prediction* is where the retrieval headroom actually is — see the majority-vote section.
+Full write-up in [`docs/FINDING-reranking.md`](docs/FINDING-reranking.md); spec in
+[`docs/EXPERIMENT-reranking.md`](docs/EXPERIMENT-reranking.md); numbers in
+`results/retrieval_eval.json`.
+
 ## Ground-truth and scorer verification
 
 Two independent audits were added, both reproducible from a clean checkout and

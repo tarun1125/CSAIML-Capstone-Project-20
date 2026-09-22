@@ -1,6 +1,10 @@
 # Experiment — cross-encoder reranking, and whether ranking metrics predict task accuracy
 
-**Status:** specified 2026-09-22, not yet run.
+**Status:** specified and RUN 2026-09-22. **Result: the second outcome in §5 — ranking metrics
+improved, execution accuracy did not.** At K=10, reranking flipped 48 of 304 cases and split
+them exactly 24 lost / 24 gained (McNemar exact p = 1.0000). See
+[`docs/FINDING-reranking.md`](FINDING-reranking.md). Two errors in this spec were found while
+running it and are corrected in place below, marked **[CORRECTED]**.
 **Why it exists:** the retrieval stage is currently evaluated by one number —
 `build_prompts.py`'s `database retrieval accuracy` — and by downstream execution accuracy.
 Neither tells you *how well ranked* the retrieved exemplars are, and nothing here has ever
@@ -39,6 +43,15 @@ task-level ground truth to check against. Here there is one — the execution or
 ## 2. Relevance labels — define once, in one module
 
 New file: `rag/relevance.py`. Nothing else may define these.
+
+> **[CORRECTED] `gold_collections` is inconsistently qualified, and this spec did not say so.**
+> 331 of the 450 entries across the 304 test cases are written `car_1.cars_data`; the other 119
+> are bare (`Department`). `collections_in` returns bare names, so without normalising this,
+> two-thirds of cases never match and every graded label silently collapses to 1 — a plausible,
+> wrong nDCG with no error anywhere. A `gold_collections_of(case)` helper is therefore required
+> alongside the three functions below. It must split on the **first** dot and strip only a
+> prefix matching the case's database: `car_1.model_list.json` must become `model_list.json`,
+> and an rsplit yields `car_1.model_list`, which is not a collection.
 
 ```python
 def collections_in(normalized_query: str) -> set[str]:
@@ -87,9 +100,27 @@ no FAISS, no I/O, so they are unit-testable against hand-worked examples.
 them. A silently wrong nDCG is the easiest way to produce a confident wrong conclusion here,
 and it will not look wrong.
 
-**Sanity check that must pass before anything else runs:** `recall@10` under the binary label
-must equal the existing `db_match_count / 304` from `build_prompts.py` at `TOP_K=10`. If it
-does not, one of the two is wrong — find out which before continuing.
+**[CORRECTED] Sanity check that must pass before anything else runs.** This spec originally
+asked that `recall@10` under the binary label equal `db_match_count / 304` from
+`build_prompts.py` at `TOP_K=10`. **That is wrong** — the two measure different things and do
+not agree:
+
+- `recall@10` = 0.9868 — "at least one same-database exemplar landed in the top 10"
+- `db_match`  = 0.8487 — "the **majority vote** over those 10 databases picked the right one"
+
+A vote can lose 4–3–3 with the correct database sitting at rank 1. Both numbers are correct.
+Running the check as originally written fails, and sends you hunting a bug that does not exist.
+
+The check that tests what this section *intended* — "am I reading the same retrieval the
+pipeline read?" — is to **reconstruct the majority vote from the ranked list** and compare that
+to the recorded 0.8487. Implemented in `eval_retrieval.py`; it runs first and raises on
+mismatch.
+
+While doing this, note that `build_prompts.py:majority_vote_database` does not do what its own
+docstring says: on a tie it returns `neighbor_dbs[0]` without checking that database is among
+the tied ones. It fires on 3 of 304 cases and accounts for the entire gap between 258/304 and
+255/304. **Replicate it, do not fix it here** — changing the vote and the ranking in the same
+experiment confounds the two.
 
 ---
 
@@ -102,9 +133,14 @@ retrieve top-N with FAISS (N = 50)   ->   cross-encoder scores (question, exempl
                                      ->   re-sort   ->   take top-K
 ```
 
-- Model: `cross-encoder/ms-marco-MiniLM-L-6-v2` via `sentence-transformers`. Standard
-  baseline, small, CPU-fine.
-- Cost: 304 × 50 ≈ **15,200 pairs**. Minutes on Apple Silicon. Cache scores to
+- Model: `cross-encoder/ms-marco-MiniLM-L-6-v2`. **[CORRECTED] via raw `transformers`
+  (`AutoModelForSequenceClassification`, num_labels=1), NOT `sentence-transformers`** — that
+  package is not in this venv, and adding it would pull in a fourth copy of `libomp.dylib`
+  alongside torch's, faiss's and sklearn's, which is the exact hazard the import-order note
+  below exists because of. `embed_utils.py` already made this call for the bi-encoder.
+  sentence-transformers' `CrossEncoder` is a thin wrapper over exactly this, so the scores are
+  comparable to anything published with that class.
+- Cost: 304 × 50 = **15,200 pairs**. **Measured: 17 seconds**, not minutes. Cache scores to
   `rag/data/rerank_scores.json` keyed by `(case_id, exemplar_id)` so re-running the metrics
   never re-runs the model.
 - **Import order:** `embed_utils` (torch) before `faiss`, same as
@@ -173,8 +209,14 @@ rag/metrics_retrieval.py    recall@k, MRR, nDCG -- pure, unit-tested
 rag/rerank.py               cross-encoder rerank + score cache
 rag/eval_retrieval.py       driver: writes results/retrieval_eval.json
 tests/test_metrics_retrieval.py   hand-worked assertions
+rag/score_rerank_arms.py    [ADDED] execution scoring per arm, reusing
+                            evaluation/execute_queries.run_model unchanged
 docs/FINDING-reranking.md   the filled table and what it means
 ```
+
+`build_prompts.py` gains an optional `--rerank <neighbors file> <label>` pair, stripped from
+argv before its existing positional parsing so every current invocation stays byte-identical
+(verified: rebuilding `rag_prompts.json` changed nothing but an additive `rerank_arm: null`).
 
 `results/retrieval_eval.json` carries every arm's metrics plus the config that produced it
 (N, K, model name, whether query text was included) — so a number can always be traced to

@@ -84,6 +84,23 @@ from run_manifest import write_manifest  # noqa: E402
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("rag.build_prompts")
 
+# Reranking experiment (docs/EXPERIMENT-reranking.md §5): an optional
+# `--rerank <file> <label>` pair, stripped out of argv BEFORE the positional
+# parsing below so every existing invocation keeps working byte-identically.
+# The file is rag/data/reranked_neighbors_<arm>.json, written by
+# rag/eval_retrieval.py --emit-neighbors: {case_id: [exemplar_id, ...]} in
+# reranked order. Everything downstream of neighbour selection -- majority
+# vote, schema block, prompt header, rules -- is untouched, which is the whole
+# point: the ONLY variable between the baseline and a rerank arm is the
+# exemplar list.
+RERANK_FILE = None
+RERANK_LABEL = None
+if "--rerank" in sys.argv:
+    _i = sys.argv.index("--rerank")
+    RERANK_FILE = sys.argv[_i + 1]
+    RERANK_LABEL = sys.argv[_i + 2]
+    del sys.argv[_i:_i + 3]
+
 TOP_K = int(sys.argv[1]) if len(sys.argv) > 1 else 10
 # 2026-08-28, Finding 5 A/B test (MLX-adapted -- see docs/finding5_ab_test_guide.md):
 #   python rag/build_prompts.py 10        # FK annotations included (default, current behavior)
@@ -245,6 +262,17 @@ def main():
     metadata = json.loads((rag_data_dir / "fewshot_metadata.json").read_text(encoding="utf-8"))
     log.info("Loaded FAISS index (ntotal=%d) and %d metadata rows", index.ntotal, len(metadata))
 
+    # Reranked order, if this is a rerank arm. Loaded once, keyed by case id.
+    # row_of_id maps an exemplar id back to its FAISS row so the reranked ids
+    # resolve to the same metadata rows a FAISS search would have produced --
+    # these are re-orderings of the SAME candidate pool, not a different pool.
+    reranked_by_case = None
+    if RERANK_FILE:
+        reranked_by_case = json.loads(Path(RERANK_FILE).read_text(encoding="utf-8"))
+        log.info("Rerank arm '%s': loaded %d reranked orders from %s",
+                 RERANK_LABEL, len(reranked_by_case), RERANK_FILE)
+    row_of_id = {m["id"]: i for i, m in enumerate(metadata)}
+
     cards = build_cards()
     cards_by_db: dict[str, list] = {}
     for c in cards:
@@ -260,8 +288,25 @@ def main():
         gold_database = case["database"]
 
         qvec = embed([question])
-        scores, idxs = index.search(qvec, TOP_K)
-        neighbors = [metadata[i] for i in idxs[0]]
+        if reranked_by_case is None:
+            scores, idxs = index.search(qvec, TOP_K)
+            neighbor_rows = [int(i) for i in idxs[0]]
+            neighbor_scores = [float(s) for s in scores[0]]
+        else:
+            # Search the FULL candidate depth the reranker saw, so the cosine
+            # scores recorded below are the real ones for these exemplars
+            # rather than a lookup against a shorter search that may not
+            # contain them at all.
+            # str(case_id): some ids in rag_test.json are integers, and JSON
+            # object keys are always strings -- so a case id that went into
+            # the neighbours file as 12 comes back out as "12".
+            order = reranked_by_case[str(case_id)]
+            depth = max(len(order), TOP_K)
+            scores, idxs = index.search(qvec, depth)
+            sim_of_row = {int(r): float(sc) for r, sc in zip(idxs[0], scores[0])}
+            neighbor_rows = [row_of_id[e] for e in order[:TOP_K]]
+            neighbor_scores = [sim_of_row.get(r, float("nan")) for r in neighbor_rows]
+        neighbors = [metadata[i] for i in neighbor_rows]
         neighbor_dbs = [n["database"] for n in neighbors]
 
         predicted_database = majority_vote_database(neighbor_dbs)
@@ -296,7 +341,12 @@ def main():
             # is IndexFlatIP over normalized embeddings, so these are cosine
             # similarities in [-1, 1], higher = more similar, in rank order.
             # Purely additive: nothing above this line reads them.
-            "retrieved_scores": [float(s) for s in scores[0]],
+            # For a rerank arm these are still the FAISS cosine similarities
+            # of the selected exemplars, but they are NO LONGER MONOTONE in
+            # rank -- the cross-encoder chose the order. `rerank_arm` below is
+            # what tells a reader which of the two situations they are in.
+            "retrieved_scores": neighbor_scores,
+            "rerank_arm": RERANK_LABEL,
             "complexity": case.get("complexity"),
             "system_prompt": system_prompt,
         })
@@ -305,7 +355,9 @@ def main():
                   case_id, gold_database, predicted_database, database_match,
                   [n["id"] for n in neighbors])
 
-    if not INCLUDE_FK:
+    if RERANK_LABEL:
+        out_name = f"rag_prompts_{RERANK_LABEL}_k{TOP_K}.json"
+    elif not INCLUDE_FK:
         out_name = "rag_prompts_nofk.json"
     elif TOP_K == 10:
         out_name = "rag_prompts.json"
@@ -328,8 +380,10 @@ def main():
         n_schema_cards=len(cards),
         database_retrieval_accuracy=db_match_count / len(test_cases) if test_cases else None,
         records_retrieved_scores=True,
+        rerank_arm=RERANK_LABEL,
+        rerank_neighbors_file=RERANK_FILE,
     )
-    if INCLUDE_FK and TOP_K == 10:
+    if INCLUDE_FK and TOP_K == 10 and not RERANK_LABEL:
         # Also keep a stably-named FK copy for the A/B test (see
         # docs/finding5_ab_test_guide.md) so rag_prompts.json can keep
         # changing with future K-sweeps/database expansions without the
