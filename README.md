@@ -207,6 +207,29 @@ Two things fell out of running it:
   [`CANONICAL_ARTIFACTS.md`](CANONICAL_ARTIFACTS.md) notes would close its documented
   1-case gap.
 
+**Similarity-weighted voting — the obvious middle path — does not exist.** The hypothesis
+was that the vote contributes noise-averaging that rank-1 throws away, and that weighting
+each neighbour by similarity would keep it while fixing the pool-frequency degeneracy.
+`rag/analyze_vote_weighting.py` replays the whole family offline in about a second, using
+`score(db) = Σ exp(s_i/τ)` — which *is* the count vote as τ→∞ and *is* rank-1 as τ→0:
+
+| weighting | correct | accuracy |
+|---|---|---|
+| unweighted vote *(current)* | 258/304 | 84.87% |
+| sum of similarity | 256/304 | 84.21% |
+| softmax τ=0.2 | 266/304 | 87.50% |
+| sum of 1/rank | 271/304 | 89.14% |
+| softmax τ=0.02 | 276/304 | 90.79% |
+| **pure rank-1** | 275/304 | 90.46% |
+
+Accuracy is monotone in sharpness and the optimum **is** the rank-1 endpoint — nothing in
+the middle beats both ends. The best cell is one case above rank-1 (p = 1.0000) and differs
+from it on 1 of 304 predictions, below the oracle noise floor above; by τ=0.01 the two are
+prediction-identical. No execution arm was run for it, deliberately: it could not have
+distinguished its arms. Note that plain similarity-sum is *worse* than counting (256 vs
+258) — any weighting that sums over members inherits the pool-frequency prior, and a sum
+dominated by its maximum is just rank-1 with extra steps.
+
 Full write-up in [`docs/FINDING-rank1-vote.md`](docs/FINDING-rank1-vote.md). **The default
 is unchanged** — this is a flag, and `rag_prompts.json` still rebuilds byte-identically.
 

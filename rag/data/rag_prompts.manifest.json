@@ -1,7 +1,7 @@
 {
   "manifest_schema_version": 1,
-  "generated_at": "2026-09-22T06:47:49Z",
-  "git_sha": "3aab76c62d33d02dd3988e3a8db0ecd2f64b8ac9",
+  "generated_at": "2026-09-22T08:31:48Z",
+  "git_sha": "5126c22e01c87ebb9fe0f40f68fdd85e2c1100fe",
   "git_dirty": true,
   "git_branch": "ground-truth-verification",
   "python_version": "3.12.11",

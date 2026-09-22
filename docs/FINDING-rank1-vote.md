@@ -149,7 +149,70 @@ documented 1-case discrepancy.
 
 ---
 
-## 4. Recommendation
+## 4. The weighted-vote alternative does not exist
+
+The obvious middle path — keep the vote's noise-averaging but weight each neighbour by
+similarity, so the pool-frequency degeneracy goes away without adopting rank-1 wholesale —
+was tested and **there is nothing there**.
+
+`rag/analyze_vote_weighting.py` replays every weighting on the recorded retrieval offline,
+in about a second. The natural family is `score(db) = Σ exp(s_i / τ)` over that database's
+neighbours, because it interpolates between the two policies already measured: as τ → ∞
+every weight goes to 1 and it *is* the unweighted count vote; as τ → 0 the largest
+similarity dominates every sum and it *is* pure rank-1.
+
+| weighting | correct | accuracy | vs vote | vs rank-1 |
+|---|---|---|---|---|
+| unweighted vote *(current)* | 258/304 | 0.8487 | — | — |
+| sum of similarity | 256/304 | 0.8421 | +1/−3, p=0.63 | +4/−23, p=0.0003 |
+| softmax τ=1.0 | 256/304 | 0.8421 | +1/−3, p=0.63 | +4/−23, p=0.0003 |
+| softmax τ=0.5 | 258/304 | 0.8487 | +2/−2, p=1.00 | +4/−21, p=0.0009 |
+| softmax τ=0.2 | 266/304 | 0.8750 | +10/−2, p=0.039 | +4/−13, p=0.049 |
+| sum of similarity⁴ | 265/304 | 0.8717 | +10/−3, p=0.092 | +3/−13, p=0.021 |
+| sum of 1/rank | 271/304 | 0.8914 | +14/−1, p=0.0010 | +2/−6, p=0.29 |
+| softmax τ=0.1 | 269/304 | 0.8849 | +12/−1, p=0.0034 | +3/−9, p=0.15 |
+| softmax τ=0.05 | 275/304 | 0.9046 | +19/−2, p=0.0002 | +2/−2, p=1.00 |
+| **softmax τ=0.02** | **276/304** | **0.9079** | +20/−2, p=0.0001 | +1/−0, p=1.00 |
+| softmax τ=0.01 | 275/304 | 0.9046 | +20/−3, p=0.0005 | **+0/−0** |
+| **pure rank-1** | 275/304 | 0.9046 | +20/−3, p=0.0005 | — |
+
+**Accuracy is monotone in sharpness, and the optimum is the rank-1 endpoint.** Nothing in
+the middle beats both ends. The best cell, τ=0.02 at 276/304, is **one case** above rank-1
+(p = 1.0000) and differs from rank-1's predictions on **exactly 1 of 304 cases** — below
+the ~1-in-277 oracle noise floor measured in §1. By τ=0.01 the two policies are
+prediction-identical on all 304.
+
+**No execution arm was run for this**, deliberately. The best weighted policy produces a
+prompt different from the rank-1 arm's on a single case; generating and scoring it would
+spend ~10 minutes to measure a one-case difference that the exact test already calls noise.
+An experiment that cannot distinguish its arms is not worth running, and saying so is
+cheaper than running it and reporting a number nobody should trust.
+
+### What this rules out, and why it is a real finding
+
+The hypothesis was that the vote contributes *something* — noise-averaging across several
+neighbours — that rank-1 discards, and that a weighting could keep it. The sweep says it
+does not. Once similarity magnitude is respected at all, the best thing to do with the
+other nine neighbours is **ignore them**.
+
+Two supporting details:
+
+- **Plain similarity-sum is worse than counting** (256 vs 258). Predicted in advance and
+  confirmed: cosine similarities here run 0.31–0.999 with mean 0.66, so summing them is
+  barely distinguishable from counting, and 84 pool examples at ~0.60 still outweigh 33 at
+  ~0.65. *Any* weighting that sums over members inherits the pool-frequency prior. Only a
+  weighting sharp enough to be dominated by its maximum escapes it — and a sum dominated by
+  its maximum is rank-1 with extra steps.
+- **`sum of 1/rank` reaches 271/304**, beating the vote significantly (p = 0.0010) while
+  still losing to rank-1 (p = 0.29). Rank-decay recovers most of the gap without using
+  similarity at all, which is consistent: what the unweighted vote gets wrong is treating
+  rank-10 as equal to rank-1.
+
+So the choice really is binary — vote or rank-1 — and §0 already answered it.
+
+---
+
+## 5. Recommendation
 
 **Switch the default to rank-1, and regenerate.** The evidence is a significant paired
 improvement with zero regressions and a mechanism that explains it. The cost is ~10 minutes
@@ -162,9 +225,10 @@ need its own arm.
 
 ---
 
-## 5. Reproducing
+## 6. Reproducing
 
 ```bash
+python rag/analyze_vote_weighting.py                 # offline weighting sweep, ~1 s
 python rag/build_prompts.py 10 --db-policy rank1     # -> rag_prompts_rank1_k10.json, 275/304
 python rag/generate_rag_mlx.py \
   --prompts-path rag/data/rag_prompts_rank1_k10.json \
