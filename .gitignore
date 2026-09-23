@@ -1,5 +1,6 @@
 # Secrets
 atlas-credentials.env
+azure.env
 
 .venv/
 

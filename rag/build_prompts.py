@@ -28,9 +28,9 @@
 #      (safe_eval_query / to_json_safe / results_match) works on RAG's
 #      output with zero changes.
 #
-# Runs entirely locally (CPU, no Atlas connection, no GPU) -- only the
-# actual Qwen generation call happens on Colab, reading this script's
-# output (rag/data/rag_prompts.json) directly.
+# Runs entirely locally (CPU, no Atlas connection, no GPU). Generation is a
+# separate step (rag/generate_rag_mlx.py) that reads this script's output
+# (rag/data/rag_prompts.json) directly.
 #
 # TOP_K is overridable from the command line for a controlled K-sweep
 # (K=3 vs K=5 vs K=10, same 61-case test split, same gold, same scoring
@@ -71,17 +71,20 @@ from pathlib import Path
 #
 # Ruff/isort will want to re-sort these back into one alphabetical block. Do
 # not let it: the blank line and this comment are what keep them apart.
+#
+# faiss itself is imported inside main(), not here, so that importing this
+# module for its render_* functions (demo_ui/live_inference.py, the Azure
+# service) neither needs faiss installed nor loads a second libomp. embed_utils
+# stays at the top, so torch is always already loaded by the time main() runs
+# `import faiss` -- the ordering above still holds.
 from embed_utils import MODEL_NAME as EMBED_MODEL_NAME
 from embed_utils import embed
-
-import faiss  # noqa: E402  MUST come after embed_utils -- see above
 
 from schema_cards import build_cards
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from run_manifest import write_manifest  # noqa: E402
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("rag.build_prompts")
 
 # Reranking experiment (docs/EXPERIMENT-reranking.md §5): an optional
@@ -112,27 +115,48 @@ log = logging.getLogger("rag.build_prompts")
 # The open question this flag exists to answer is whether that +5.6-point
 # retrieval gain reaches execution accuracy -- the same question the reranking
 # experiment asked, on the lever that still has headroom.
-DB_POLICY = "vote"
-if "--db-policy" in sys.argv:
-    _i = sys.argv.index("--db-policy")
-    DB_POLICY = sys.argv[_i + 1]
-    del sys.argv[_i:_i + 2]
-    if DB_POLICY not in ("vote", "rank1"):
-        raise SystemExit(f"--db-policy must be 'vote' or 'rank1', got {DB_POLICY!r}")
 
-RERANK_FILE = None
-RERANK_LABEL = None
-if "--rerank" in sys.argv:
-    _i = sys.argv.index("--rerank")
-    RERANK_FILE = sys.argv[_i + 1]
-    RERANK_LABEL = sys.argv[_i + 2]
-    del sys.argv[_i:_i + 3]
 
-TOP_K = int(sys.argv[1]) if len(sys.argv) > 1 else 10
-# 2026-08-28, Finding 5 A/B test (MLX-adapted -- see docs/finding5_ab_test_guide.md):
-#   python rag/build_prompts.py 10        # FK annotations included (default, current behavior)
-#   python rag/build_prompts.py 10 nofk   # FK annotations omitted -- reproduces the pre-Finding-5 prompt
-INCLUDE_FK = not (len(sys.argv) > 2 and sys.argv[2].lower() == "nofk")
+def parse_args(argv: list[str]) -> dict:
+    """argv (without the program name) -> run configuration.
+
+    This used to run at MODULE LEVEL, so merely importing this file parsed the
+    importer's own sys.argv: `TOP_K = int(sys.argv[1])` raised ValueError under
+    `uvicorn service.app:app`, and rag/eval_retrieval.py had to copy
+    majority_vote_database() rather than import it. Same flags, same order of
+    stripping, same defaults -- only moved behind main()."""
+    argv = list(argv)
+
+    db_policy = "vote"
+    if "--db-policy" in argv:
+        _i = argv.index("--db-policy")
+        db_policy = argv[_i + 1]
+        del argv[_i:_i + 2]
+        if db_policy not in ("vote", "rank1"):
+            raise SystemExit(f"--db-policy must be 'vote' or 'rank1', got {db_policy!r}")
+
+    rerank_file = None
+    rerank_label = None
+    if "--rerank" in argv:
+        _i = argv.index("--rerank")
+        rerank_file = argv[_i + 1]
+        rerank_label = argv[_i + 2]
+        del argv[_i:_i + 3]
+
+    top_k = int(argv[0]) if len(argv) > 0 else 10
+    # 2026-08-28, Finding 5 A/B test (MLX-adapted -- see docs/finding5_ab_test_guide.md):
+    #   python rag/build_prompts.py 10        # FK annotations included (default, current behavior)
+    #   python rag/build_prompts.py 10 nofk   # FK annotations omitted -- reproduces the pre-Finding-5 prompt
+    include_fk = not (len(argv) > 1 and argv[1].lower() == "nofk")
+
+    return {
+        "db_policy": db_policy,
+        "rerank_file": rerank_file,
+        "rerank_label": rerank_label,
+        "top_k": top_k,
+        "include_fk": include_fk,
+    }
+
 
 PROMPT_HEADER = (
     "You are a MongoDB query expert.\n"
@@ -276,7 +300,31 @@ def render_examples_block(neighbors: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def main():
+def build_system_prompt(neighbors: list[dict], predicted_database: str,
+                        cards_by_db: dict, include_fk: bool = True) -> str:
+    """The whole RAG system prompt for one question. The single definition:
+    main() below, demo_ui/live_inference.py and the Azure service all call
+    this, so a served prompt cannot drift from the benchmarked one."""
+    return (
+        PROMPT_HEADER
+        + render_examples_block(neighbors)
+        + "\n"
+        + render_schema_block(predicted_database, cards_by_db, include_fk=include_fk)
+        + render_numeric_string_note(predicted_database)
+        + "\n"
+        + PROMPT_RULES
+    )
+
+
+def main(argv: list[str] | None = None):
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+    import faiss  # noqa: E402  after embed_utils (module top) -- see the note there
+
+    cfg = parse_args(sys.argv[1:] if argv is None else argv)
+    DB_POLICY = cfg["db_policy"]
+    RERANK_FILE, RERANK_LABEL = cfg["rerank_file"], cfg["rerank_label"]
+    TOP_K, INCLUDE_FK = cfg["top_k"], cfg["include_fk"]
+
     root = Path(__file__).resolve().parents[1]
     rag_dir = root / "rag"
     rag_data_dir = rag_dir / "data"
@@ -347,14 +395,8 @@ def main():
         database_match = predicted_database == gold_database
         db_match_count += database_match
 
-        system_prompt = (
-            PROMPT_HEADER
-            + render_examples_block(neighbors)
-            + "\n"
-            + render_schema_block(predicted_database, cards_by_db, include_fk=INCLUDE_FK)
-            + render_numeric_string_note(predicted_database)
-            + "\n"
-            + PROMPT_RULES
+        system_prompt = build_system_prompt(
+            neighbors, predicted_database, cards_by_db, include_fk=INCLUDE_FK
         )
 
         prompts.append({

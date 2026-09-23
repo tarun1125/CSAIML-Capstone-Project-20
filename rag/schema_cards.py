@@ -199,6 +199,23 @@ def build_cards() -> list[dict]:
                 "doc_count": len(docs),
                 "text": text,
             })
+
+    # PARTIAL dumps are the common case, not the edge case: database/ is
+    # gitignored, but 6 of the 23 databases were committed before that rule,
+    # so a clean clone -- or a Docker build from one -- discovers exactly those
+    # 6. The empty-COLLECTIONS fallback above never fired, and every prompt for
+    # the other 17 got "Schema (college_2, 0 collection(s) ...)": schema-free,
+    # silently. Fill any database the dumps do not cover from the snapshot.
+    if _CACHED_CARDS.exists():
+        snapshot = json.loads(_CACHED_CARDS.read_text(encoding="utf-8"))
+        missing = sorted({c["database"] for c in snapshot} - set(COLLECTIONS))
+        if missing:
+            log.warning(
+                "Local dumps cover %d database(s); taking %d more from the "
+                "committed snapshot %s: %s",
+                len(COLLECTIONS), len(missing), _CACHED_CARDS.name, missing,
+            )
+            cards += [c for c in snapshot if c["database"] in missing]
     return cards
 
 

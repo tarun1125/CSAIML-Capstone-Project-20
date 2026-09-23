@@ -238,10 +238,7 @@ def run_rag(question: str, database: str, top_k: int = 10, max_tokens: int = 300
 
     import faiss  # noqa: E402  MUST come after embed_utils -- see above
 
-    from build_prompts import (
-        PROMPT_HEADER, PROMPT_RULES, render_examples_block, render_schema_block,
-        render_numeric_string_note, majority_vote_database,
-    )
+    from build_prompts import build_system_prompt, majority_vote_database
     from schema_cards import build_cards
 
     logger.info("run_rag(database=%s, top_k=%d)", database, top_k)
@@ -265,15 +262,7 @@ def run_rag(question: str, database: str, top_k: int = 10, max_tokens: int = 300
     for card in build_cards():
         cards_by_db.setdefault(card["database"], []).append(card)
 
-    system_prompt = (
-        PROMPT_HEADER
-        + render_examples_block(neighbors)
-        + "\n"
-        + render_schema_block(predicted_database, cards_by_db, include_fk=True)
-        + render_numeric_string_note(predicted_database)
-        + "\n"
-        + PROMPT_RULES
-    )
+    system_prompt = build_system_prompt(neighbors, predicted_database, cards_by_db, include_fk=True)
     model, tokenizer = _get_model(None)
     query = _generate(model, tokenizer, system_prompt, question, max_tokens)
     return {

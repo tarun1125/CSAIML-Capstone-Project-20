@@ -25,6 +25,7 @@ hanging query, without needing to intercept every possible eval'd query
 shape. Documented as a deliberate tradeoff, not an oversight.
 """
 
+import os
 from pathlib import Path
 
 from pymongo import MongoClient
@@ -82,11 +83,16 @@ def connect(
     server_selection_timeout_ms: int = DEFAULT_SERVER_SELECTION_TIMEOUT_MS,
     verbose: bool = True,
 ) -> MongoClient:
-    env_file = find_env_file(Path(__file__).resolve().parent)
-    env_values = load_env_file(env_file)
-    uri = env_values.get("MONGODB_URI")
+    # The environment wins over the file. A deployed container has no
+    # atlas-credentials.env (and must not: that file holds the ADMIN URI); it
+    # gets a read-only URI as MONGODB_URI from a Key Vault reference instead.
+    # Locally nothing sets the variable, so every script keeps reading the file.
+    uri = os.environ.get("MONGODB_URI")
     if not uri:
-        raise RuntimeError(f"MONGODB_URI not found in {env_file}")
+        env_file = find_env_file(Path(__file__).resolve().parent)
+        uri = load_env_file(env_file).get("MONGODB_URI")
+        if not uri:
+            raise RuntimeError(f"MONGODB_URI not found in {env_file}")
 
     if verbose:
         print(f"[connect] Connecting to {mask_uri(uri)}")
