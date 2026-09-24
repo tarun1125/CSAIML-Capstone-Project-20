@@ -54,9 +54,10 @@ from pathlib import Path
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-import faiss  # noqa: E402  MUST come after torch -- see above
-
 from embed_utils import embed  # noqa: E402
+# faiss now arrives through FaissRetriever, which imports it lazily when it is
+# constructed -- still strictly after torch above.
+from retrievers import FaissRetriever  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RAG_DATA = REPO_ROOT / "rag" / "data"
@@ -152,21 +153,26 @@ def save_cache(cache: dict) -> None:
     CACHE_PATH.write_text(json.dumps(cache, indent=2), encoding="utf-8")
 
 
-def build_candidates(top_n: int = DEFAULT_TOP_N) -> tuple[list[dict], list[dict], list[list[int]], list[list[float]]]:
-    """FAISS top-N candidate rows for all 304 test cases, plus their cosine
-    scores. Shared by both arms and by the baseline, so every arm reranks the
-    SAME candidate set -- the only variable is the ordering."""
+def build_candidates(top_n: int = DEFAULT_TOP_N, retriever=None) -> tuple[list[dict], list[dict], list[list[int]], list[list[float]]]:
+    """Top-N candidate rows for all 304 test cases, plus their scores. Shared by
+    both arms and by the baseline, so every arm reranks the SAME candidate set
+    -- the only variable is the ordering.
+
+    `retriever` (rag/retrievers.py) defaults to FAISS, which reproduces the
+    original inline search exactly. rag/eval_retriever.py passes an Azure one
+    to get ranking metrics for the Azure arms from this same code path."""
+    if retriever is None:
+        retriever = FaissRetriever()
     test_cases = json.loads((RAG_DATA / "rag_test.json").read_text(encoding="utf-8"))
     metadata = json.loads((RAG_DATA / "fewshot_metadata.json").read_text(encoding="utf-8"))
-    index = faiss.read_index(str(RAG_DATA / "fewshot.index"))
-    log.info("FAISS index ntotal=%d, %d test cases, top_n=%d", index.ntotal, len(test_cases), top_n)
+    log.info("retriever=%s, %d test cases, top_n=%d", retriever.describe(), len(test_cases), top_n)
 
     rows, sims = [], []
     for case in test_cases:
         qvec = embed([case["question"]])
-        scores, idxs = index.search(qvec, top_n)
-        rows.append([int(i) for i in idxs[0]])
-        sims.append([float(s) for s in scores[0]])
+        hits = retriever.search(case["question"], qvec, top_n)
+        rows.append([r for r, _ in hits])
+        sims.append([sc for _, sc in hits])
     return test_cases, metadata, rows, sims
 
 
