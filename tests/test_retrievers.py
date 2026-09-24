@@ -21,7 +21,7 @@ sys.path.insert(0, str(REPO_ROOT / "rag"))
 # IMPORT ORDER: build_prompts pulls in embed_utils (torch) before anything
 # constructs a FaissRetriever (faiss). See rag/build_prompts.py.
 from build_prompts import output_name, parse_args  # noqa: E402
-from retrievers import FaissRetriever, make_retriever, retriever_label  # noqa: E402
+from retrievers import FaissRetriever, load_azure_settings, retriever_label  # noqa: E402
 
 
 # Every invocation that has produced a committed rag/data/rag_prompts*.json,
@@ -72,9 +72,20 @@ def test_unknown_retriever_refused():
         retriever_label("pinecone")
 
 
-def test_azure_retriever_not_built_yet():
-    with pytest.raises(NotImplementedError):
-        make_retriever("azure-vector")
+def test_azure_settings_missing_is_a_clear_error(tmp_path, monkeypatch):
+    for k in ("AZURE_SEARCH_ENDPOINT", "AZURE_SEARCH_QUERY_KEY", "AZURE_SEARCH_ADMIN_KEY"):
+        monkeypatch.delenv(k, raising=False)
+    with pytest.raises(RuntimeError, match="missing"):
+        load_azure_settings(env_file=tmp_path / "absent.env")
+
+
+def test_azure_settings_environment_wins_over_file(tmp_path, monkeypatch):
+    env = tmp_path / "azure.env"
+    env.write_text("AZURE_SEARCH_ENDPOINT=https://file\nAZURE_SEARCH_QUERY_KEY=filekey\n")
+    monkeypatch.setenv("AZURE_SEARCH_ENDPOINT", "https://env")
+    monkeypatch.delenv("AZURE_SEARCH_QUERY_KEY", raising=False)
+    cfg = load_azure_settings(env_file=env)
+    assert (cfg["endpoint"], cfg["query_key"], cfg["index"]) == ("https://env", "filekey", "fewshot-exemplars")
 
 
 def test_faiss_retriever_returns_rows_and_cosines_in_rank_order():

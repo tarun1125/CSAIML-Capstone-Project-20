@@ -1,6 +1,6 @@
 # Plan — moving the RAG arm to Azure
 
-**Status:** Phases 0–1 done (2026-09-24); only the empty resource group exists on Azure · **Written:** 2026-09-22 · **Revised:** 2026-09-23
+**Status:** Phases 0–2 done (2026-09-24). On Azure: `rg-capstone-rag` + Free search service `srch-capstone-22b895` ($0) · **Written:** 2026-09-22 · **Revised:** 2026-09-23
 after a code review against this plan · **Budget:** the $200 free-account credit, which expires
 30 days after sign-up
 **Branch to work on:** `azure-deploy` (exists; the code prerequisites below are in `ef8f032`)
@@ -54,6 +54,8 @@ retrieval held fixed. They are two questions and never go into one number.
 | **The free trial has a spending limit; Pay-As-You-Go does not.** After upgrading, budgets *alert* but do not stop spending. | Budget alerts on day 0. After the upgrade, deleting the resource group is the only real off switch. |
 | **AI Search Free tier: 50 MB, 3 indexes, no semantic ranker.** Free services can be deleted after long inactivity. | The index is ~2 MB (1,213 × 384 floats), so it fits easily. Semantic ranker needs Basic, which is billed hourly, so it's optional (arm A3). |
 
+> ✅ **Resolved 2026-09-24:** the Free tier accepted the 384-dim exhaustive-KNN field; no Basic tier needed for A1/A2.
+>
 > ⚠️ **Check one thing on day 1:** that a vector field can be created on your Free search
 > service. The limits documentation lists vector quota only for Basic and above. Arm A1
 > deliberately uses **exhaustive KNN**, which Microsoft documents as *not* consuming vector
@@ -174,10 +176,16 @@ and confirm the parity check yourself.
 
 ---
 
-## Phase 2 — The AI Search index (Day 1–2)
+## Phase 2 — The AI Search index (Day 1–2) — ✅ done 2026-09-24
 
-- [ ] Create the service: `az search service create -n srch-capstone-<suffix> -g rg-capstone-rag --sku free -l centralindia`
-- [ ] `rag/azure_index.py` creates the index and uploads the 1,213 pool documents:
+**Status:** service `srch-capstone-22b895` (Free, Central India), index `fewshot-exemplars`, 1,213/1,213
+documents. `rag/azure_index.py` builds it; `AzureSearchRetriever` in `rag/retrievers.py` reads it
+with the query key. Smoke test: Azure vector search returned FAISS's exact top-10 rows in order
+on two sample questions. **This is not Gate 1.** Gate 1 is all 304 cases against the threshold
+you pre-register. The index definition is saved at `results/azure_index_definition.json`.
+
+- [x] Create the service: `az search service create -n srch-capstone-<suffix> -g rg-capstone-rag --sku free -l centralindia`
+- [x] `rag/azure_index.py` creates the index and uploads the 1,213 pool documents:
 
   | Field | Type | Attributes | Why |
   |---|---|---|---|
@@ -189,20 +197,19 @@ and confirm the parity check yourself.
   | `normalized_query` | `Edm.String` | retrievable, **not** searchable | The exemplar text. Kept out of BM25, matching the FAISS design (only the question is embedded). |
   | `question_vector` | `Collection(Edm.Single)`, 384 dims | profile `exact` → **exhaustive KNN, cosine** | Exact search, like `IndexFlatIP` |
 
-- [ ] **Upload the vectors already in the FAISS index**, not freshly computed ones:
+- [x] **Upload the vectors already in the FAISS index**, not freshly computed ones:
   `faiss.read_index("rag/data/fewshot.index").reconstruct_n(0, ntotal)` returns the exact float32
   rows FAISS searches. Re-embedding would usually match, but "usually" is a second variable in A1.
   Query vectors still come from `embed_utils.embed()`, just as in FAISS. Do not use Azure's integrated
   vectorizer or an Azure OpenAI embedding model for this experiment. That would change the
   embedding model and the search engine at the same time.
-- [ ] **Scores are not raw cosine.** I believe `@search.score` for a cosine vector field is a
-  transform of the distance, not the cosine itself; check the current "vector relevance scoring"
-  docs. In hybrid mode it's an RRF score. So compare **row lists** in the parity gate, and record
-  the score type in the manifest (`score_kind=`), because `retrieved_scores` in the prompts file
-  will no longer be cosine.
-- [ ] Verify: the document count is 1,213; storage and vector usage are on the service's
+- [x] **Scores are not raw cosine, measured.** For the exhaustive-KNN cosine field,
+  `@search.score = 1 / (2 − cosine)` (matches FAISS to 6 d.p.), so `cosine = 2 − 1/score`. It's monotone,
+  so the order is cosine order. Hybrid scores are RRF (top hit ≈ 1/61 + 1/61 = 0.0333). The manifest
+  records `score_kind`. Gate 1 compares **row lists**, and its tie check uses true cosines from the vectors.
+- [x] Verify: the document count is 1,213; storage and vector usage are on the service's
   Overview → Usage tab.
-- [ ] Credentials: the admin key goes into `azure.env` for indexing. Querying uses the
+- [x] Credentials: the admin key goes into `azure.env` for indexing. Querying uses the
   **query key**, which is read-only. The service in Phase 5 moves to managed identity.
 
 **Design choices to be able to defend (these are yours):**
@@ -269,18 +276,24 @@ policy (run `vote`, the canonical default, and `rank1` as a secondary), `schema_
    dict (`"azvec_k10": "qwen_rag_mlx_azvec_k10_results.json"`), then
    `python rag/score_rerank_arms.py azvec_k10`. It normalizes, refuses partial runs (≠ 304), and
    writes `qwen_rag_azvec_k10_execution_results.json`. **Don't use `score_rag.py` with file
-   arguments:** it writes to `qwen_rag_execution_results_mlx.json`, which is **A0's reference
-   file**, and reads its database diagnostic from the default `rag_prompts.json` whatever arm
+   arguments:** it overwrites `qwen_rag_execution_results_mlx.json` (a committed artifact, the
+   no-FK run's case file), and reads its database diagnostic from the default `rag_prompts.json` whatever arm
    you pass. Read `execution_accuracy`, **not** `status`.
 5. **Paired comparison** of each arm against A0 with McNemar's exact test. Report discordant
    counts, not just p. Remember the ≈0.4% oracle noise floor (1 in 277 cases flipped on a tie).
-   This snippet was checked against the existing rank-1 arm:
+   **A0's file is `qwen_rag_fk_k10_execution_results.json` (143/304), not
+   `qwen_rag_execution_results_mlx.json`.** The latter is the *no-FK* run (141/304): the FK
+   run's case file was overwritten by the FK A/B test (see `CANONICAL_ARTIFACTS.md`), and the
+   `_fk_k10` file is its re-scoring. Every Azure arm has FK on, so the no-FK file would vary FK
+   *and* retrieval at once. That's the same trap `eval_retrieval.py` documents for the reranking
+   experiment. The 143 vs the headline 142 is the oracle's known noise.
+   This snippet was checked against the existing rank-1 arm (143 vs 149):
    ```bash
    python - <<'EOF'
    import json, sys; sys.path.insert(0, "rag")
    from eval_retrieval import mcnemar_exact
    load = lambda f: {str(r["id"]): r.get("execution_accuracy") is True for r in json.load(open(f))}
-   a0 = load("rag/data/qwen_rag_execution_results_mlx.json")          # A0: 141/304
+   a0 = load("rag/data/qwen_rag_fk_k10_execution_results.json")       # A0: 143/304, FK on
    for arm in ["azvec_k10", "azhyb_k10"]:
        print(arm, mcnemar_exact(a0, load(f"rag/data/qwen_rag_{arm}_execution_results.json")))
    EOF
