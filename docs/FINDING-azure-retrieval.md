@@ -36,9 +36,9 @@ Same model, decoding, schema cards, prompt rules and scorer. Only the retrieval 
 | Rank-1 database policy | 27/304 | 27 | 6 | 6 | 0 | 0.0313 |
 | **Azure hybrid (A2), vote** | **304/304** | **19** | **33** | **19** | **14** | **0.4869** |
 
-*The reranking row is recomputed against the FK-on A0 (143), as in `FINDING-rank1-vote.md`. The
-status line of `EXPERIMENT-reranking.md` reports 48 discordant, 24/24, p = 1.0. That is the same
-arm against the **no-FK** file (141), the baseline mix-up described in §4.*
+*The reranking row is against the FK-on A0 (143), as in `FINDING-reranking.md` and
+`FINDING-rank1-vote.md`. The status line of `EXPERIMENT-reranking.md` used to say 48 discordant,
+24/24, p = 1.0, computed against the no-FK file. It was corrected 2026-09-26.*
 
 The pattern holds a third time. Interventions that rewrite the exemplar list in almost every
 prompt produce churn. The one intervention that changed only the database decision produced a
