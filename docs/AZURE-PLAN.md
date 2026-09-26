@@ -366,6 +366,13 @@ East US. Generator: `rag/generate_rag_aoai.py` (T = 0, seed 42, max 300 tokens, 
 identical (36/50 ×3). About $2.05 in total, $0.005 per query, p50 2.0 s. Write-up:
 `docs/FINDING-azure-generator.md`. Optional follow-up: G1 + rank-1 (about $1.55), with a prediction first.
 
+**G1 + rank-1 pre-registration (recorded 2026-09-26, before the run):** gpt-4o on
+`rag/data/rag_prompts_rank1_k10.json` (the same FAISS exemplars; the database comes from the rank-1
+exemplar, 275/304 right vs the vote's 258). **Primary comparison: vs G1-vote (198/304)**, McNemar
+exact, which isolates the database policy with the generator fixed. Secondary: vs Qwen rank-1 (149).
+**Prediction (Tarun): 200+ / 304.** No significance bar set. Noise reference: about ±2 per 50 cases (§2 of
+the finding).
+
 - [ ] Create an Azure OpenAI (Foundry) resource and deploy **one small, cheap chat model**. Model
   availability varies by region, so check the Foundry portal and use any region that has it.
   The latency to India doesn't matter for a batch run.

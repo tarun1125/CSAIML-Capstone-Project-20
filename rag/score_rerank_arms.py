@@ -55,6 +55,7 @@ ARMS = {
     # OpenAI (rag/generate_rag_aoai.py). Output files keep this script's
     # qwen_rag_<label>_* naming for every arm; the label says which generator.
     "aoai_gpt4o_k10": "aoai_gpt4o_k10_results.json",
+    "aoai_gpt4o_rank1_k10": "aoai_gpt4o_rank1_k10_results.json",
 }
 
 
