@@ -1,6 +1,6 @@
 # Finding — a hosted gpt-4o on the same prompts: +55 cases over Qwen 1.5B
 
-**Status:** complete, 2026-09-26, including the follow-up arm **G1 + rank-1 (§3.1): 212/304**. Interpretation in §3 and §6 is marked *(draft — Tarun to confirm)*.
+**Status:** complete, 2026-09-26, including the follow-up arm **G1 + rank-1 (§3.1): 212/304**. Interpretation (§3, §6) signed off by Tarun on 2026-09-26.
 **Arm:** G1 of `docs/AZURE-PLAN.md`, Phase 4. Prediction recorded before the run (commit `88217db`).
 **Follows:** [`FINDING-azure-retrieval.md`](FINDING-azure-retrieval.md) changed retrieval with the
 generator fixed. This changes the generator with retrieval fixed. They are two questions and two numbers.
@@ -62,7 +62,7 @@ number.** A repeat run will not reproduce it byte for byte; Qwen on MLX with gre
 
 ---
 
-## 3. Where the gain is, and what now limits it *(draft — Tarun to confirm)*
+## 3. Where the gain is, and what now limits it
 
 | | database right (258 cases) | database wrong (46 cases) |
 |---|---|---|
@@ -145,7 +145,7 @@ Mac: about 1.4 s per case).
 
 ---
 
-## 6. What to do with this *(draft — Tarun to confirm)*
+## 6. What to do with this
 
 - **Generator size is the largest lever measured in this project**, larger than every retrieval
   change combined. For the deployed service, the case for a hosted model is about +18 points at

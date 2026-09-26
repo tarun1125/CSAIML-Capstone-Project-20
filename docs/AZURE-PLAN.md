@@ -222,15 +222,14 @@ you pre-register. The index definition is saved at `results/azure_index_definiti
 
 ---
 
-## Phase 3 — The retrieval experiment (Day 2–7) — ✅ run 2026-09-26 (Day 2), finding in draft
+## Phase 3 — The retrieval experiment (Day 2–7) — ✅ done 2026-09-26 (Day 2), finding signed off
 
 **Status:** pre-registered (`f075044`), Gate 1 **missed** (298/304; all 6 mismatches are one
 duplicate-question tie pair; proceeded under a dated deviation, `af3d073`), Gate 2 run, A2
 generated and scored under both policies. **Result: A2-vote 148/304 vs A0 143, 19 gained / 14 lost,
 McNemar p = 0.4869. The pre-registered bar (≥ +9 and p < 0.05) was not met, and the prediction
 (≥ 155) was wrong.** A2-rank1 150 vs 149. A3 (semantic, Basic tier) was not run. Azure cost: $0.
-Write-up: `docs/FINDING-azure-retrieval.md`. §2 and §7 are awaiting Tarun's sign-off, which is the
-plan's own condition for the Day-7 upgrade.
+Write-up: `docs/FINDING-azure-retrieval.md`. §2 and §7 signed off by Tarun on 2026-09-26.
 
 **Pre-register it first.** Write `docs/EXPERIMENT-azure-retrieval.md` before running
 anything, in the shape of `EXPERIMENT-reranking.md`: hypothesis, arms, metrics, what result
@@ -578,7 +577,7 @@ Search or OpenAI, wait, then restart the revision before you debug anything else
   cost about $0.25.
 
 **Remaining:** README *Deployment on Azure* section; a 60-second screen capture (Tarun); the
-token-bucket rate limiter (Tarun); sign-off of the two findings' draft sections.
+token-bucket rate limiter (Tarun). (Findings signed off 2026-09-26.)
 
 
 Do the measurements in **one sitting**: resume at the start (see Cost control) and pause at the end.

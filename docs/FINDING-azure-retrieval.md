@@ -1,7 +1,6 @@
 # Finding — hybrid (BM25 + vector) retrieval on Azure AI Search does not move execution accuracy
 
-**Status:** DRAFT, 2026-09-26. The numbers are final; the sections marked *(draft — Tarun to
-confirm)* are interpretation, which is yours to accept, change or strike.
+**Status:** final, 2026-09-26. Interpretation (§2, §7) signed off by Tarun on 2026-09-26.
 **Pre-registration:** [`docs/EXPERIMENT-azure-retrieval.md`](EXPERIMENT-azure-retrieval.md),
 signed 2026-09-24, commit `f075044`. Every claim below is checked against it.
 **Follows:** [`FINDING-reranking.md`](FINDING-reranking.md) (reordering exemplars: no effect) and
@@ -64,7 +63,7 @@ resolved: `college_1/2` ×4, `csu_1`, `store_1` vs `hr_1`, `sakila_1` vs `store_
 
 ---
 
-## 2. Why better retrieval did not become better answers *(draft — Tarun to confirm)*
+## 2. Why better retrieval did not become better answers
 
 ### 2.1 Most flips have nothing to do with the database
 
@@ -159,7 +158,7 @@ The whole experiment cost **$0 of Azure credit**.
 
 ---
 
-## 7. What to do with this *(draft — Tarun to confirm)*
+## 7. What to do with this
 
 - **Don't switch the benchmark pipeline to hybrid for accuracy.** It isn't distinguishable from
   FAISS on execution, and under the better database policy (rank-1) it adds +1.
