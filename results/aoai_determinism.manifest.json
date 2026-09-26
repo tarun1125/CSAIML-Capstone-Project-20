@@ -1,0 +1,18 @@
+{
+  "manifest_schema_version": 1,
+  "generated_at": "2026-09-26T04:40:32Z",
+  "git_sha": "88217db457d282ba48849bf90722d89b3961db8f",
+  "git_dirty": true,
+  "git_branch": "azure-deploy",
+  "python_version": "3.12.11",
+  "platform": "Darwin arm64",
+  "mlx_lm_version": "0.31.3",
+  "mlx_version": "0.32.1",
+  "stage": "G1 determinism check",
+  "decoding": "temperature 0, seed 42",
+  "deployment": "gpt-4o (2024-11-20, Standard, East US)",
+  "script": "(inline analysis, see docs/FINDING-azure-generator.md)",
+  "results_file": "results/aoai_determinism.json",
+  "results_sha256": "d21aa4221beb85afe08d05534ce9e315135e3f789d173e768a8223d2d0579bd6",
+  "results_bytes": 2479
+}

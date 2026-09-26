@@ -51,6 +51,10 @@ ARMS = {
     # but the retrieved exemplar list is identical to the K=10 FAISS arms.
     "azhyb_k10": "qwen_rag_mlx_azhyb_k10_results.json",
     "rank1_azhyb_k10": "qwen_rag_mlx_rank1_azhyb_k10_results.json",
+    # Phase 4, arm G1: A0's exact prompts, generator swapped to gpt-4o on Azure
+    # OpenAI (rag/generate_rag_aoai.py). Output files keep this script's
+    # qwen_rag_<label>_* naming for every arm; the label says which generator.
+    "aoai_gpt4o_k10": "aoai_gpt4o_k10_results.json",
 }
 
 
