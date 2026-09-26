@@ -9,7 +9,7 @@
   "mlx_lm_version": "0.31.3",
   "mlx_version": "0.32.1",
   "stage": "Phase 6 smoke benchmark (live endpoint)",
-  "url": "https://ca-capstone-rag.happyrock-720264af.centralindia.azurecontainerapps.io",
+  "url": "https://<service-fqdn, redacted: IP-restricted, torn down after the project>",
   "revision": "ca-capstone-rag--0000002",
   "image": "acrcapstone22b895.azurecr.io/capstone-rag:v2",
   "settings": "RETRIEVER\tazure-vector\nDB_POLICY\trank1\nTOP_K\t10\nMAX_ROWS\t50\nMAX_QUESTION_CHARS\t500\nRATE_LIMIT_PER_MIN\t10\nAZURE_SEARCH_ENDPOINT\thttps://srch-capstone-22b895.search.windows.net\nAZURE_SEARCH_INDEX\tfewshot-exemplars\nAZURE_OPENAI_ENDPOINT\thttps://rg-capstone-rag.openai.azure.com/\nAZURE_OPENAI_DEPLOYMENT\tgpt-4o\nAPPLICATIONINSIGHTS_CONNECTION_STRING\tInstrumentationKey=d22a8d4b-ce98-4775-b736-d1c94e91537b;IngestionEndpoint=https://centralindia-0.in.applicationinsights.azure.com/;LiveEndpoint=https://centralindia.livediagnostics.monitor.azure.com/;ApplicationId=79f07f3a-0aae-459a-baa8-0e42022359d2",

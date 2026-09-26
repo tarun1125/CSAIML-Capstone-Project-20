@@ -9,7 +9,7 @@
   "mlx_lm_version": "0.31.3",
   "mlx_version": "0.32.1",
   "stage": "Phase 6 cold start (scale 0 -> 1)",
-  "url": "https://ca-capstone-rag.happyrock-720264af.centralindia.azurecontainerapps.io",
+  "url": "https://<service-fqdn, redacted: IP-restricted, torn down after the project>",
   "revision": "ca-capstone-rag--0000002",
   "image": "acrcapstone22b895.azurecr.io/capstone-rag:v2",
   "script": "service/smoke.py",
