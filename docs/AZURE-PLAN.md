@@ -361,6 +361,11 @@ East US. Generator: `rag/generate_rag_aoai.py` (T = 0, seed 42, max 300 tokens, 
 - Determinism: first 50 cases run twice before the full run; report the flip rate on the
   normalized query. Three smoke-test calls already showed two different `system_fingerprint`s.
 
+**G1 result (2026-09-26): 198/304 vs A0 143, 69 gained / 14 lost, p = 6.8 × 10⁻¹⁰. The prediction
+(147–150) was far too low.** Determinism: query text differs on 3–6 of 50 cases per repeat, the score is
+identical (36/50 ×3). About $2.05 in total, $0.005 per query, p50 2.0 s. Write-up:
+`docs/FINDING-azure-generator.md`. Optional follow-up: G1 + rank-1 (about $1.55), with a prediction first.
+
 - [ ] Create an Azure OpenAI (Foundry) resource and deploy **one small, cheap chat model**. Model
   availability varies by region, so check the Foundry portal and use any region that has it.
   The latency to India doesn't matter for a batch run.
