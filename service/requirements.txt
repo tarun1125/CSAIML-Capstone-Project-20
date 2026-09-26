@@ -1,0 +1,20 @@
+# Runtime dependencies of the deployed service (service/Dockerfile), pinned to
+# the versions tests/test_service.py and the local end-to-end run used
+# (2026-09-26). torch is installed separately in the Dockerfile from the CPU-only
+# wheel index -- the default wheel pulls ~2 GB of CUDA libraries the container
+# can never use.
+fastapi==0.141.1
+uvicorn==0.52.4
+pydantic==2.13.5
+pymongo==4.17.0
+azure-core==1.41.0
+azure-identity==1.25.3
+azure-search-documents==12.0.0
+azure-monitor-opentelemetry==1.8.10
+openai==3.19.2
+numpy==2.5.2
+transformers==5.15.1
+tokenizers==0.22.2
+safetensors==0.8.0
+# Only for RETRIEVER=faiss (the fallback if the search service is deleted).
+faiss-cpu==1.15.0

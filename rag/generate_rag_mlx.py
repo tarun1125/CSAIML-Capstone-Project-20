@@ -42,9 +42,16 @@
 # tail -- averaging over that tail would produce a "confidence" describing
 # text that was thrown away. See spot_check.clean_with_logprobs.
 #
-# Output feeds:
-#   python normalize.py rag/data/qwen_rag_mlx_results.json rag/data/qwen_rag_mlx_normalized.json
-#   python rag/score_rag.py 10 data/qwen_baseline_mlx_testslice_normalized.json rag/data/qwen_rag_mlx_normalized.json
+# Output feeds rag/score_rerank_arms.py: add the arm to its ARMS dict
+# (label -> this --output filename), then `python rag/score_rerank_arms.py
+# <label>`. It normalizes to qwen_rag_<label>_normalized.json and scores to
+# qwen_rag_<label>_execution_results.json -- per-arm names, nothing shared.
+#
+# DON'T use the old `normalize.py <out> rag/data/qwen_rag_mlx_normalized.json`
+# + `score_rag.py 10 ...` pair for a new arm. Both targets are committed
+# artifacts of earlier runs (and score_rag.py's execution output is the no-FK
+# case file, qwen_rag_execution_results_mlx.json), so every new arm would
+# silently overwrite them.
 
 import argparse
 import json
@@ -75,15 +82,29 @@ log = logging.getLogger("rag.generate_rag_mlx")
 MODEL = "mlx-community/Qwen2.5-Coder-1.5B-Instruct-bf16"  # same model, no adapter -- RAG is a base-model arm
 
 
-def load_checkpoint(output_path: Path) -> dict:
+def load_checkpoint(output_path: Path, prompts_rel: str) -> dict:
+    """Resume state. Records now carry the prompts file they were generated
+    from, and resuming against a DIFFERENT prompts file is refused -- before
+    this, `--output` reused across two arms silently produced one file holding
+    half of each. Records from before that field existed can't be checked, so
+    they are resumed with a warning."""
     if not output_path.exists():
         return {}
     try:
         existing = json.loads(output_path.read_text(encoding="utf-8"))
-        return {r["id"]: r for r in existing}
+        done = {r["id"]: r for r in existing}
     except (json.JSONDecodeError, KeyError):
         log.warning("Could not read existing %s as a valid checkpoint -- starting fresh.", output_path)
         return {}
+    sources = {r.get("prompts_file") for r in existing}
+    if sources - {None} and sources != {prompts_rel}:
+        raise SystemExit(
+            f"{output_path} was generated from {sorted(map(str, sources))}, not {prompts_rel}. "
+            "Refusing to resume into it -- use a fresh --output."
+        )
+    if None in sources:
+        log.warning("%s has records without prompts_file (pre-guard run); resuming unchecked.", output_path)
+    return done
 
 
 def save_checkpoint(output_path: Path, results_by_id: dict, case_order: list):
@@ -199,7 +220,9 @@ def main():
               "database_match %d/%d (%.1f%%) -- generation quality is a separate question from this.",
               db_match, len(cases), db_match / len(cases) * 100 if cases else 0.0)
 
-    done = load_checkpoint(output_path)
+    prompts_rel = (str(prompts_path.resolve().relative_to(REPO_ROOT))
+                   if prompts_path.resolve().is_relative_to(REPO_ROOT) else str(prompts_path))
+    done = load_checkpoint(output_path, prompts_rel)
     if done:
         log.info("Resuming: %d/%d cases already have a saved result in %s -- skipping those.",
                   len(done), len(cases), output_path)
@@ -256,6 +279,7 @@ def main():
             "predicted_database": case["predicted_database"],
             "database_match": case["database_match"],
             "complexity": case.get("complexity"),
+            "prompts_file": prompts_rel,
             **gen_block,
         }
         save_checkpoint(output_path, done, cases)  # write progress after EVERY case
@@ -287,11 +311,10 @@ def main():
         records_logprobs=True,
     )
     log.info("Wrote run manifest -> %s", manifest_file)
-    log.info(
-        "Next: python normalize.py %s rag/data/qwen_rag_mlx_normalized.json",
-        output_path.relative_to(REPO_ROOT) if output_path.is_relative_to(REPO_ROOT) else output_path,
-    )
-    log.info("Then: python rag/score_rag.py 10 data/qwen_baseline_mlx_testslice_normalized.json rag/data/qwen_rag_mlx_normalized.json")
+    # Per-arm names only -- see the header note for why the old hint here was
+    # a trap (it overwrote committed artifacts for every arm that followed it).
+    log.info("Next: add '<label>': '%s' to ARMS in rag/score_rerank_arms.py, "
+             "then: python rag/score_rerank_arms.py <label>", output_path.name)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,21 @@
+{
+  "manifest_schema_version": 1,
+  "generated_at": "2026-09-24T05:51:28Z",
+  "git_sha": "fbf705d6e5b69867ac02714f208b6ece8076cdd9",
+  "git_dirty": true,
+  "git_branch": "azure-deploy",
+  "python_version": "3.12.11",
+  "platform": "Darwin arm64",
+  "mlx_lm_version": "0.31.3",
+  "mlx_version": "0.32.1",
+  "stage": "azure index build",
+  "index": "fewshot-exemplars",
+  "endpoint": "https://srch-capstone-22b895.search.windows.net",
+  "n_documents": 1213,
+  "semantic": false,
+  "vectors_from": "rag/data/fewshot.index (reconstruct_n)",
+  "script": "rag/azure_index.py",
+  "results_file": "results/azure_index_definition.json",
+  "results_sha256": "284742482f14b07687af07892d96727aafcfb4e7b71491b0bfd7c71c28a67beb",
+  "results_bytes": 4301
+}

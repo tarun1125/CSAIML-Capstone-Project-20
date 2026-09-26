@@ -28,9 +28,9 @@
 #      (safe_eval_query / to_json_safe / results_match) works on RAG's
 #      output with zero changes.
 #
-# Runs entirely locally (CPU, no Atlas connection, no GPU) -- only the
-# actual Qwen generation call happens on Colab, reading this script's
-# output (rag/data/rag_prompts.json) directly.
+# Runs entirely locally (CPU, no Atlas connection, no GPU). Generation is a
+# separate step (rag/generate_rag_mlx.py) that reads this script's output
+# (rag/data/rag_prompts.json) directly.
 #
 # TOP_K is overridable from the command line for a controlled K-sweep
 # (K=3 vs K=5 vs K=10, same 61-case test split, same gold, same scoring
@@ -71,17 +71,21 @@ from pathlib import Path
 #
 # Ruff/isort will want to re-sort these back into one alphabetical block. Do
 # not let it: the blank line and this comment are what keep them apart.
+#
+# faiss itself is imported inside main(), not here, so that importing this
+# module for its render_* functions (demo_ui/live_inference.py, the Azure
+# service) neither needs faiss installed nor loads a second libomp. embed_utils
+# stays at the top, so torch is always already loaded by the time main() runs
+# `import faiss` -- the ordering above still holds.
 from embed_utils import MODEL_NAME as EMBED_MODEL_NAME
 from embed_utils import embed
 
-import faiss  # noqa: E402  MUST come after embed_utils -- see above
-
+from retrievers import RETRIEVERS, make_retriever, retriever_label
 from schema_cards import build_cards
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from run_manifest import write_manifest  # noqa: E402
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("rag.build_prompts")
 
 # Reranking experiment (docs/EXPERIMENT-reranking.md §5): an optional
@@ -112,27 +116,93 @@ log = logging.getLogger("rag.build_prompts")
 # The open question this flag exists to answer is whether that +5.6-point
 # retrieval gain reaches execution accuracy -- the same question the reranking
 # experiment asked, on the lever that still has headroom.
-DB_POLICY = "vote"
-if "--db-policy" in sys.argv:
-    _i = sys.argv.index("--db-policy")
-    DB_POLICY = sys.argv[_i + 1]
-    del sys.argv[_i:_i + 2]
-    if DB_POLICY not in ("vote", "rank1"):
-        raise SystemExit(f"--db-policy must be 'vote' or 'rank1', got {DB_POLICY!r}")
 
-RERANK_FILE = None
-RERANK_LABEL = None
-if "--rerank" in sys.argv:
-    _i = sys.argv.index("--rerank")
-    RERANK_FILE = sys.argv[_i + 1]
-    RERANK_LABEL = sys.argv[_i + 2]
-    del sys.argv[_i:_i + 3]
 
-TOP_K = int(sys.argv[1]) if len(sys.argv) > 1 else 10
-# 2026-08-28, Finding 5 A/B test (MLX-adapted -- see docs/finding5_ab_test_guide.md):
-#   python rag/build_prompts.py 10        # FK annotations included (default, current behavior)
-#   python rag/build_prompts.py 10 nofk   # FK annotations omitted -- reproduces the pre-Finding-5 prompt
-INCLUDE_FK = not (len(sys.argv) > 2 and sys.argv[2].lower() == "nofk")
+def parse_args(argv: list[str]) -> dict:
+    """argv (without the program name) -> run configuration.
+
+    This used to run at MODULE LEVEL, so merely importing this file parsed the
+    importer's own sys.argv: `TOP_K = int(sys.argv[1])` raised ValueError under
+    `uvicorn service.app:app`, and rag/eval_retrieval.py had to copy
+    majority_vote_database() rather than import it. Same flags, same order of
+    stripping, same defaults -- only moved behind main()."""
+    argv = list(argv)
+
+    db_policy = "vote"
+    if "--db-policy" in argv:
+        _i = argv.index("--db-policy")
+        db_policy = argv[_i + 1]
+        del argv[_i:_i + 2]
+        if db_policy not in ("vote", "rank1"):
+            raise SystemExit(f"--db-policy must be 'vote' or 'rank1', got {db_policy!r}")
+
+    rerank_file = None
+    rerank_label = None
+    if "--rerank" in argv:
+        _i = argv.index("--rerank")
+        rerank_file = argv[_i + 1]
+        rerank_label = argv[_i + 2]
+        del argv[_i:_i + 3]
+
+    # Retrieval source (docs/AZURE-PLAN.md, Phase 1). faiss is the default, and
+    # with it every filename, prompt and byte of output is what it always was.
+    retriever = "faiss"
+    if "--retriever" in argv:
+        _i = argv.index("--retriever")
+        retriever = argv[_i + 1]
+        del argv[_i:_i + 2]
+        if retriever not in RETRIEVERS:
+            raise SystemExit(f"--retriever must be one of {RETRIEVERS}, got {retriever!r}")
+    if rerank_file and retriever != "faiss":
+        # A rerank file is a re-ordering of FAISS's candidates, and the scores
+        # recorded for it come from a FAISS search. Mixing it with another
+        # retriever would change two things at once.
+        raise SystemExit("--rerank only applies to --retriever faiss")
+
+    top_k = int(argv[0]) if len(argv) > 0 else 10
+    # 2026-08-28, Finding 5 A/B test (MLX-adapted -- see docs/finding5_ab_test_guide.md):
+    #   python rag/build_prompts.py 10        # FK annotations included (default, current behavior)
+    #   python rag/build_prompts.py 10 nofk   # FK annotations omitted -- reproduces the pre-Finding-5 prompt
+    include_fk = not (len(argv) > 1 and argv[1].lower() == "nofk")
+
+    return {
+        "db_policy": db_policy,
+        "rerank_file": rerank_file,
+        "rerank_label": rerank_label,
+        "top_k": top_k,
+        "include_fk": include_fk,
+        "retriever": retriever,
+    }
+
+
+def output_name(cfg: dict) -> str:
+    """The prompts filename for a run configuration.
+
+    Every faiss configuration keeps the exact name it has always had (other
+    scripts and committed artifacts depend on them). A non-faiss retriever
+    gets one uniform scheme instead of extending the special cases:
+    rag_prompts_[<policy>_]<label>[_nofk]_k<K>.json, e.g.
+    rag_prompts_azvec_k10.json or rag_prompts_rank1_azhyb_k10.json."""
+    label = retriever_label(cfg["retriever"])
+    top_k = cfg["top_k"]
+    if label:
+        parts = [p for p in (
+            cfg["db_policy"] if cfg["db_policy"] != "vote" else "",
+            label,
+            "nofk" if not cfg["include_fk"] else "",
+        ) if p]
+        return f"rag_prompts_{'_'.join(parts)}_k{top_k}.json"
+    if cfg["db_policy"] != "vote":
+        suffix = f"_{cfg['rerank_label']}" if cfg["rerank_label"] else ""
+        return f"rag_prompts_{cfg['db_policy']}{suffix}_k{top_k}.json"
+    if cfg["rerank_label"]:
+        return f"rag_prompts_{cfg['rerank_label']}_k{top_k}.json"
+    if not cfg["include_fk"]:
+        return "rag_prompts_nofk.json"
+    if top_k == 10:
+        return "rag_prompts.json"
+    return f"rag_prompts_k{top_k}.json"
+
 
 PROMPT_HEADER = (
     "You are a MongoDB query expert.\n"
@@ -354,7 +424,30 @@ def render_examples_block(neighbors: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def main():
+def build_system_prompt(neighbors: list[dict], predicted_database: str,
+                        cards_by_db: dict, include_fk: bool = True) -> str:
+    """The whole RAG system prompt for one question. The single definition:
+    main() below, demo_ui/live_inference.py and the Azure service all call
+    this, so a served prompt cannot drift from the benchmarked one."""
+    return (
+        PROMPT_HEADER
+        + render_examples_block(neighbors)
+        + "\n"
+        + render_schema_block(predicted_database, cards_by_db, include_fk=include_fk)
+        + render_numeric_string_note(predicted_database)
+        + "\n"
+        + PROMPT_RULES
+    )
+
+
+def main(argv: list[str] | None = None):
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+
+    cfg = parse_args(sys.argv[1:] if argv is None else argv)
+    DB_POLICY = cfg["db_policy"]
+    RERANK_FILE, RERANK_LABEL = cfg["rerank_file"], cfg["rerank_label"]
+    TOP_K, INCLUDE_FK = cfg["top_k"], cfg["include_fk"]
+
     root = Path(__file__).resolve().parents[1]
     rag_dir = root / "rag"
     rag_data_dir = rag_dir / "data"
@@ -363,9 +456,12 @@ def main():
     test_cases = json.loads((rag_data_dir / "rag_test.json").read_text(encoding="utf-8"))
     log.info("Loaded %d held-out test cases -- TOP_K=%d for this run", len(test_cases), TOP_K)
 
-    index = faiss.read_index(str(rag_data_dir / "fewshot.index"))
+    # faiss is imported inside FaissRetriever, i.e. here -- after embed_utils
+    # (module top) has already loaded torch. See the import-order note.
+    retriever = make_retriever(cfg["retriever"])
     metadata = json.loads((rag_data_dir / "fewshot_metadata.json").read_text(encoding="utf-8"))
-    log.info("Loaded FAISS index (ntotal=%d) and %d metadata rows", index.ntotal, len(metadata))
+    log.info("Retriever %s (%s) and %d metadata rows",
+             retriever.name, retriever.describe(), len(metadata))
 
     # Reranked order, if this is a rerank arm. Loaded once, keyed by case id.
     # row_of_id maps an exemplar id back to its FAISS row so the reranked ids
@@ -394,9 +490,9 @@ def main():
 
         qvec = embed([question])
         if reranked_by_case is None:
-            scores, idxs = index.search(qvec, TOP_K)
-            neighbor_rows = [int(i) for i in idxs[0]]
-            neighbor_scores = [float(s) for s in scores[0]]
+            hits = retriever.search(question, qvec, TOP_K)
+            neighbor_rows = [r for r, _ in hits]
+            neighbor_scores = [sc for _, sc in hits]
         else:
             # Search the FULL candidate depth the reranker saw, so the cosine
             # scores recorded below are the real ones for these exemplars
@@ -407,8 +503,7 @@ def main():
             # the neighbours file as 12 comes back out as "12".
             order = reranked_by_case[str(case_id)]
             depth = max(len(order), TOP_K)
-            scores, idxs = index.search(qvec, depth)
-            sim_of_row = {int(r): float(sc) for r, sc in zip(idxs[0], scores[0])}
+            sim_of_row = dict(retriever.search(question, qvec, depth))
             neighbor_rows = [row_of_id[e] for e in order[:TOP_K]]
             neighbor_scores = [sim_of_row.get(r, float("nan")) for r in neighbor_rows]
         neighbors = [metadata[i] for i in neighbor_rows]
@@ -425,14 +520,8 @@ def main():
         database_match = predicted_database == gold_database
         db_match_count += database_match
 
-        system_prompt = (
-            PROMPT_HEADER
-            + render_examples_block(neighbors)
-            + "\n"
-            + render_schema_block(predicted_database, cards_by_db, include_fk=INCLUDE_FK)
-            + render_numeric_string_note(predicted_database)
-            + "\n"
-            + PROMPT_RULES
+        system_prompt = build_system_prompt(
+            neighbors, predicted_database, cards_by_db, include_fk=INCLUDE_FK
         )
 
         prompts.append({
@@ -467,17 +556,7 @@ def main():
                   case_id, gold_database, predicted_database, database_match,
                   [n["id"] for n in neighbors])
 
-    if DB_POLICY != "vote":
-        suffix = f"_{RERANK_LABEL}" if RERANK_LABEL else ""
-        out_name = f"rag_prompts_{DB_POLICY}{suffix}_k{TOP_K}.json"
-    elif RERANK_LABEL:
-        out_name = f"rag_prompts_{RERANK_LABEL}_k{TOP_K}.json"
-    elif not INCLUDE_FK:
-        out_name = "rag_prompts_nofk.json"
-    elif TOP_K == 10:
-        out_name = "rag_prompts.json"
-    else:
-        out_name = f"rag_prompts_k{TOP_K}.json"
+    out_name = output_name(cfg)
     out_path = rag_data_dir / out_name
     out_path.write_text(json.dumps(prompts, indent=2), encoding="utf-8")
     write_manifest(
@@ -487,9 +566,7 @@ def main():
         top_k=TOP_K,
         include_fk=INCLUDE_FK,
         embedding_model=EMBED_MODEL_NAME,
-        faiss_index="rag/data/fewshot.index",
-        faiss_index_ntotal=index.ntotal,
-        faiss_index_type=type(index).__name__,
+        **retriever.describe(),
         n_cases=len(prompts),
         n_schema_databases=len(cards_by_db),
         n_schema_cards=len(cards),
@@ -499,7 +576,7 @@ def main():
         rerank_arm=RERANK_LABEL,
         rerank_neighbors_file=RERANK_FILE,
     )
-    if INCLUDE_FK and TOP_K == 10 and not RERANK_LABEL and DB_POLICY == "vote":
+    if out_name == "rag_prompts.json":
         # Also keep a stably-named FK copy for the A/B test (see
         # docs/finding5_ab_test_guide.md) so rag_prompts.json can keep
         # changing with future K-sweeps/database expansions without the

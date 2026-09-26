@@ -1,0 +1,152 @@
+[
+  {
+    "Log_s": "2026-09-26 08:01:33,962 [INFO] service request=9e7e997be4f1 q_sha256=05e945e4b57c73ca db=concert_singer safe=True rows=None error=False latency_ms={'embed': 13.3, 'retrieve': 2910.1, 'generate': 2079.9, 'guard': 0.4, 'execute': 8.3, 'total': 5012.3}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:01:34.818065Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:01:36,370 [INFO] service request=73e9dcaf97f9 q_sha256=6857c3ff07fb7b02 db=dog_kennels safe=True rows=4 error=False latency_ms={'embed': 14.3, 'retrieve': 17.1, 'generate': 888.6, 'guard': 0.4, 'execute': 8.1, 'total': 929.0}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:01:37.8094679Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:04:15,701 [INFO] service request=a9bf0b00bc8e q_sha256=47a6cbb380e2e6b3 db=car_1 safe=True rows=1 error=False latency_ms={'embed': 10.7, 'retrieve': 348.4, 'generate': 1867.2, 'guard': 0.7, 'execute': 7.9, 'total': 2235.2}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:04:16.8424944Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:04:28,610 [INFO] service request=901932d7adf1 q_sha256=c8bb5fd15eef8b0a db=car_1 safe=True rows=0 error=False latency_ms={'embed': 13.5, 'retrieve': 43.7, 'generate': 2097.0, 'guard': 1.0, 'execute': 12.8, 'total': 2168.3}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:04:29.8473668Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:04:46,984 [INFO] service request=bf00e6750985 q_sha256=a5b10310c12c7573 db=dog_kennels safe=True rows=1 error=False latency_ms={'embed': 17.5, 'retrieve': 45.0, 'generate': 928.6, 'guard': 0.6, 'execute': 7.0, 'total': 999.0}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:04:47.759628Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:04:59,963 [INFO] service request=4324de054530 q_sha256=2b84854fabe4c1d6 db=dog_kennels safe=True rows=1 error=False latency_ms={'embed': 10.5, 'retrieve': 43.7, 'generate': 914.3, 'guard': 0.4, 'execute': 8.2, 'total': 977.6}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:05:00.8260342Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:05:13,185 [INFO] service request=b7d44cb22c58 q_sha256=d091ebcfbde1edf7 db=network_1 safe=True rows=1 error=False latency_ms={'embed': 10.4, 'retrieve': 45.5, 'generate': 1157.7, 'guard': 0.7, 'execute': 9.5, 'total': 1224.0}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:05:13.9859489Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:05:20,261 [INFO] service request=a1cbaf366a86 q_sha256=cdbb0fec8c5d5145 db=world_1 safe=True rows=1 error=False latency_ms={'embed': 10.5, 'retrieve': 41.1, 'generate': 1720.5, 'guard': 0.4, 'execute': 9.2, 'total': 1782.0}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:05:20.7783934Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:05:45,744 [INFO] service request=b65c2537dd7f q_sha256=bf74d555c9c50430 db=world_1 safe=True rows=50 error=False latency_ms={'embed': 10.5, 'retrieve': 44.3, 'generate': 1182.0, 'guard': 0.7, 'execute': 10.9, 'total': 1248.7}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:05:46.8399197Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:04:34,564 [INFO] service request=294b7c4b15ff q_sha256=f0eeab55e6279b64 db=car_1 safe=True rows=7 error=False latency_ms={'embed': 15.5, 'retrieve': 43.1, 'generate': 1548.7, 'guard': 1.3, 'execute': 9.4, 'total': 1618.5}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:04:35.8707725Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:05:52,642 [INFO] service request=af628c66ff78 q_sha256=8d3ded12f174c35d db=world_1 safe=True rows=1 error=False latency_ms={'embed': 14.3, 'retrieve': 45.1, 'generate': 1577.0, 'guard': 1.0, 'execute': 7.4, 'total': 1645.2}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:05:53.8949862Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:06:12,049 [INFO] service request=8f97c38805b7 q_sha256=a4747787b24f94a6 db=car_1 safe=True rows=22 error=False latency_ms={'embed': 14.0, 'retrieve': 42.9, 'generate': 1470.6, 'guard': 0.8, 'execute': 9.9, 'total': 1538.5}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:06:12.7645167Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:06:24,937 [INFO] service request=4f2f5d3f501d q_sha256=b471370d7cfb9eec db=car_1 safe=True rows=8 error=False latency_ms={'embed': 20.3, 'retrieve': 43.0, 'generate': 1348.3, 'guard': 1.0, 'execute': 8.4, 'total': 1421.4}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:06:25.804179Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:06:37,492 [INFO] service request=e1a94d2d020a q_sha256=bac9be61aac80f64 db=concert_singer safe=True rows=1 error=False latency_ms={'embed': 17.3, 'retrieve': 49.0, 'generate': 880.3, 'guard': 0.4, 'execute': 7.0, 'total': 954.3}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:06:38.7708583Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:07:36,471 [INFO] service request=8b90e6655805 q_sha256=17c6b8f611abfd31 db=network_1 safe=True rows=16 error=False latency_ms={'embed': 10.3, 'retrieve': 43.8, 'generate': 1353.5, 'guard': 0.4, 'execute': 6.9, 'total': 1415.3}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:07:37.789837Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:07:43,175 [INFO] service request=d24e30045e22 q_sha256=d5321f643170bfa7 db=pets_1 safe=True rows=1 error=False latency_ms={'embed': 12.9, 'retrieve': 43.5, 'generate': 1547.3, 'guard': 0.6, 'execute': 7.8, 'total': 1612.4}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:07:43.801987Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:08:02,507 [INFO] service request=4e463731b835 q_sha256=91cf543d87f4aeef db=pets_1 safe=True rows=1 error=False latency_ms={'embed': 15.5, 'retrieve': 44.3, 'generate': 1367.5, 'guard': 0.8, 'execute': 7.8, 'total': 1436.3}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:08:03.7436703Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:07:49,156 [INFO] service request=e2ad4bac3c04 q_sha256=e2e7e53de773e2d7 db=pets_1 safe=True rows=1 error=False latency_ms={'embed': 13.3, 'retrieve': 42.0, 'generate': 1016.7, 'guard': 0.7, 'execute': 9.5, 'total': 1082.5}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:07:49.8041379Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:07:56,233 [INFO] service request=b82c89c8f49f q_sha256=d5c16c8b153fdbaf db=concert_singer safe=True rows=1 error=False latency_ms={'embed': 17.5, 'retrieve': 42.0, 'generate': 1582.0, 'guard': 0.6, 'execute': 9.4, 'total': 1651.8}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:07:56.7397739Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:08:28,452 [INFO] service request=f56cf1cc9dee q_sha256=d606af8472a5576b db=concert_singer safe=True rows=1 error=False latency_ms={'embed': 13.4, 'retrieve': 42.6, 'generate': 1291.0, 'guard': 0.4, 'execute': 7.9, 'total': 1355.5}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:08:29.8152489Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:08:09,096 [INFO] service request=e554e1d65f9a q_sha256=a2463f531a1d990c db=concert_singer safe=True rows=1 error=False latency_ms={'embed': 10.6, 'retrieve': 43.8, 'generate': 1458.2, 'guard': 0.5, 'execute': 15.0, 'total': 1528.5}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:08:09.7412741Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:08:48,980 [INFO] service request=2f6cb3be462f q_sha256=a7bf81df480429b0 db=world_1 safe=True rows=1 error=False latency_ms={'embed': 17.6, 'retrieve': 46.4, 'generate': 2295.5, 'guard': 1.1, 'execute': 20.3, 'total': 2381.1}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:08:49.7606324Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:08:16,004 [INFO] service request=8aa17fa31568 q_sha256=abb086f584ce68d0 db=pets_1 safe=True rows=1 error=False latency_ms={'embed': 13.6, 'retrieve': 42.3, 'generate': 1858.1, 'guard': 0.8, 'execute': 8.7, 'total': 1923.8}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:08:17.7843916Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:08:54,123 [INFO] service request=dabaff12d9e4 q_sha256=866aedf219d346e3 db=dog_kennels safe=True rows=1 error=False latency_ms={'embed': 17.4, 'retrieve': 43.4, 'generate': 924.6, 'guard': 0.5, 'execute': 10.3, 'total': 996.5}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:08:55.802553Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:22:26,309 [INFO] service request=055abc9e1b85 q_sha256=05e945e4b57c73ca db=concert_singer safe=True rows=None error=False latency_ms={'embed': 18.5, 'retrieve': 938.8, 'generate': 1509.4, 'guard': 0.3, 'execute': 8.2, 'total': 2475.6}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:22:27.3987174Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:01:35,302 [INFO] service request=200bd4741cdd q_sha256=47a6cbb380e2e6b3 db=car_1 safe=True rows=1 error=False latency_ms={'embed': 11.3, 'retrieve': 18.2, 'generate': 1168.5, 'guard': 0.8, 'execute': 9.1, 'total': 1208.2}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:01:36.914705Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:28:47,651 [INFO] service request=9c3190294bdf q_sha256=05e945e4b57c73ca db=concert_singer safe=True rows=None error=False latency_ms={'embed': 21.0, 'retrieve': 859.8, 'generate': 1475.2, 'guard': 0.3, 'execute': 8.5, 'total': 2365.2}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:28:49.1196369Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:04:20,924 [INFO] service request=ddd83ca3c9ea q_sha256=10267ef2eaf578af db=dog_kennels safe=True rows=1 error=False latency_ms={'embed': 12.3, 'retrieve': 16.7, 'generate': 936.9, 'guard': 0.5, 'execute': 8.1, 'total': 974.8}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:04:21.8089999Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:04:41,583 [INFO] service request=794c10bf1fcc q_sha256=4aade0a8790bc65b db=car_1 safe=True rows=50 error=False latency_ms={'embed': 10.2, 'retrieve': 43.3, 'generate': 1965.0, 'guard': 0.9, 'execute': 114.9, 'total': 2134.8}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:04:42.7596708Z"
+  },
+  {
+    "Log_s": "2026-09-26 08:04:54,755 [INFO] service request=de9ac5acb43a q_sha256=e5d6f0aaa3f410c5 db=car_1 safe=True rows=0 error=False latency_ms={'embed': 21.3, 'retrieve': 41.8, 'generate': 2218.8, 'guard': 0.8, 'execute': 7.4, 'total': 2290.4}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-09-26T08:04:55.9348402Z"
+  }
+]

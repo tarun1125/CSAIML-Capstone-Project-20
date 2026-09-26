@@ -84,9 +84,14 @@ def known_databases() -> set:
     source rag/schema_cards.py builds prompts from), unioned with the 23-db
     adapter's training manifest, so it can never be narrower than what the
     demo legitimately needs. Returns an empty set if neither source is
-    readable, and the caller treats that as "cannot validate, do not block" --
-    a demo that refuses to run because a schema dump is missing would be a
-    worse failure than the one this guards against."""
+    readable, and the caller treats that as "cannot validate, so refuse".
+
+    This used to FAIL OPEN (empty allowlist = allow everything), on the
+    reasoning that a demo refusing to run is worse than the risk. That trade
+    no longer holds: rag/schema_cards.py now always has the committed
+    rag/schema_cards.json to fall back on, so an empty set means something is
+    genuinely broken, and a broken guard in front of eval() should stop, not
+    wave everything through."""
     global _KNOWN_DATABASES_CACHE
     if _KNOWN_DATABASES_CACHE is not None:
         return _KNOWN_DATABASES_CACHE
@@ -223,6 +228,9 @@ def run_baseline(question: str, database: str, max_tokens: int = 300) -> dict:
     return {"arm": "baseline", "intended_database": database, "question": question, "generated_query": query}
 
 
+_RAG_CACHE: dict = {}
+
+
 def run_rag(question: str, database: str, top_k: int = 10, max_tokens: int = 300) -> dict:
     """RAG: retrieve top_k few-shot examples for `question`, build a schema+examples prompt, no adapter."""
     # IMPORT ORDER IS LOAD-BEARING -- embed_utils (torch) BEFORE faiss. This
@@ -238,10 +246,7 @@ def run_rag(question: str, database: str, top_k: int = 10, max_tokens: int = 300
 
     import faiss  # noqa: E402  MUST come after embed_utils -- see above
 
-    from build_prompts import (
-        PROMPT_HEADER, PROMPT_RULES, render_examples_block, render_schema_block,
-        render_numeric_string_note, majority_vote_database,
-    )
+    from build_prompts import build_system_prompt, majority_vote_database
     from schema_cards import build_cards
 
     logger.info("run_rag(database=%s, top_k=%d)", database, top_k)
@@ -251,8 +256,16 @@ def run_rag(question: str, database: str, top_k: int = 10, max_tokens: int = 300
         raise ModelUnavailable(f"RAG index/metadata missing ({index_path} / {meta_path}) -- run "
                                 f"rag/build_retrieval_index.py first.")
 
-    index = faiss.read_index(str(index_path))
-    metadata = json.loads(meta_path.read_text())
+    if "index" not in _RAG_CACHE:
+        # Loaded once per process: re-reading the index, the metadata and every
+        # schema card on each question was pure repeated work.
+        _RAG_CACHE["index"] = faiss.read_index(str(index_path))
+        _RAG_CACHE["metadata"] = json.loads(meta_path.read_text())
+        cards_by_db: dict = {}
+        for card in build_cards():
+            cards_by_db.setdefault(card["database"], []).append(card)
+        _RAG_CACHE["cards_by_db"] = cards_by_db
+    index, metadata, cards_by_db = _RAG_CACHE["index"], _RAG_CACHE["metadata"], _RAG_CACHE["cards_by_db"]
 
     qvec = embed([question])
     _scores, idxs = index.search(qvec, top_k)
@@ -261,19 +274,7 @@ def run_rag(question: str, database: str, top_k: int = 10, max_tokens: int = 300
     logger.info("RAG retrieval: %d neighbors, predicted_database=%s (caller-supplied=%s)",
                 len(neighbors), predicted_database, database)
 
-    cards_by_db: dict = {}
-    for card in build_cards():
-        cards_by_db.setdefault(card["database"], []).append(card)
-
-    system_prompt = (
-        PROMPT_HEADER
-        + render_examples_block(neighbors)
-        + "\n"
-        + render_schema_block(predicted_database, cards_by_db, include_fk=True)
-        + render_numeric_string_note(predicted_database)
-        + "\n"
-        + PROMPT_RULES
-    )
+    system_prompt = build_system_prompt(neighbors, predicted_database, cards_by_db, include_fk=True)
     model, tokenizer = _get_model(None)
     query = _generate(model, tokenizer, system_prompt, question, max_tokens)
     return {
@@ -310,6 +311,19 @@ def run_finetuned(question: str, database: str, variant: str = DEFAULT_FT_VARIAN
             "generated_query": query}
 
 
+_ATLAS_CLIENT = None
+
+
+def _get_atlas_client(atlas_env):
+    """One MongoClient per process. connect() used to run on every button
+    press, and each call opened a new connection pool that was never closed.
+    MongoClient is thread-safe and meant to be shared."""
+    global _ATLAS_CLIENT
+    if _ATLAS_CLIENT is None:
+        _ATLAS_CLIENT = atlas_env.connect()
+    return _ATLAS_CLIENT
+
+
 def execute_against_atlas(query: str, database: str) -> dict:
     """Optional: actually run a generated query against live Atlas and return {status, result, error}.
     Off by default in the UI -- opt-in, since it needs atlas-credentials.env and a live connection.
@@ -338,7 +352,10 @@ def execute_against_atlas(query: str, database: str) -> dict:
         # Restricted here, at the one place that actually touches Atlas, so
         # every arm is covered by one check rather than three.
         allowed = known_databases()
-        if allowed and database not in allowed:
+        if not allowed:
+            raise ValueError("database allowlist is empty (schema cards unreadable) -- "
+                             "refusing to execute rather than skipping the check")
+        if database not in allowed:
             raise ValueError(
                 f"'{database}' is not one of this project's databases. "
                 f"Known: {sorted(allowed)}"
@@ -362,7 +379,7 @@ def execute_against_atlas(query: str, database: str) -> dict:
             logger.info("normalize() rewrote the query before execution: %r -> %r",
                         query[:120], normalized_query[:120])
 
-        client = atlas_env.connect()
+        client = _get_atlas_client(atlas_env)
         db = client[database]
         raw_result = safe_eval_query(normalized_query, db)
         raw_type = type(raw_result).__name__
