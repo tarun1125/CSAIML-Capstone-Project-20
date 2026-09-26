@@ -1,6 +1,6 @@
 # Experiment — does hybrid (BM25 + vector) retrieval on Azure AI Search beat FAISS?
 
-**Status:** pre-registration, signed off by Tarun on **2026-09-24**. Gate 1 not yet run.
+**Status:** pre-registration, signed off by Tarun on **2026-09-24**. Gate 1 run 2026-09-26: **missed the count criterion (298/304 < 300)**; proceeding under the dated deviation in §4. A2 not yet evaluated.
 Nothing in §4–§6 may change after Gate 1 has been run. If something turns out to be wrong, correct
 it in place and mark it **[CORRECTED]** with the reason, as `EXPERIMENT-reranking.md` does.
 
@@ -51,6 +51,24 @@ metrics moved and execution accuracy did not?
 - **If it fails:** stop. A2/A3 are not run or reported until the cause (vector upload, field
   mapping, metric, or ordering) is found and fixed, and Gate 1 then passes. *(This rule is from
   `docs/AZURE-PLAN.md`, Phase 3.)*
+
+> **[DEVIATION] 2026-09-26, decided after Gate 1 and before any A2 result.**
+> Gate 1 (`results/retrieval_eval_azure-vector.json`): **298/304 identical**, 6 same set/different
+> order, **0 different sets**, and **6/6 mismatches on an exact cosine tie**. So the count criterion
+> (≥ 300) **failed** and the tie criterion **passed**.
+> **Cause:** all six mismatches are one exemplar pair with identical question text, *"How many
+> students are in each department?"*: row 760 (`college_1`) and row 1123 (`college_2`). Identical text
+> gives identical vectors and cosines equal to 7 d.p., and FAISS and Azure order exact ties
+> differently. The pair appears in the top 10 of six college test cases.
+> **Consequence at K = 10:** the same 10 exemplars for all 304 cases, and identical database
+> decisions (vote@10 0.8487, rank-1 0.9046 in both). Only the order of those two examples differs,
+> in 6 prompts.
+> **Decision (Tarun):** proceed to A2. The gate exists to catch harness bugs, and this evidence
+> rules one out. The threshold is **not** changed, and the miss is reported as a miss in the finding.
+> Adjusting Azure's tie-breaking to match FAISS was rejected: it would tune the harness to pass
+> its own control.
+> *Incidental observation:* the pool contains an identical question labelled with two sibling
+> databases. No retriever can separate those two exemplars.
 
 **Gate 2 (retrieval metrics), no pass/fail.** Report recall@{1,5,10}, MRR@10, nDCG@10, db vote@10,
 db rank-1 for A1, A2 (and A3) next to A0.

@@ -1,7 +1,7 @@
 {
   "manifest_schema_version": 1,
-  "generated_at": "2026-09-24T05:25:50Z",
-  "git_sha": "ef8f032999749d240b3ae36da83476f6b8725590",
+  "generated_at": "2026-09-26T02:19:06Z",
+  "git_sha": "f0750444459644f5a6f5c5fcd2c9c5a12e369484",
   "git_dirty": true,
   "git_branch": "azure-deploy",
   "python_version": "3.12.11",
