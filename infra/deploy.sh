@@ -8,13 +8,23 @@
 #
 # Reads resource NAMES from azure.env (never commits them to anything else).
 # Needs, in azure.env: RG LOC SRCH AOAI ACR ENV APP KV LAW AI MYIP
+# (VNET / NAT / EGRESS_IP names default below; override them there if needed.)
 # and, the first time only, a file ./atlas-ro-uri.txt holding the READ-ONLY
 # Atlas URI (gitignored; stored in Key Vault, then you delete the file).
 #
 # What gets created (all in $RG, all deleted by `az group delete`):
 #   Log Analytics (0.1 GB/day cap) + App Insights, Container Registry (Basic),
-#   Key Vault (RBAC), Container Apps environment (consumption) + the app
+#   Key Vault (RBAC), a VNet + NAT Gateway + static public IP (the app's ONE
+#   egress address, for the Atlas IP access list), a workload-profiles
+#   Container Apps environment in that VNet (Consumption profile) + the app
 #   (scale 0..1, system-assigned identity, ingress restricted to $MYIP).
+#
+# WHY THE NAT GATEWAY: a consumption-only environment has no egress IP of its
+# own -- Azure reports the region's shared pool (~190 addresses in Central
+# India, shared with other tenants). Allowlisting that in Atlas would admit
+# "any Container App in the region", not this one. A NAT Gateway on the
+# environment's subnet gives one static IP that only this app egresses from.
+# Cost: roughly $1/day (gateway hours + static IP), until teardown.
 # No keys go into environment variables: the app reaches Search, OpenAI and
 # Key Vault with its managed identity; the Atlas URI and the service API key
 # are Key Vault secret references.
@@ -28,6 +38,8 @@ cd "$(dirname "$0")/.."
 set -a; source azure.env; set +a
 : "${RG:?}" "${LOC:?}" "${SRCH:?}" "${AOAI:?}" "${ACR:?}" "${ENV:?}" "${APP:?}" "${KV:?}" "${LAW:?}" "${AI:?}" "${MYIP:?}"
 TAG="${TAG:-v1}"
+VNET="${VNET:-vnet-capstone}"; SUBNET="${SUBNET:-snet-aca}"
+NAT="${NAT:-nat-capstone}"; EGRESS_IP="${EGRESS_IP:-pip-capstone-egress}"
 IMAGE="$ACR.azurecr.io/capstone-rag:$TAG"
 exists() { "$@" -o none >/dev/null 2>&1; }
 say() { printf '\n== %s\n' "$*"; }
@@ -78,11 +90,27 @@ if ! exists az keyvault secret show --vault-name "$KV" -n service-api-key; then
   echo "   generated service-api-key (read it with: az keyvault secret show --vault-name $KV -n service-api-key --query value -o tsv)"
 fi
 
-say "4. Container Apps environment + app (scale 0..1)"
+say "4a. Network: VNet + delegated subnet + NAT Gateway with one static egress IP"
+az provider register -n Microsoft.Network --wait -o none
+exists az network vnet show -g "$RG" -n "$VNET" ||
+  az network vnet create -g "$RG" -n "$VNET" -l "$LOC" --address-prefixes 10.20.0.0/16 \
+    --subnet-name "$SUBNET" --subnet-prefixes 10.20.0.0/24 -o none
+exists az network public-ip show -g "$RG" -n "$EGRESS_IP" ||
+  az network public-ip create -g "$RG" -n "$EGRESS_IP" -l "$LOC" --sku Standard --allocation-method Static -o none
+exists az network nat gateway show -g "$RG" -n "$NAT" ||
+  az network nat gateway create -g "$RG" -n "$NAT" -l "$LOC" --public-ip-addresses "$EGRESS_IP" --idle-timeout 10 -o none
+# Delegated to Container Apps (workload-profiles environments need a /27 or larger) and routed via the NAT.
+az network vnet subnet update -g "$RG" --vnet-name "$VNET" -n "$SUBNET" \
+  --delegations Microsoft.App/environments --nat-gateway "$NAT" -o none
+SUBNET_ID=$(az network vnet subnet show -g "$RG" --vnet-name "$VNET" -n "$SUBNET" --query id -o tsv)
+EGRESS=$(az network public-ip show -g "$RG" -n "$EGRESS_IP" --query ipAddress -o tsv)
+
+say "4b. Container Apps environment (workload profiles, in the VNet) + app (scale 0..1)"
 if ! exists az containerapp env show -g "$RG" -n "$ENV"; then
   LAW_CID=$(az monitor log-analytics workspace show -g "$RG" -n "$LAW" --query customerId -o tsv)
   LAW_KEY=$(az monitor log-analytics workspace get-shared-keys -g "$RG" -n "$LAW" --query primarySharedKey -o tsv)
-  az containerapp env create -g "$RG" -n "$ENV" -l "$LOC" --logs-workspace-id "$LAW_CID" --logs-workspace-key "$LAW_KEY" -o none
+  az containerapp env create -g "$RG" -n "$ENV" -l "$LOC" --logs-workspace-id "$LAW_CID" --logs-workspace-key "$LAW_KEY" \
+    --enable-workload-profiles --infrastructure-subnet-resource-id "$SUBNET_ID" -o none
 fi
 if ! exists az containerapp show -g "$RG" -n "$APP"; then
   # Starts without secrets and will fail its first revision -- step 6 fixes that
@@ -120,6 +148,5 @@ az containerapp ingress access-restriction set -g "$RG" -n "$APP" --rule-name me
   --ip-address "$MYIP/32" --action Allow -o none
 FQDN=$(az containerapp show -g "$RG" -n "$APP" --query properties.configuration.ingress.fqdn -o tsv)
 echo "   URL:          https://$FQDN"
-echo "   Outbound IPs (add ONLY these to the Atlas IP access list):"
-az containerapp show -g "$RG" -n "$APP" --query properties.outboundIpAddresses -o tsv | tr ' ' '\n' | sed 's/^/     /'
+echo "   Egress IP (the NAT Gateway's; add ONLY this to the Atlas IP access list): $EGRESS/32"
 echo "   Health check: curl -s https://$FQDN/healthz"
