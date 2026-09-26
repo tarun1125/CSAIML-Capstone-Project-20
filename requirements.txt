@@ -23,11 +23,6 @@ numpy
 scikit-learn            # rag/build_split.py: train_test_split for the
                         # train/test split that produced rag_test.json
 
-# --- Azure AI Search (rag/azure_index.py, rag/retrievers.py) -- only needed for
-# the Azure retrieval arms; FAISS runs never import it. See docs/AZURE-PLAN.md.
-azure-search-documents>=12.0
-openai>=3.0              # rag/generate_rag_aoai.py (Azure OpenAI v1 endpoint); G1 arm only
-
 # --- Model inference (baseline + RAG notebooks) ---
 torch>=2.1              # 2.1+ for a solid MPS (Apple Silicon) backend --
                         # on the Mac, verify with:

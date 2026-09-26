@@ -16,10 +16,7 @@
 
 import logging
 
-# mlx_lm is imported inside generate_with_logprobs(), not here. clean() is the
-# post-processing every arm is scored through, and it has to be importable
-# where MLX is not installed -- the Linux container for the Azure service, and
-# the Azure OpenAI generator arm -- or those paths would have to copy it.
+from mlx_lm import stream_generate
 
 log = logging.getLogger("generation_utils")
 
@@ -192,8 +189,6 @@ def generate_with_logprobs(model, tokenizer, prompt, max_tokens: int, **kwargs):
     probabilities").
 
     Returns (cleaned_text, kept_logprobs, diagnostics, raw_text)."""
-    from mlx_lm import stream_generate
-
     pieces: list[str] = []
     tok_lps: list[float] = []
     for resp in stream_generate(model, tokenizer, prompt=prompt, max_tokens=max_tokens, **kwargs):

@@ -206,91 +206,6 @@ def render_live_tab():
                 st.error(f"Execution failed: {exec_result['error']}")
 
 
-def _show_rows(rows, row_count, truncated):
-    if rows is None:
-        st.caption("not executed")
-    elif isinstance(rows, list):
-        st.caption(f"{row_count} row(s){' (capped at 50)' if truncated else ''}")
-        st.json(rows[:20])
-    else:
-        st.write(rows)
-
-
-def render_azure_tab():
-    st.subheader("RAG on Azure vs RAG on this Mac")
-    st.caption(
-        "Same question, two RAG systems. **Azure:** the deployed service (Container Apps) with gpt-4o, "
-        "Azure AI Search vector retrieval and the rank-1 database policy, the best measured "
-        "configuration (212/304). **Local:** Qwen2.5-Coder-1.5B on MLX, FAISS and the majority vote, the "
-        "benchmark's RAG arm (143/304). Both use the same prompt builder, guard and scorer; see "
-        "docs/FINDING-azure-generator.md for why they differ."
-    )
-    try:
-        import azure_client as az
-    except ImportError as exc:
-        st.error(f"azure_client failed to import: {exc}")
-        return
-
-    question = st.text_area("Question", value="What is the average horsepower of the cars before 1980?",
-                            key="azure_q")
-    also_local = st.checkbox("Also run the local RAG (Qwen on MLX) for a side-by-side comparison", value=True)
-    execute = st.checkbox("Execute the generated queries against Atlas", value=True, key="azure_exec")
-
-    if not st.button("Ask", type="primary", key="azure_ask"):
-        st.info("The Azure service is paused between sessions: run `./infra/resume.sh` first. "
-                "The first request after it has been idle takes ~30 s (cold start).")
-        return
-
-    col_az, col_local = st.columns(2)
-    with col_az:
-        st.markdown("#### Azure: gpt-4o + rank-1")
-        try:
-            with st.spinner("Calling the deployed service (a cold start can take ~30 s)..."):
-                az.health()
-                r = az.ask(question, execute=execute)
-        except az.AzureServiceUnavailable as exc:
-            st.error(str(exc))
-            r = None
-        if r:
-            st.markdown(f"Database: `{r['database']}` ({r['db_policy']}) · model `{r.get('model')}`")
-            st.code(r.get("query") or "(empty)", language="python")
-            if not r["safe"]:
-                st.warning(f"Rejected by the AST guard before execution: {r['rejected_reason']}")
-            elif r.get("error"):
-                st.error(r["error"])
-            else:
-                _show_rows(r.get("rows"), r.get("row_count"), r.get("truncated"))
-            lat = r.get("latency_ms", {})
-            st.caption(" · ".join(f"{k} {v:.0f} ms" for k, v in lat.items()))
-
-    with col_local:
-        st.markdown("#### Local: Qwen 1.5B + vote")
-        if not also_local:
-            st.caption("skipped")
-        else:
-            try:
-                import time
-                import live_inference as li
-                t0 = time.perf_counter()
-                with st.spinner("Running local RAG on MLX (first call loads the model)..."):
-                    res = li.run_rag(question, database="")
-                gen_s = time.perf_counter() - t0
-                db = res["predicted_database"]
-                st.markdown(f"Database: `{db}` (vote) · model `Qwen2.5-Coder-1.5B (MLX)`")
-                st.code(res["generated_query"] or "(empty)", language="python")
-                if execute:
-                    ex = li.execute_against_atlas(res["generated_query"], db)
-                    if ex["status"] == "PASS":
-                        rows = ex["result"]
-                        _show_rows(rows, len(rows) if isinstance(rows, list) else None, False)
-                    else:
-                        st.error(ex["error"])
-                st.caption(f"retrieve + generate {gen_s * 1000:.0f} ms (includes model load on first call)")
-            except Exception as exc:  # noqa: BLE001 -- local MLX may be unavailable; never crash the demo
-                st.error(f"Local RAG unavailable: {exc}")
-                logger.exception("local RAG failed in the Azure comparison tab")
-
-
 def main():
     st.title("NL-to-MongoDB Query Generation: Baseline vs RAG vs Fine-Tuned")
     st.caption(
@@ -299,8 +214,8 @@ def main():
         "epoch-parity-fixed 23-db adapter, 1000 iterations / ~3.7 epochs) — nothing here is fabricated."
     )
 
-    tab_baseline, tab_rag, tab_ft, tab_compare, tab_live, tab_azure = st.tabs(
-        ["Baseline", "RAG", "Fine-Tuned", "Compare All 3", "Live Inference (experimental)", "RAG on Azure"]
+    tab_baseline, tab_rag, tab_ft, tab_compare, tab_live = st.tabs(
+        ["Baseline", "RAG", "Fine-Tuned", "Compare All 3", "Live Inference (experimental)"]
     )
     with tab_baseline:
         render_single_arm_tab("baseline", "Baseline (zero-shot)")
@@ -312,8 +227,6 @@ def main():
         render_compare_all_tab()
     with tab_live:
         render_live_tab()
-    with tab_azure:
-        render_azure_tab()
 
 
 if __name__ == "__main__":

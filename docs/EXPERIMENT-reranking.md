@@ -1,12 +1,8 @@
 # Experiment — cross-encoder reranking, and whether ranking metrics predict task accuracy
 
 **Status:** specified and RUN 2026-09-22. **Result: the second outcome in §5 — ranking metrics
-improved, execution accuracy did not.** At K=10, reranking flipped 42 of 304 cases, 22 lost /
-20 gained (McNemar exact p = 0.8776), against the FK-on baseline
-`qwen_rag_fk_k10_execution_results.json` (143/304). **[CORRECTED 2026-09-26]** This line used to
-say 48 flipped, 24 / 24, p = 1.0000. That compared against `qwen_rag_execution_results_mlx.json`,
-which is the no-FK run (141/304), so FK varied along with the exemplar list. `FINDING-reranking.md`
-already carried the corrected numbers; only this summary line was stale. See
+improved, execution accuracy did not.** At K=10, reranking flipped 48 of 304 cases and split
+them exactly 24 lost / 24 gained (McNemar exact p = 1.0000). See
 [`docs/FINDING-reranking.md`](FINDING-reranking.md). Two errors in this spec were found while
 running it and are corrected in place below, marked **[CORRECTED]**.
 **Why it exists:** the retrieval stage is currently evaluated by one number —
