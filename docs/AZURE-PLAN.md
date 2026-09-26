@@ -613,6 +613,9 @@ Do the measurements in **one sitting**: resume at the start (see Cost control) a
 - [ ] Export whatever you want to keep: App Insights query results, the index definition JSON, screenshots.
 - [ ] `az group delete -n rg-capstone-rag --yes`. This single command is why everything went into one resource group.
 - [ ] Delete the Atlas read-only user and remove the IP entries.
+- [ ] Delete **`NetworkWatcherRG`** too (`az group delete -n NetworkWatcherRG --yes`). Azure created it
+  automatically for the VNet in Phase 5; it's free, but it sits outside `rg-capstone-rag`, so the group delete
+  above doesn't remove it.
 - [ ] Check Cost Management the next day and confirm spend has stopped.
 - [ ] Keep `infra/deploy.sh`. It's the proof that you can redeploy in about 20 minutes.
 
@@ -635,6 +638,8 @@ treat every session as *resume → work → pause*, and check the portal's Cost 
 | Azure OpenAI, **Standard** deployment | No, pay per token | delete the deployment once Phase 6 is done | — |
 | Azure OpenAI, *Provisioned* deployment | **Yes, hourly.** Never choose this type | — | — |
 | Log Analytics / App Insights | Per GB ingested | the 0.1 GB/day cap from step 1 | — |
+| **NAT Gateway + static egress IP** (Phase 5, Option B) | **Yes, hourly** (~$1/day together) | only at teardown | — |
+| VNet environment's managed load balancer + IP (`ME_cae-capstone-vnet_…` group, created by Azure) | **Probably yes, hourly**; check Cost Management | deleted with the environment | — |
 | Key Vault | Per operation (cents) | — | — |
 
 Check current prices in the pricing calculator on the day. The point of the table is the **Yes** rows.
