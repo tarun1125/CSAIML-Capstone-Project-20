@@ -1,0 +1,1296 @@
+{
+  "summary": {
+    "n_cases": 50,
+    "n_ok_requests": 50,
+    "client_s": {
+      "p50": 1.675,
+      "p95": 2.477,
+      "mean": 1.679
+    },
+    "server_ms": {
+      "embed": {
+        "p50": 13.7,
+        "p95": 20.3
+      },
+      "retrieve": {
+        "p50": 43.4,
+        "p95": 49.0
+      },
+      "generate": {
+        "p50": 1470.6,
+        "p95": 2218.8
+      },
+      "guard": {
+        "p50": 0.7,
+        "p95": 1.2
+      },
+      "execute": {
+        "p50": 8.6,
+        "p95": 30.1
+      },
+      "total": {
+        "p50": 1538.5,
+        "p95": 2381.1
+      }
+    },
+    "database_match": 49,
+    "safe": 50,
+    "correct": 35,
+    "not_comparable_truncated": 2,
+    "prompt_tokens": 84657,
+    "completion_tokens": 4103,
+    "note": "3 duplicate rows removed after the run: for integer case ids (12, 6, 3) the request succeeded and was recorded, then the progress print raised on an 's' format and the error handler appended a spurious failed row. Fixed in service/smoke.py."
+  },
+  "cases": [
+    {
+      "id": "spider-car_1-39",
+      "gold_database": "car_1",
+      "database": "car_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.cars_data.aggregate([{'$match': {'Year': {'$lt': 1980}, 'Horsepower': {'$ne': 'null'}}}, {'$addFields': {'HorsepowerNum': {'$toInt': '$Horsepower'}}}, {'$group': {'_id': None, 'avg_horsepower': {'$avg': '$HorsepowerNum'}}}, {'$project': {'_id': 0, 'avg_horsepower': 1}}])",
+      "client_s": 2.379,
+      "latency_ms": {
+        "embed": 10.7,
+        "retrieve": 348.4,
+        "generate": 1867.2,
+        "guard": 0.7,
+        "execute": 7.9,
+        "total": 2235.2
+      },
+      "tokens": {
+        "prompt_tokens": 1841,
+        "completion_tokens": 100
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-dog_kennels-39",
+      "gold_database": "dog_kennels",
+      "database": "dog_kennels",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.Charges.aggregate([{'$group': {'_id': None, 'max_charge': {'$max': '$charge_amount'}}}, {'$project': {'_id': 0, 'max_charge': 1}}])",
+      "client_s": 1.091,
+      "latency_ms": {
+        "embed": 12.3,
+        "retrieve": 16.7,
+        "generate": 936.9,
+        "guard": 0.5,
+        "execute": 8.1,
+        "total": 974.8
+      },
+      "tokens": {
+        "prompt_tokens": 1460,
+        "completion_tokens": 47
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "car-h3",
+      "gold_database": "car_1",
+      "database": "car_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": false,
+      "query": "db.car_makers.aggregate([{'$addFields': {'CountryInt': {'$toInt': '$Country'}}}, {'$lookup': {'from': 'countries', 'localField': 'CountryInt', 'foreignField': 'CountryId', 'as': 'country'}}, {'$unwind': '$country'}, {'$lookup': {'from': 'continents', 'localField': 'country.Continent', 'foreignField': 'ContId', 'as': 'continent'}}, {'$unwind': '$continent'}, {'$match': {'continent.Continent': 'Asia'}}, {'$project': {'_id': 0, 'FullName': 1, 'CountryName': '$country.CountryName'}}])",
+      "client_s": 2.271,
+      "latency_ms": {
+        "embed": 13.5,
+        "retrieve": 43.7,
+        "generate": 2097.0,
+        "guard": 1.0,
+        "execute": 12.8,
+        "total": 2168.3
+      },
+      "tokens": {
+        "prompt_tokens": 2438,
+        "completion_tokens": 170
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-car_1-14",
+      "gold_database": "car_1",
+      "database": "car_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": false,
+      "query": "db.car_makers.aggregate([{'$lookup': {'from': 'model_list.json', 'localField': 'Id', 'foreignField': 'Maker', 'as': 'models'}}, {'$match': {'$expr': {'$gte': [{'$size': '$models'}, 2]}}}, {'$group': {'_id': None, 'makers': {'$push': {'Id': '$Id', 'Maker': '$Maker'}}}}, {'$match': {'$expr': {'$gt': [{'$size': '$makers'}, 3]}}}, {'$unwind': '$makers'}, {'$replaceRoot': {'newRoot': '$makers'}}, {'$project': {'_id': 0, 'Id': 1, 'Maker': 1}}])",
+      "client_s": 1.726,
+      "latency_ms": {
+        "embed": 15.5,
+        "retrieve": 43.1,
+        "generate": 1548.7,
+        "guard": 1.3,
+        "execute": 9.4,
+        "total": 1618.5
+      },
+      "tokens": {
+        "prompt_tokens": 2442,
+        "completion_tokens": 162
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": 12,
+      "gold_database": "car_1",
+      "database": "car_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": true,
+      "correct": null,
+      "query": "db.cars_data.aggregate([{'$match': {'Horsepower': {'$ne': 'null'}}}, {'$addFields': {'HorsepowerNum': {'$toInt': '$Horsepower'}}}, {'$lookup': {'from': 'car_names', 'localField': 'Id', 'foreignField': 'MakeId', 'as': 'car_name'}}, {'$unwind': '$car_name'}, {'$group': {'_id': '$car_name.Make', 'max_hp_model': {'$first': '$car_name.Model'}, 'max_hp': {'$max': '$HorsepowerNum'}}}, {'$project': {'_id': 0, 'Maker': '$_id', 'Model': '$max_hp_model', 'MaxHorsepower': '$max_hp'}}])",
+      "client_s": 2.258,
+      "latency_ms": {
+        "embed": 10.2,
+        "retrieve": 43.3,
+        "generate": 1965.0,
+        "guard": 0.9,
+        "execute": 114.9,
+        "total": 2134.8
+      },
+      "tokens": {
+        "prompt_tokens": 2194,
+        "completion_tokens": 168
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "dk-e1",
+      "gold_database": "dog_kennels",
+      "database": "dog_kennels",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.Dogs.aggregate([{'$addFields': {'age_num': {'$toInt': '$age'}}}, {'$group': {'_id': None, 'avg_age': {'$avg': '$age_num'}}}, {'$project': {'_id': 0, 'avg_age': 1}}])",
+      "client_s": 1.179,
+      "latency_ms": {
+        "embed": 17.5,
+        "retrieve": 45.0,
+        "generate": 928.6,
+        "guard": 0.6,
+        "execute": 7.0,
+        "total": 999.0
+      },
+      "tokens": {
+        "prompt_tokens": 1605,
+        "completion_tokens": 65
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "car-h2",
+      "gold_database": "car_1",
+      "database": "car_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": false,
+      "query": "db.car_names.aggregate([{'$match': {'Make': 'Volvo'}}, {'$lookup': {'from': 'cars_data', 'localField': 'MakeId', 'foreignField': 'Id', 'as': 'car_data'}}, {'$unwind': '$car_data'}, {'$match': {'car_data.Year': {'$gte': 1977, '$lte': 1981}}}, {'$project': {'_id': 0, 'Model': 1, 'Year': '$car_data.Year'}}, {'$sort': {'Year': 1, 'Model': 1}}])",
+      "client_s": 2.404,
+      "latency_ms": {
+        "embed": 21.3,
+        "retrieve": 41.8,
+        "generate": 2218.8,
+        "guard": 0.8,
+        "execute": 7.4,
+        "total": 2290.4
+      },
+      "tokens": {
+        "prompt_tokens": 1743,
+        "completion_tokens": 128
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "dk-e3",
+      "gold_database": "dog_kennels",
+      "database": "dog_kennels",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": false,
+      "query": "db.Treatments.aggregate([{'$group': {'_id': '$dog_id'}}, {'$count': 'count'}])",
+      "client_s": 1.108,
+      "latency_ms": {
+        "embed": 10.5,
+        "retrieve": 43.7,
+        "generate": 914.3,
+        "guard": 0.4,
+        "execute": 8.2,
+        "total": 977.6
+      },
+      "tokens": {
+        "prompt_tokens": 1817,
+        "completion_tokens": 27
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-pets_1-10",
+      "gold_database": "pets_1",
+      "database": "pets_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": false,
+      "query": "db.Student.aggregate([{'$lookup': {'from': 'Has_Pet', 'let': {'sid': '$StuID'}, 'pipeline': [{'$match': {'$expr': {'$eq': ['$StuID', '$$sid']}}}, {'$lookup': {'from': 'Pets', 'localField': 'PetID', 'foreignField': 'PetID', 'as': 'p'}}, {'$unwind': '$p'}, {'$match': {'p.PetType': 'cat'}}], 'as': 'cat_pets'}}, {'$match': {'cat_pets': {'$eq': []}}}, {'$project': {'_id': 0, 'StuID': 1}}, {'$sort': {'StuID': 1}}])",
+      "client_s": 2.568,
+      "latency_ms": {
+        "embed": 15.5,
+        "retrieve": 43.5,
+        "generate": 2365.2,
+        "guard": 1.2,
+        "execute": 14.3,
+        "total": 2440.0
+      },
+      "tokens": {
+        "prompt_tokens": 2204,
+        "completion_tokens": 203
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-network_1-12",
+      "gold_database": "network_1",
+      "database": "network_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.Highschooler.aggregate([{'$match': {'name': 'Kyle'}}, {'$lookup': {'from': 'Friend', 'localField': 'ID', 'foreignField': 'student_id', 'as': 'friends'}}, {'$project': {'_id': 0, 'friend_count': {'$size': '$friends'}}}])",
+      "client_s": 1.332,
+      "latency_ms": {
+        "embed": 10.4,
+        "retrieve": 45.5,
+        "generate": 1157.7,
+        "guard": 0.7,
+        "execute": 9.5,
+        "total": 1224.0
+      },
+      "tokens": {
+        "prompt_tokens": 1454,
+        "completion_tokens": 73
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-world_1-35",
+      "gold_database": "world_1",
+      "database": "world_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.country.find({'Name': 'Angola'}, {'_id': 0, 'Region': 1, 'Population': 1})",
+      "client_s": 1.935,
+      "latency_ms": {
+        "embed": 10.5,
+        "retrieve": 41.1,
+        "generate": 1720.5,
+        "guard": 0.4,
+        "execute": 9.2,
+        "total": 1782.0
+      },
+      "tokens": {
+        "prompt_tokens": 1605,
+        "completion_tokens": 29
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "nw-m3",
+      "gold_database": "network_1",
+      "database": "network_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": false,
+      "query": "db.Friend.aggregate([{'$group': {'_id': '$student_id', 'friend_count': {'$sum': 1}}}, {'$sort': {'friend_count': -1, '_id': 1}}, {'$limit': 1}, {'$project': {'_id': 0, 'student_id': '$_id', 'friend_count': 1}}])",
+      "client_s": 1.391,
+      "latency_ms": {
+        "embed": 16.8,
+        "retrieve": 42.5,
+        "generate": 1203.3,
+        "guard": 0.7,
+        "execute": 7.4,
+        "total": 1271.0
+      },
+      "tokens": {
+        "prompt_tokens": 1596,
+        "completion_tokens": 80
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-dog_kennels-26",
+      "gold_database": "dog_kennels",
+      "database": "dog_kennels",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.Dogs.find({}, {'_id': 0, 'date_arrived': 1, 'date_departed': 1})",
+      "client_s": 1.623,
+      "latency_ms": {
+        "embed": 13.0,
+        "retrieve": 42.9,
+        "generate": 1439.4,
+        "guard": 0.4,
+        "execute": 6.9,
+        "total": 1503.0
+      },
+      "tokens": {
+        "prompt_tokens": 1878,
+        "completion_tokens": 28
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "car-c2",
+      "gold_database": "car_1",
+      "database": "car_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": false,
+      "query": "db.cars_data.aggregate([{'$match': {'Weight': {'$gt': 4000}}}, {'$lookup': {'from': 'car_names', 'localField': 'Id', 'foreignField': 'MakeId', 'as': 'car_name'}}, {'$unwind': '$car_name'}, {'$lookup': {'from': 'model_list.json', 'localField': 'car_name.Model', 'foreignField': 'Model', 'as': 'model'}}, {'$unwind': '$model'}, {'$group': {'_id': '$model.Maker'}}, {'$count': 'distinct_makers'}])",
+      "client_s": 2.278,
+      "latency_ms": {
+        "embed": 19.3,
+        "retrieve": 45.9,
+        "generate": 2070.7,
+        "guard": 0.8,
+        "execute": 30.1,
+        "total": 2167.3
+      },
+      "tokens": {
+        "prompt_tokens": 1810,
+        "completion_tokens": 132
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "wl-e7",
+      "gold_database": "world_1",
+      "database": "world_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": true,
+      "correct": null,
+      "query": "db.countrylanguage.aggregate([{'$group': {'_id': '$CountryCode', 'langs': {'$addToSet': '$Language'}}}, {'$match': {'$expr': {'$not': {'$in': ['English', '$langs']}}}}, {'$project': {'_id': 0, 'CountryCode': '$_id'}}, {'$sort': {'CountryCode': 1}}])",
+      "client_s": 1.349,
+      "latency_ms": {
+        "embed": 10.5,
+        "retrieve": 44.3,
+        "generate": 1182.0,
+        "guard": 0.7,
+        "execute": 10.9,
+        "total": 1248.7
+      },
+      "tokens": {
+        "prompt_tokens": 1609,
+        "completion_tokens": 86
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-world_1-49",
+      "gold_database": "world_1",
+      "database": "world_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.country.aggregate([{'$sort': {'Population': 1}}, {'$limit': 1}, {'$project': {'_id': 0, 'Name': 1, 'IndepYear': 1, 'SurfaceArea': 1}}])",
+      "client_s": 1.743,
+      "latency_ms": {
+        "embed": 14.3,
+        "retrieve": 45.1,
+        "generate": 1577.0,
+        "guard": 1.0,
+        "execute": 7.4,
+        "total": 1645.2
+      },
+      "tokens": {
+        "prompt_tokens": 1777,
+        "completion_tokens": 54
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-pets_1-15",
+      "gold_database": "pets_1",
+      "database": "dog_kennels",
+      "database_match": false,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": false,
+      "query": "db.Pets.aggregate([{'$group': {'_id': '$PetType', 'avg_age': {'$avg': {'$toInt': '$pet_age'}}, 'max_age': {'$max': {'$toInt': '$pet_age'}}}}, {'$project': {'_id': 0, 'PetType': '$_id', 'avg_age': 1, 'max_age': 1}}, {'$sort': {'PetType': 1}}])",
+      "client_s": 1.335,
+      "latency_ms": {
+        "embed": 11.6,
+        "retrieve": 41.5,
+        "generate": 1166.5,
+        "guard": 0.7,
+        "execute": 7.0,
+        "total": 1227.8
+      },
+      "tokens": {
+        "prompt_tokens": 1759,
+        "completion_tokens": 98
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-world_1-2",
+      "gold_database": "world_1",
+      "database": "world_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.country.aggregate([{'$lookup': {'from': 'countrylanguage', 'localField': 'Code', 'foreignField': 'CountryCode', 'as': 'langs'}}, {'$unwind': '$langs'}, {'$group': {'_id': {'Continent': '$Continent', 'Language': '$langs.Language'}}}, {'$group': {'_id': '$_id.Continent', 'unique_languages': {'$sum': 1}}}, {'$sort': {'unique_languages': -1}}, {'$limit': 1}, {'$project': {'_id': 0, 'Continent': '$_id'}}])",
+      "client_s": 2.495,
+      "latency_ms": {
+        "embed": 11.3,
+        "retrieve": 44.2,
+        "generate": 2193.2,
+        "guard": 0.9,
+        "execute": 154.0,
+        "total": 2403.9
+      },
+      "tokens": {
+        "prompt_tokens": 1470,
+        "completion_tokens": 134
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-car_1-20",
+      "gold_database": "car_1",
+      "database": "car_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": false,
+      "query": "db['model_list.json'].aggregate([{'$lookup': {'from': 'car_makers', 'localField': 'Maker', 'foreignField': 'Id', 'as': 'maker'}}, {'$unwind': '$maker'}, {'$group': {'_id': '$maker.FullName', 'count': {'$sum': 1}}}, {'$project': {'_id': 0, 'FullName': '$_id', 'count': 1}}, {'$sort': {'count': -1}}])",
+      "client_s": 1.637,
+      "latency_ms": {
+        "embed": 14.0,
+        "retrieve": 42.9,
+        "generate": 1470.6,
+        "guard": 0.8,
+        "execute": 9.9,
+        "total": 1538.5
+      },
+      "tokens": {
+        "prompt_tokens": 1934,
+        "completion_tokens": 109
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-world_1-23",
+      "gold_database": "world_1",
+      "database": "world_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.country.aggregate([{'$match': {'HeadOfState': 'Beatrix'}}, {'$lookup': {'from': 'countrylanguage', 'localField': 'Code', 'foreignField': 'CountryCode', 'as': 'langs'}}, {'$unwind': '$langs'}, {'$match': {'langs.IsOfficial': 'T'}}, {'$project': {'_id': 0, 'Language': '$langs.Language'}}])",
+      "client_s": 2.086,
+      "latency_ms": {
+        "embed": 17.0,
+        "retrieve": 43.9,
+        "generate": 1893.1,
+        "guard": 0.6,
+        "execute": 9.3,
+        "total": 1964.2
+      },
+      "tokens": {
+        "prompt_tokens": 1990,
+        "completion_tokens": 91
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-car_1-6",
+      "gold_database": "car_1",
+      "database": "car_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.countries.aggregate([{'$lookup': {'from': 'car_makers', 'let': {'cid': '$CountryId'}, 'pipeline': [{'$addFields': {'CountryInt': {'$toInt': '$Country'}}}, {'$match': {'$expr': {'$eq': ['$CountryInt', '$$cid']}}}], 'as': 'makers'}}, {'$match': {'makers': {'$ne': []}}}, {'$project': {'_id': 0, 'CountryId': 1, 'CountryName': 1}}, {'$sort': {'CountryId': 1}}])",
+      "client_s": 1.608,
+      "latency_ms": {
+        "embed": 20.3,
+        "retrieve": 43.0,
+        "generate": 1348.3,
+        "guard": 1.0,
+        "execute": 8.4,
+        "total": 1421.4
+      },
+      "tokens": {
+        "prompt_tokens": 2520,
+        "completion_tokens": 129
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-car_1-44",
+      "gold_database": "car_1",
+      "database": "car_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.cars_data.aggregate([{'$match': {'$or': [{'Cylinders': 8}, {'Year': {'$lt': 1980}}], 'MPG': {'$ne': 'null'}}}, {'$group': {'_id': None, 'max_mpg': {'$max': {'$toDouble': '$MPG'}}}}, {'$project': {'_id': 0, 'max_mpg': 1}}])",
+      "client_s": 1.982,
+      "latency_ms": {
+        "embed": 19.7,
+        "retrieve": 43.3,
+        "generate": 1797.7,
+        "guard": 0.8,
+        "execute": 8.2,
+        "total": 1870.0
+      },
+      "tokens": {
+        "prompt_tokens": 1458,
+        "completion_tokens": 95
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "cs-e8",
+      "gold_database": "concert_singer",
+      "database": "concert_singer",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.singer.find({'Song_Name': 'Love'}, {'_id': 0, 'Name': 1})",
+      "client_s": 1.067,
+      "latency_ms": {
+        "embed": 17.3,
+        "retrieve": 49.0,
+        "generate": 880.3,
+        "guard": 0.4,
+        "execute": 7.0,
+        "total": 954.3
+      },
+      "tokens": {
+        "prompt_tokens": 1436,
+        "completion_tokens": 24
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "cs-m2",
+      "gold_database": "concert_singer",
+      "database": "concert_singer",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.stadium.aggregate([{'$group': {'_id': None, 'total_capacity': {'$sum': '$Capacity'}}}, {'$project': {'_id': 0, 'total_capacity': 1}}])",
+      "client_s": 1.783,
+      "latency_ms": {
+        "embed": 16.3,
+        "retrieve": 45.2,
+        "generate": 1483.5,
+        "guard": 0.5,
+        "execute": 8.3,
+        "total": 1554.1
+      },
+      "tokens": {
+        "prompt_tokens": 1568,
+        "completion_tokens": 46
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "cs-m8",
+      "gold_database": "concert_singer",
+      "database": "concert_singer",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.stadium.aggregate([{'$group': {'_id': None, 'average_capacity': {'$avg': '$Capacity'}}}, {'$project': {'_id': 0, 'average_capacity': 1}}])",
+      "client_s": 1.23,
+      "latency_ms": {
+        "embed": 10.2,
+        "retrieve": 42.9,
+        "generate": 1020.4,
+        "guard": 0.7,
+        "execute": 8.6,
+        "total": 1083.2
+      },
+      "tokens": {
+        "prompt_tokens": 1506,
+        "completion_tokens": 46
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-network_1-26",
+      "gold_database": "network_1",
+      "database": "network_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.Highschooler.aggregate([{'$match': {'name': 'Kyle'}}, {'$lookup': {'from': 'Likes', 'localField': 'ID', 'foreignField': 'student_id', 'as': 'likes'}}, {'$project': {'_id': 0, 'like_count': {'$size': '$likes'}}}])",
+      "client_s": 1.918,
+      "latency_ms": {
+        "embed": 14.5,
+        "retrieve": 42.4,
+        "generate": 1731.5,
+        "guard": 0.9,
+        "execute": 8.7,
+        "total": 1798.4
+      },
+      "tokens": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 73
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-world_1-32",
+      "gold_database": "world_1",
+      "database": "world_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.country.aggregate([{'$match': {'Region': 'Caribbean'}}, {'$group': {'_id': None, 'total_surface_area': {'$sum': '$SurfaceArea'}}}, {'$project': {'_id': 0, 'total_surface_area': 1}}])",
+      "client_s": 0.996,
+      "latency_ms": {
+        "embed": 14.7,
+        "retrieve": 44.3,
+        "generate": 818.8,
+        "guard": 0.5,
+        "execute": 19.0,
+        "total": 897.7
+      },
+      "tokens": {
+        "prompt_tokens": 1544,
+        "completion_tokens": 60
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-car_1-28",
+      "gold_database": "car_1",
+      "database": "car_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.car_names.aggregate([{'$match': {'Model': 'volvo'}}, {'$lookup': {'from': 'cars_data', 'localField': 'MakeId', 'foreignField': 'Id', 'as': 'car_data'}}, {'$unwind': '$car_data'}, {'$group': {'_id': None, 'avg_edispl': {'$avg': '$car_data.Edispl'}}}, {'$project': {'_id': 0, 'avg_edispl': 1}}])",
+      "client_s": 2.061,
+      "latency_ms": {
+        "embed": 13.7,
+        "retrieve": 43.1,
+        "generate": 1798.6,
+        "guard": 0.8,
+        "execute": 9.0,
+        "total": 1865.5
+      },
+      "tokens": {
+        "prompt_tokens": 1883,
+        "completion_tokens": 109
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "dk-h1",
+      "gold_database": "dog_kennels",
+      "database": "dog_kennels",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.Owners.aggregate([{'$group': {'_id': None, 'owner_states': {'$addToSet': '$state'}}}, {'$lookup': {'from': 'Professionals', 'pipeline': [{'$group': {'_id': None, 'prof_states': {'$addToSet': '$state'}}}], 'as': 'p'}}, {'$unwind': '$p'}, {'$project': {'_id': 0, 'states': {'$setIntersection': ['$owner_states', '$p.prof_states']}}}, {'$unwind': '$states'}, {'$project': {'_id': 0, 'state': '$states'}}, {'$sort': {'state': 1}}])",
+      "client_s": 1.425,
+      "latency_ms": {
+        "embed": 11.3,
+        "retrieve": 44.9,
+        "generate": 1235.8,
+        "guard": 1.1,
+        "execute": 19.3,
+        "total": 1312.8
+      },
+      "tokens": {
+        "prompt_tokens": 1766,
+        "completion_tokens": 151
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-car_1-29",
+      "gold_database": "car_1",
+      "database": "car_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.cars_data.aggregate([{'$group': {'_id': '$Cylinders', 'maxAccelerate': {'$max': '$Accelerate'}}}, {'$project': {'_id': 0, 'Cylinders': '$_id', 'maxAccelerate': 1}}])",
+      "client_s": 1.856,
+      "latency_ms": {
+        "embed": 19.3,
+        "retrieve": 43.9,
+        "generate": 1610.7,
+        "guard": 0.5,
+        "execute": 11.5,
+        "total": 1686.2
+      },
+      "tokens": {
+        "prompt_tokens": 1519,
+        "completion_tokens": 62
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "car-e1",
+      "gold_database": "car_1",
+      "database": "car_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.cars_data.count_documents({})",
+      "client_s": 0.974,
+      "latency_ms": {
+        "embed": 10.4,
+        "retrieve": 40.8,
+        "generate": 697.9,
+        "guard": 0.3,
+        "execute": 7.3,
+        "total": 756.9
+      },
+      "tokens": {
+        "prompt_tokens": 1426,
+        "completion_tokens": 8
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-network_1-18",
+      "gold_database": "network_1",
+      "database": "network_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.Highschooler.find({}, {'_id': 0, 'grade': 1})",
+      "client_s": 1.545,
+      "latency_ms": {
+        "embed": 10.3,
+        "retrieve": 43.8,
+        "generate": 1353.5,
+        "guard": 0.4,
+        "execute": 6.9,
+        "total": 1415.3
+      },
+      "tokens": {
+        "prompt_tokens": 1310,
+        "completion_tokens": 19
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-pets_1-14",
+      "gold_database": "pets_1",
+      "database": "pets_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.Pets.find({}, {'_id': 0, 'PetType': 1, 'weight': 1}).sort('pet_age', 1).limit(1)",
+      "client_s": 1.714,
+      "latency_ms": {
+        "embed": 12.9,
+        "retrieve": 43.5,
+        "generate": 1547.3,
+        "guard": 0.6,
+        "execute": 7.8,
+        "total": 1612.4
+      },
+      "tokens": {
+        "prompt_tokens": 1206,
+        "completion_tokens": 37
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": 6,
+      "gold_database": "pets_1",
+      "database": "pets_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": false,
+      "query": "db.Pets.aggregate([{'$group': {'_id': '$PetType', 'count': {'$sum': 1}}}, {'$match': {'count': {'$gt': 1}}}, {'$project': {'_id': 0, 'PetType': '$_id', 'count': 1}}])",
+      "client_s": 1.19,
+      "latency_ms": {
+        "embed": 13.3,
+        "retrieve": 42.0,
+        "generate": 1016.7,
+        "guard": 0.7,
+        "execute": 9.5,
+        "total": 1082.5
+      },
+      "tokens": {
+        "prompt_tokens": 1667,
+        "completion_tokens": 69
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-concert_singer-17",
+      "gold_database": "concert_singer",
+      "database": "concert_singer",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.stadium.aggregate([{'$group': {'_id': None, 'average_capacity': {'$avg': '$Capacity'}, 'max_capacity': {'$max': '$Capacity'}}}, {'$project': {'_id': 0, 'average_capacity': 1, 'max_capacity': 1}}])",
+      "client_s": 1.764,
+      "latency_ms": {
+        "embed": 17.5,
+        "retrieve": 42.0,
+        "generate": 1582.0,
+        "guard": 0.6,
+        "execute": 9.4,
+        "total": 1651.8
+      },
+      "tokens": {
+        "prompt_tokens": 1511,
+        "completion_tokens": 64
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-pets_1-20",
+      "gold_database": "pets_1",
+      "database": "pets_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.Has_Pet.aggregate([{'$lookup': {'from': 'Pets', 'localField': 'PetID', 'foreignField': 'PetID', 'as': 'pet'}}, {'$unwind': '$pet'}, {'$match': {'pet.PetType': 'cat', 'pet.pet_age': 3}}, {'$lookup': {'from': 'Student', 'localField': 'StuID', 'foreignField': 'StuID', 'as': 'student'}}, {'$unwind': '$student'}, {'$project': {'_id': 0, 'LName': '$student.LName'}}])",
+      "client_s": 1.535,
+      "latency_ms": {
+        "embed": 15.5,
+        "retrieve": 44.3,
+        "generate": 1367.5,
+        "guard": 0.8,
+        "execute": 7.8,
+        "total": 1436.3
+      },
+      "tokens": {
+        "prompt_tokens": 2171,
+        "completion_tokens": 130
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "cs-e2",
+      "gold_database": "concert_singer",
+      "database": "concert_singer",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": false,
+      "query": "db.stadium.aggregate([{'$group': {'_id': None, 'stadium_count': {'$sum': 1}}}, {'$project': {'_id': 0, 'stadium_count': 1}}])",
+      "client_s": 1.694,
+      "latency_ms": {
+        "embed": 10.6,
+        "retrieve": 43.8,
+        "generate": 1458.2,
+        "guard": 0.5,
+        "execute": 15.0,
+        "total": 1528.5
+      },
+      "tokens": {
+        "prompt_tokens": 1810,
+        "completion_tokens": 48
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-pets_1-3",
+      "gold_database": "pets_1",
+      "database": "pets_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.Has_Pet.aggregate([{'$group': {'_id': '$StuID', 'count': {'$sum': 1}}}, {'$match': {'count': {'$gt': 1}}}, {'$lookup': {'from': 'Student', 'localField': '_id', 'foreignField': 'StuID', 'as': 'student'}}, {'$unwind': '$student'}, {'$project': {'_id': 0, 'Fname': '$student.Fname', 'Sex': '$student.Sex'}}, {'$sort': {'Fname': 1}}])",
+      "client_s": 2.028,
+      "latency_ms": {
+        "embed": 13.6,
+        "retrieve": 42.3,
+        "generate": 1858.1,
+        "guard": 0.8,
+        "execute": 8.7,
+        "total": 1923.8
+      },
+      "tokens": {
+        "prompt_tokens": 2240,
+        "completion_tokens": 125
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "cs-m7",
+      "gold_database": "concert_singer",
+      "database": "concert_singer",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": false,
+      "query": "db.singer.aggregate([{'$group': {'_id': '$Country', 'singer_count': {'$sum': 1}}}, {'$project': {'_id': 0, 'Country': '$_id', 'singer_count': 1}}, {'$sort': {'Country': 1}}])",
+      "client_s": 1.388,
+      "latency_ms": {
+        "embed": 9.7,
+        "retrieve": 43.1,
+        "generate": 1224.4,
+        "guard": 0.6,
+        "execute": 7.7,
+        "total": 1285.9
+      },
+      "tokens": {
+        "prompt_tokens": 1184,
+        "completion_tokens": 66
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "cs-e10",
+      "gold_database": "concert_singer",
+      "database": "concert_singer",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.concert.find({'concert_Name': 'Super bootcamp'}, {'_id': 0, 'Theme': 1})",
+      "client_s": 1.461,
+      "latency_ms": {
+        "embed": 13.4,
+        "retrieve": 42.6,
+        "generate": 1291.0,
+        "guard": 0.4,
+        "execute": 7.9,
+        "total": 1355.5
+      },
+      "tokens": {
+        "prompt_tokens": 1829,
+        "completion_tokens": 26
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-dog_kennels-41",
+      "gold_database": "dog_kennels",
+      "database": "dog_kennels",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.Dogs.aggregate([{'$group': {'_id': {'breed_code': '$breed_code', 'size_code': '$size_code'}}}, {'$project': {'_id': 0, 'breed_code': '$_id.breed_code', 'size_code': '$_id.size_code'}}])",
+      "client_s": 1.789,
+      "latency_ms": {
+        "embed": 10.4,
+        "retrieve": 40.6,
+        "generate": 1534.2,
+        "guard": 0.7,
+        "execute": 7.6,
+        "total": 1593.8
+      },
+      "tokens": {
+        "prompt_tokens": 1544,
+        "completion_tokens": 63
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": 3,
+      "gold_database": "pets_1",
+      "database": "pets_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.Pets.aggregate([{'$group': {'_id': None, 'max_weight': {'$max': '$weight'}}}, {'$project': {'_id': 0}}])",
+      "client_s": 1.12,
+      "latency_ms": {
+        "embed": 13.7,
+        "retrieve": 55.4,
+        "generate": 843.3,
+        "guard": 0.5,
+        "execute": 19.2,
+        "total": 932.4
+      },
+      "tokens": {
+        "prompt_tokens": 1104,
+        "completion_tokens": 39
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-world_1-22",
+      "gold_database": "world_1",
+      "database": "world_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.countrylanguage.aggregate([{'$match': {'Language': 'English'}}, {'$group': {'_id': '$CountryCode'}}, {'$lookup': {'from': 'country', 'localField': '_id', 'foreignField': 'Code', 'as': 'country'}}, {'$unwind': '$country'}, {'$group': {'_id': None, 'english_population': {'$sum': '$country.Population'}}}, {'$lookup': {'from': 'country', 'pipeline': [{'$group': {'_id': None, 'total_population': {'$sum': '$Population'}}}], 'as': 'total'}}, {'$unwind': '$total'}, {'$project': {'_id': 0, 'non_english_population': {'$subtract': ['$total.total_population', '$english_population']}}}])",
+      "client_s": 2.477,
+      "latency_ms": {
+        "embed": 17.6,
+        "retrieve": 46.4,
+        "generate": 2295.5,
+        "guard": 1.1,
+        "execute": 20.3,
+        "total": 2381.1
+      },
+      "tokens": {
+        "prompt_tokens": 1598,
+        "completion_tokens": 176
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "dk-e5",
+      "gold_database": "dog_kennels",
+      "database": "dog_kennels",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.Charges.aggregate([{'$group': {'_id': None, 'max_charge': {'$max': '$charge_amount'}}}, {'$project': {'_id': 0, 'max_charge': 1}}])",
+      "client_s": 1.117,
+      "latency_ms": {
+        "embed": 17.4,
+        "retrieve": 43.4,
+        "generate": 924.6,
+        "guard": 0.5,
+        "execute": 10.3,
+        "total": 996.5
+      },
+      "tokens": {
+        "prompt_tokens": 1426,
+        "completion_tokens": 47
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-world_1-54",
+      "gold_database": "world_1",
+      "database": "world_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.country.find({}, {'_id': 0, 'Name': 1}).sort({'Population': -1}).limit(3)",
+      "client_s": 1.675,
+      "latency_ms": {
+        "embed": 19.8,
+        "retrieve": 46.6,
+        "generate": 1422.3,
+        "guard": 0.5,
+        "execute": 10.3,
+        "total": 1499.9
+      },
+      "tokens": {
+        "prompt_tokens": 1487,
+        "completion_tokens": 28
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "car-m3",
+      "gold_database": "car_1",
+      "database": "car_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.cars_data.aggregate([{'$group': {'_id': None, 'avg_weight': {'$avg': '$Weight'}}}, {'$project': {'_id': 0, 'avg_weight': 1}}])",
+      "client_s": 1.676,
+      "latency_ms": {
+        "embed": 14.7,
+        "retrieve": 43.4,
+        "generate": 1501.4,
+        "guard": 0.5,
+        "execute": 7.7,
+        "total": 1568.1
+      },
+      "tokens": {
+        "prompt_tokens": 1547,
+        "completion_tokens": 47
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-car_1-37",
+      "gold_database": "car_1",
+      "database": "car_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db['model_list.json'].find({}, {'_id': 0, 'Maker': 1, 'Model': 1})",
+      "client_s": 1.059,
+      "latency_ms": {
+        "embed": 11.2,
+        "retrieve": 40.8,
+        "generate": 899.6,
+        "guard": 0.4,
+        "execute": 7.3,
+        "total": 959.6
+      },
+      "tokens": {
+        "prompt_tokens": 1782,
+        "completion_tokens": 27
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-network_1-23",
+      "gold_database": "network_1",
+      "database": "network_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.Highschooler.aggregate([{'$lookup': {'from': 'Friend', 'localField': 'ID', 'foreignField': 'student_id', 'as': 'friends'}}, {'$lookup': {'from': 'Likes', 'localField': 'ID', 'foreignField': 'liked_id', 'as': 'likes'}}, {'$match': {'friends': {'$ne': []}, 'likes': {'$ne': []}}}, {'$project': {'_id': 0, 'name': 1}}, {'$sort': {'name': 1}}])",
+      "client_s": 2.169,
+      "latency_ms": {
+        "embed": 29.2,
+        "retrieve": 41.7,
+        "generate": 1986.6,
+        "guard": 0.9,
+        "execute": 9.0,
+        "total": 2067.6
+      },
+      "tokens": {
+        "prompt_tokens": 1684,
+        "completion_tokens": 123
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "spider-world_1-29",
+      "gold_database": "world_1",
+      "database": "world_1",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": false,
+      "query": "db.country.aggregate([{'$facet': {'threshold': [{'$match': {'Continent': 'Africa'}}, {'$group': {'_id': None, 'val': {'$max': '$Population'}}}], 'all': [{'$match': {'Continent': 'Asia'}}, {'$project': {'_id': 0, 'Name': 1, 'Population': 1}}]}}, {'$unwind': '$threshold'}, {'$unwind': '$all'}, {'$match': {'$expr': {'$gt': ['$all.Population', '$threshold.val']}}}, {'$project': {'_id': 0, 'Name': '$all.Name'}}, {'$sort': {'Name': 1}}])",
+      "client_s": 1.669,
+      "latency_ms": {
+        "embed": 14.0,
+        "retrieve": 43.6,
+        "generate": 1484.7,
+        "guard": 1.4,
+        "execute": 8.3,
+        "total": 1552.4
+      },
+      "tokens": {
+        "prompt_tokens": 1601,
+        "completion_tokens": 154
+      },
+      "model": "gpt-4o-2024-11-20"
+    },
+    {
+      "id": "cs-e9",
+      "gold_database": "concert_singer",
+      "database": "concert_singer",
+      "database_match": true,
+      "safe": true,
+      "error": null,
+      "truncated": false,
+      "correct": true,
+      "query": "db.singer.find({'Country': {'$ne': 'France'}}, {'_id': 0, 'Name': 1})",
+      "client_s": 1.812,
+      "latency_ms": {
+        "embed": 10.2,
+        "retrieve": 42.7,
+        "generate": 1640.1,
+        "guard": 0.4,
+        "execute": 6.9,
+        "total": 1700.6
+      },
+      "tokens": {
+        "prompt_tokens": 1291,
+        "completion_tokens": 28
+      },
+      "model": "gpt-4o-2024-11-20"
+    }
+  ]
+}

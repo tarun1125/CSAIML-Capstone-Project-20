@@ -1,0 +1,19 @@
+{
+  "manifest_schema_version": 1,
+  "generated_at": "2026-09-26T08:28:48Z",
+  "git_sha": "2ec2311e0b14b3e60d6ccb826aef9d4ea5a1b6ae",
+  "git_dirty": true,
+  "git_branch": "azure-deploy",
+  "python_version": "3.12.11",
+  "platform": "Darwin arm64",
+  "mlx_lm_version": "0.31.3",
+  "mlx_version": "0.32.1",
+  "stage": "Phase 6 cold start (scale 0 -> 1)",
+  "url": "https://<service-fqdn, redacted: IP-restricted, torn down after the project>",
+  "revision": "ca-capstone-rag--0000002",
+  "image": "acrcapstone22b895.azurecr.io/capstone-rag:v2",
+  "script": "service/smoke.py",
+  "results_file": "results/azure_cold_start.json",
+  "results_sha256": "a72d5dfeb13406622b8ccdecbcdbb770e402885ae23d8d86c2d050139a890102",
+  "results_bytes": 1017
+}

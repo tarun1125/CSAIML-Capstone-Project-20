@@ -32,9 +32,11 @@ RAG_DATA = REPO_ROOT / "rag" / "data"
 DATA = REPO_ROOT / "data"
 
 # label -> raw generations file. The K=10 bi-encoder arm is deliberately absent:
-# it already exists as rag/data/qwen_rag_execution_results_mlx.json, the
-# canonical run this whole experiment is measured against. Regenerating it would
-# risk moving the baseline underneath the comparison.
+# its FK-on case-level results already exist as
+# rag/data/qwen_rag_fk_k10_execution_results.json (143/304), the baseline every
+# arm here is compared against. NOT qwen_rag_execution_results_mlx.json: that is
+# the no-FK run (141/304) -- see CANONICAL_ARTIFACTS.md. Regenerating the
+# baseline would risk moving it underneath the comparison.
 ARMS = {
     "k5": "qwen_rag_mlx_k5_results.json",
     "rerankQ_k5": "qwen_rag_mlx_rerankQ_k5_results.json",
@@ -44,6 +46,16 @@ ARMS = {
     # exemplars to the K=10 baseline, only the predicted database -- and so the
     # schema block -- differs.
     "rank1_k10": "qwen_rag_mlx_rank1_k10_results.json",
+    # Azure retrieval experiment (docs/EXPERIMENT-azure-retrieval.md): A2, BM25 +
+    # vector hybrid on Azure AI Search, under both database policies. Everything
+    # but the retrieved exemplar list is identical to the K=10 FAISS arms.
+    "azhyb_k10": "qwen_rag_mlx_azhyb_k10_results.json",
+    "rank1_azhyb_k10": "qwen_rag_mlx_rank1_azhyb_k10_results.json",
+    # Phase 4, arm G1: A0's exact prompts, generator swapped to gpt-4o on Azure
+    # OpenAI (rag/generate_rag_aoai.py). Output files keep this script's
+    # qwen_rag_<label>_* naming for every arm; the label says which generator.
+    "aoai_gpt4o_k10": "aoai_gpt4o_k10_results.json",
+    "aoai_gpt4o_rank1_k10": "aoai_gpt4o_rank1_k10_results.json",
 }
 
 

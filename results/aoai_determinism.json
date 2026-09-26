@@ -1,0 +1,124 @@
+{
+  "n_cases": 50,
+  "scope": "first 50 cases of rag/data/rag_prompts.json; runs A and B are separate --limit 50 runs, 'full' is the first 50 of the 304-case G1 run",
+  "query_text_differs": {
+    "a_vs_b": 3,
+    "a_vs_full": 6,
+    "b_vs_full": 6,
+    "any_of_three": 7
+  },
+  "execution_correct": {
+    "run_a": 36,
+    "run_b": 36,
+    "full_run": 36
+  },
+  "execution_flips": {
+    "a_vs_b": 0,
+    "a_vs_full": 2,
+    "b_vs_full": 2
+  },
+  "system_fingerprints_seen": [
+    "fp_1bb99812b9",
+    "fp_85fa909971"
+  ],
+  "cases": [
+    {
+      "id": "car-h3",
+      "query_differs": true,
+      "execution": {
+        "run_a": false,
+        "run_b": false,
+        "full_run": false
+      },
+      "fingerprints": [
+        "fp_1bb99812b9",
+        "fp_1bb99812b9",
+        "fp_1bb99812b9"
+      ]
+    },
+    {
+      "id": "12",
+      "query_differs": true,
+      "execution": {
+        "run_a": false,
+        "run_b": false,
+        "full_run": false
+      },
+      "fingerprints": [
+        "fp_85fa909971",
+        "fp_85fa909971",
+        "fp_85fa909971"
+      ]
+    },
+    {
+      "id": "nw-m3",
+      "query_differs": true,
+      "execution": {
+        "run_a": false,
+        "run_b": false,
+        "full_run": false
+      },
+      "fingerprints": [
+        "fp_85fa909971",
+        "fp_85fa909971",
+        "fp_85fa909971"
+      ]
+    },
+    {
+      "id": "spider-network_1-26",
+      "query_differs": true,
+      "execution": {
+        "run_a": true,
+        "run_b": true,
+        "full_run": true
+      },
+      "fingerprints": [
+        "fp_1bb99812b9",
+        "fp_1bb99812b9",
+        "fp_1bb99812b9"
+      ]
+    },
+    {
+      "id": "cs-e2",
+      "query_differs": true,
+      "execution": {
+        "run_a": false,
+        "run_b": false,
+        "full_run": true
+      },
+      "fingerprints": [
+        "fp_1bb99812b9",
+        "fp_1bb99812b9",
+        "fp_1bb99812b9"
+      ]
+    },
+    {
+      "id": "spider-world_1-22",
+      "query_differs": true,
+      "execution": {
+        "run_a": true,
+        "run_b": true,
+        "full_run": false
+      },
+      "fingerprints": [
+        "fp_1bb99812b9",
+        "fp_1bb99812b9",
+        "fp_1bb99812b9"
+      ]
+    },
+    {
+      "id": "spider-network_1-23",
+      "query_differs": true,
+      "execution": {
+        "run_a": true,
+        "run_b": true,
+        "full_run": true
+      },
+      "fingerprints": [
+        "fp_1bb99812b9",
+        "fp_1bb99812b9",
+        "fp_1bb99812b9"
+      ]
+    }
+  ]
+}

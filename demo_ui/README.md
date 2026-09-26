@@ -80,3 +80,12 @@ fine-tuning adapter is retrained again, re-run this same join before
 trusting the fine-tuned column of any existing curated example, since
 (as already happened once here) a case's outcome can flip between
 adapter versions.
+
+## RAG on Azure tab
+
+Sends the question to the deployed service (`service/`, gpt-4o + Azure AI Search vector retrieval +
+rank-1 database policy) and, optionally, runs the local RAG arm (Qwen2.5-Coder-1.5B on MLX, FAISS,
+majority vote) on the same question, side by side. It shows each system's database, query, rows and
+per-stage latency. The service URL and API key are resolved through the Azure CLI (key from Key
+Vault, in memory only), or from `AZURE_SERVICE_URL` / `SERVICE_API_KEY`. Run `./infra/resume.sh`
+first; the tab says so if the service is paused. The first request after idle takes ~30 s (cold start).

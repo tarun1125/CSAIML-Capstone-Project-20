@@ -178,6 +178,22 @@ def _check_pipeline_stages(tree) -> tuple[bool, str]:
     return True, ""
 
 
+# PyMongo back-references. Database.client, Collection.database and
+# Cursor.collection are plain attributes, not method calls, so the
+# ALLOWED_METHODS check never sees them -- and they climb out of the database
+# the query was handed: db.client["other_db"].coll.find({}) passed this check
+# and read another database on the cluster, bypassing the per-database
+# allowlist in demo_ui/live_inference.py. 0 of the 7,727 distinct stored
+# queries use any of these names.
+FORBIDDEN_ATTRIBUTES = {"client", "database", "collection"}
+
+# Arithmetic the query may contain. `*`, `**`, `%` and `<<` can build a huge
+# value in pure Python before Atlas is ever contacted ("a" * 10**12,
+# 9**9**9), which socketTimeoutMS cannot interrupt -- a one-line CPU/memory
+# DoS of whatever process runs eval(). The stored queries use only +, - and /.
+ALLOWED_BINOPS = (ast.Add, ast.Sub, ast.Div)
+
+
 def check_query_is_safe(query: str) -> tuple[bool, str]:
     try:
         tree = ast.parse(query, mode="eval")
@@ -187,6 +203,10 @@ def check_query_is_safe(query: str) -> tuple[bool, str]:
     for node in ast.walk(tree):
         if isinstance(node, ast.Attribute) and node.attr.startswith("_"):
             return False, f"dunder access: {node.attr}"
+        if isinstance(node, ast.Attribute) and node.attr in FORBIDDEN_ATTRIBUTES:
+            return False, f"attribute not allowed: {node.attr}"
+        if isinstance(node, ast.BinOp) and not isinstance(node.op, ALLOWED_BINOPS):
+            return False, f"operator not allowed: {type(node.op).__name__}"
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
             if node.func.attr not in ALLOWED_METHODS:
                 return False, f"method not allowed: {node.func.attr}"
