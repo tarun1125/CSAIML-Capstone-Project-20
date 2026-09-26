@@ -345,7 +345,21 @@ but removes the spending limit.
 
 ---
 
-## Phase 4 — Generator arm on Azure OpenAI (Day 8–10)
+## Phase 4 — Generator arm on Azure OpenAI (Day 8–10) — started 2026-09-26 (Day 2)
+
+**Setup (done):** Azure OpenAI resource `rg-capstone-rag` (East US, S0); deployment `gpt-4o`,
+model **gpt-4o 2024-11-20**, **Standard** (pay per token), 50K TPM, **NoAutoUpgrade** (pinned).
+gpt-4o-mini was refused ("deprecated since 2026-03-31" for new deployments), and gpt-5-family models
+are reasoning models without temperature 0. Central India offers no pay-per-token gpt-4o/-mini, hence
+East US. Generator: `rag/generate_rag_aoai.py` (T = 0, seed 42, max 300 tokens, `clean()`, v1 endpoint).
+
+**G1 pre-registration (recorded 2026-09-26, before any G1 result):**
+- Comparison: G1 (gpt-4o on A0's exact `rag_prompts.json`) vs A0 (Qwen 1.5B MLX, **143/304**),
+  McNemar exact, discordant counts reported.
+- **Prediction (Tarun): G1 = 147–150 / 304.**
+- No significance bar set. Report net, discordant counts and p as they fall.
+- Determinism: first 50 cases run twice before the full run; report the flip rate on the
+  normalized query. Three smoke-test calls already showed two different `system_fingerprint`s.
 
 - [ ] Create an Azure OpenAI (Foundry) resource and deploy **one small, cheap chat model**. Model
   availability varies by region, so check the Foundry portal and use any region that has it.
