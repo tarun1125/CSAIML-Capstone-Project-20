@@ -399,7 +399,31 @@ on this task, per rupee?* Keep it in its own section of the write-up.
 
 ---
 
-## Phase 5 — Deploy the service (Day 10–14)
+## Phase 5 — Deploy the service (Day 10–14) — ✅ deployed 2026-09-26 (Day 2)
+
+**Status:** live at the Container App `ca-capstone-rag` (Central India), serving **gpt-4o + Azure vector
+retrieval + rank-1** (the 212/304 configuration; Azure vector reproduces FAISS per Gate 1). Code:
+`service/` (pipeline, FastAPI app, Dockerfile), `infra/deploy.sh` / `pause.sh` / `resume.sh`, commits
+`1fb3c0a`…`2ec2311`. Verified end to end in the cloud: correct rows for three questions, 401 on a
+wrong key, and about 1 s warm (about 90% of it gpt-4o).
+
+**What changed from the plan, and why:**
+- **Egress (Option B).** A consumption-only environment egresses from the region's *shared* pool
+  (about 190 addresses, shared with other tenants), so "add the app's outbound IPs to Atlas" would have
+  admitted any Container App in Central India. The environment is now a workload-profiles environment
+  in `vnet-capstone`, with a **NAT Gateway and one static IP (`20.198.104.185/32`)**, the only Atlas
+  access-list entry. About $1/day until teardown. The app's `outboundIpAddresses` property still shows
+  the regional pool; Atlas sees the NAT IP.
+- **Build context.** The first `az acr build` uploaded the working directory (123 MB). The image was
+  verified clean (no `.env` files, `/app` 3.3 MB), but the upload couldn't be proven secret-free.
+  `deploy.sh` now builds from `git archive` of only the service's paths (2 MB upload).
+- **Atlas user:** `readAnyDatabase`, verified to hold **no** write or admin actions. Scoping `read` to
+  the 23 databases is optional hardening.
+- **Auth:** managed identity for Search, OpenAI and Key Vault; the Atlas URI and the service API key
+  are Key Vault references. Four orphaned role assignments from the first app were removed.
+- **Rate limiter:** a fixed-window placeholder (`service/app.py`). **The token bucket is still Tarun's
+  to write** (dsa-design-drill 05), keeping the `allow(key)` interface.
+
 
 ### Shape
 
@@ -535,7 +559,27 @@ Search or OpenAI, wait, then restart the revision before you debug anything else
 
 ---
 
-## Phase 6 — Observe, measure, write up (Day 14–16)
+## Phase 6 — Observe, measure, write up (Day 14–16) — measurements done 2026-09-26 (Day 2)
+
+**Measured against the live endpoint** (image `capstone-rag:v2`, gpt-4o + Azure vector + rank-1):
+- **Smoke, 50 pre-declared cases** (`rag_test.json[:50]`, `results/azure_smoke.json`): 50/50 requests
+  OK, 50/50 passed the guard, database right 49/50, **served correct 35/50** (+2 not comparable,
+  capped at 50 rows) vs 36/50 for the offline G1 + rank-1 run on the same cases. The 3 differences are
+  the row cap and two opposite-direction flips, within gpt-4o's measured noise.
+- **Latency, client end to end: p50 1.68 s, p95 2.48 s.** Server p50: embed 14 ms, retrieve 43 ms,
+  **generate 1,471 ms**, guard 0.7 ms, execute 9 ms. gpt-4o is about 96% of the time.
+- **App Insights agrees** (`results/azure_appinsights_latency.csv`): stage spans match to the ms, and
+  it shows a one-off 2.6 s `/msi/token` (the first managed-identity token).
+- **Cold start ×3** (`results/azure_cold_start.json`): 35.3 / 34.5 / 27.2 s (median 34.5 s) after 5–6
+  minutes idle; the pipeline accounts for about 2.5 s of it, container start (about 1 GB image,
+  CPU torch) for about 25–32 s. A warm follow-up takes 0.94 s. The trade-off: `min-replicas 1` removes
+  this but runs outside the free grant. A torch-free (ONNX) embedder is the cheaper fix.
+- **Cost per query:** about $0.005 (gpt-4o tokens; Container Apps within the free grant). The smoke run
+  cost about $0.25.
+
+**Remaining:** README *Deployment on Azure* section; a 60-second screen capture (Tarun); the
+token-bucket rate limiter (Tarun); sign-off of the two findings' draft sections.
+
 
 Do the measurements in **one sitting**: resume at the start (see Cost control) and pause at the end.
 

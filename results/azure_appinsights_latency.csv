@@ -1,0 +1,13 @@
+span,n,p50_ms,p95_ms
+embed,53,14,20
+guard,53,1,1
+execute,53,9,30
+retrieve,52,43,55
+_SearchClientOperationsMixin.search,51,0,0
+POST /indexes('fewshot-exemplars')/docs/search.post.search,51,40,52
+_SearchClientOperationsMixin._search_post,51,41,53
+POST /openai/v1/chat/completions,51,1481,2216
+generate,51,1483,2219
+GET /AzMonSDKDynamicConfigurationChanges,2,599,687
+GET /AzMonSDKDynamicConfiguration,2,161,660
+GET /msi/token,1,2629,2629
