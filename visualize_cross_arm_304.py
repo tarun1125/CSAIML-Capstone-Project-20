@@ -2,7 +2,7 @@
 unified-MLX-LM test set -- the same set of charts as
 visualize_cross_arm_comparison.ipynb built for the original 61-case holdout,
 recomputed on today's real data (baseline 15/304, RAG 142/304 FK-canonical,
-fine-tuned 73/304, 23-db collision-fix-retrained adapter).
+fine-tuned 103/304, 23-db epoch-parity-fixed (1000-iter) retrained adapter).
 
 Reads directly from already-scored execution-results JSON / reference_queries.json
 (never hardcodes a number) so these charts can never drift from what
@@ -39,6 +39,7 @@ the original 61-case PNGs.
 import json
 from pathlib import Path
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -73,7 +74,7 @@ plt.rcParams.update({
 # ---------------------------------------------------------------------------
 baseline = json.load(open(ROOT / "rag" / "data" / "qwen_baseline_testslice_execution_results_mlx.json"))
 rag = json.load(open(ROOT / "rag" / "data" / "qwen_rag_execution_results_mlx.json"))
-ft = json.load(open(ROOT / "data" / "finetuned_full304_23db_execution_results.json"))
+ft = json.load(open(ROOT / "data" / "finetuned_full304_23db_1000iter_execution_results.json"))
 ref = json.load(open(ROOT / "data" / "reference_queries.json"))
 ref_by_id = {str(r["id"]): r for r in ref}
 
@@ -119,7 +120,7 @@ print("Fine-tuned funnel:", ft_counts)
 
 
 def draw_funnel(counts, title, filename, accent_color):
-    fig, ax = plt.subplots(figsize=(6.5, 5))
+    fig, ax = plt.subplots(figsize=(8.5, 5))
     labels = [BUCKET_LABEL[b] for b in BUCKET_ORDER]
     values = [counts[b] for b in BUCKET_ORDER]
     colors = [BUCKET_COLOR[b] for b in BUCKET_ORDER]
@@ -130,7 +131,7 @@ def draw_funnel(counts, title, filename, accent_color):
                 ha="center", va="bottom", fontsize=10, color=INK, fontweight="bold")
     ax.set_ylabel("Cases (n=304)", fontsize=11)
     ax.set_ylim(0, max(values) * 1.3)
-    ax.set_title(title, fontsize=13, color=INK, fontweight="bold", pad=14)
+    ax.set_title(title, fontsize=13, color=INK, fontweight="bold", pad=14, loc="left")
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(axis="y", color=PANEL, linewidth=1, zorder=0)
     ax.set_axisbelow(True)
@@ -342,7 +343,7 @@ for tax, correct, ohf, n in [(b_tax, b_correct, b_ohf, 304), (r_tax, r_correct, 
 fig, ax = plt.subplots(figsize=(9.5, 6))
 arms3 = ["Baseline", "RAG", "Fine-tuned"]
 tax_data = [b_tax, r_tax, f_tax]
-tax_colors = plt.cm.get_cmap("tab10")(np.linspace(0, 1, len(TAXONOMY_ORDER)))
+tax_colors = matplotlib.colormaps["tab10"](np.linspace(0, 1, len(TAXONOMY_ORDER)))
 bottom = np.zeros(3)
 for i, bucket in enumerate(TAXONOMY_ORDER):
     vals = np.array([t[bucket] for t in tax_data])

@@ -1,0 +1,38 @@
+# Build context for service/Dockerfile (docs/AZURE-PLAN.md, Phase 5).
+# `az acr build ... .` uploads the repo root, so anything not excluded here is
+# shipped to the registry and can end up in an image layer.
+
+# Secrets. atlas-credentials.env holds the ADMIN Atlas URI; the container
+# gets a read-only URI as MONGODB_URI from Key Vault instead (atlas_env.py).
+atlas-credentials.env
+azure.env
+*.env
+
+# Not needed at serve time. rag/schema_cards.json covers every database, so
+# the raw dumps under database/ can stay out (rag/schema_cards.py falls back).
+.git/
+.venv/
+__pycache__/
+*.pyc
+_to_delete/
+database/
+data/
+# The adapters and training data stay out; clean() is imported from here.
+fine_tuning/*
+!fine_tuning/generation_utils.py
+outputs/
+# rag/data holds ~50 MB of experiment results; the service needs two files.
+rag/data/*
+!rag/data/fewshot_metadata.json
+!rag/data/fewshot.index
+rag/outputs/
+tests/
+infra/
+demo_ui/
+results/
+docs/
+*.ipynb
+*.pptx
+*.docx
+.pytest_cache/
+atlas-ro-uri.txt

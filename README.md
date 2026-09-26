@@ -138,61 +138,252 @@ tested as a controlled A/B run on MLX-LM - **FK-included 142/304 (46.7%) vs. no-
 (46.4%)**. A 1-case, 0.3-point difference. FK annotations don't measurably help
 or hurt on top of what schema + few-shot examples already provide.
 
-### The majority vote is the weakest part of RAG retrieval
+### Cross-encoder reranking — ranking metrics improved, execution accuracy did not
 
-`majority_vote_database()` breaks a tie by returning the rank-1 FAISS neighbor
-*outright*, without checking it is one of the tied databases — on neighbors
-`[A, B, B, C, C]` it returns `A`, which lost the vote. That reads like an
-off-by-one bug. It was investigated rather than patched, and the behaviour is
-**kept**; `rag/analyze_vote_policies.py` replays every aggregation policy over the
-recorded retrieval in `rag_prompts.json` (offline, no re-embedding) and reproduces
-the whole table.
+Retrieval was only ever evaluated by one number (`database retrieval accuracy`) and by
+downstream execution accuracy, so nothing said how well *ranked* the retrieved exemplars
+were. A cross-encoder (`ms-marco-MiniLM-L-6-v2`) reranking the FAISS top-50 was A/B
+tested against the bi-encoder on the same 304 cases, with the model, decoding, schema
+cards and scorer all held fixed — the exemplar list was the only variable.
 
-Two findings came out of it, and only the second one matters.
+Every ranking metric improved. recall@1 0.905 → 0.931, recall@3 0.938 → 0.977,
+recall@10 0.987 → **1.000**, MRR@10 0.929 → 0.951, nDCG@10 0.893 → 0.909.
 
-**The tie-break itself is unresolvable on this split.** Restricting the tie-break to
-the tied set changes exactly 3 of 304 cases. A paired exact test on 3 discordant
-pairs bottoms out at p=0.25 — the *smallest* p-value reachable at n=3 — so no result
-here could have been significant in either direction. Changing behaviour on those 3
-cases would be fitting noise.
+Execution accuracy did not follow:
 
-**But rank-1 beats the vote decisively, and that is significant.** Dropping the vote
-entirely and always taking the nearest neighbor's database:
+| Arm | recall@5 | nDCG@10 | execution accuracy |
+|---|---|---|---|
+| Bi-encoder, K=5 | 0.9638 | 0.8928 | 141/304 (46.4%) |
+| + rerank, K=5 | 0.9836 | 0.8987 | 129/304 (42.4%) |
+| + rerank on question+query, K=5 | 0.9803 | 0.9088 | 131/304 (43.1%) |
+| Bi-encoder, K=10 | 0.9638 | 0.8928 | 143/304 (47.0%) |
+| + rerank, K=10 | 0.9836 | 0.8987 | 141/304 (46.4%) |
 
-| database-prediction policy | correct | accuracy |
+At K=10 reranking flipped **42 of 304** cases, 20 gained against 22 lost — McNemar exact
+**p = 0.8776**. Not a weak intervention: ~40% of the exemplars in every prompt changed,
+and identical ordering survived in 0/304 cases. The change was pure churn with respect to
+correctness.
+
+Per-case nDCG@10 correlates with execution correctness at **r = 0.307** (p = 4.7e-08) —
+real, but explaining under 9% of the variance. And the correlation *weakens* as nDCG
+improves: the best-ranked arm (nDCG 0.909) is the weakest predictor (r = 0.200).
+Optimising the metric made it a worse proxy for the thing that matters.
+
+**Why**: the bi-encoder was already at recall@10 = 0.987. Exemplar ranking was saturated
+before the experiment began, so there was nothing for a reranker to win. Full write-up in
+[`docs/FINDING-reranking.md`](docs/FINDING-reranking.md); spec in
+[`docs/EXPERIMENT-reranking.md`](docs/EXPERIMENT-reranking.md); numbers in
+`results/retrieval_eval.json`.
+
+### Dropping the majority vote does what reranking couldn't
+
+The retrieval headroom was never in exemplar ranking — it was in **database prediction**.
+Replacing the majority vote over the top-10 neighbours' databases with the single nearest
+neighbour (`python rag/build_prompts.py 10 --db-policy rank1`):
+
+| | database prediction | execution accuracy |
 |---|---|---|
-| majority vote, rank-1 tie-break (current) | 258/304 | 84.9% |
-| majority vote, tie-break restricted to tied set | 255/304 | 83.9% |
-| **pure rank-1, no vote at all** | **275/304** | **90.5%** |
+| majority vote, K=10 *(current default)* | 258/304 (84.9%) | 143/304 (47.0%) |
+| **pure rank-1, K=10** | **275/304 (90.5%)** | **149/304 (49.0%)** |
 
-Better on 20 cases, worse on 3 — McNemar exact **p=0.0005**, bootstrap 95% CI on the
-gap **[+2.6, +8.6] points**. Reliability is monotone in how concentrated the vote is:
-where the top count is 8+/10 the vote and rank-1 agree and both are 94–99% right, but
-at a top count of 5/10 the vote collapses to 39.3% while rank-1 holds 64.3%.
+Paired over the same 304 cases: **6 discordant, 6 gained, 0 lost**, McNemar exact
+**p = 0.031**. Rank-1 did not lose a case. Five of the six gains are mechanical — rank-1
+put the right schema in the prompt and the model then wrote the right query.
 
-The mechanism is the same near-identical-database problem the fine-tuning arm hit. An
-unweighted k-NN vote keeps counts and discards similarity *magnitude*. When two
-databases are near-degenerate in embedding space, every pool example from either
-sibling sits at roughly the same distance from the query, so the expected neighbor
-count for sibling *c* is ≈ `K · N_c / Σ N_sibling` — proportional to **pool
-frequency, not relevance**. `argmax` over counts degenerates into `argmax` over pool
-frequency, and the rarer sibling can never win however close it actually is. Measured,
-that is total: `chinook_1` (33 pool examples) loses **all 9** of its test cases to
-`store_1` (84), and `college_3` (29) loses **all 7** to `college_1`/`college_2`
-(126/125). Rank-1 recovers 3 and 2 of those. These are the same collision families
-`fine_tuning/prepare_data_23db.py`'s `COLLISION_GROUPS` already handles — the same
-data property breaks both arms, by different routes.
+The contrast with reranking is the point: reranking rewrote 300 of 304 prompts and
+produced churn; rank-1 touched 27 and every discordant case went the right way.
+**Precision of intervention beat volume**, and the metric the field would have told you to
+optimise pointed at the intervention that did nothing.
 
-Ten townspeople asked which of two identical twins you are looking at will always name
-whichever twin has more friends in town. The one person standing closest to you will not.
+Two things fell out of running it:
 
-**Not changed here.** Switching to pure rank-1 alters the predicted database — and so
-the prompt's schema block — on ~17 more cases, invalidating every downstream artifact
-(`qwen_rag_*.json`, the score CSVs, the cross-arm figures), none of which can be
-regenerated without the MLX/Qwen stack. It is a re-run, not a one-line change, and is
-left as an explicit follow-up. Note also that database-retrieval accuracy is a
-diagnostic on step 2, not end-to-end query accuracy: the +17 is a prediction about
-better schema selection, not a measured end-to-end gain.
+- **The execution oracle is not fully deterministic.** One case in 277 flipped with a
+  byte-identical prompt and a byte-identical generated query: a `$sort`/`$limit 1` on a
+  tied count, where MongoDB returns whichever row it likes. ≈0.4%, worth knowing when
+  reading any paired result here. *Generation* is fully deterministic — 277/277 identical
+  prompts gave identical output.
+- **The missing FK case-level file is regenerated.**
+  `rag/data/qwen_rag_fk_k10_execution_results.json` (143/304), which
+  [`CANONICAL_ARTIFACTS.md`](CANONICAL_ARTIFACTS.md) notes would close its documented
+  1-case gap.
+
+**Similarity-weighted voting — the obvious middle path — does not exist.** The hypothesis
+was that the vote contributes noise-averaging that rank-1 throws away, and that weighting
+each neighbour by similarity would keep it while fixing the pool-frequency degeneracy.
+`rag/analyze_vote_weighting.py` replays the whole family offline in about a second, using
+`score(db) = Σ exp(s_i/τ)` — which *is* the count vote as τ→∞ and *is* rank-1 as τ→0:
+
+| weighting | correct | accuracy |
+|---|---|---|
+| unweighted vote *(current)* | 258/304 | 84.87% |
+| sum of similarity | 256/304 | 84.21% |
+| softmax τ=0.2 | 266/304 | 87.50% |
+| sum of 1/rank | 271/304 | 89.14% |
+| softmax τ=0.02 | 276/304 | 90.79% |
+| **pure rank-1** | 275/304 | 90.46% |
+
+Accuracy is monotone in sharpness and the optimum **is** the rank-1 endpoint — nothing in
+the middle beats both ends. The best cell is one case above rank-1 (p = 1.0000) and differs
+from it on 1 of 304 predictions, below the oracle noise floor above; by τ=0.01 the two are
+prediction-identical. No execution arm was run for it, deliberately: it could not have
+distinguished its arms. Note that plain similarity-sum is *worse* than counting (256 vs
+258) — any weighting that sums over members inherits the pool-frequency prior, and a sum
+dominated by its maximum is just rank-1 with extra steps.
+
+**The vote's tie-break was investigated and kept.** `majority_vote_database()` breaks a tie
+by returning the rank-1 neighbour *outright*, without checking it is one of the tied databases:
+on `[A, B, B, C, C]` it returns `A`. `rag/analyze_vote_policies.py` replays every aggregation
+policy over the recorded retrieval, offline. Restricting the tie-break to the tied set changes
+exactly 3 of 304 cases (258 → 255), and a paired exact test on 3 discordant pairs bottoms out at
+p = 0.25, the smallest p reachable at n = 3. Changing it would be fitting noise, so the behaviour
+and its docstring are kept (PR #18). The same replay gives the vote-vs-rank-1 retrieval gap a
+bootstrap 95% CI of **[+2.6, +8.6] points**, and shows the vote's reliability collapsing with
+concentration: at a top count of 5/10 the vote is right 39.3% of the time, rank-1 64.3%.
+
+Full write-up in [`docs/FINDING-rank1-vote.md`](docs/FINDING-rank1-vote.md). **The default
+is unchanged** — this is a flag, and `rag_prompts.json` still rebuilds byte-identically.
+
+## Ground-truth and scorer verification
+
+Two independent audits were added, both reproducible from a clean checkout and
+neither needing an Atlas connection. Which file each published number comes
+from — and which same-named sibling is superseded — is now recorded in
+[`CANONICAL_ARTIFACTS.md`](CANONICAL_ARTIFACTS.md).
+
+### 1. Is the gold data right? SQL ↔ PyMongo cross-check
+
+[`evaluation/crosscheck_sql_gold.py`](evaluation/crosscheck_sql_gold.py) checks
+the hand-written PyMongo gold against **Spider's own gold SQL**, executed on
+Spider's original SQLite databases. All 23 databases are present in the Spider
+distribution, and all **1,396** Spider-derived cases match a Spider example on
+`(db_id, question text)` exactly, so the SQL is fully recoverable. The Mongo side
+is read from the already-executed `data/gold_results.json`; only the SQL side is
+run, locally.
+
+**1,409 cases execute on both sides; 1,264 (89.7%) agree** — 87.2% on the
+304-case test slice. Zero SQL errors. The comparison is value-based and tolerant
+of column naming, column order, row order, float representation, `$facet`
+set-difference shapes, and Mongo carrying an extra computed column the SQL
+doesn't project, so what remains is semantic rather than cosmetic.
+
+The 145 disagreements are auto-classified into causes in
+`outputs/sql_crosscheck.csv`, and most are **not** gold defects:
+
+| Likely cause | n | What it means |
+| --- | ---: | --- |
+| `UNCLASSIFIED` | 43 | No pattern matched — read these first. |
+| `TEXT_TYPED_NUMERIC` | 38 | The column is TEXT in SQLite and a string in Mongo. SQL compares it numerically; a plain `$gt` on a string silently matches nothing. |
+| `TIE_OR_RANK` | 37 | `ORDER BY x LIMIT 1` with a **tie** at the top. |
+| `AGGREGATE_OVER_TEXT` | 12 | SQL `AVG`/`SUM` coerces TEXT; Mongo's `$avg` over a string yields null without `$toDouble`. |
+| `SET_OP` | 7 | SQL `EXCEPT`/`INTERSECT`, expressed in Mongo via `$facet`. |
+| `JOIN_FANOUT` | 6 | Same distinct rows, different row counts — one side's join duplicates. |
+| `SUBQUERY` | 2 | Correlated/nested `SELECT`. |
+
+The most interesting class is `TIE_OR_RANK`: **the question itself is
+under-determined**. `spider-network_1-7` asks which grade has the most high
+schoolers when grades 9, 10, 11 and 12 all have exactly 4 — SQL's arbitrary pick
+is 12, the gold PyMongo adds an `_id` tiebreak and picks 9. A model answering
+"12" is scored wrong for giving an equally correct answer. That is a property of
+the questions, not of either query language, and it caps how high any arm's
+measurable accuracy can go.
+
+Gold health separately: **0** of 1,517 gold queries fail to execute and only
+**4** return empty (`spider-flight_2-37/38/75/76`, all `flight_2`).
+
+### 2. Is the *scorer* right? False-positive audit
+
+[`evaluation/audit_false_positives.py`](evaluation/audit_false_positives.py)
+asks the complementary question: how often does a **semantically wrong** query
+score correct because its *result* happened to match? `results_match()` compares
+result sets, and four properties of that let a wrong query through — empty
+matches empty, scalar matches scalar by coincidence, order is never compared,
+and low-cardinality collections make "top N" degenerate.
+
+The script flags candidates mechanically and keeps human verdicts in a registry
+keyed by **(arm, id)** — a false positive is a property of a generated query,
+not of a test case. That distinction is load-bearing: on `spider-flight_2-75`
+and `spider-apartment_rentals-29`, fine-tuning's query is defective while RAG's
+is correct, so an id-keyed registry would have blamed RAG for both.
+
+| Arm | Published | AST-identical to gold | Confirmed false positives | Corrected |
+| --- | ---: | ---: | ---: | ---: |
+| Zero-shot baseline | 15/304 (4.9%) | 3 | 2 (13.3% of correct) | 13/304 (4.3%) |
+| RAG (K=10) | 141/304 \* | 72 | **3 (2.1%)** | 138/304 (45.4%) |
+| LoRA fine-tuned | 103/304 (33.9%) | 51 | **9 (8.7%)** | 94/304 (30.9%) |
+
+<sub>\* the case-level file surviving the FK A/B overwrite; the canonical
+aggregate is 142/304 — see [`CANONICAL_ARTIFACTS.md`](CANONICAL_ARTIFACTS.md).</sub>
+
+Representative confirmed cases: fine-tuning filters `DestAirport` where the
+question says *departing* (`spider-flight_2-75` — both return 0, and empty
+matches empty); drops the `PetType == "cat"` filter and matches on age alone
+(`spider-pets_1-20`); drops the `COMMISSION_PCT != null` filter
+(`spider-hr_1-65`); averages a **string** `room_count` and returns the top-3 in
+the wrong ranking, which passes because there are exactly 3 distinct values
+(`spider-apartment_rentals-29`). RAG reverses a sort direction on "worked
+longest" over a collection of ≤10 employees (`spider-store_1-26`).
+
+Errors run the other way too — 6 RAG, 2 fine-tuned and 2 baseline cases are
+scored wrong when a stricter reading says they are right, most because the model
+simply didn't project `_id` away.
+
+**The headline conclusion survives, and strengthens.** Fine-tuning's
+false-positive rate is **4× RAG's**, which is what the mechanism predicts: LoRA
+teaches the *shape* of a correct query, so it emits structurally plausible
+pipelines with wrong predicates — exactly the failure mode result-comparison
+cannot see. Correcting both directions widens the RAG-vs-fine-tuned gap from
+12.8 to ~15.4 points.
+
+Both audits write CSVs (`outputs/false_positive_audit.csv`,
+`outputs/sql_crosscheck.csv`) and neither modifies any published number.
+
+```bash
+python evaluation/audit_false_positives.py
+python evaluation/crosscheck_sql_gold.py --spider-root ../spider_data
+```
+
+## Secondary metrics: CodeBLEU and BERTScore
+
+Execution accuracy (above) is this project's primary metric throughout — a query is
+scored by whether it returns the correct result when actually run, not by how closely
+its text resembles a reference. Two secondary, literature-comparability metrics were
+recomputed against the current, full 304-case test set:
+
+| Arm | n | CodeBLEU (3-component, canonical) | CodeBLEU (full, 4-component) |
+| --- | ---: | ---: | ---: |
+| Baseline (zero-shot) | 304 | 0.2270 | 0.4203 |
+| RAG (K=10, FK-included) | 304 | 0.2783 | 0.4587 |
+| Fine-tuned (23-db, 1,000-iter) | 304 | 0.2759 | 0.4570 |
+
+The 3-component score (n-gram, weighted n-gram, syntax match) is this project's
+canonical CodeBLEU figure — the 4th component, dataflow match, is designed for
+multi-statement code and degenerates to zero for the single-expression PyMongo output
+this task produces, so including it would silently deflate every arm's score by a
+constant, uninformative amount rather than measure anything real.
+
+**RAG and fine-tuning score within 0.0024 of each other on CodeBLEU (0.2783 vs. 0.2759)
+despite a 12.8-percentage-point gap in execution accuracy (46.7% vs. 33.9%)** — on this
+secondary metric the two arms look nearly indistinguishable, while on the metric this
+project treats as authoritative they are clearly separated. See
+`outputs/figures/codebleu_vs_execution_accuracy_304.png` and
+`outputs/codebleu_scores_304.csv`. This is not a contradiction: CodeBLEU rewards
+surface-level lexical/syntactic similarity to a single reference query, while execution
+accuracy asks whether the generated query actually returns the correct result — a query
+can borrow much of the reference's shape while filtering on the wrong condition, and a
+semantically correct query can legitimately diverge from the reference's literal token
+sequence and lose CodeBLEU credit for it regardless.
+
+**BERTScore F1 has not been recomputed at this scale.** Both compute environments
+available for this update sit behind a network restriction that blocks the Hugging Face
+Hub download BERTScore's underlying `roberta-large` model requires — confirmed directly
+in both environments (`OSError` resolving the model config; `httpx.ProxyError: 403
+Forbidden`), not assumed. A complete, ready-to-run script,
+[`compute_bertscore_304.py`](compute_bertscore_304.py) — mirroring this project's
+established BERTScore methodology exactly (`lang="en"`, `rescale_with_baseline=True`) —
+is included in this repository; running it needs only an environment with unrestricted
+Hugging Face Hub access. Both metrics were previously measured once, early in the
+project, on a 121-case subset (CodeBLEU: Claude 0.272, Qwen 0.225; BERTScore F1: Claude
+0.672, Qwen 0.472) but not at the current, full 304-case scale until this update.
 
 ## Fine-tuning: the epoch-parity fix
 
@@ -269,6 +460,90 @@ pip install streamlit    # already in requirements.txt
 streamlit run demo_ui/app.py
 ```
 
+## Deployment on Azure
+
+The RAG pipeline also runs as a hosted service on Azure, and two controlled experiments were run
+on the way there. Everything is in [`docs/AZURE-PLAN.md`](docs/AZURE-PLAN.md), which covers the plan,
+the deviations and the cost runbook.
+
+### What the Azure work measured
+
+Every row uses the same 304 held-out cases, the same prompts pipeline and the same execution oracle,
+with exactly **one** thing changed from the reference run (A0: Qwen 1.5B on MLX, FAISS, majority vote, 143/304):
+
+| Change | Result | gained / lost | McNemar exact p | Write-up |
+|---|---|---|---|---|
+| Retrieval → Azure AI Search **hybrid** (BM25 + vector, RRF) | 148/304 | 19 / 14 | 0.49 (n.s.) | [`FINDING-azure-retrieval.md`](docs/FINDING-azure-retrieval.md) |
+| Generator → **gpt-4o** (Azure OpenAI, T = 0) | 198/304 | 69 / 14 | 6.8 × 10⁻¹⁰ | [`FINDING-azure-generator.md`](docs/FINDING-azure-generator.md) |
+| gpt-4o **+ rank-1** database policy | **212/304** | 80 / 11 | 4.4 × 10⁻¹⁴ | same, §3.1 |
+
+Both experiments were pre-registered (predictions committed before the runs). The retrieval
+prediction missed, and Gate 1 missed its count by 2, recorded as a deviation. Two things stand out:
+- **Better retrieval rankings didn't mean better answers.** Hybrid improved every ranking metric,
+  but execution only moved when the *database decision* changed.
+- **A stronger generator makes the database decision matter more.** Rank-1's fixes were worth
+  +5 with Qwen and about +12 with gpt-4o.
+
+### The served system
+
+```mermaid
+graph LR
+    C[client, allowlisted IP] -->|HTTPS + x-api-key| App[Container Apps: FastAPI\nscale 0-1, Central India]
+    App -->|1 embed| E[MiniLM, CPU, in the image]
+    App -->|2 retrieve top-10| S[(Azure AI Search\nexhaustive-KNN vector)]
+    App -->|3 rank-1 db + build_system_prompt| App
+    App -->|4 generate| O[Azure OpenAI gpt-4o\nEast US, T=0]
+    App -->|5 normalize + AST guard| App
+    App -->|6 read-only execute| NAT[NAT Gateway\n1 static egress IP] --> M[(MongoDB Atlas\nread-only user)]
+    App -.->|per-stage spans| AI[App Insights]
+    KV[Key Vault] -.->|Atlas URI, API key| App
+```
+
+It serves the best measured configuration, **gpt-4o + vector retrieval + rank-1**. Azure vector search
+reproduced FAISS's top-10 on 298/304 cases; the 6 exceptions are one pair of duplicate questions tied on
+cosine. Every step imports the benchmark's own code. `tests/test_service.py` checks that the served
+system prompt is **byte-identical** to `rag/data/rag_prompts_rank1_k10.json`.
+
+**Measured on the live endpoint** (`results/azure_smoke.json`, `azure_cold_start.json`,
+`azure_appinsights_latency.csv`):
+
+| | |
+|---|---|
+| Served accuracy, first 50 held-out cases | 35/50 (+2 capped at 50 rows) vs 36/50 offline on the same cases |
+| End-to-end latency, warm | p50 **1.68 s**, p95 2.48 s |
+| Server stages, p50 | embed 14 ms · retrieve 43 ms · **generate 1,471 ms** · guard 0.7 ms · execute 9 ms |
+| Cold start after scale-to-zero (×3) | 27–35 s, median 34.5 s, almost all container start; the pipeline is about 2.5 s of it |
+| Cost | about **$0.005 per query** (gpt-4o tokens). Whole Azure phase: well under $50 of the free credit |
+
+gpt-4o is about 96% of a warm request. App Insights' own spans match the app's stage timings to the millisecond.
+
+### Security controls (the endpoint `eval()`s model output)
+
+- **AST allowlist before every `eval()`.** It rejects non-read methods, `$out`/`$merge`/`$where`/
+  `$function`, the `.client`/`.database`/`.collection` back-references (which could reach another
+  database), and `*`, `**`, `%`, `<<` arithmetic (CPU/memory blow-ups). `eval` runs with no builtins.
+- **Database allowlist, fail-closed:** the predicted database must be one of the 23; an empty allowlist
+  refuses startup.
+- **Read-only Atlas user** (`readAnyDatabase`, verified to hold no write actions), reachable only
+  from the NAT Gateway's single static IP.
+- **Managed identity** for Search, OpenAI and Key Vault; no keys in the container. The Atlas URI and API
+  key are Key Vault references.
+- **Ingress restricted to one client IP**, plus an API key, a 500-character question limit, per-IP
+  rate limiting, results capped at 50 rows, and logs that record a question **hash**, never its text.
+
+### Running it
+
+```bash
+./infra/deploy.sh          # create/update everything (names from the gitignored azure.env)
+./infra/resume.sh          # start of a session: re-open ingress to MYIP, health-check
+python service/smoke.py smoke --n 50     # live-endpoint benchmark
+./infra/pause.sh           # end of a session: close ingress, list billable resources
+az group delete -n rg-capstone-rag --yes # teardown: everything lives in one resource group
+```
+
+Locally, the same service runs with `SERVICE_API_KEY=… uvicorn service.app:app`, reading Azure
+and Atlas settings from `azure.env` / `atlas-credentials.env`.
+
 ## Visualizations
 
 `visualize_cross_arm_304.py` reproduces the earlier 61-case cross-arm notebook's figure
@@ -280,14 +555,153 @@ set against the full, current 304-case, MLX-unified results, written to
 `finetuned_accuracy_by_database_304.png`, plus `visualize_final_comparison.py`'s
 `final_arm_comparison_n304.png` and `old_run_vs_current_run.png`.
 
-**Known staleness, flagged rather than hidden**: the figures above were generated
-against the 200-iteration fine-tuned adapter (24.0%), before the epoch-parity retrain
-described above raised fine-tuning to 33.9%. Their fine-tuned bars/numbers are
-superseded by the tables in this README until those scripts are re-run against
-`data/finetuned_full304_23db_1000iter_execution_results.json`.
-`fine_tuning/outputs/figures/finetuned_23db_1000iter_outcome_breakdown.png` and
-`finetuned_23db_epoch_fix_comparison.png` are the up-to-date figures specific to the
-fine-tuned arm's before/after epoch-parity fix.
+**Now current, staleness resolved**: all figures above were regenerated against the
+current 1,000-iteration, epoch-parity-fixed fine-tuned adapter (33.9%) rather than the
+superseded 200-iteration run (24.0%) — closing a gap this README previously flagged
+explicitly rather than silently. Two incidental bugs were fixed in the same pass: a
+funnel-chart title-clipping defect (`draw_funnel()`'s figure width) and a deprecated
+`matplotlib.pyplot.cm.get_cmap` call.
+
+Two further figures were added this round, also in `outputs/figures/`:
+`finetuned_23db_1000iter_loss_and_memory.png` — train/validation
+loss and peak Metal memory vs. iteration over the full 1,000-iteration run, two stacked
+panels sharing an x-axis rather than a dual y-axis. Its source data,
+`fine_tuning/training_log_1000iter.txt`, is committed; the `plot_training_curve.py` script
+this README previously credited is **not in the repo** and never was, so the figure is
+currently not regenerable from a clean clone — flagged here rather than left as a
+dangling reference. Also added — 
+`codebleu_vs_execution_accuracy_304.png` (`visualize_codebleu_304.py`) — execution
+accuracy and CodeBLEU (3-component) side by side for all three arms, see
+[Secondary Metrics](#secondary-metrics-codebleu-and-bertscore) above.
+
+## Run provenance, confidence, and what a re-run actually reproduces
+
+Every generation and prompt-build step now writes a sibling `<name>.manifest.json`
+recording what produced the artifact next to it: model, adapter, `max_tokens`, decoding
+mode, `TOP_K`, whether FK annotations were on, the embedding model and FAISS index size,
+library versions, the git SHA, whether the tree was dirty, and a SHA-256 of the results
+file itself ([`run_manifest.py`](run_manifest.py)). A sibling file rather than a
+`_manifest` key inside the JSON, because every results file here is a list and every
+consumer iterates it — a dict at the top level would break all of them at once.
+
+This was added because three concrete problems had already happened and nothing in the
+repo could have caught any of them.
+
+**1. `rag/build_prompts.py` segfaulted — step 3 below did not run at all.** The venv
+carries three separate copies of `libomp.dylib` (torch, faiss, sklearn). Whichever loads
+first wins the process, and when faiss's copy won, the first torch forward pass killed
+the interpreter: SIGSEGV, exit 139, no traceback, no Python-level error, output ending
+silently after `Embedder ready.`. The script imported `faiss` before `embed_utils`
+(alphabetical order), so it hit this every time. Reproduced minimally in both directions
+and fixed by pinning the import order in `rag/build_prompts.py` and
+`rag/build_retrieval_index.py`; both carry a comment saying not to let isort re-sort them
+back. **Anyone who tried to rebuild the RAG prompts got a silent crash instead of
+prompts.**
+
+**2. `rag/data/qwen_rag_mlx_results.json` is stale and does not correspond to the
+prompts committed beside it.** Regenerating from the committed `rag_prompts.json`
+reproduces `rag/data/qwen_rag_mlx_fk_results.json` **bit-for-bit on all 304 cases**
+(identical text *and* identical per-token logprobs, across two independent runs) — but
+differs from `qwen_rag_mlx_results.json` on 103 of 304. The cause is dated: between
+commits `32d41f6` and `f396e3d` every one of the 304 `system_prompt`s changed while
+every `retrieved_ids` list stayed identical — the schema cards went from 76 cards / 0 FK
+edges to 161 cards / 19 FK edges, and rule 7 and the `"null"`-string warning were added.
+The results file was generated against the *older* prompts and then committed alongside
+the *newer* ones. **The published RAG figure is unaffected** — 142/304 (46.7%) was scored
+from the FK artifact, which reproduces exactly; `qwen_rag_mlx_results.json` is a leftover
+third file that matches neither A/B variant.
+
+**3. The same thing happened to the baseline arm, for a different reason.** The baseline
+uses one fixed system prompt shared by all 304 cases, assembled at runtime from whatever
+is dumped under `database/mongodb/` — which is gitignored. When that run was made,
+`college_3` and `chinook_1` had no local dump (the script's own docstring says so), so
+the shared prompt omitted two databases' schema; all 23 have dumps now. One input change
+therefore moved every case, and 181/304 regenerate differently. The current run's manifest
+records `schema_coverage.missing: []`, so this specific gap is now closed *and* recorded.
+
+Generation itself is deterministic on this stack: two independent full 304-case runs came
+out identical down to the per-token logprobs. What was missing was never determinism — it
+was any record of which inputs a given artifact was produced from.
+
+**Problem 3 is now fixed, not just recorded.** `rag/schema_cards.py` falls back to
+the committed `rag/schema_cards.json` when `database/mongodb/` is absent, so a clean
+clone builds the baseline arm's full-schema prompt instead of silently building a
+*schema-free* one. The snapshot is verified byte-identical to a live build, and the
+fallback logs loudly that it is a snapshot rather than live schema. Regenerate it with
+`python rag/schema_cards.py` after any future dataset expansion.
+
+Two other housekeeping fixes in the same pass. `clean()`, `STOP_MARKERS`,
+`clean_with_logprobs()`, `generate_with_logprobs()` and `confidence_fields()` moved out of
+`fine_tuning/spot_check.py` — a CLI sanity-check script whose own docstring says it is
+"not a scored metric" — into `fine_tuning/generation_utils.py`, which is what five scripts
+across all three arms and the demo UI were actually importing. Same functions, byte-identical
+post-processing; `spot_check.py` re-exports the names, so any older call site or notebook
+still works. And `data/reference_queries.json`'s `complexity` field used three spellings for
+one bucket — 16 `high` and 12 `complex` alongside 148 `hard`. Normalized at the source to
+`hard` (176). The visualization scripts already mapped `high`/`complex` → `hard`, so the
+by-complexity table is unchanged, verified: Easy 75 / Medium 111 / Hard 39 / Unknown 79.
+
+### Confidence signals
+
+Nothing in this repo used to emit a probability anywhere, so no calibration analysis
+(ECE, reliability diagrams, temperature scaling) was possible from its outputs. Both
+base-model arms now record confidence:
+
+- **Mean token logprob** — `mean_logprob`, `sum_logprob`, `token_logprobs`,
+  `n_gen_tokens` on every record. Generation is unchanged: in mlx-lm 0.31.3 `generate()`
+  is literally `"".join(r.text for r in stream_generate(...))`, so streaming to capture
+  per-step logprobs runs the identical decode path — confirmed empirically as well as by
+  construction.
+  The logprobs are **trimmed to the span `clean()` keeps**, not averaged over the raw
+  generation. Because of mlx-lm issue #973 the model keeps sampling past `<|im_end|>` to
+  `max_tokens`, so a raw generation is a short answer followed by a long discarded tail —
+  across the 304 RAG cases only 19,876 of 22,139 generated tokens (89.8%) survive
+  `clean()`. Averaging over the other 10% would describe text that was thrown away. The
+  trim reproduces `clean()`'s edits at character level and is checked against `clean()`
+  itself per case, falling back to a conservative stop-marker trim and recording which
+  rule it used (`logprob_trim_method`) rather than guessing.
+- **Self-consistency** — `python rag/generate_rag_mlx.py --samples 5 --temp 0.7` samples
+  k generations per case and reports the fraction agreeing with the modal answer, with
+  **all k generations persisted**, not just the winner. Agreement is decided on
+  `normalize.py`'s AST-canonical form, not on raw strings, so two correct queries that
+  differ only in whitespace or quoting count as agreement instead of splitting the vote.
+  `--samples > 1` with `--temp 0` is rejected: k greedy samples are k identical samples
+  and would report a self-consistency of 1.0 for every case.
+
+`rag/data/rag_prompts.json` additionally now keeps the FAISS similarity scores
+(`retrieved_scores`) that `index.search()` always computed and immediately discarded.
+Ranks alone support Recall@k / MRR / nDCG, but not telling a *retrieval gap* (the right
+exemplar was never retrieved) from *retrieval noise* (it was retrieved but outranked).
+Verified additive: rebuilding changed 0 of 304 `system_prompt`s and 0 of 304
+`retrieved_ids`, and added exactly one key.
+
+## Tests
+
+There were none before. `tests/test_scoring.py` (47 tests, no network, no Atlas)
+pins the two pieces of logic every published number depends on: `results_match()`
+— what counts as a correct query — and `normalize()` — what the model's raw
+output is rewritten into before it executes. The four known false-positive
+classes are included as explicit **characterization** tests: they assert that a
+wrong query currently scores correct, so anyone tightening the scorer sees
+exactly which assertions flip rather than being surprised.
+
+```bash
+python -m pytest tests/ -q
+```
+
+Writing them found a real hole in the `eval()` guard: **`$where` — arbitrary
+server-side JavaScript — passed `check_query_is_safe()` inside a `find()`
+filter.** The pipeline-stage check only inspected `aggregate()` pipelines, and to
+the outer AST allowlist a filter is just a literal dict. Closed with
+`FORBIDDEN_OPERATORS`, which walks every dict at every depth, `$lookup`
+sub-pipelines included. No query in any arm's results uses one of these
+operators, so **no published number changes**; the hole is closed before one does.
+
+Re-running the guard over all 2,350 stored queries surfaced a second,
+pre-existing gap in the opposite direction: 7 **gold** queries using `$unionWith`
+or `$setWindowFields` were stored with `status: PASS` but would now be rejected,
+so `execute_gold.py` could no longer regenerate 7 of its own gold results. Both
+operators are read-only and are now allowlisted; all 2,350 queries pass.
 
 ## Reproducing a full run
 
@@ -309,6 +723,14 @@ python rag/score_rag.py 10 data/qwen_baseline_mlx_testslice_normalized.json rag/
 python fine_tuning/generate_predictions_23db.py
 python normalize.py data/finetuned_full304_23db_1000iter_results.json data/finetuned_full304_23db_1000iter_normalized.json
 python fine_tuning/score_finetuned_23db.py
+```
+
+Optional, for calibration work — self-consistency at k=5 (writes its own file, so a crash
+mid-sampling cannot damage the greedy results):
+
+```bash
+python rag/generate_rag_mlx.py --samples 5 --temp 0.7 \
+    --output rag/data/qwen_rag_mlx_selfconsistency_k5.json
 ```
 
 Retraining the adapter from scratch: `mlx_lm.lora --config fine_tuning/lora_config_23db_1000iter.yaml`

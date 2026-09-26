@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 
-from execute_queries import connect, safe_eval_query, is_empty, to_json_safe
+from execute_queries import connect, safe_eval_query, is_empty, materialize_result, to_json_safe
 
 
 def main():
@@ -47,10 +47,7 @@ def main():
 
         try:
             result = safe_eval_query(query, db)
-            if isinstance(result, (int, float, str, bool)):
-                pass
-            elif not isinstance(result, list):
-                result = list(result)
+            result = materialize_result(result)
 
             converted = []
             result = to_json_safe(result, converted)

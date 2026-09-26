@@ -21,9 +21,14 @@ import json
 import logging
 from pathlib import Path
 
-import faiss
-
+# IMPORT ORDER IS LOAD-BEARING -- embed_utils (torch) BEFORE faiss. This venv
+# ships three copies of libomp.dylib (torch, faiss, sklearn); if faiss's copy
+# loads first, the first torch forward pass segfaults the interpreter with no
+# traceback. Same latent bug that was crashing rag/build_prompts.py -- see the
+# longer note there. Do not let isort merge these back into one block.
 from embed_utils import embed
+
+import faiss  # noqa: E402  MUST come after embed_utils -- see above
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("rag.build_retrieval_index")

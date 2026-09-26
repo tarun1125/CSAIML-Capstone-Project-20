@@ -41,7 +41,7 @@ ROOT = Path(__file__).resolve().parent
 REPO_ROOT = ROOT.parent
 sys.path.insert(0, str(ROOT))
 from prepare_data import SYSTEM_PROMPT  # noqa: E402
-from spot_check import STOP_MARKERS, clean  # noqa: E402  (reuse, don't re-derive)
+from generation_utils import STOP_MARKERS, clean  # noqa: E402  (reuse, don't re-derive)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("fine_tuning.generate_predictions")

@@ -73,6 +73,43 @@ class ModelUnavailable(RuntimeError):
     """Raised when mlx_lm or a required model/adapter path isn't available on this machine."""
 
 
+_KNOWN_DATABASES_CACHE = None
+
+
+def known_databases() -> set:
+    """The databases this project actually owns -- the allowlist for anything
+    that reaches the live cluster.
+
+    Derived from the local schema dumps under database/mongodb/ (the same
+    source rag/schema_cards.py builds prompts from), unioned with the 23-db
+    adapter's training manifest, so it can never be narrower than what the
+    demo legitimately needs. Returns an empty set if neither source is
+    readable, and the caller treats that as "cannot validate, so refuse".
+
+    This used to FAIL OPEN (empty allowlist = allow everything), on the
+    reasoning that a demo refusing to run is worse than the risk. That trade
+    no longer holds: rag/schema_cards.py now always has the committed
+    rag/schema_cards.json to fall back on, so an empty set means something is
+    genuinely broken, and a broken guard in front of eval() should stop, not
+    wave everything through."""
+    global _KNOWN_DATABASES_CACHE
+    if _KNOWN_DATABASES_CACHE is not None:
+        return _KNOWN_DATABASES_CACHE
+
+    names = set()
+    try:
+        from schema_cards import build_cards
+        names |= {c["database"] for c in build_cards()}
+    except Exception as exc:  # noqa: BLE001 -- best effort; falls back to the manifest
+        logger.warning("Could not derive database allowlist from schema cards: %s", exc)
+    if KNOWN_23DB_DATABASES:
+        names |= set(KNOWN_23DB_DATABASES)
+
+    logger.info("Database allowlist for live Atlas execution: %d database(s)", len(names))
+    _KNOWN_DATABASES_CACHE = names
+    return names
+
+
 _MODEL_CACHE = {}  # keyed by adapter_path string (or "" for none) -> (model, tokenizer)
 
 
@@ -114,7 +151,7 @@ def _get_model(adapter_path: Path | None):
 
 def _generate(model, tokenizer, system_prompt: str, question: str, max_tokens: int = 300) -> str:
     from mlx_lm import generate
-    from spot_check import clean  # fine_tuning/spot_check.py -- canonical post-processing, reused verbatim
+    from generation_utils import clean  # fine_tuning/generation_utils.py -- canonical post-processing, reused verbatim
 
     messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": question}]
     prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
@@ -191,14 +228,25 @@ def run_baseline(question: str, database: str, max_tokens: int = 300) -> dict:
     return {"arm": "baseline", "intended_database": database, "question": question, "generated_query": query}
 
 
+_RAG_CACHE: dict = {}
+
+
 def run_rag(question: str, database: str, top_k: int = 10, max_tokens: int = 300) -> dict:
     """RAG: retrieve top_k few-shot examples for `question`, build a schema+examples prompt, no adapter."""
-    import faiss
+    # IMPORT ORDER IS LOAD-BEARING -- embed_utils (torch) BEFORE faiss. This
+    # venv ships three copies of libomp.dylib (torch, faiss, sklearn); if
+    # faiss's copy loads first, the first torch forward pass segfaults the
+    # interpreter. Here that meant the RAG tab took the whole Streamlit
+    # process down at the first embed() call -- SIGSEGV, not an exception, so
+    # execute_against_atlas()'s broad `except Exception` could never have
+    # caught it. Same bug fixed in rag/build_prompts.py and
+    # rag/build_retrieval_index.py; this call site was missed because it
+    # imports faiss directly rather than through build_prompts.
     from embed_utils import embed
-    from build_prompts import (
-        PROMPT_HEADER, PROMPT_RULES, render_examples_block, render_schema_block,
-        render_numeric_string_note, majority_vote_database,
-    )
+
+    import faiss  # noqa: E402  MUST come after embed_utils -- see above
+
+    from build_prompts import build_system_prompt, majority_vote_database
     from schema_cards import build_cards
 
     logger.info("run_rag(database=%s, top_k=%d)", database, top_k)
@@ -208,8 +256,16 @@ def run_rag(question: str, database: str, top_k: int = 10, max_tokens: int = 300
         raise ModelUnavailable(f"RAG index/metadata missing ({index_path} / {meta_path}) -- run "
                                 f"rag/build_retrieval_index.py first.")
 
-    index = faiss.read_index(str(index_path))
-    metadata = json.loads(meta_path.read_text())
+    if "index" not in _RAG_CACHE:
+        # Loaded once per process: re-reading the index, the metadata and every
+        # schema card on each question was pure repeated work.
+        _RAG_CACHE["index"] = faiss.read_index(str(index_path))
+        _RAG_CACHE["metadata"] = json.loads(meta_path.read_text())
+        cards_by_db: dict = {}
+        for card in build_cards():
+            cards_by_db.setdefault(card["database"], []).append(card)
+        _RAG_CACHE["cards_by_db"] = cards_by_db
+    index, metadata, cards_by_db = _RAG_CACHE["index"], _RAG_CACHE["metadata"], _RAG_CACHE["cards_by_db"]
 
     qvec = embed([question])
     _scores, idxs = index.search(qvec, top_k)
@@ -218,19 +274,7 @@ def run_rag(question: str, database: str, top_k: int = 10, max_tokens: int = 300
     logger.info("RAG retrieval: %d neighbors, predicted_database=%s (caller-supplied=%s)",
                 len(neighbors), predicted_database, database)
 
-    cards_by_db: dict = {}
-    for card in build_cards():
-        cards_by_db.setdefault(card["database"], []).append(card)
-
-    system_prompt = (
-        PROMPT_HEADER
-        + render_examples_block(neighbors)
-        + "\n"
-        + render_schema_block(predicted_database, cards_by_db, include_fk=True)
-        + render_numeric_string_note(predicted_database)
-        + "\n"
-        + PROMPT_RULES
-    )
+    system_prompt = build_system_prompt(neighbors, predicted_database, cards_by_db, include_fk=True)
     model, tokenizer = _get_model(None)
     query = _generate(model, tokenizer, system_prompt, question, max_tokens)
     return {
@@ -267,6 +311,19 @@ def run_finetuned(question: str, database: str, variant: str = DEFAULT_FT_VARIAN
             "generated_query": query}
 
 
+_ATLAS_CLIENT = None
+
+
+def _get_atlas_client(atlas_env):
+    """One MongoClient per process. connect() used to run on every button
+    press, and each call opened a new connection pool that was never closed.
+    MongoClient is thread-safe and meant to be shared."""
+    global _ATLAS_CLIENT
+    if _ATLAS_CLIENT is None:
+        _ATLAS_CLIENT = atlas_env.connect()
+    return _ATLAS_CLIENT
+
+
 def execute_against_atlas(query: str, database: str) -> dict:
     """Optional: actually run a generated query against live Atlas and return {status, result, error}.
     Off by default in the UI -- opt-in, since it needs atlas-credentials.env and a live connection.
@@ -279,14 +336,52 @@ def execute_against_atlas(query: str, database: str) -> dict:
     result happened to carry a raw ObjectId. Fixed 2026-08-29 -- reusing to_json_safe(), not
     reimplementing BSON conversion.
     """
-    from execute_queries import safe_eval_query, to_json_safe  # evaluation/execute_queries.py -- same AST-gated eval
+    from execute_queries import materialize_result, safe_eval_query, to_json_safe  # evaluation/execute_queries.py -- same AST-gated eval
+    from normalize import normalize  # normalize.py -- rewrites Mongo-shell/JS dialect habits into valid Python
     import atlas_env
 
     logger.info("execute_against_atlas(database=%s, query=%r)", database, query[:120])
     try:
-        client = atlas_env.connect()
+        # The database name comes from a free-text st.text_input in app.py and
+        # goes straight into client[database]. run_finetuned() validates it
+        # against KNOWN_23DB_DATABASES, but the baseline and RAG arms did not,
+        # so the demo would happily execute a generated query against ANY
+        # database on the cluster -- including ones this project does not own.
+        # Streamlit has no auth and binds every interface by default, so on
+        # conference wifi that is reachable by anyone on the network.
+        # Restricted here, at the one place that actually touches Atlas, so
+        # every arm is covered by one check rather than three.
+        allowed = known_databases()
+        if not allowed:
+            raise ValueError("database allowlist is empty (schema cards unreadable) -- "
+                             "refusing to execute rather than skipping the check")
+        if database not in allowed:
+            raise ValueError(
+                f"'{database}' is not one of this project's databases. "
+                f"Known: {sorted(allowed)}"
+            )
+
+        # Every other script in this repo runs generate -> normalize -> execute (see spot_check.py,
+        # generate_baseline_mlx.py, generate_rag_mlx.py, fine_tuning/generate_predictions_23db.py --
+        # all call normalize.py before scoring). This function was calling safe_eval_query() directly
+        # on the RAW model output, skipping that step entirely. The model sometimes writes Mongo-
+        # shell/JS-style literals (bare `null`/`true`/`false`, or camelCase methods like
+        # `countDocuments`) instead of Python's `None`/`True`/`False` / `count_documents` -- valid
+        # Mongo shell syntax, but not valid Python. check_query_is_safe() parses the query as a
+        # Python AST and rejects any identifier it doesn't recognize (its allowlist is only
+        # {"db","None","True","False","len","sorted","list","dict"}), so a bare `null` shows up as
+        # an unrecognized ast.Name and gets rejected as "unexpected name: null" -- correctly refusing
+        # to eval something that isn't safe Python, but the query was never given the chance to be
+        # rewritten into safe Python first. Fixed 2026-08-29 by normalizing before executing, exactly
+        # like the rest of the pipeline.
+        normalized_query = normalize(query)
+        if normalized_query != query:
+            logger.info("normalize() rewrote the query before execution: %r -> %r",
+                        query[:120], normalized_query[:120])
+
+        client = _get_atlas_client(atlas_env)
         db = client[database]
-        raw_result = safe_eval_query(query, db)
+        raw_result = safe_eval_query(normalized_query, db)
         raw_type = type(raw_result).__name__
 
         # Mirror evaluation/execute_queries.py's run_model() EXACTLY: a query like
@@ -298,10 +393,7 @@ def execute_against_atlas(query: str, database: str) -> dict:
         # through it, got stringified into something like "<pymongo.cursor.Cursor object at ...>"
         # by Streamlit's JSON encoder, and a bare string at the JSON root is exactly what makes
         # the frontend's JSON viewer throw "src property must be a valid json object".)
-        if isinstance(raw_result, (int, float, str, bool)):
-            pass
-        elif not isinstance(raw_result, list):
-            raw_result = list(raw_result)
+        raw_result = materialize_result(raw_result)
 
         result = to_json_safe(raw_result)
         logger.info("Atlas execution OK, raw type=%s -> materialized+JSON-safe result of type=%s",

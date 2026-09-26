@@ -1,0 +1,4 @@
+Arm,n,codebleu,ngram_match_score,weighted_ngram_match_score,syntax_match_score,dataflow_match_score,codebleu_3component
+Baseline,304,0.4203,0.0003,0.0003,0.6805,0,0.227
+"RAG (K=10, FK)",304,0.4587,0.0098,0.0098,0.8154,0,0.2783
+"Fine-tuned (23-db, 1000iter)",304,0.457,0.0155,0.0154,0.7969,0,0.2759

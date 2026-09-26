@@ -1,0 +1,22 @@
+{
+  "manifest_schema_version": 1,
+  "generated_at": "2026-09-26T08:09:38Z",
+  "git_sha": "2ec2311e0b14b3e60d6ccb826aef9d4ea5a1b6ae",
+  "git_dirty": true,
+  "git_branch": "azure-deploy",
+  "python_version": "3.12.11",
+  "platform": "Darwin arm64",
+  "mlx_lm_version": "0.31.3",
+  "mlx_version": "0.32.1",
+  "stage": "Phase 6 smoke benchmark (live endpoint)",
+  "url": "https://<service-fqdn, redacted: IP-restricted, torn down after the project>",
+  "revision": "ca-capstone-rag--0000002",
+  "image": "acrcapstone22b895.azurecr.io/capstone-rag:v2",
+  "settings": "RETRIEVER\tazure-vector\nDB_POLICY\trank1\nTOP_K\t10\nMAX_ROWS\t50\nMAX_QUESTION_CHARS\t500\nRATE_LIMIT_PER_MIN\t10\nAZURE_SEARCH_ENDPOINT\thttps://srch-capstone-22b895.search.windows.net\nAZURE_SEARCH_INDEX\tfewshot-exemplars\nAZURE_OPENAI_ENDPOINT\thttps://rg-capstone-rag.openai.azure.com/\nAZURE_OPENAI_DEPLOYMENT\tgpt-4o\nAPPLICATIONINSIGHTS_CONNECTION_STRING\tInstrumentationKey=d22a8d4b-ce98-4775-b736-d1c94e91537b;IngestionEndpoint=https://centralindia-0.in.applicationinsights.azure.com/;LiveEndpoint=https://centralindia.livediagnostics.monitor.azure.com/;ApplicationId=79f07f3a-0aae-459a-baa8-0e42022359d2",
+  "slice": "rag/data/rag_test.json[:50]",
+  "spacing_s": 6.5,
+  "script": "service/smoke.py",
+  "results_file": "results/azure_smoke.json",
+  "results_sha256": "390cb5b8475b10a863244f79243f18323bfe67b6ead191c42e544c7bfdd06d7e",
+  "results_bytes": 41154
+}

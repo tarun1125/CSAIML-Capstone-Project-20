@@ -1,0 +1,27 @@
+{
+  "manifest_schema_version": 1,
+  "generated_at": "2026-09-22T06:46:37Z",
+  "git_sha": "3aab76c62d33d02dd3988e3a8db0ecd2f64b8ac9",
+  "git_dirty": true,
+  "git_branch": "ground-truth-verification",
+  "python_version": "3.12.11",
+  "platform": "Darwin arm64",
+  "mlx_lm_version": "0.31.3",
+  "mlx_version": "0.32.1",
+  "stage": "retrieval evaluation / reranking",
+  "top_n": 50,
+  "n_cases": 304,
+  "pool_size": 1213,
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "cross_encoder_model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+  "arms": [
+    "bi_encoder",
+    "rerank_question_only",
+    "rerank_question_plus_query"
+  ],
+  "sanity_check_passed": true,
+  "script": "rag/eval_retrieval.py",
+  "results_file": "results/retrieval_eval.json",
+  "results_sha256": "b298a9c605e67f48b413f0c50f4a2b03e967e3f557bcea49d6055ede9726ed8e",
+  "results_bytes": 59547
+}

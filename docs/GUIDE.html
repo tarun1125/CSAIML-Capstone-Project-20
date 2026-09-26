@@ -1,0 +1,1154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NL→MongoDB Capstone Guide</title>
+<!-- Self-contained and offline: no web fonts, no CDN, no network. Open this file directly in any browser. -->
+<style>
+:root{
+  --ground:#F4F4F1; --surface:#FFFFFF; --sunk:#ECECE7; --sunk-2:#E1E1DA;
+  --ink:#1A1C1E; --ink-2:#3F4347; --muted:#666B70; --faint:#8E9398;
+  --line:#DCDCD5; --line-soft:#E8E8E2;
+  --accent:#1F6B5C; --accent-soft:#DDEDE8;
+  --trap:#A33A2E; --trap-soft:#F8E5E1;
+  --ok:#23704A; --ok-soft:#DDEEE4;
+  --web:#7A4E0F; --web-soft:#F6EBD8;
+  --term:#2F4F7A; --term-soft:#E1E9F4;
+  --code-bg:#1F2328; --code-ink:#E6E8EA;
+  --fd:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --fb:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --fm:"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --ground:#131517; --surface:#1B1E21; --sunk:#23272B; --sunk-2:#2C3136;
+  --ink:#E8EAEC; --ink-2:#C3C8CD; --muted:#99A0A7; --faint:#737A81;
+  --line:#30353A; --line-soft:#282C31;
+  --accent:#6CC2AB; --accent-soft:#16302A;
+  --trap:#EB8F82; --trap-soft:#3A221E; --ok:#78C99C; --ok-soft:#18291F;
+  --web:#E3B46A; --web-soft:#342815; --term:#93B4E3; --term-soft:#1C2635;
+  --code-bg:#0E1012; --code-ink:#E6E8EA;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#131517; --surface:#1B1E21; --sunk:#23272B; --sunk-2:#2C3136;
+  --ink:#E8EAEC; --ink-2:#C3C8CD; --muted:#99A0A7; --faint:#737A81;
+  --line:#30353A; --line-soft:#282C31;
+  --accent:#6CC2AB; --accent-soft:#16302A;
+  --trap:#EB8F82; --trap-soft:#3A221E; --ok:#78C99C; --ok-soft:#18291F;
+  --web:#E3B46A; --web-soft:#342815; --term:#93B4E3; --term-soft:#1C2635;
+  --code-bg:#0E1012; --code-ink:#E6E8EA;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--fb);font-size:16px;line-height:1.62}
+.wrap{max-width:1000px;margin:0 auto;padding-inline:22px;padding-block:30px 90px}
+h1,h2,h3,h4{font-family:var(--fd);color:var(--ink);line-height:1.22;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.9rem,4vw,2.6rem);font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.55rem;font-weight:700;margin:34px 0 10px}
+h3{font-size:1.17rem;font-weight:700;margin:24px 0 8px}
+h4{font-size:1rem;font-weight:700;margin:16px 0 6px;font-family:var(--fb)}
+section>h2:first-child{margin-top:4px}
+p{margin:0 0 .8em;color:var(--ink-2)} li{color:var(--ink-2)}
+strong,b{color:var(--ink)}
+a{color:var(--accent)}
+code{font-family:var(--fm);font-size:.86em;background:var(--sunk);padding:1px 5px;border-radius:4px;color:var(--ink);overflow-wrap:anywhere}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+ul,ol{padding-left:22px;margin:0 0 .9em} li{margin-bottom:4px}
+hr{border:0;border-top:1px solid var(--line);margin:28px 0}
+
+/* header */
+.top{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:6px}
+.eyebrow{font-family:var(--fm);font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.dek{font-size:1.05rem;max-width:70ch;margin-top:10px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.pill{font-family:var(--fm);font-size:.72rem;padding:3px 9px;border-radius:99px;background:var(--sunk);color:var(--ink-2);white-space:nowrap}
+.pill.acc{background:var(--accent-soft);color:var(--accent)}
+.pill.trap{background:var(--trap-soft);color:var(--trap)}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+
+/* tabs */
+.tabs{position:sticky;top:0;z-index:10;background:var(--ground);display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--line);padding-top:8px;margin-bottom:24px;scrollbar-width:thin}
+.tab{font:600 .92rem var(--fb);color:var(--muted);background:none;border:0;border-bottom:3px solid transparent;padding:9px 11px 8px;cursor:pointer;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab.all{margin-left:auto;font-weight:500;font-family:var(--fm);font-size:.78rem}
+body.showall .pane{display:block!important;border-top:2px dashed var(--line);padding-top:18px;margin-top:26px}
+.pane[hidden]{display:none}
+
+/* blocks */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:14px 0}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.wrap{min-width:0}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.callout{border:1px solid var(--line);border-left:5px solid var(--accent);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0}
+.callout>*:last-child{margin-bottom:0}
+.callout .lab{font-family:var(--fm);font-size:.7rem;letter-spacing:.07em;text-transform:uppercase;font-weight:600;margin-bottom:4px;color:var(--accent)}
+.callout.trap{border-left-color:var(--trap);background:var(--trap-soft)} .callout.trap .lab{color:var(--trap)}
+.callout.ok{border-left-color:var(--ok);background:var(--ok-soft)} .callout.ok .lab{color:var(--ok)}
+.callout.web{border-left-color:var(--web);background:var(--web-soft)} .callout.web .lab{color:var(--web)}
+.callout.term{border-left-color:var(--term);background:var(--term-soft)} .callout.term .lab{color:var(--term)}
+.big{font-family:var(--fd);font-size:1.18rem;color:var(--ink);line-height:1.45}
+
+/* code */
+.code{position:relative;margin:10px 0 14px}
+pre{background:var(--code-bg);color:var(--code-ink);font-family:var(--fm);font-size:.83rem;line-height:1.55;padding:13px 15px;border-radius:8px;overflow-x:auto;margin:0;white-space:pre}
+pre .c{color:#8C959F}
+.copy{position:absolute;top:6px;right:6px;font:600 .68rem var(--fm);letter-spacing:.04em;background:#39414A;color:#E6E8EA;border:0;border-radius:5px;padding:4px 8px;cursor:pointer;opacity:.85}
+.copy:hover{opacity:1}
+
+/* tables */
+.tscroll{overflow-x:auto;margin:10px 0 14px}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--surface)}
+th{text-align:left;font-family:var(--fm);font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:2px solid var(--line);white-space:nowrap;background:var(--sunk)}
+td{padding:8px 10px;border-top:1px solid var(--line-soft);vertical-align:top;color:var(--ink-2)}
+td code{white-space:nowrap}
+td.n{font-family:var(--fm);font-size:.85rem;white-space:nowrap;color:var(--ink)}
+
+/* runbook steps */
+.step{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin:14px 0;overflow:hidden}
+.step>header{display:flex;gap:10px;align-items:flex-start;padding:12px 16px;background:var(--sunk);border-bottom:1px solid var(--line)}
+.step>header input{width:19px;height:19px;margin-top:3px;accent-color:var(--accent);flex:none;cursor:pointer}
+.step>header .num{font-family:var(--fm);font-weight:700;color:var(--accent);flex:none;margin-top:1px}
+.step>header h4{margin:0;font-size:1.02rem}
+.step>header .where{margin-left:auto;flex:none}
+.step .body{padding:10px 16px 6px}
+.step.done>header{opacity:.6}
+.step.done>header h4{text-decoration:line-through}
+.kv{display:grid;grid-template-columns:110px minmax(0,1fr);gap:4px 14px;margin:6px 0 10px}
+.kv>dt{font-family:var(--fm);font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+.kv>dd{margin:0;color:var(--ink-2);min-width:0;overflow-wrap:anywhere}
+.code{min-width:0;max-width:100%}
+.step .body,.card,.callout{min-width:0}
+@media (max-width:560px){.kv{grid-template-columns:1fr}.kv>dt{padding-top:6px}}
+.tag{font-family:var(--fm);font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap}
+.tag.web{background:var(--web-soft);color:var(--web)} .tag.term{background:var(--term-soft);color:var(--term)}
+.tag.local{background:var(--ok-soft);color:var(--ok)} .tag.cost{background:var(--trap-soft);color:var(--trap)}
+
+/* Q&A self-test */
+details.qa{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin:10px 0}
+details.qa>summary{cursor:pointer;padding:11px 16px;font-weight:600;color:var(--ink);list-style:none}
+details.qa>summary::-webkit-details-marker{display:none}
+details.qa>summary::before{content:"Q ";font-family:var(--fm);color:var(--accent)}
+details.qa[open]>summary{border-bottom:1px solid var(--line-soft)}
+details.qa>div{padding:10px 16px 4px}
+.progress{font-family:var(--fm);font-size:.78rem;color:var(--muted);margin:6px 0 14px}
+footer{margin-top:50px;border-top:1px solid var(--line);padding-top:14px;color:var(--faint);font-size:.84rem}
+@media print{.tabs,.copy{display:none}.pane{display:block!important}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">CSAIML-Capstone-Project-20 · study &amp; run guide · written 26 Sep 2026</div>
+  <h1>NL → MongoDB Capstone</h1>
+  <p class="dek">Everything needed to understand, defend and re-run this project on your own: the ideas from zero, why each value was chosen, the statistics, every result, and a step-by-step runbook for each arm, including the Azure work and which parts of it you did in the web portal versus the terminal.</p>
+  <div class="meta">
+    <span class="pill acc">Experiments: D3</span><span class="pill acc">Azure deployment: D2</span>
+    <span class="pill">304 held-out cases</span><span class="pill">178 tests passing (verified 26 Sep)</span>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Sections">
+  <button class="tab" data-tab="start">Start here</button>
+  <button class="tab" data-tab="fund">Fundamentals</button>
+  <button class="tab" data-tab="system">How it works</button>
+  <button class="tab" data-tab="values">Values &amp; why</button>
+  <button class="tab" data-tab="stats">Statistics</button>
+  <button class="tab" data-tab="results">Results</button>
+  <button class="tab" data-tab="run">Run it: local</button>
+  <button class="tab" data-tab="azure">Run it: Azure</button>
+  <button class="tab" data-tab="interview">Interview</button>
+  <button class="tab" data-tab="files">Files &amp; glossary</button>
+  <button class="tab all" type="button">Show all (search / print)</button>
+</nav>
+
+<!-- =================================================================== START -->
+<section class="pane" id="p-start">
+<h2>What this project is, in three sentences</h2>
+<p class="big">A benchmark for turning a plain-English question into a MongoDB query. It compares three ways of adapting one small model (zero-shot, retrieval-augmented, and LoRA fine-tuned), then a larger hosted model, on 304 held-out questions across 23 databases. Every answer is graded by <b>running the query against a live database and comparing the rows it returns</b>, never by comparing text.</p>
+
+<div class="callout"><div class="lab">The one idea to carry into every interview</div>
+<p>Grading by execution is what makes every number here trustworthy. A query can look completely different from the reference and still be right, or look almost identical and be wrong. String metrics can't tell those apart; running the query can. <b>Finding a cheap, trustworthy oracle is most of the work in testing a system like this.</b></p></div>
+
+<h3>The numbers to know cold</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Setting (same 304 cases)</th><th>Correct</th><th>What changed</th></tr></thead>
+<tbody>
+<tr><td>Zero-shot baseline (Qwen 1.5B, full 23-db schema)</td><td class="n">15 / 304 (4.9%)</td><td>—</td></tr>
+<tr><td>LoRA fine-tuned Qwen 1.5B</td><td class="n">103 / 304 (33.9%)</td><td>Trained on the 1,213-case pool</td></tr>
+<tr><td>RAG, Qwen 1.5B (published aggregate)</td><td class="n">142 / 304 (46.7%)</td><td>10 retrieved examples + one database's schema</td></tr>
+<tr><td>RAG + rank-1 database policy</td><td class="n">149 / 304 (49.0%)</td><td>Database picked from the nearest example, not a vote</td></tr>
+<tr><td>Azure hybrid retrieval (BM25 + vector)</td><td class="n">148 / 304</td><td>Better ranking, no significant gain (p = 0.49)</td></tr>
+<tr><td>gpt-4o on the identical prompts</td><td class="n">198 / 304 (65.1%)</td><td>Generator swapped, retrieval fixed</td></tr>
+<tr><td><b>gpt-4o + rank-1 (best measured)</b></td><td class="n"><b>212 / 304 (69.7%)</b></td><td>The configuration the Azure service serves</td></tr>
+</tbody></table></div>
+<p>Why 142 in one row and 143 in the comparisons: the RAG case-level file used for paired tests scores 143 (the same run, re-scored). The one-case gap is the oracle's known noise; details under <a href="#" data-go="results">Results</a>.</p>
+
+<h3>How to use this guide</h3>
+<ol>
+<li><b>Fundamentals</b> if a term is shaky. Every idea used anywhere in the project is explained from zero.</li>
+<li><b>How it works</b> and <b>Values &amp; why</b> to be able to draw the pipeline and defend every number that was chosen.</li>
+<li><b>Statistics</b> until you can do McNemar's test and nDCG on paper. That's where interviewers probe.</li>
+<li><b>Run it</b> tabs when you want to reproduce anything. Each step lists what it needs, the command, what it creates, and how to check it worked. Tick steps as you go; ticks are saved in this browser.</li>
+<li><b>Interview</b> last: questions with hidden answers, so you can test yourself.</li>
+</ol>
+
+<h3>Where things live</h3>
+<div class="tscroll"><table><tbody>
+<tr><td>This repo</td><td><code>~/Documents/ai-projects/capstone-project/CSAIML-Capstone-Project-20</code> (branch <code>azure-deploy</code>)</td></tr>
+<tr><td>Spider source data</td><td><code>~/Documents/ai-projects/capstone-project/spider_data</code> (sibling folder, not in git)</td></tr>
+<tr><td>Which file holds which number</td><td><code>CANONICAL_ARTIFACTS.md</code></td></tr>
+<tr><td>Deeper write-ups</td><td><code>docs/FINDING-*.md</code>, <code>docs/EXPERIMENT-*.md</code>, <code>docs/AZURE-PLAN.md</code>, <code>docs/STUDY-GUIDE.md</code></td></tr>
+<tr><td>Things that exist only on this Mac</td><td>The LoRA adapter weights (<code>fine_tuning/adapters_23db_1000iter/</code>, about 42 MB each), <code>atlas-credentials.env</code>, <code>azure.env</code>, <code>.venv/</code>, <code>database/mongodb/</code> dumps. <b>Back these up.</b> Git doesn't have them.</td></tr>
+</tbody></table></div>
+
+<div class="callout trap"><div class="lab">Five traps this guide will keep you out of</div>
+<ol>
+<li><b>Don't run <code>rag/build_split.py</code>.</b> It would replace the committed test set with a different one (only 66 of 304 cases overlap, checked 26 Sep). The committed split was built by an "additive" process with no script. Treat <code>rag_test.json</code> and <code>rag_fewshot_pool.json</code> as frozen.</li>
+<li><b>Always pass a new <code>--output</code> to generation scripts.</b> Their defaults point at committed files, and they resume from an existing file, so a default run silently does nothing.</li>
+<li><b><code>fine_tuning/generate_predictions_23db.py</code> defaults to the old 200-iteration adapter</b> (the 24.0% one). Pass <code>--adapter-path fine_tuning/adapters_23db_1000iter</code>.</li>
+<li><b>Don't use <code>rag/score_rag.py</code> for a new arm.</b> It overwrites committed files. Use <code>rag/score_rerank_arms.py</code> or the scoring snippet in the run tab.</li>
+<li><b>Read <code>execution_accuracy</code>, never <code>status</code>.</b> "PASS" only means the query ran without an error.</li>
+</ol></div>
+</section>
+
+<!-- =================================================================== FUNDAMENTALS -->
+<section class="pane" id="p-fund" hidden>
+<h2>Fundamentals, from zero</h2>
+<p>Each idea below is used somewhere in this project. Read the ones you can't yet explain in two sentences.</p>
+
+<h3>1. The task: NL → query</h3>
+<p>The input is a question like <i>"How many singers are there?"</i> plus a database. The output is one line of Python that PyMongo can run, for example <code>db.singer.count_documents({})</code>. MongoDB stores <b>documents</b> (JSON-like records) in <b>collections</b> (like tables) inside <b>databases</b>. Two query styles appear:</p>
+<ul>
+<li><code>find(filter, projection)</code>: select documents matching a filter and choose which fields come back.</li>
+<li><code>aggregate([stage, stage, …])</code>: a pipeline. Each stage transforms the stream: <code>$match</code> filters, <code>$group</code> groups and counts, <code>$lookup</code> joins another collection, <code>$project</code> reshapes, <code>$sort</code>, <code>$limit</code>.</li>
+</ul>
+<p>The questions come from <b>Spider</b>, a public text-to-SQL benchmark. Its SQLite databases were converted into MongoDB collections, and the gold answers were hand-written as PyMongo queries.</p>
+
+<h3>2. Language models, tokens, decoding</h3>
+<p>A language model reads text as <b>tokens</b> (word pieces) and predicts the next token, one at a time. <b>Decoding</b> is how the next token is chosen:</p>
+<ul>
+<li><b>Greedy (temperature 0):</b> always take the most likely token. Deterministic on the same hardware and software. Used for every scored run here, so re-runs are comparable.</li>
+<li><b>Sampling (temperature &gt; 0):</b> pick randomly in proportion to probability. Higher temperature means more random. Used only for self-consistency (below).</li>
+</ul>
+<p>A model's <b>log-probability</b> for a token measures how confident it was. The <b>mean log-probability</b> over an answer's tokens is one confidence signal. <b>Self-consistency</b> is another: sample the answer k times and measure how often the samples agree.</p>
+
+<h3>3. Prompting: zero-shot, few-shot, schema</h3>
+<ul>
+<li><b>Zero-shot:</b> instructions plus the question, no examples. Here the baseline also gets the schema of all 23 databases (so it has to find the right one itself).</li>
+<li><b>Few-shot:</b> include example question → query pairs in the prompt so the model copies the style.</li>
+<li><b>Schema:</b> the list of collections and fields (with types). Without it the model invents field names.</li>
+</ul>
+
+<h3>4. Embeddings and cosine similarity</h3>
+<p>An <b>embedding model</b> turns a sentence into a fixed-length list of numbers (a vector) so that sentences with similar meaning land close together. This project uses <code>all-MiniLM-L6-v2</code>, which gives 384 numbers per sentence.</p>
+<p><b>Cosine similarity</b> is the angle-based closeness of two vectors: 1 means same direction, 0 unrelated. If every vector is scaled to length 1 first (<b>L2-normalised</b>), cosine similarity equals the plain <b>dot product</b>, which is cheaper. That's why the index here is an "inner product" index over normalised vectors.</p>
+<p><b>Mean pooling:</b> MiniLM produces one vector per token; averaging them (ignoring padding) gives one vector for the sentence.</p>
+
+<h3>5. Vector search: FAISS, exact vs approximate</h3>
+<p><b>FAISS</b> is a library for finding the nearest vectors fast. <code>IndexFlatIP</code> compares the query against every stored vector: exact, and plenty fast for 1,213 vectors. <b>Approximate</b> indexes (HNSW, IVF) skip most comparisons to handle millions of vectors, at the cost of sometimes missing the true nearest one. At this scale exact search costs nothing, so there's no reason to accept that error.</p>
+
+<h3>6. RAG: retrieval-augmented generation</h3>
+<p>Instead of hoping the model knows the answer, <b>retrieve</b> relevant material and put it in the prompt. Here the "material" is the 10 most similar past questions with their correct queries, plus the full schema of the database those examples point to. The model then writes a query in the same style.</p>
+
+<h3>7. Keyword search (BM25), hybrid search and RRF</h3>
+<p><b>BM25</b> scores documents by shared words, weighting rare words more (a word that appears in few documents is more informative). Good at exact terms like field names; blind to paraphrase.</p>
+<p><b>Hybrid search</b> runs keyword search and vector search, then merges the two ranked lists. <b>Reciprocal Rank Fusion (RRF)</b> merges by rank, not by score: each document gets <code>1 / (60 + rank)</code> from each list and the sums are sorted. Using ranks avoids comparing BM25 scores with cosine scores, which are on unrelated scales. The constant 60 is the standard choice; it stops one list's top result from dominating.</p>
+
+<h3>8. Bi-encoders vs cross-encoders (reranking)</h3>
+<p>A <b>bi-encoder</b> (like MiniLM here) embeds the question and each candidate separately, then compares vectors. Fast, because candidates are embedded once. A <b>cross-encoder</b> reads the question and one candidate <i>together</i> and outputs a relevance score. Slower (one model call per pair) but usually more accurate. <b>Reranking</b> = retrieve many candidates with the fast bi-encoder, re-sort them with the cross-encoder. This project tested exactly that.</p>
+
+<h3>9. Fine-tuning and LoRA</h3>
+<p><b>Fine-tuning</b> continues training a model on your task. Full fine-tuning updates all 1.5 billion weights: expensive. <b>LoRA</b> (low-rank adaptation) freezes the original weights and learns a small correction for chosen weight matrices: <code>W + B·A</code>, where A and B are thin matrices of <b>rank</b> r (here 16). Only A and B are trained, 10.55 million numbers here (0.68% of the model). The <b>scale</b> multiplies the correction's strength. The trained A and B are the <b>adapter</b>.</p>
+<p>An <b>epoch</b> is one full pass over the training set. Iterations × effective batch size ÷ training examples = epochs.</p>
+
+<h3>10. MLX and Apple Silicon</h3>
+<p><b>MLX</b> is Apple's machine-learning framework for M-series chips. <code>mlx-lm</code> runs and fine-tunes language models on it. All three Qwen arms use the same MLX stack, which matters: numbers produced on different software stacks aren't comparable (see "the confound" in Results).</p>
+
+<h3>11. Metrics for query generation</h3>
+<ul>
+<li><b>Execution accuracy</b> (primary): run the generated query and the gold query; correct if the returned rows match.</li>
+<li><b>CodeBLEU</b> (secondary): text similarity to the reference, with syntax awareness. Rewards looking similar, not being right.</li>
+<li><b>BERTScore</b> (secondary): embedding similarity of the texts. Same weakness.</li>
+</ul>
+
+<h3>12. Metrics for retrieval rankings</h3>
+<ul>
+<li><b>recall@k:</b> did at least one relevant item appear in the top k? Averaged over questions.</li>
+<li><b>MRR@10</b> (mean reciprocal rank): 1 / the rank of the first relevant item (0 if none in the top 10), averaged.</li>
+<li><b>nDCG@10:</b> rewards putting the most relevant items highest, with graded relevance. Explained with a worked example in <a href="#" data-go="stats">Statistics</a>.</li>
+</ul>
+
+<h3>13. Paired comparisons</h3>
+<p>Two arms answer the <i>same</i> 304 questions, so their results are <b>paired</b>. Most questions come out the same both ways and say nothing about which arm is better. Only the <b>discordant</b> ones (right in one arm, wrong in the other) carry information. McNemar's test looks at exactly those. Full explanation in Statistics.</p>
+
+<h3>14. Pre-registration, positive controls, deviations</h3>
+<ul>
+<li><b>Pre-registration:</b> write the hypothesis, the arms, the comparison and your prediction <i>before</i> running, and commit it. You can't then move the goalposts.</li>
+<li><b>Positive control:</b> check the measuring setup can reproduce a known result before trusting it on a new one (Azure vector search had to reproduce FAISS first).</li>
+<li><b>Deviation:</b> when reality departs from the plan, record it with a date <i>before</i> seeing the results it affects.</li>
+</ul>
+
+<h3>15. Goodhart's law</h3>
+<p>"When a measure becomes a target, it ceases to be a good measure." Here: optimising the ranking metric (nDCG) made it a <i>worse</i> predictor of whether answers were correct.</p>
+
+<h3>16. Cloud pieces (for the Azure arm)</h3>
+<ul>
+<li><b>Resource group:</b> a folder for Azure resources. Deleting it deletes everything inside.</li>
+<li><b>Azure AI Search:</b> managed search service (keyword, vector, hybrid).</li>
+<li><b>Azure OpenAI:</b> hosted OpenAI models; you create a <b>deployment</b> of a model version and call it by name.</li>
+<li><b>Container Apps:</b> runs a container, scales to zero when idle. <b>Container Registry (ACR)</b> stores the image.</li>
+<li><b>Key Vault:</b> stores secrets. <b>Managed identity:</b> the app's own identity, so it can call other Azure services without any key in its settings; access is granted with <b>role assignments</b> (RBAC).</li>
+<li><b>Application Insights / Log Analytics:</b> traces and logs.</li>
+<li><b>VNet, subnet, NAT Gateway, static public IP:</b> a private network whose outbound traffic leaves from one fixed IP, so MongoDB Atlas can allow exactly that IP.</li>
+</ul>
+</section>
+<!-- =================================================================== SYSTEM -->
+<section class="pane" id="p-system" hidden>
+<h2>How it works, end to end</h2>
+
+<h3>The data layer</h3>
+<pre>Spider (public text-to-SQL)          ~/Documents/ai-projects/capstone-project/spider_data/
+   │  SQLite files, 23 of its databases used
+   ▼  sqlite_to_mongo.py &lt;db&gt;          → database/mongodb/&lt;db&gt;/&lt;collection&gt;.json
+   ▼  atlas_verify_and_load.py --load   → MongoDB Atlas: 23 databases, 161 collections
+data/reference_queries.json          1,517 hand-verified question → PyMongo pairs
+   │  (121 original hand-written + 1,396 derived from Spider questions)
+   ▼  evaluation/execute_gold.py        → data/gold_results.json (the rows every gold query returns)
+   ▼  split (frozen, "additive")        → rag/data/rag_fewshot_pool.json (1,213)
+                                          rag/data/rag_test.json         (304, held out)</pre>
+<p><b>Why "additive":</b> the dataset grew in three rounds (305 → 735 → 1,517). Each round kept the earlier test cases in the test set and split only the new cases, so earlier results stayed comparable. No script reproduces that exact split, which is why it's treated as frozen.</p>
+<p><b>Leakage checks:</b> zero id overlap and zero question-text overlap between pool and test, checked independently.</p>
+
+<h3>The three Qwen arms</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Arm</th><th>Prompt contains</th><th>Script</th></tr></thead>
+<tbody>
+<tr><td>Zero-shot baseline</td><td>Rules + the schema of all 23 databases. Same prompt for every question.</td><td><code>generate_baseline_mlx.py</code></td></tr>
+<tr><td>RAG</td><td>Rules + 10 retrieved example pairs + the full schema of one predicted database (+ foreign-key notes).</td><td><code>rag/build_prompts.py</code> → <code>rag/generate_rag_mlx.py</code></td></tr>
+<tr><td>LoRA fine-tuned</td><td>A "batch" schema (up to 4 databases) the model was trained with, and no examples: the task knowledge is in the adapter.</td><td><code>fine_tuning/generate_predictions_23db.py</code></td></tr>
+</tbody></table></div>
+
+<h3>RAG, step by step (what <code>build_prompts.py</code> does for each question)</h3>
+<ol>
+<li><b>Embed</b> the question with MiniLM (<code>rag/embed_utils.py</code>): tokens → mean pooling → L2-normalise → 384 numbers.</li>
+<li><b>Search</b> the FAISS index of the 1,213 pool questions for the 10 nearest (<code>rag/data/fewshot.index</code>, row-aligned with <code>fewshot_metadata.json</code>). Only the <i>question</i> text is embedded, never the query or schema: the job is "find past questions phrased like this one".</li>
+<li><b>Pick the database.</b> <code>vote</code> (the default): the most common database among the 10 neighbours, ties broken by the nearest. <code>rank1</code>: just the nearest neighbour's database.</li>
+<li><b>Build the system prompt</b> with <code>build_system_prompt()</code>: header → 10 example Q/query pairs → full schema of the picked database with FK annotations → a warning about string-typed numeric fields where relevant → 7 rules.</li>
+<li><b>Save</b> everything per question to <code>rag/data/rag_prompts*.json</code>: the prompt, the retrieved ids, their cosine scores and whether the database was right.</li>
+</ol>
+<p>Generation then reads those prompts and never touches retrieval again. That's why an Azure retrieval arm could be generated locally after the Azure search had done its part.</p>
+
+<h3>From a generation to a score</h3>
+<pre>raw generation (…_results.json)
+   ▼ clean()            fine_tuning/generation_utils.py  – cut at the model's stop marker, strip markdown
+   ▼ normalize.py       rewrite JS-shell habits at the AST level: null/true/false → None/True/False,
+                        countDocuments/findOne → count_documents/find_one, add {} to a bare count
+   ▼ check_query_is_safe()   evaluation/execute_queries.py – the AST allowlist (next section)
+   ▼ eval() against the case's GOLD database on Atlas (read-only), materialise the cursor
+   ▼ results_match(rows, gold_rows)  → execution_accuracy True / False</pre>
+<div class="callout"><div class="lab">A subtlety worth knowing</div>
+<p>Scoring runs each query against the <b>gold</b> database for that question, even if retrieval predicted a different one. A query written against the wrong schema almost always fails there, so a wrong database costs the case. The deployed service, by contrast, executes against the <i>predicted</i> database.</p></div>
+
+<h3>What counts as "the same rows" (<code>results_match</code>)</h3>
+<ol>
+<li><b>Scalars</b> (counts): plain equality.</li>
+<li><b>Lists:</b> order is ignored, and dict key order is ignored (both are canonicalised and sorted).</li>
+<li><b>Key-tolerant fallback:</b> if exact match fails, same number of rows and the same values per row with different key names still counts (for example <code>{"max": 640}</code> vs <code>{"max_charge_amount": 640}</code>). A null <code>_id</code> from <code>$group</code> is ignored; a real <code>_id</code> is compared.</li>
+</ol>
+<p>Known ways this lets a wrong query through (measured by the false-positive audit): empty matches empty, a scalar matches by coincidence, order is never compared, and tiny collections make "top N" degenerate.</p>
+
+<h3>The safety guard (<code>check_query_is_safe</code>)</h3>
+<p>Model output is executed with <code>eval()</code>, so it's parsed first and rejected unless every piece is on an allowlist. It <b>fails closed</b>: anything it can't prove safe is refused.</p>
+<ul>
+<li>Parse as a Python expression. A syntax error is a rejection.</li>
+<li>Only the names <code>db, None, True, False, len, sorted, list, dict</code>.</li>
+<li>Only these methods: <code>find, find_one, aggregate, count_documents, distinct, sort, limit, skip, len, sorted, list, dict</code>.</li>
+<li>No attribute starting with <code>_</code>; no <code>.client</code>, <code>.database</code>, <code>.collection</code> (those reach other databases).</li>
+<li>Arithmetic only <code>+ - /</code>. Refusing <code>**</code>, <code>*</code>, <code>%</code>, <code>&lt;&lt;</code> blocks CPU/memory bombs like <code>9**9**9</code>.</li>
+<li><code>$where, $function, $accumulator, $merge, $out</code> refused anywhere, at any depth. Dict keys must be literal strings (so <code>"$o"+"ut"</code> tricks fail), with no <code>**</code> unpacking and no <code>dict()</code> call.</li>
+<li>Aggregation stages must be on a read-only list (<code>$match, $project, $group, $lookup, $unwind, $facet, $unionWith, $setWindowFields</code>, …).</li>
+</ul>
+
+<h3>The fine-tuning arm</h3>
+<ol>
+<li><code>prepare_data_23db.py</code> turns the 1,213-case pool into <code>fine_tuning/data_23db/train.jsonl</code> (1,091) and <code>valid.jsonl</code> (122). Each example's system prompt holds the schema of a <b>batch</b> of up to 4 databases rather than all 23 (a 23-database prompt was about 23,000 characters, 6× too long). Batches are built so near-identical databases (<code>college_1/2/3</code>, <code>chinook_1</code>/<code>store_1</code>, <code>flight_2</code>/<code>flight_4</code>, <code>store_1</code>/<code>sakila_1</code>) are never in the same batch. Otherwise the model learns to mix up their field names.</li>
+<li><code>mlx_lm.lora --config fine_tuning/lora_config_23db_1000iter.yaml</code> trains the adapter.</li>
+<li><code>generate_predictions_23db.py</code> reads the exact batch prompts from <code>data_23db/split_manifest.json</code>, so training and generation prompts are byte-identical.</li>
+</ol>
+
+<h3>The Azure service (what's deployed)</h3>
+<pre>client (your IP only) ──HTTPS + x-api-key──▶ Container App ca-capstone-rag (FastAPI, scale 0–1)
+   1 embed (MiniLM, CPU, baked into the image)          14 ms
+   2 retrieve top-10 ─────────▶ Azure AI Search, vector   43 ms
+   3 database = rank-1, build_system_prompt()
+   4 generate ─────────────────▶ Azure OpenAI gpt-4o      1,471 ms   (≈96% of a warm request)
+   5 normalize + AST guard                                0.7 ms
+   6 execute read-only ──▶ NAT Gateway (1 static IP) ──▶ MongoDB Atlas   9 ms
+   traces ──▶ Application Insights · secrets ◀── Key Vault · identity: managed (no keys)</pre>
+<p>Every step imports the benchmark's own functions, and <code>tests/test_service.py</code> checks the served prompt is byte-identical to <code>rag/data/rag_prompts_rank1_k10.json</code>.</p>
+</section>
+
+<!-- =================================================================== VALUES -->
+<section class="pane" id="p-values" hidden>
+<h2>Every chosen value, and why</h2>
+<p>If an interviewer points at a number and asks "why that?", this is the answer. "What would change" is the honest follow-up: what the value trades against.</p>
+
+<h3>Data and split</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Value</th><th>Where</th><th>Why</th><th>What would change</th></tr></thead>
+<tbody>
+<tr><td class="n">304 test / 1,213 pool (80/20)</td><td><code>rag_test.json</code></td><td>Enough test cases for paired tests to detect a few-point change; the pool keeps 80% for retrieval and training. Stratified by database, so every database appears in proportion.</td><td>A bigger test set narrows intervals but starves retrieval.</td></tr>
+<tr><td class="n">23 databases</td><td>Atlas</td><td>Grew from 6 over three rounds. More databases make database prediction a real 23-way problem with look-alike siblings.</td><td>—</td></tr>
+<tr><td class="n">SAMPLE_CAP 5000</td><td><code>dump_atlas_to_local.py</code></td><td>Local dumps are only for working out field <i>types</i>, so a 5,000-document sample is as good as all 510,437 rows of <code>wta_1.rankings</code>.</td><td><code>--sample-cap 0</code> dumps everything.</td></tr>
+</tbody></table></div>
+
+<h3>Retrieval</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Value</th><th>Where</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td class="n">all-MiniLM-L6-v2, 384-d</td><td><code>embed_utils.py</code></td><td>Small (about 90 MB), CPU-friendly and a standard sentence embedder. The query and the index <b>must</b> use the identical function, or the search is meaningless without any error.</td></tr>
+<tr><td class="n">Mean pooling + L2 normalise</td><td><code>embed_utils.py</code></td><td>Normalised vectors make inner product = cosine, so <code>IndexFlatIP</code> ranks by cosine.</td></tr>
+<tr><td class="n">IndexFlatIP (exact)</td><td><code>build_retrieval_index.py</code></td><td>1,213 vectors: a full scan takes milliseconds. Approximate indexes exist for millions.</td></tr>
+<tr><td class="n">Embed the question only</td><td>same</td><td>The job is "find past questions phrased like this". Mixing query syntax into the embedded text would blur that signal.</td></tr>
+<tr><td class="n">K = 10 examples</td><td><code>build_prompts.py</code></td><td>A K = 3/5/10 sweep on the earlier 61-case slice rose monotonically with K; K was set to 10 once the pool was big enough. Recall@10 was already 0.987.</td></tr>
+<tr><td class="n">Database: vote (default) vs rank-1</td><td><code>--db-policy</code></td><td>The vote was the original design. Rank-1 is better (see Results): an unweighted vote counts how often a database appears in the pool rather than how close its examples are.</td></tr>
+<tr><td class="n">Whole schema of one database</td><td><code>render_schema_block</code></td><td>Retrieving individual collections can drop one a <code>$lookup</code> join needs. Picking the whole database avoids that.</td></tr>
+<tr><td class="n">FK annotations on</td><td>default</td><td>A/B tested: 142 vs 141, a null result. Kept as the default.</td></tr>
+<tr><td class="n">String-typed numeric warnings</td><td><code>STRING_TYPED_NUMERIC_FIELDS</code></td><td>Three databases store numbers as text (<code>concert_singer</code>, <code>dog_kennels</code>, <code>car_1</code>); without a <code>$toInt</code>/<code>$toDouble</code> hint the model compares strings. <code>car_1</code> also has the literal text <code>"null"</code>, which breaks <code>$toDouble</code>. The warning was added after it caused real failures.</td></tr>
+<tr><td class="n">Rerank depth 50</td><td><code>rerank.py DEFAULT_TOP_N</code></td><td>The cross-encoder re-sorts FAISS's top 50, deep enough to reach anything useful.</td></tr>
+<tr><td class="n">cross-encoder/ms-marco-MiniLM-L-6-v2, max_length 512</td><td><code>rerank.py</code></td><td>A standard, small reranker trained for passage relevance.</td></tr>
+</tbody></table></div>
+
+<h3>Generation</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Value</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td class="n">Qwen2.5-Coder-1.5B-Instruct, bf16</td><td>A small code model that runs on the Mac. bf16 keeps the published weights' precision.</td></tr>
+<tr><td class="n">Greedy (temperature 0)</td><td>Deterministic on this stack: two full 304-case runs matched down to the per-token log-probabilities. Makes paired comparisons clean.</td></tr>
+<tr><td class="n">max_tokens 300</td><td>Every gold query fits well within it. mlx-lm keeps generating past the end marker (issue #973), so <code>clean()</code> cuts at the stop marker; about 90% of generated tokens survive the cut.</td></tr>
+<tr><td class="n">Self-consistency k = 5, T = 0.7</td><td>Five samples is enough to measure agreement at a sane cost; T = 0.7 is random enough to disagree. <code>--samples &gt; 1</code> with T = 0 is refused, since it would report agreement of 1.0 everywhere.</td></tr>
+<tr><td class="n">gpt-4o 2024-11-20, T = 0, seed 42, max 300</td><td>Matches the Qwen decoding. gpt-4o-mini couldn't be deployed (blocked for new deployments from 31 Mar 2026), and gpt-5-family models are reasoning models without temperature 0. The version is pinned with <b>NoAutoUpgrade</b>, so Azure can't silently swap it.</td></tr>
+</tbody></table></div>
+
+<h3>Fine-tuning (<code>lora_config_23db_1000iter.yaml</code>)</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Value</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td class="n">rank 16, scale 2.0, dropout 0</td><td>Rank 16 is a common middle setting: enough capacity for a narrow task, still small. Unchanged from the first working run, so later runs change one thing at a time.</td></tr>
+<tr><td class="n">num_layers 16</td><td>LoRA on the last 16 of 28 blocks, on all seven projection matrices: 10.55M trainable parameters (0.68%).</td></tr>
+<tr><td class="n">batch 2 × grad accumulation 2 = 4</td><td>Batch 4 ran out of memory on the 24 GB Mac; batch 2 with accumulation 2 gives the same effective batch. Gradient checkpointing on for the same reason.</td></tr>
+<tr><td class="n">iters 1000</td><td><b>Epoch parity.</b> 1000 × 4 ÷ 1,091 examples ≈ 3.67 epochs, matching the first 6-database adapter's ≈ 3.65. The earlier 200 iterations was only 0.73 epochs (under-trained): 24.0% → 33.9% once fixed.</td></tr>
+<tr><td class="n">learning rate 1e-5, AdamW</td><td>A conservative default, unchanged from the working run.</td></tr>
+<tr><td class="n">max_seq_length 4096</td><td>The longest batch prompt is about 2,545 tokens, so 4096 leaves headroom.</td></tr>
+<tr><td class="n">val_batches 25, eval every 20, save every 100</td><td>Tracks validation loss often enough to see over-fitting; checkpoints let you pick an earlier point. Final: train loss 0.030, validation 0.024, peak memory 15.45 GB.</td></tr>
+</tbody></table></div>
+
+<h3>Evaluation and statistics</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Value</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td class="n">McNemar exact, two-sided</td><td>Paired arms; exact binomial because discordant counts are small. See Statistics.</td></tr>
+<tr><td class="n">α = 0.05</td><td>The conventional line. Always reported with the discordant counts, never alone.</td></tr>
+<tr><td class="n">Pre-registered bar: ≥ +9 net <b>and</b> p &lt; 0.05 (Azure hybrid)</td><td>+9 is about 3 points, a change worth switching infrastructure for. Requiring both stops a tiny but "significant" effect or a large noisy one from counting.</td></tr>
+<tr><td class="n">Gate 1 parity ≥ 300/304 identical</td><td>Set before running. Exact cosine on identical vectors should match nearly everywhere; allowing a few ties.</td></tr>
+<tr><td class="n">Relevance: binary + graded 0–3</td><td>Binary = same database (for recall/MRR). Graded: 0 different database · 1 same database, no shared collection · 2 partial overlap · 3 exact same collection set (for nDCG).</td></tr>
+<tr><td class="n">nDCG gain 2^g − 1</td><td>The standard exponential gain: a grade-3 example is worth 7, not 3× a grade-1. Exact collection matches matter much more.</td></tr>
+<tr><td class="n">recall@{1,3,5,10,20}, MRR@10, nDCG@10</td><td>Standard cut-offs; 10 matches K.</td></tr>
+</tbody></table></div>
+
+<h3>Azure service</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Value</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td class="n">Central India (East US for OpenAI)</td><td>South India lacks AI Search's higher limits. Central India offered no pay-per-token gpt-4o, hence East US for the model only.</td></tr>
+<tr><td class="n">Exhaustive KNN, cosine</td><td>Exact, like FAISS. HNSW would add approximation error, a second variable. It also doesn't consume the Free tier's vector quota.</td></tr>
+<tr><td class="n">Hybrid vector leg k = 50, cut to 10</td><td>Gives RRF a deep enough candidate list to fuse.</td></tr>
+<tr><td class="n">min replicas 0, max 1, 1 vCPU / 2 GiB</td><td>Scale to zero costs nothing idle (inside the free grant). The trade-off is a cold start of about 34.5 s median.</td></tr>
+<tr><td class="n">MAX_ROWS 50, MAX_QUESTION_CHARS 500, RATE_LIMIT 10/min</td><td>Limits the blast radius of a service that runs model-written code.</td></tr>
+<tr><td class="n">Log Analytics cap 0.1 GB/day</td><td>A log storm can't run up a bill.</td></tr>
+<tr><td class="n">NAT Gateway + one static IP</td><td>A consumption-only environment leaves from Azure's shared pool (~190 IPs used by other tenants too). Allowlisting that in Atlas would admit any Container App in the region. One static IP admits only this app. About $1/day.</td></tr>
+<tr><td class="n">Atlas user: <code>readAnyDatabase</code></td><td>Verified to have no write or admin actions. The admin URI never goes into the container.</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- =================================================================== STATS -->
+<section class="pane" id="p-stats" hidden>
+<h2>The statistics, worked by hand</h2>
+
+<h3>1. Why paired, and McNemar's test</h3>
+<p>Two arms answer the same 304 questions. Put every question in a 2×2 table:</p>
+<div class="tscroll"><table>
+<thead><tr><th></th><th>New arm right</th><th>New arm wrong</th></tr></thead>
+<tbody>
+<tr><td><b>Old arm right</b></td><td>a: both right (no information)</td><td><b>b: lost</b></td></tr>
+<tr><td><b>Old arm wrong</b></td><td><b>c: gained</b></td><td>d: both wrong (no information)</td></tr>
+</tbody></table></div>
+<p>Cells a and d say nothing about which arm is better; they came out the same. Only <b>b</b> and <b>c</b> (the discordant pairs) matter. If the two arms were really equally good, each discordant question would be equally likely to fall either way, like a fair coin. So under the "no difference" hypothesis, c out of (b + c) follows a Binomial(b + c, ½) distribution.</p>
+<p><b>The p-value</b> is the chance of a split at least as lopsided as the one observed, in either direction, if the coin were fair. "Exact" means computing that binomial probability directly rather than using the chi-square approximation, which is unreliable when b + c is small.</p>
+
+<div class="callout ok"><div class="lab">Worked example: rank-1 (gained 6, lost 0)</div>
+<p>b + c = 6. The chance all 6 land on one given side is (½)<sup>6</sup> = 1/64. Two-sided (either side all-6): 2 × 1/64 = <b>0.03125</b>. That's the published p = 0.031. Six questions, no losses, and it's only just significant, because 6 flips is very little evidence.</p></div>
+<div class="callout"><div class="lab">Worked example: reranking (gained 20, lost 22)</div>
+<p>42 discordant, split 20/22: close to what a fair coin gives. p = <b>0.88</b>. Reranking changed 42 answers and it was churn, not improvement.</p></div>
+<div class="tscroll"><table>
+<thead><tr><th>Comparison</th><th>gained / lost</th><th>p (recomputed 26 Sep)</th></tr></thead>
+<tbody>
+<tr><td>Reranking K=10 vs A0</td><td class="n">20 / 22</td><td class="n">0.8776</td></tr>
+<tr><td>Rank-1 vs vote</td><td class="n">6 / 0</td><td class="n">0.03125</td></tr>
+<tr><td>Azure hybrid vs A0</td><td class="n">19 / 14</td><td class="n">0.4869</td></tr>
+<tr><td>Azure hybrid (rank-1) vs rank-1</td><td class="n">15 / 14</td><td class="n">1.0</td></tr>
+<tr><td>gpt-4o vs Qwen (same prompts)</td><td class="n">69 / 14</td><td class="n">6.8 × 10⁻¹⁰</td></tr>
+<tr><td>gpt-4o + rank-1 vs gpt-4o vote</td><td class="n">17 / 3</td><td class="n">0.0026</td></tr>
+<tr><td>gpt-4o + rank-1 vs A0</td><td class="n">80 / 11</td><td class="n">4.4 × 10⁻¹⁴</td></tr>
+</tbody></table></div>
+<p>Compute any of them yourself (the capstone's venv has scipy):</p>
+<pre>from scipy.stats import binomtest
+gained, lost = 19, 14
+print(binomtest(min(gained, lost), gained + lost, 0.5).pvalue)   # 0.4869</pre>
+
+<h3>2. Why not just compare the two accuracies?</h3>
+<p>One accuracy on 304 questions has an uncertainty of about <b>± 5.6 points</b> (95%, at ~47%): 1.96 × √(0.47 × 0.53 / 304) ≈ 0.056. Treated as two independent numbers, two arms would need to differ by roughly 11 points before you could call it. Pairing removes the shared questions, so a 3-point change touching a handful of cases can still show up. That's also why a fixed rule like "fail if accuracy drops 2 points" is wrong both ways: it fires on noise and stays silent on a real change hidden in a large swap.</p>
+
+<h3>3. A p-value is not the effect size</h3>
+<p>Always report net change and discordant counts next to p. gpt-4o's p = 6.8 × 10⁻¹⁰ says "certainly not chance"; the +55 cases says how much. Rank-1's p = 0.031 is marginal, yet it lost zero cases, and the mechanism is understood. Both facts matter.</p>
+
+<h3>4. Noise floors: how small a difference can be real</h3>
+<ul>
+<li><b>The oracle itself:</b> one case in 277 flipped with a byte-identical query (a <code>$sort</code> + <code>$limit 1</code> over a tie; MongoDB may return either row). About 0.4%.</li>
+<li><b>Qwen on MLX:</b> fully deterministic (identical per-token log-probabilities across runs).</li>
+<li><b>gpt-4o at T = 0:</b> not deterministic. Three runs of 50 cases differed in 3–6 queries per pair and 0–2 correctness flips, with identical totals. Report it as "~198 ± a few".</li>
+<li><b>bf16 cascade:</b> a tiny floating-point difference early in greedy decoding can change the whole rest of an answer. Why "fused vs adapter" text matched only 90% in FORGE even though the maths is identical.</li>
+</ul>
+
+<h3>5. Correlation: how much ranking explains</h3>
+<p>Per question, nDCG@10 vs correct/incorrect: <b>r = 0.307</b>. Squared, r² = 0.094, so ranking quality explains about <b>9.4%</b> of the variation in whether an answer is right; the rest is the generator. The correlation is real (t = 5.61 on 302 degrees of freedom, p = 4.7 × 10⁻⁸) but small. And the best-ranked arm had the <i>weakest</i> link (r = 0.200): Goodhart's law, observed.</p>
+
+<h3>6. Ranking metrics, worked</h3>
+<p>Say a question's top 4 retrieved examples have graded relevance <code>[3, 0, 2, 1]</code> (best first).</p>
+<ul>
+<li><b>DCG@4</b> = Σ (2<sup>g</sup> − 1) / log₂(i + 2) = 7/1 + 0/1.585 + 3/2 + 1/2.322 = 7 + 0 + 1.5 + 0.431 = <b>8.931</b></li>
+<li><b>Ideal order</b> [3, 2, 1, 0]: 7/1 + 3/1.585 + 1/2 + 0 = <b>9.393</b></li>
+<li><b>nDCG@4</b> = 8.931 / 9.393 = <b>0.951</b>. 1.0 would be a perfect order. The ideal here is the best order <i>of what was retrieved</i>: nDCG judges ordering; recall judges what got retrieved at all.</li>
+</ul>
+<p>With binary relevance <code>[0, 0, 1, 0, 1]</code>: reciprocal rank = 1/3 (first relevant item at rank 3); recall@1 = 0, recall@3 = 1. MRR averages the reciprocal ranks over all questions. These functions are in <code>rag/metrics_retrieval.py</code>, with hand-computed tests in <code>tests/test_metrics_retrieval.py</code>.</p>
+
+<h3>7. Soft voting and temperature (the vote-weighting analysis)</h3>
+<p>Score each database by <code>Σ exp(similarity / τ)</code> over the neighbours. As τ → ∞, every neighbour counts 1 (the plain vote). As τ → 0, only the nearest counts (rank-1). Sweeping τ showed accuracy rises steadily as τ shrinks: no middle setting beats rank-1 by more than one case. Plain similarity-sum was <i>worse</i> than counting (256 vs 258), because any sum over neighbours inherits the pool-frequency bias.</p>
+
+<h3>8. Pre-registration and gates in practice</h3>
+<ul>
+<li><b>Azure retrieval:</b> prediction ≥ 155 (wrong: 148); bar ≥ +9 and p &lt; 0.05 (not met). Gate 1 ≥ 300/304 (missed at 298: all 6 mismatches were one tied pair of identical questions; the deviation was logged in commit <code>af3d073</code> before any hybrid number existed).</li>
+<li><b>gpt-4o:</b> prediction 147–150 (far too low: 198).</li>
+<li><b>gpt-4o + rank-1:</b> prediction 200+ (correct: 212).</li>
+</ul>
+<p>Reporting the misses is the point: a prediction that can't be wrong isn't a prediction.</p>
+
+<h3>9. Several comparisons at once</h3>
+<p>Every extra arm is another chance of a fluke "significant" result. At α = 0.05, one test in twenty is significant by luck. The protection here is pre-registering the primary comparison per experiment, and reading secondary comparisons as supporting, not as separate discoveries. (Formal corrections like Holm's method are covered in the ARBITER guide.)</p>
+
+<h3>10. Calibration (cross-reference)</h3>
+<p>Measured in ARBITER, on this project's RAG log-probabilities. Recomputed 26 Sep with ARBITER's own code: raw confidence exp(mean log-prob) has <b>AUROC 0.817</b> (good at ranking right above wrong) but <b>ECE 0.485</b> (badly miscalibrated: it says ~95% and is right 47% of the time). Cross-fitted Platt scaling brings ECE to <b>0.056</b>. Details and the exact command are in ARBITER's guide.</p>
+</section>
+<!-- =================================================================== RESULTS -->
+<section class="pane" id="p-results" hidden>
+<h2>Every result, and what it means</h2>
+
+<h3>1. The three Qwen arms (one serving stack: MLX)</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Arm</th><th>Accuracy</th><th>Right / wrong rows / empty / hard fail</th></tr></thead>
+<tbody>
+<tr><td>Zero-shot baseline</td><td class="n">4.9% (15/304)</td><td class="n">15 / 68 / 172 / 49</td></tr>
+<tr><td>RAG (K=10, FK on)</td><td class="n">46.7% (142/304)</td><td class="n">141 / 86 / 63 / 14 (from the 141-case file)</td></tr>
+<tr><td>LoRA fine-tuned (1000 iterations)</td><td class="n">33.9% (103/304)</td><td class="n">103 / 105 / 80 / 16</td></tr>
+</tbody></table></div>
+<p><b>By complexity</b> (RAG): easy 60.0% · medium 40.5% · hard 28.2%. 79 cases from the newest round have no complexity label and are reported as their own bucket rather than dropped.</p>
+<p><b>They fail on different questions:</b> both right on 64, RAG only 77, fine-tuned only 39, neither 124. Together they cover 180/304 (59.2%), well above either alone.</p>
+
+<h3>2. The confound, and the reversed conclusion ⭐</h3>
+<p>Originally, baseline and RAG ran on Google Colab (Hugging Face transformers, fp16, shared GPU) while fine-tuning ran on the Mac (MLX, bf16). Re-running RAG on MLX, the <b>same 61 questions, same gold, same scorer</b> went from 24.6% to <b>50.8%</b>. Cause, found by testing rather than assumed: fp16 GPU inference without deterministic flags isn't bit-identical across Colab sessions. A prompt change and its exact revert, run back-to-back in one session, gave byte-identical output, so the earlier swing came from the session boundary, not the code. The earlier headline, "fine-tuning beats RAG", was reversed and <b>published as reversed</b>. This is the origin of the house rule: change one variable at a time.</p>
+
+<h3>3. Smaller findings on the Qwen arms</h3>
+<ul>
+<li><b>FK annotations:</b> 142 with vs 141 without. A null result; they neither help nor hurt.</li>
+<li><b>Epoch-parity bug:</b> the 23-database adapter first trained for 200 iterations (0.73 epochs): 73/304 (24.0%). At 1000 iterations (3.67 epochs, matching the first adapter): <b>103/304 (33.9%)</b>.</li>
+<li><b>Batch collision bug:</b> putting <code>college_1/2/3</code> in one training batch taught the model to mix their field names. Separating near-identical databases took <code>college_3</code> from 0% to double digits.</li>
+<li><b>Fine-tuning's false positives are 4× RAG's</b> (next section): LoRA learns the <i>shape</i> of a correct query, so it writes plausible pipelines with wrong filters. That's exactly the failure a row comparison can miss.</li>
+</ul>
+
+<h3>4. Is the gold right? Is the scorer right?</h3>
+<ul>
+<li><b>SQL cross-check</b> (<code>evaluation/crosscheck_sql_gold.py</code>): the hand-written Mongo gold was checked against Spider's own SQL on Spider's SQLite. Of 1,409 cases that run on both sides, <b>1,264 agree (89.7%)</b>; 87.2% on the test slice. Most disagreements are not gold errors: text-typed numbers (38), ties at the top of <code>ORDER BY … LIMIT 1</code> (37), aggregates over text (12). The tie class means some questions have <i>more than one right answer</i>, which caps measurable accuracy for every arm.</li>
+<li><b>Gold health:</b> 0 of 1,517 gold queries fail to run; 4 return empty (all <code>flight_2</code>).</li>
+<li><b>False-positive audit</b> (<code>evaluation/audit_false_positives.py</code>): wrong queries scored correct. Baseline 2 of 15, RAG 3 (2.1% of its correct answers), fine-tuned 9 (8.7%). Corrected: RAG 138, fine-tuned 94. The gap between them <i>widens</i>, from 12.8 to about 15.4 points.</li>
+</ul>
+
+<h3>5. Secondary metrics</h3>
+<p><b>CodeBLEU</b> (3-component, canonical): baseline 0.2270 · RAG 0.2783 · fine-tuned 0.2759. RAG and fine-tuning look nearly identical on CodeBLEU despite a 12.8-point gap in execution accuracy. That's the argument for execution accuracy in one sentence. The dataflow component is dropped because it's always zero for one-line queries. <b>BERTScore</b> has not been recomputed at 304 cases (see the run tab for the one-line fix it needs).</p>
+
+<h3>6. Reranking: better ranking, not better answers ⭐</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Arm</th><th>recall@5</th><th>nDCG@10</th><th>execution</th></tr></thead>
+<tbody>
+<tr><td>Bi-encoder, K=5</td><td class="n">0.9638</td><td class="n">0.8928</td><td class="n">141</td></tr>
+<tr><td>+ rerank, K=5</td><td class="n">0.9836</td><td class="n">0.8987</td><td class="n">129</td></tr>
+<tr><td>+ rerank on question + query, K=5</td><td class="n">0.9803</td><td class="n">0.9088</td><td class="n">131</td></tr>
+<tr><td>Bi-encoder, K=10</td><td class="n">0.9638</td><td class="n">0.8928</td><td class="n">143</td></tr>
+<tr><td>+ rerank, K=10</td><td class="n">0.9836</td><td class="n">0.8987</td><td class="n">141</td></tr>
+</tbody></table></div>
+<p>At K=10, 42 answers changed: 20 gained, 22 lost, p = 0.88. About 40% of each prompt's examples changed, so it was a strong intervention that produced churn. <b>Why:</b> the bi-encoder was already at recall@10 = 0.987, leaving nothing for a reranker to find. And the arm with the best nDCG had the weakest link to correctness (Goodhart).</p>
+
+<h3>7. Rank-1: the change that worked ⭐</h3>
+<p>Database from the nearest neighbour instead of a vote: database accuracy 258 → 275/304; execution <b>143 → 149, gained 6, lost 0, p = 0.031</b>. Only 27 prompts changed (those where the database changed). <b>Mechanism:</b> an unweighted vote counts neighbours, and for near-identical sibling databases the count follows how often each appears in the pool, not how close it is. <code>chinook_1</code> (33 pool examples) lost all 9 of its test questions to <code>store_1</code> (84). <b>Precision beat volume:</b> reranking rewrote 300 prompts and did nothing; rank-1 touched 27 and every flip went the right way.</p>
+
+<h3>8. Azure hybrid retrieval: a null result ⭐</h3>
+<p>Azure AI Search, BM25 + vector fused by RRF, everything else fixed (Qwen on MLX). Better retrieval: recall@5 0.964 → 0.974, MRR 0.929 → 0.939, database vote 258 → 263. Execution <b>143 → 148, 19 / 14, p = 0.49</b>; the pre-registered bar (+9 and p &lt; 0.05) was not met, and the prediction (≥ 155) was wrong. 26 of the 33 flips had the <i>same</i> database and schema, so they're example churn again. One of the 19 gains is a false positive (<code>store_1-25</code>: sorted by hire date instead of birth date, and happened to return the same single row). <b>Takeaway:</b> Azure Search is a free choice on operational grounds, not an accuracy improvement.</p>
+
+<h3>9. The generator is the big lever ⭐</h3>
+<p>gpt-4o on the byte-identical prompts: <b>198/304 (+55; 69 / 14; p = 6.8 × 10⁻¹⁰)</b>, about ten times any retrieval change. The whole gain is in questions where retrieval picked the right database (136 → 192 of 258); with the wrong schema, gpt-4o does no better than Qwen (6 vs 7). So <b>the database decision becomes the constraint</b>: 38% of gpt-4o's remaining failures.</p>
+<p><b>gpt-4o + rank-1: 212/304 (69.7%)</b>, +14 over gpt-4o with the vote (17 / 3, p = 0.0026). On the 20 cases rank-1 fixes, Qwen gained 5 and gpt-4o gained 12: <b>a retrieval policy's value depends on the generator behind it.</b> The other 277 prompts were byte-identical between those two runs, which isolates gpt-4o's own noise at about ±2.</p>
+<p><b>Cost:</b> about $0.005 per query (≈ $1.55 per 304-case run); all gpt-4o work ≈ $3.64. <b>Caveats to volunteer:</b> one run per arm; gains not audited for false positives; gpt-4o may have seen Spider in training (this compares two systems on this benchmark, not generalisation).</p>
+
+<h3>10. The deployed service</h3>
+<p>50 pre-declared cases (<code>rag_test.json[:50]</code>): 50/50 requests OK, database right 49/50, served correct <b>35/50</b> vs 36/50 offline on the same cases (2 more were cut by the 50-row cap). Latency: warm p50 <b>1.68 s</b>, p95 2.48 s; cold start after scale-to-zero 27–35 s (median 34.5 s), almost all container start.</p>
+</section>
+
+<!-- =================================================================== RUN LOCAL -->
+<section class="pane" id="p-run" hidden>
+<h2>Run it yourself: local</h2>
+<p class="progress" data-progress="p-run"></p>
+<div class="callout trap"><div class="lab">Rules for every run</div>
+<ol>
+<li><b>Work on a branch</b> (<code>git switch -c rerun-YYYYMMDD</code>) so the committed results stay untouched on the others.</li>
+<li><b>Never</b> run <code>rag/build_split.py</code> or <code>rag/score_rag.py</code> (see Start here).</li>
+<li>Every generation gets a <b>new, unique <code>--output</code></b> file.</li>
+<li>After each step, run <code>git status --short</code>. Anything modified that you didn't intend: <code>git checkout -- &lt;path&gt;</code> restores it.</li>
+<li>Commands run from the repo root with the venv active: <code>cd ~/Documents/ai-projects/capstone-project/CSAIML-Capstone-Project-20 &amp;&amp; source .venv/bin/activate</code>.</li>
+</ol></div>
+
+<h3>Part 0 — Set up (once)</h3>
+
+<div class="step" id="c0a"><header><input type="checkbox" aria-label="done"><span class="num">0.1</span><h4>Check the machine and the repo</h4><span class="where"><span class="tag local">local</span></span></header><div class="body">
+<dl class="kv"><dt>Needs</dt><dd>An Apple Silicon Mac (MLX needs it), about 10 GB free disk, git, Python 3.12.</dd>
+<dt>Run</dt><dd><pre>python3 -c "import platform; print(platform.machine())"   # must print arm64
+cd ~/Documents/ai-projects/capstone-project/CSAIML-Capstone-Project-20
+git status --short && git branch --show-current</pre></dd>
+<dt>Check</dt><dd><code>arm64</code>, and a clean status (or only files you expect).</dd></dl></div></div>
+
+<div class="step" id="c0b"><header><input type="checkbox" aria-label="done"><span class="num">0.2</span><h4>Create the virtual environment</h4><span class="where"><span class="tag local">local</span></span></header><div class="body">
+<dl class="kv"><dt>Why</dt><dd>Isolates this project's libraries. <code>.venv/</code> already exists on this Mac; recreate it only on a new machine.</dd>
+<dt>Run</dt><dd><pre>python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt || true   # see the note below
+pip install mlx-lm                         # installed on its own on purpose
+pip install scipy                          # used by the McNemar code</pre></dd>
+<dt>Note</dt><dd>A full <code>pip install -r requirements.txt</code> can refuse on a declared (not real) conflict between <code>codebleu==0.7.0</code> and <code>tree-sitter</code>. The fix, documented in <code>requirements.txt</code>: install <code>mlx-lm</code> standalone as above. The Azure steps also need <code>azure-search-documents</code>, <code>openai</code> and <code>azure-identity</code>; they're already in this Mac's <code>.venv</code> (checked 26 Sep). On a new machine: <code>pip install -r service/requirements.txt</code>.</dd>
+<dt>Check</dt><dd><pre>python -c "import mlx.core as mx; print(mx.default_device())"   # Device(gpu, 0)
+python -m pytest tests -q                                         # 178 passed</pre></dd></dl></div></div>
+
+<div class="step" id="c0c"><header><input type="checkbox" aria-label="done"><span class="num">0.3</span><h4>Atlas credentials</h4><span class="where"><span class="tag web">Atlas web UI</span> <span class="tag local">local file</span></span></header><div class="body">
+<dl class="kv"><dt>Needs</dt><dd>Your MongoDB Atlas cluster with the 23 databases loaded (it is, today). In Atlas (cloud.mongodb.com) → <b>Network Access</b>, your current home IP must be allowed, or every Atlas step times out after 8 seconds.</dd>
+<dt>File</dt><dd><code>atlas-credentials.env</code> at the repo root, gitignored, with keys <code>MONGODB_USERNAME</code>, <code>MONGODB_PASSWORD</code>, <code>MONGODB_URI</code> (and <code>HF_TOKEN</code>, optional). The code reads <code>MONGODB_URI</code>; if the environment variable is set it wins (that's how the Azure container gets its read-only URI).</dd>
+<dt>Check</dt><dd><pre>python -c "import atlas_env; c=atlas_env.connect(); print(sorted(c.list_database_names())[:5])"</pre>
+Prints a masked URI and database names. A timeout means the IP isn't allowed in Atlas.</dd></dl></div></div>
+
+<div class="step" id="c0d"><header><input type="checkbox" aria-label="done"><span class="num">0.4</span><h4>Model weights</h4><span class="where"><span class="tag local">local</span></span></header><div class="body">
+<dl class="kv"><dt>What</dt><dd>MLX downloads <code>mlx-community/Qwen2.5-Coder-1.5B-Instruct-bf16</code> (2.9 GB) and <code>sentence-transformers/all-MiniLM-L6-v2</code> into <code>~/.cache/huggingface/hub</code> on first use. Both are already cached, as are the cross-encoder and <code>roberta-large</code> (for BERTScore).</dd>
+<dt>Adapter</dt><dd><code>fine_tuning/adapters_23db_1000iter/adapters.safetensors</code> exists only on this Mac. <b>Copy that folder somewhere safe.</b> Without it the fine-tuned arm needs retraining (step E2, about an hour).</dd></dl></div></div>
+
+<h3>Part A — Data (only to rebuild from nothing)</h3>
+<div class="callout"><div class="lab">Skip unless starting from scratch</div><p>Atlas already holds the data, and <code>data/gold_results.json</code> and the split are committed. These steps rebuild them, for example on a new Atlas account.</p></div>
+
+<div class="step" id="cA1"><header><input type="checkbox" aria-label="done"><span class="num">A1</span><h4>Spider SQLite → MongoDB JSON, then load Atlas</h4><span class="where"><span class="tag local">local</span> <span class="tag web">Atlas</span></span></header><div class="body">
+<dl class="kv"><dt>Needs</dt><dd>Spider's SQLite files, from <code>../spider_data/database/&lt;db&gt;/&lt;db&gt;.sqlite</code>, copied to <code>database/sqlite/&lt;db&gt;/&lt;db&gt;.sqlite</code> (the script reads that path).</dd>
+<dt>Run</dt><dd><pre>python sqlite_to_mongo.py concert_singer           # once per database → database/mongodb/concert_singer/*.json
+python atlas_verify_and_load.py                     # report what Atlas has
+python atlas_verify_and_load.py --load              # upload any missing/empty collections</pre></dd>
+<dt>Creates</dt><dd><code>database/mongodb/&lt;db&gt;/&lt;collection&gt;.json</code> (gitignored) and the collections in Atlas.</dd>
+<dt>Trap</dt><dd><code>car_1</code> has a collection literally named <code>model_list.json</code> (the <code>.json</code> is part of the name). The scripts special-case it.</dd></dl></div></div>
+
+<div class="step" id="cA2"><header><input type="checkbox" aria-label="done"><span class="num">A2</span><h4>Execute every gold query</h4><span class="where"><span class="tag local">local</span> <span class="tag web">needs Atlas</span></span></header><div class="body">
+<dl class="kv"><dt>Run</dt><dd><pre>python evaluation/execute_gold.py</pre></dd>
+<dt>Creates</dt><dd><code>data/gold_results.json</code>: all 1,517 gold queries' rows (committed).</dd>
+<dt>Check</dt><dd><code>git diff --stat data/gold_results.json</code> should be empty on an unchanged Atlas. Expected: 0 failures, 4 empty (<code>flight_2</code>).</dd></dl></div></div>
+
+<div class="step" id="cA3"><header><input type="checkbox" aria-label="done"><span class="num">A3</span><h4>Local dumps and schema cards</h4><span class="where"><span class="tag local">local</span> <span class="tag web">needs Atlas</span></span></header><div class="body">
+<dl class="kv"><dt>Run</dt><dd><pre>python dump_atlas_to_local.py            # samples ≤5,000 docs per collection
+python rag/schema_cards.py               # regenerates rag/schema_cards.json</pre></dd>
+<dt>Creates</dt><dd><code>database/mongodb/**</code> (gitignored), <code>rag/schema_cards.json</code> (23 databases, 161 collections).</dd>
+<dt>Check</dt><dd><code>git diff --stat rag/schema_cards.json</code> empty. Without local dumps, the code falls back to the committed JSON and logs that it did.</dd></dl></div></div>
+
+<h3>Part B — RAG arm (Qwen on MLX)</h3>
+
+<div class="step" id="cB1"><header><input type="checkbox" aria-label="done"><span class="num">B1</span><h4>Build the FAISS index</h4><span class="where"><span class="tag local">local, seconds</span></span></header><div class="body">
+<dl class="kv"><dt>Run</dt><dd><pre>python rag/build_retrieval_index.py</pre></dd>
+<dt>Creates</dt><dd><code>rag/data/fewshot.index</code> (1,213 × 384) and <code>rag/data/fewshot_metadata.json</code> (row-aligned). Both committed.</dd>
+<dt>Check</dt><dd>Log says <code>ntotal=1213, dim=384</code>. <code>git status</code> should show the metadata unchanged.</dd>
+<dt>Trap</dt><dd>Import order is load-bearing: torch (via <code>embed_utils</code>) must load before <code>faiss</code>, or the process segfaults silently after "Embedder ready." Don't let an auto-formatter reorder the imports.</dd></dl></div></div>
+
+<div class="step" id="cB2"><header><input type="checkbox" aria-label="done"><span class="num">B2</span><h4>Build the prompts</h4><span class="where"><span class="tag local">local, ~30 s</span></span></header><div class="body">
+<dl class="kv"><dt>Run</dt><dd><pre>python rag/build_prompts.py 10                       # A0: FAISS, vote, FK on → rag_prompts.json
+python rag/build_prompts.py --db-policy rank1 10     # rank-1 → rag_prompts_rank1_k10.json
+python rag/build_prompts.py 10 nofk                  # FK off → rag_prompts_nofk.json
+python rag/build_prompts.py 5                        # K=5 → rag_prompts_k5.json</pre></dd>
+<dt>Creates</dt><dd>One prompts file per variant plus a <code>.manifest.json</code> (inputs, versions, git SHA, SHA-256).</dd>
+<dt>Check</dt><dd>Verified 26 Sep: the first two rebuild <b>byte-identically</b>; only the manifest's timestamp changes. <code>git status --short rag/data | grep -v manifest</code> must print nothing. The log's last line reports database accuracy: 258/304 (vote), 275/304 (rank-1).</dd></dl></div></div>
+
+<div class="step" id="cB3"><header><input type="checkbox" aria-label="done"><span class="num">B3</span><h4>Generate with Qwen</h4><span class="where"><span class="tag local">local, ~6.5 min per 304</span></span></header><div class="body">
+<dl class="kv"><dt>Run</dt><dd><pre>python rag/generate_rag_mlx.py --prompts-path rag/data/rag_prompts.json \
+    --output rag/data/qwen_rag_mlx_rerun_k10_results.json</pre></dd>
+<dt>Creates</dt><dd>The raw generations (with log-probabilities) and a manifest. Resumable: interrupt and re-run the same command to continue.</dd>
+<dt>Trap</dt><dd>The default <code>--output</code> is a committed, known-stale file; it would resume and skip all 304. Always give a new name.</dd>
+<dt>Check</dt><dd>304 rows. For the A0 prompts it should reproduce <code>rag/data/qwen_rag_mlx_fk_results.json</code> exactly, per the README.</dd></dl></div></div>
+
+<div class="step" id="cB4"><header><input type="checkbox" aria-label="done"><span class="num">B4</span><h4>Score against Atlas</h4><span class="where"><span class="tag local">local</span> <span class="tag web">needs Atlas</span></span></header><div class="body">
+<dl class="kv"><dt>Run</dt><dd>Add a label to the <code>ARMS</code> dict in <code>rag/score_rerank_arms.py</code>, e.g. <code>"rerun_k10": "qwen_rag_mlx_rerun_k10_results.json",</code>, then:
+<pre>python rag/score_rerank_arms.py rerun_k10</pre></dd>
+<dt>Creates</dt><dd><code>rag/data/qwen_rag_rerun_k10_normalized.json</code> and <code>…_execution_results.json</code>. It refuses anything that isn't all 304 cases.</dd>
+<dt>Check</dt><dd>The summary prints correct / 304. For A0 prompts: about 143.</dd></dl></div></div>
+
+<div class="step" id="cB5"><header><input type="checkbox" aria-label="done"><span class="num">B5</span><h4>Compare two arms (McNemar)</h4><span class="where"><span class="tag local">local</span></span></header><div class="body">
+<pre>python - &lt;&lt;'EOF'
+import json, sys; sys.path.insert(0, "rag")
+from eval_retrieval import mcnemar_exact
+load = lambda f: {str(r["id"]): r.get("execution_accuracy") is True for r in json.load(open(f))}
+a0 = load("rag/data/qwen_rag_fk_k10_execution_results.json")        # A0: 143/304, FK on
+arm = load("rag/data/qwen_rag_rerun_k10_execution_results.json")
+print(mcnemar_exact(a0, arm))
+EOF</pre>
+<p>Read <code>only_baseline_correct</code> (lost), <code>only_arm_correct</code> (gained) and <code>mcnemar_exact_p</code>. A0's file is the FK-on re-score (143), <b>not</b> <code>qwen_rag_execution_results_mlx.json</code>, which is the FK-off run (141).</p></div></div>
+
+<h3>Part C — Zero-shot baseline</h3>
+<div class="step" id="cC1"><header><input type="checkbox" aria-label="done"><span class="num">C1</span><h4>Generate, normalise, score</h4><span class="where"><span class="tag local">local</span> <span class="tag web">Atlas</span></span></header><div class="body">
+<dl class="kv"><dt>Run</dt><dd><pre>python generate_baseline_mlx.py --output data/qwen_baseline_rerun_results.json
+python normalize.py data/qwen_baseline_rerun_results.json data/qwen_baseline_rerun_normalized.json</pre>
+Then score with the generic snippet below.</dd>
+<dt>Time</dt><dd>Not recorded. Longer than RAG, because every prompt carries all 23 schemas.</dd>
+<dt>Check</dt><dd>The manifest's <code>schema_coverage.missing</code> must be <code>[]</code>. About 15/304 correct.</dd></dl></div></div>
+
+<div class="step" id="cGEN"><header><input type="checkbox" aria-label="done"><span class="num">★</span><h4>Generic: score any normalised file without touching committed files</h4><span class="where"><span class="tag local">local</span> <span class="tag web">Atlas</span></span></header><div class="body">
+<pre>python - &lt;&lt;'EOF'
+import json, sys
+from pathlib import Path
+sys.path.insert(0, "evaluation")
+from execute_queries import connect, run_model
+gold = {str(r["id"]): r for r in json.load(open("data/gold_results.json")) if r.get("status") == "PASS"}
+res = run_model(connect(), "rerun", Path("data/qwen_baseline_rerun_normalized.json"),
+                Path("data/qwen_baseline_rerun_execution_results.json"), gold)
+print(sum(r.get("execution_accuracy") is True for r in res), "/", len(res))
+EOF</pre>
+<p>The input needs <code>id</code>, <code>database</code> and <code>normalized_query</code> per row (what <code>normalize.py</code> writes). Change the two paths for any arm.</p></div></div>
+
+<h3>Part D — Fine-tuned arm</h3>
+<div class="step" id="cD1"><header><input type="checkbox" aria-label="done"><span class="num">D1</span><h4>Generate with the existing adapter</h4><span class="where"><span class="tag local">local</span></span></header><div class="body">
+<dl class="kv"><dt>Run</dt><dd><pre>python fine_tuning/generate_predictions_23db.py \
+    --adapter-path fine_tuning/adapters_23db_1000iter \
+    --output data/finetuned_rerun_results.json
+python normalize.py data/finetuned_rerun_results.json data/finetuned_rerun_normalized.json
+python fine_tuning/score_finetuned_23db.py \
+    --normalized-path data/finetuned_rerun_normalized.json \
+    --output data/finetuned_rerun_execution_results.json</pre></dd>
+<dt>Trap</dt><dd>Without <code>--adapter-path</code> it uses <code>adapters_23db</code>, the under-trained 200-iteration adapter (24.0%). The scorer also always rewrites <code>fine_tuning/outputs/finetuned_23db_scores.csv</code>; restore it afterwards with <code>git checkout -- fine_tuning/outputs/finetuned_23db_scores.csv</code>.</dd>
+<dt>Check</dt><dd>About 103/304.</dd></dl></div></div>
+
+<div class="step" id="cD2"><header><input type="checkbox" aria-label="done"><span class="num">D2</span><h4>Retrain the adapter (only if the weights are lost)</h4><span class="where"><span class="tag local">local, ~1 hour, 15.5 GB</span></span></header><div class="body">
+<dl class="kv"><dt>Run</dt><dd><pre>python fine_tuning/prepare_data_23db.py      # rebuilds fine_tuning/data_23db/ (check: git diff empty)
+mlx_lm.lora --config fine_tuning/lora_config_23db_1000iter.yaml \
+    --iters 20 --adapter-path fine_tuning/adapters_smoketest \
+    --steps-per-report 5 --steps-per-eval 10          # 1-minute smoke test first
+mlx_lm.lora --config fine_tuning/lora_config_23db_1000iter.yaml   # the real run</pre></dd>
+<dt>Creates</dt><dd>Checkpoints every 100 iterations and <code>adapters.safetensors</code> in <code>fine_tuning/adapters_23db_1000iter/</code>.</dd>
+<dt>Verified</dt><dd><code>prepare_data_23db.py</code> rebuilt <code>data_23db/</code> byte-identically on 26 Sep (it takes no arguments; running it always rewrites that folder).</dd><dt>Check</dt><dd>Log: <code>Trainable parameters: 0.684% (10.551M/1543.714M)</code>; final train loss ≈ 0.030, validation ≈ 0.024; peak memory ≈ 15.45 GB. Close other apps; if it runs out of memory, the config's comments list the next levers (batch 1, then 8 layers).</dd></dl></div></div>
+
+<h3>Part E — The retrieval experiments</h3>
+<div class="step" id="cE1"><header><input type="checkbox" aria-label="done"><span class="num">E1</span><h4>Reranking experiment</h4><span class="where"><span class="tag local">local</span></span></header><div class="body">
+<pre>python rag/rerank.py                     # cross-encoder scores, question only (cached in rag/data/rerank_scores.json)
+python rag/rerank.py --include-query     # question + query variant
+python rag/eval_retrieval.py --emit-neighbors      # ranking metrics → results/retrieval_eval.json + neighbour orders
+python rag/build_prompts.py --rerank rag/data/reranked_neighbors_rerank_question_only.json rerankQ 10
+# then B3 → B4 → B5 on rag/data/rag_prompts_rerankQ_k10.json, and finally:
+python rag/eval_retrieval.py --with-execution      # adds the execution columns + correlation</pre>
+<p>The scores are cached, so re-running is cheap. Expected: recall@5 0.964 → 0.984, execution 141 at K=10.</p></div></div>
+
+<div class="step" id="cE2"><header><input type="checkbox" aria-label="done"><span class="num">E2</span><h4>Rank-1 and the vote-weighting sweep</h4><span class="where"><span class="tag local">local</span></span></header><div class="body">
+<pre>python rag/build_prompts.py --db-policy rank1 10   # then B3 → B4 → B5
+python rag/analyze_vote_weighting.py               # offline, ~1 second, no model, no Atlas</pre>
+<p>Expected: 149/304, 6 gained / 0 lost. The sweep prints the softmax-τ table. (Its header mentions <code>rag/analyze_vote_policies.py</code>, which isn't in the repo; ignore that reference.)</p></div></div>
+
+<h3>Part F — Audits, figures, extras</h3>
+<div class="step" id="cF1"><header><input type="checkbox" aria-label="done"><span class="num">F1</span><h4>Gold and scorer audits</h4><span class="where"><span class="tag local">local</span></span></header><div class="body">
+<pre>python evaluation/audit_false_positives.py                           # → outputs/false_positive_audit.csv
+python evaluation/crosscheck_sql_gold.py --spider-root ../spider_data  # → outputs/sql_crosscheck.csv</pre>
+<p>Both run without Atlas. Check the headline counts in their output against Results §4.</p></div></div>
+
+<div class="step" id="cF2"><header><input type="checkbox" aria-label="done"><span class="num">F2</span><h4>Figures and secondary metrics</h4><span class="where"><span class="tag local">local</span></span></header><div class="body">
+<pre>python visualize_cross_arm_304.py      # outputs/figures/*_304.png
+python visualize_final_comparison.py   # final_arm_comparison_n304.png
+python visualize_codebleu_304.py       # codebleu_vs_execution_accuracy_304.png</pre>
+<p><b>BERTScore:</b> <code>compute_bertscore_304.py</code> writes to <code>/home/claude/metrics_304/…</code>, a path from the machine it was written on that doesn't exist on your Mac. Change its <code>OUTPUT</code> line to <code>Path("outputs/bertscore_scores_304.csv")</code> first. <code>roberta-large</code> is already cached.</p>
+<p><b>Not regenerable:</b> <code>finetuned_23db_1000iter_loss_and_memory.png</code>; its plotting script was never committed (the data, <code>training_log_1000iter.txt</code>, is).</p></div></div>
+
+<div class="step" id="cF3"><header><input type="checkbox" aria-label="done"><span class="num">F3</span><h4>Confidence signals</h4><span class="where"><span class="tag local">local</span></span></header><div class="body">
+<pre>python rag/generate_rag_mlx.py --samples 5 --temp 0.7 \
+    --output rag/data/qwen_rag_mlx_selfconsistency_rerun.json    # 5× the time of a greedy run</pre>
+<p>Every greedy run already records <code>mean_logprob</code>. Calibration of both signals is computed in ARBITER (see its guide).</p></div></div>
+
+<div class="step" id="cF4"><header><input type="checkbox" aria-label="done"><span class="num">F4</span><h4>The demo UI</h4><span class="where"><span class="tag local">local</span></span></header><div class="body">
+<pre>streamlit run demo_ui/app.py</pre>
+<p>Tabs: Baseline · RAG · Fine-tuned · Compare all 3 (five curated cases, no model, can't fail) · Live inference (loads Qwen via MLX; slow on first use) · RAG on Azure (needs <code>AZURE_SERVICE_URL</code> and <code>SERVICE_API_KEY</code> in the environment, and the service running).</p></div></div>
+</section>
+<!-- =================================================================== AZURE -->
+<section class="pane" id="p-azure" hidden>
+<h2>Run it yourself: Azure</h2>
+<p class="progress" data-progress="p-azure"></p>
+
+<div class="callout"><div class="lab">What you'll find here</div>
+<p>Every Azure step you took, marked <span class="tag web">WEB UI</span> (done in the Azure portal, the Foundry portal or the Atlas site) or <span class="tag term">TERMINAL</span> (the <code>az</code> CLI or a repo script). The marks come from your subscription's <b>Activity Log</b>, read on 26 Sep 2026: every change Azure records carries the ID of the app that made it, and the Azure Portal and the Azure CLI have different, well-known IDs. So this is a record, not a recollection.</p></div>
+
+<h3>What each piece is for</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Name</th><th>Azure resource</th><th>Job</th><th>Bills while idle?</th></tr></thead>
+<tbody>
+<tr><td><code>rg-capstone-rag</code></td><td>Resource group</td><td>Holds everything, so one delete removes it all</td><td>No</td></tr>
+<tr><td><code>srch-capstone-22b895</code></td><td>AI Search, <b>Free</b> tier</td><td>Index <code>fewshot-exemplars</code>: 1,213 examples with FAISS's own vectors</td><td>No</td></tr>
+<tr><td><code>rg-capstone-rag</code> (East US)</td><td>Azure OpenAI account (it shares the group's name)</td><td>Deployment <code>gpt-4o</code> (2024-11-20, Standard, 50K TPM, no auto-upgrade)</td><td>No (pay per token)</td></tr>
+<tr><td><code>acrcapstone22b895</code></td><td>Container Registry, Basic</td><td>Stores the service image <code>capstone-rag:&lt;tag&gt;</code></td><td><b>Yes</b>, small daily fee</td></tr>
+<tr><td><code>kv-capstone-22b895</code></td><td>Key Vault (RBAC)</td><td>Secrets <code>atlas-uri-ro</code> and <code>service-api-key</code></td><td>Cents</td></tr>
+<tr><td><code>law-capstone</code> / <code>ai-capstone</code></td><td>Log Analytics / Application Insights</td><td>Logs (0.1 GB/day cap) and per-stage traces</td><td>Per GB</td></tr>
+<tr><td><code>vnet-capstone</code>, <code>snet-aca</code></td><td>Virtual network + subnet</td><td>Private network the app runs in</td><td>No</td></tr>
+<tr><td><code>nat-capstone</code> + <code>pip-capstone-egress</code></td><td>NAT Gateway + static public IP (20.198.104.185)</td><td>The app's single outbound IP, the only one Atlas allows</td><td><b>Yes</b>, ~$1/day together</td></tr>
+<tr><td><code>cae-capstone-vnet</code></td><td>Container Apps environment (workload profiles)</td><td>Hosts the app inside the VNet</td><td>Its load balancer IP: probably</td></tr>
+<tr><td><code>ca-capstone-rag</code></td><td>Container App</td><td>The FastAPI service, scale 0–1</td><td>No, at zero replicas</td></tr>
+<tr><td><code>ME_cae-capstone-vnet_…</code>, <code>NetworkWatcherRG</code></td><td>Groups Azure created by itself</td><td>The environment's load balancer; network monitoring</td><td>LB IP: probably</td></tr>
+</tbody></table></div>
+
+<h3>What was done where (from the Activity Log)</h3>
+<div class="tscroll"><table>
+<thead><tr><th>When (UTC)</th><th>What</th><th>How</th></tr></thead>
+<tbody>
+<tr><td class="n">24 Sep 05:14</td><td>Created resource group <code>rg-capstone-rag</code></td><td><span class="tag web">WEB UI</span> portal</td></tr>
+<tr><td class="n">24 Sep 05:20</td><td>Registered providers: App, Search, OperationalInsights, ContainerRegistry, KeyVault, CognitiveServices</td><td><span class="tag web">WEB UI</span> portal</td></tr>
+<tr><td class="n">24 Sep 05:49</td><td>Created search service + read its keys</td><td><span class="tag term">TERMINAL</span> <code>az search</code></td></tr>
+<tr><td class="n">26 Sep 03:46–03:51</td><td>Budgets <code>az-rag-arm</code>, <code>az-rag-arm-25</code>, <code>az-rag-arm-50</code></td><td><span class="tag web">WEB UI</span> Cost Management</td></tr>
+<tr><td class="n">26 Sep (before 04:00)</td><td>Upgraded Free Trial → Pay-As-You-Go</td><td><span class="tag web">WEB UI</span> (billing; not in the Activity Log)</td></tr>
+<tr><td class="n">26 Sep 04:05</td><td>Created the Azure OpenAI account (East US)</td><td><span class="tag web">WEB UI</span> portal</td></tr>
+<tr><td class="n">26 Sep 04:12 / 04:16</td><td>Deployed <code>gpt-4o-mini</code> (refused as deprecated) then <code>gpt-4o</code></td><td><span class="tag web">WEB UI</span> Foundry portal (ai.azure.com)</td></tr>
+<tr><td class="n">26 Sep 04:16</td><td>Read the OpenAI keys into <code>azure.env</code></td><td><span class="tag term">TERMINAL</span></td></tr>
+<tr><td class="n">26 Sep 06:26–06:36</td><td>Logs, App Insights, registry + image build, Key Vault, first environment + app, role assignments</td><td><span class="tag term">TERMINAL</span> <code>infra/deploy.sh</code></td></tr>
+<tr><td class="n">26 Sep 07:03–07:16</td><td>Deleted the first app/environment; built VNet, NAT Gateway, static IP, new environment, app, roles (Option B)</td><td><span class="tag term">TERMINAL</span> <code>infra/deploy.sh</code></td></tr>
+<tr><td class="n">26 Sep 08:03</td><td>Removed four orphaned role assignments from the first app</td><td><span class="tag term">TERMINAL</span></td></tr>
+<tr><td class="n">—</td><td>Atlas read-only user; Atlas IP access list (NAT IP)</td><td><span class="tag web">WEB UI</span> Atlas (cloud.mongodb.com)</td></tr>
+</tbody></table></div>
+
+<h3>Phase 0 — Account and guardrails</h3>
+<div class="step" id="z01"><header><input type="checkbox" aria-label="done"><span class="num">0.1</span><h4>Azure account, CLI, sign in</h4><span class="where"><span class="tag web">WEB UI</span> <span class="tag term">TERMINAL</span></span></header><div class="body">
+<dl class="kv"><dt>Web</dt><dd>Create the account at azure.microsoft.com/free. A new account gets <b>$200 of credit for 30 days</b> and a spending limit. Your Day 0 was 24 Sep; the credit expires 24 Oct.</dd>
+<dt>Terminal</dt><dd><pre>brew install azure-cli
+az login                         # opens the browser to sign in
+az account show -o table         # confirm the subscription</pre></dd></dl></div></div>
+
+<div class="step" id="z02"><header><input type="checkbox" aria-label="done"><span class="num">0.2</span><h4>Resource group and providers</h4><span class="where"><span class="tag web">you did: WEB UI</span></span></header><div class="body">
+<dl class="kv"><dt>Web (what you did)</dt><dd>Portal → <b>Resource groups</b> → Create → name <code>rg-capstone-rag</code>, region Central India. Portal → <b>Subscriptions</b> → your subscription → <b>Resource providers</b> → register each one listed below.</dd>
+<dt>Terminal equivalent</dt><dd><pre>az group create -n rg-capstone-rag -l centralindia
+for ns in Microsoft.Search Microsoft.App Microsoft.OperationalInsights \
+          Microsoft.ContainerRegistry Microsoft.KeyVault Microsoft.CognitiveServices; do
+  az provider register --namespace $ns
+done</pre></dd>
+<dt>Why</dt><dd>A provider must be registered before its resources can be created. <code>deploy.sh</code> also registers <code>Microsoft.Network</code> itself; <code>Microsoft.Insights</code> was registered automatically.</dd></dl></div></div>
+
+<div class="step" id="z03"><header><input type="checkbox" aria-label="done"><span class="num">0.3</span><h4>Budget alerts</h4><span class="where"><span class="tag web">WEB UI</span></span></header><div class="body">
+<dl class="kv"><dt>Web</dt><dd>Portal → <b>Cost Management</b> → <b>Budgets</b> → Add. Yours: <code>az-rag-arm</code>, <code>az-rag-arm-25</code> ($25), <code>az-rag-arm-50</code> ($50), emailing you.</dd>
+<dt>Why</dt><dd>After a Pay-As-You-Go upgrade nothing stops spending automatically; budgets only send email.</dd></dl></div></div>
+
+<div class="step" id="z04"><header><input type="checkbox" aria-label="done"><span class="num">0.4</span><h4>The local <code>azure.env</code> file</h4><span class="where"><span class="tag local">local file</span></span></header><div class="body">
+<p>At the repo root; gitignored (check: <code>git check-ignore azure.env</code> prints the name). Scripts read it with <code>set -a; source azure.env; set +a</code>. Keys, and what each holds:</p>
+<div class="tscroll"><table><tbody>
+<tr><td><code>RG</code>, <code>LOC</code></td><td>Resource group name, region (<code>centralindia</code>)</td></tr>
+<tr><td><code>SRCH</code>, <code>AZURE_SEARCH_ENDPOINT</code>, <code>AZURE_SEARCH_INDEX</code></td><td>Search service name, <code>https://&lt;name&gt;.search.windows.net</code>, <code>fewshot-exemplars</code></td></tr>
+<tr><td><code>AZURE_SEARCH_ADMIN_KEY</code> / <code>AZURE_SEARCH_QUERY_KEY</code></td><td>Admin key (write: building the index); query key (read-only: searching). Without keys, the code falls back to your <code>az login</code> identity.</td></tr>
+<tr><td><code>AOAI</code>, <code>AZURE_OPENAI_ENDPOINT</code>, <code>AZURE_OPENAI_DEPLOYMENT</code>, <code>AZURE_OPENAI_API_KEY</code></td><td>OpenAI account name, endpoint, <code>gpt-4o</code>, key (optional: same fallback)</td></tr>
+<tr><td><code>ACR</code>, <code>KV</code>, <code>ENV</code>, <code>APP</code>, <code>LAW</code>, <code>AI</code></td><td>Names for the registry, Key Vault, environment, app, Log Analytics, App Insights</td></tr>
+<tr><td><code>MYIP</code></td><td>Your current public IP (<code>curl -s https://api.ipify.org</code>). Home IPs change; update it before <code>resume.sh</code>.</td></tr>
+</tbody></table></div></div></div>
+
+<h3>Phase 1 — The retriever seam (local, done)</h3>
+<div class="step" id="z10"><header><input type="checkbox" aria-label="done"><span class="num">1</span><h4>Check the seam still reproduces FAISS</h4><span class="where"><span class="tag local">local</span></span></header><div class="body">
+<pre>python -m pytest tests/test_retrievers.py -q
+python rag/eval_retriever.py --retriever faiss     # positive control: must reproduce results/retrieval_eval.json</pre>
+<p><code>rag/retrievers.py</code> gives every retriever one interface returning <b>row numbers</b> (not example ids: ids mix ints and strings, and Azure keys are always strings). <code>eval_retriever.py</code> refuses to write output if the FAISS control doesn't match the published numbers exactly.</p></div></div>
+
+<h3>Phase 2 — The search index</h3>
+<div class="step" id="z21"><header><input type="checkbox" aria-label="done"><span class="num">2.1</span><h4>Create the search service</h4><span class="where"><span class="tag term">you did: TERMINAL</span></span></header><div class="body">
+<pre>az search service create -n srch-capstone-22b895 -g rg-capstone-rag --sku free -l centralindia
+az search admin-key show  --service-name srch-capstone-22b895 -g rg-capstone-rag   # → AZURE_SEARCH_ADMIN_KEY
+az search query-key list  --service-name srch-capstone-22b895 -g rg-capstone-rag   # → AZURE_SEARCH_QUERY_KEY</pre>
+<p><b>Free tier:</b> 50 MB, 3 indexes, no semantic ranker, and it can be deleted after long inactivity. The index is ~2 MB. Only one Free service per subscription.</p></div></div>
+
+<div class="step" id="z22"><header><input type="checkbox" aria-label="done"><span class="num">2.2</span><h4>Build the index</h4><span class="where"><span class="tag term">TERMINAL</span> (a repo script)</span></header><div class="body">
+<pre>python rag/azure_index.py              # create/update, upload 1,213 docs, verify
+python rag/azure_index.py --recreate   # delete and rebuild from scratch</pre>
+<dl class="kv"><dt>Creates</dt><dd>Index <code>fewshot-exemplars</code>; <code>results/azure_index_definition.json</code> (committed).</dd>
+<dt>Design</dt><dd>Vectors are read straight out of <code>fewshot.index</code> (<code>reconstruct_n</code>), not re-embedded, so parity can't depend on "probably the same floats". Field <code>question_vector</code>: 384-d, exhaustive KNN, cosine. BM25 only on <code>question</code>. <code>id</code> = the row number as a string.</dd>
+<dt>Check</dt><dd>Script reports 1,213/1,213. In the portal: the service → Overview → Usage shows the document count.</dd>
+<dt>Know</dt><dd>Azure's exhaustive-KNN score is <b>1 / (2 − cosine)</b> (measured to match FAISS to 6 decimals), so cosine = 2 − 1/score. It's monotone, so the order is the same.</dd></dl></div></div>
+
+<h3>Phase 3 — The retrieval experiment (free trial, $0)</h3>
+<div class="step" id="z31"><header><input type="checkbox" aria-label="done"><span class="num">3.1</span><h4>Gates 1 and 2: parity and ranking metrics</h4><span class="where"><span class="tag term">TERMINAL</span></span></header><div class="body">
+<pre>python rag/eval_retriever.py --retriever azure-vector   # Gate 1 (parity vs FAISS) + Gate 2
+python rag/eval_retriever.py --retriever azure-hybrid   # Gate 2</pre>
+<p>Writes <code>results/retrieval_eval_&lt;retriever&gt;.json</code>. Gate 1's block <code>parity_vs_faiss</code> reports identical lists, same-set-different-order, different sets, and how many mismatches are explained by exact cosine ties. Published: 298/304 identical, all 6 mismatches one tied pair.</p></div></div>
+
+<div class="step" id="z32"><header><input type="checkbox" aria-label="done"><span class="num">3.2</span><h4>Prompts from Azure, generation locally</h4><span class="where"><span class="tag term">TERMINAL</span> <span class="tag local">local MLX</span></span></header><div class="body">
+<pre>python rag/build_prompts.py --retriever azure-hybrid 10                      # → rag_prompts_azhyb_k10.json
+python rag/build_prompts.py --retriever azure-hybrid --db-policy rank1 10    # → rag_prompts_rank1_azhyb_k10.json
+python rag/generate_rag_mlx.py --prompts-path rag/data/rag_prompts_azhyb_k10.json \
+    --output rag/data/qwen_rag_mlx_azhyb_k10_results.json                     # 6.6 min
+python rag/score_rerank_arms.py azhyb_k10 rank1_azhyb_k10                     # labels already in ARMS</pre>
+<p>Retrieval labels: <code>azure-vector → azvec</code>, <code>azure-hybrid → azhyb</code>, <code>azure-semantic → azsem</code> (semantic needs the paid Basic tier and was not run). Then McNemar as in the local tab. Expected: 148 and 150.</p></div></div>
+
+<h3>Decision — upgrade to Pay-As-You-Go</h3>
+<div class="step" id="z40"><header><input type="checkbox" aria-label="done"><span class="num">3.9</span><h4>Upgrade the subscription</h4><span class="where"><span class="tag web">WEB UI</span></span></header><div class="body">
+<p>Portal → <b>Subscriptions</b> → your subscription → <b>Upgrade</b>. Free-trial subscriptions have <b>zero</b> Azure OpenAI quota; upgrading unlocks it and keeps the unused credit, but <b>removes the spending limit</b>. From then on only budgets (email) and deleting resources protect you.</p></div></div>
+
+<h3>Phase 4 — The generator arm (gpt-4o)</h3>
+<div class="step" id="z41"><header><input type="checkbox" aria-label="done"><span class="num">4.1</span><h4>Create Azure OpenAI and deploy gpt-4o</h4><span class="where"><span class="tag web">you did: WEB UI</span></span></header><div class="body">
+<dl class="kv"><dt>Web (portal)</dt><dd>Create a resource → <b>Azure OpenAI</b> → resource group <code>rg-capstone-rag</code>, region <b>East US</b> (Central India offered no pay-per-token gpt-4o), pricing tier S0. (You named the account <code>rg-capstone-rag</code>.)</dd>
+<dt>Web (Foundry, ai.azure.com)</dt><dd>Open the resource → <b>Deployments</b> → Deploy model → <code>gpt-4o</code>, version <b>2024-11-20</b>, deployment type <b>Standard</b> (pay per token), rate limit 50K tokens/min, version update policy <b>no auto-upgrade</b>. Deployment name <code>gpt-4o</code>.</dd>
+<dt>Never</dt><dd>Choose a <b>Provisioned</b> deployment type: it bills every hour whether used or not.</dd>
+<dt>Terminal</dt><dd><pre>az cognitiveservices account show -g rg-capstone-rag -n rg-capstone-rag --query properties.endpoint -o tsv
+az cognitiveservices account keys list -g rg-capstone-rag -n rg-capstone-rag</pre>
+Put the endpoint, <code>gpt-4o</code> and a key into <code>azure.env</code>.</dd></dl></div></div>
+
+<div class="step" id="z42"><header><input type="checkbox" aria-label="done"><span class="num">4.2</span><h4>Run G1: determinism, full run, rank-1</h4><span class="where"><span class="tag term">TERMINAL</span> <span class="tag cost">~$3.64 total</span></span></header><div class="body">
+<pre>python rag/generate_rag_aoai.py --limit 50 --output rag/data/aoai_gpt4o_k10_det_a.json
+python rag/generate_rag_aoai.py --limit 50 --output rag/data/aoai_gpt4o_k10_det_b.json
+python rag/generate_rag_aoai.py --output rag/data/aoai_gpt4o_k10_results.json                  # ~$1.55
+python rag/generate_rag_aoai.py --prompts-path rag/data/rag_prompts_rank1_k10.json \
+    --output rag/data/aoai_gpt4o_rank1_k10_results.json                                      # ~$1.56
+python rag/score_rerank_arms.py aoai_gpt4o_k10 aoai_gpt4o_rank1_k10</pre>
+<p><code>--output</code> is required here, and the script refuses to resume from a file made from different prompts. Records tokens, <code>system_fingerprint</code> and estimated cost ($2.50 / $10.00 per million tokens in / out) in its manifest. Expected: ~198 and ~212 (± a few; not bit-reproducible).</p></div></div>
+
+<h3>Phase 5 — Deploy the service</h3>
+<div class="step" id="z51"><header><input type="checkbox" aria-label="done"><span class="num">5.1</span><h4>Atlas: read-only user and its URI</h4><span class="where"><span class="tag web">WEB UI</span> Atlas</span></header><div class="body">
+<p>cloud.mongodb.com → your project → <b>Database Access</b> → Add new database user → password auth → built-in role <b>"Only read any database"</b> (<code>readAnyDatabase</code>). Build its connection string from the cluster's <b>Connect</b> dialog and save it, on one line, in <code>atlas-ro-uri.txt</code> at the repo root (gitignored). <code>deploy.sh</code> stores it in Key Vault the first time; then delete the file.</p></div></div>
+
+<div class="step" id="z52"><header><input type="checkbox" aria-label="done"><span class="num">5.2</span><h4>Run the deploy script</h4><span class="where"><span class="tag term">TERMINAL</span></span></header><div class="body">
+<pre>git status --short service rag evaluation      # commit first: the image is built from git HEAD
+./infra/deploy.sh                              # first deploy (tag v1)
+TAG=v2 ./infra/deploy.sh                       # later: rebuild and roll out a new image</pre>
+<p>Safe to re-run: every create checks whether the thing already exists. In order, it:</p>
+<ol>
+<li>Creates Log Analytics (0.1 GB/day cap, 30-day retention) and App Insights.</li>
+<li>Creates the registry and builds the image <b>in the cloud</b> from a <code>git archive</code> of only the service's files (so gitignored secrets never leave the Mac; uncommitted changes are <i>not</i> included).</li>
+<li>Creates Key Vault (RBAC), gives you "Key Vault Secrets Officer", stores <code>atlas-uri-ro</code>, and generates <code>service-api-key</code>.</li>
+<li>Creates the VNet, a delegated subnet, a static public IP and a NAT Gateway on that subnet.</li>
+<li>Creates the Container Apps environment inside the VNet and the app (system-assigned identity, scale 0–1, 1 vCPU / 2 GiB, port 8000).</li>
+<li>Grants the app's identity: <code>AcrPull</code>, <code>Key Vault Secrets User</code>, <code>Search Index Data Reader</code>, <code>Cognitive Services OpenAI User</code>.</li>
+<li>Wires the secrets as Key Vault references and sets the settings (<code>RETRIEVER=azure-vector</code>, <code>DB_POLICY=rank1</code>, <code>TOP_K=10</code>, <code>MAX_ROWS=50</code>, <code>MAX_QUESTION_CHARS=500</code>, <code>RATE_LIMIT_PER_MIN=10</code>, endpoints).</li>
+<li>Restricts ingress to <code>$MYIP</code> and prints the URL and the egress IP.</li>
+</ol>
+<p>Role assignments can take minutes to apply. A 403 from Search or OpenAI on the first request: wait, restart the revision, then debug.</p></div></div>
+
+<div class="step" id="z53"><header><input type="checkbox" aria-label="done"><span class="num">5.3</span><h4>Allow the egress IP in Atlas, then test</h4><span class="where"><span class="tag web">WEB UI</span> Atlas <span class="tag term">TERMINAL</span></span></header><div class="body">
+<p>Atlas → <b>Network Access</b> → Add IP address → the NAT IP the script printed, as <code>/32</code>. Never <code>0.0.0.0/0</code>. Then:</p>
+<pre>set -a; source azure.env; set +a
+URL=https://$(az containerapp show -g $RG -n $APP --query properties.configuration.ingress.fqdn -o tsv)
+KEY=$(az keyvault secret show --vault-name $KV -n service-api-key --query value -o tsv)
+curl -s $URL/healthz
+curl -s -H "x-api-key: $KEY" -H 'content-type: application/json' \
+     -d '{"question":"How many singers are there?"}' $URL/query</pre>
+<p>Check the returned <code>database</code>, <code>query</code>, <code>rows</code> and <code>latency_ms</code>. A wrong key must give 401.</p></div></div>
+
+<h3>Phase 6 — Measure</h3>
+<div class="step" id="z61"><header><input type="checkbox" aria-label="done"><span class="num">6.1</span><h4>Smoke benchmark and cold start</h4><span class="where"><span class="tag term">TERMINAL</span></span></header><div class="body">
+<pre>python service/smoke.py smoke --n 50        # first 50 test cases, 6.5 s apart → results/azure_smoke.json
+python service/smoke.py cold --runs 3       # waits for scale-to-zero each time → results/azure_cold_start.json</pre>
+<p>The URL and key come from Azure at run time and the key is never written to disk. Spacing requests stays under the 10/min limit, so you measure the service, not the limiter.</p></div></div>
+
+<div class="step" id="z62"><header><input type="checkbox" aria-label="done"><span class="num">6.2</span><h4>Cross-check in App Insights</h4><span class="where"><span class="tag web">WEB UI</span></span></header><div class="body">
+<p>Portal → <code>ai-capstone</code> → <b>Logs</b>. Summarise span durations by name (for example <code>dependencies | where timestamp &gt; ago(1d) | summarize percentiles(duration, 50, 95), count() by name</code>, adjusting the table if your spans land elsewhere). Saved as <code>results/azure_appinsights_latency.csv</code>: embed p50 14 ms, retrieve 43, guard 1, execute 9.</p></div></div>
+
+<h3>Every session</h3>
+<div class="step" id="z71"><header><input type="checkbox" aria-label="done"><span class="num">S</span><h4>Resume and pause</h4><span class="where"><span class="tag term">TERMINAL</span></span></header><div class="body">
+<pre>./infra/resume.sh     # re-open ingress to $MYIP (update MYIP first), health check
+./infra/pause.sh      # close ingress, min replicas 0, show search tier, list every resource</pre>
+<p>Closing ingress matters: any request (even a bot scanning URLs) wakes a scaled-to-zero app.</p></div></div>
+
+<h3>Phase 7 — Tear down</h3>
+<div class="step" id="z81"><header><input type="checkbox" aria-label="done"><span class="num">7</span><h4>Delete everything</h4><span class="where"><span class="tag term">TERMINAL</span> <span class="tag web">Atlas</span></span></header><div class="body">
+<pre>az group delete -n rg-capstone-rag --yes
+az group delete -n NetworkWatcherRG --yes
+az resource list -o table                      # must print nothing</pre>
+<p>Then in Atlas, delete the read-only user and the NAT IP entry. Check Cost Management the next day. Everything is rebuildable: <code>rag/azure_index.py</code> + <code>infra/deploy.sh</code> + the Foundry deployment (about 20 minutes).</p></div></div>
+
+<h3>Rebuilding from zero, in order</h3>
+<ol>
+<li>0.1–0.4 (account, resource group, providers, budgets, <code>azure.env</code>).</li>
+<li>2.1–2.2 (search service, index). Free tier, $0.</li>
+<li>Phase 3 if re-running the experiment.</li>
+<li>Upgrade, then 4.1 (OpenAI + gpt-4o deployment). Check first that gpt-4o 2024-11-20 is still deployable; models are retired over time.</li>
+<li>5.1–5.3 (Atlas user, <code>deploy.sh</code>, Atlas IP), then test.</li>
+<li>Pause at the end of every session; tear down when done.</li>
+</ol>
+</section>
+
+<!-- =================================================================== INTERVIEW -->
+<section class="pane" id="p-interview" hidden>
+<h2>Interview: test yourself</h2>
+<p>Say your answer out loud first, then open the question.</p>
+
+<details class="qa"><summary>Walk me through the project in 60 seconds.</summary><div>
+<p>A benchmark for natural language to MongoDB. 1,517 hand-verified pairs across 23 databases: 1,213 as a retrieval pool, 304 held out. Every generated query is graded by running it on a live Atlas cluster and comparing rows. Zero-shot 4.9%, fine-tuned 33.9%, RAG 46.7%. Rank-1 database selection took RAG to 49%. On Azure, swapping the generator to gpt-4o with everything else fixed took it to 65%, and 69.7% with rank-1. That's the configuration a FastAPI service on Container Apps serves.</p></div></details>
+
+<details class="qa"><summary>Why execution accuracy instead of BLEU or exact match?</summary><div>
+<p>Text similarity is wrong both ways: a correct query in a different shape scores low, and a subtly wrong one that looks right scores high. My own data shows it: RAG and fine-tuning are within 0.0024 on CodeBLEU but 12.8 points apart on execution. Then I checked the oracle itself: gold against Spider's SQL (89.7% agreement, disagreements classified), and a false-positive audit of "correct" answers.</p></div></details>
+
+<details class="qa"><summary>Tell me about a time you were wrong.</summary><div>
+<p>The confound. My headline was "fine-tuning beats RAG". Baseline and RAG ran on Colab in fp16, fine-tuning on the Mac. Re-run on one stack, RAG on the same 61 questions went 24.6% → 50.8%. I proved the cause (a prompt change and its revert gave identical output within one session, so the swing was the session boundary), reversed the conclusion and published the reversal. Since then: one variable per experiment.</p></div></details>
+
+<details class="qa"><summary>Would you add a reranker?</summary><div>
+<p>Only if it moves the task metric, and mine didn't. A cross-encoder improved recall@5 0.964 → 0.984 and nDCG, and execution went nowhere: 20 gained, 22 lost, McNemar p = 0.88. Recall@10 was already 0.987, so there was nothing to find. nDCG explained only 9.4% of correctness, and the best-ranked arm correlated worst. Measure end to end.</p></div></details>
+
+<details class="qa"><summary>What did work in retrieval?</summary><div>
+<p>Rank-1 database selection: +6, zero losses, p = 0.031. The vote counted neighbours, so sibling databases were decided by how common they were in the pool, not by how close. It touched 27 prompts; reranking touched 300. Precision beat volume. And with gpt-4o behind it, the same fix was worth +12 instead of +5.</p></div></details>
+
+<details class="qa"><summary>Explain McNemar's test on a whiteboard.</summary><div>
+<p>Same questions, two arms. Draw the 2×2. Both-right and both-wrong say nothing. Under no difference, each discordant question is a fair coin, so gained out of (gained + lost) is Binomial(n, ½). The p-value is the chance of a split at least that lopsided, both sides. Exact because the counts are small. Example: 6–0 gives 2 × (½)⁶ = 0.031.</p></div></details>
+
+<details class="qa"><summary>Why was the Azure vector search run at all, if FAISS worked?</summary><div>
+<p>As a positive control. Before believing a hybrid result, the harness had to reproduce a known one: exact cosine on the same vectors should match FAISS. It matched on 298/304 with a pre-registered bar of 300. All six misses were one tied pair of identical questions, so I logged a dated deviation before any hybrid number existed, and reported the gate as missed.</p></div></details>
+
+<details class="qa"><summary>Did Azure hybrid search improve accuracy?</summary><div>
+<p>No: 148 vs 143, p = 0.49, 19 gained / 14 lost. Every ranking metric improved, but 26 of the 33 flips had the same database, so it was example churn. It's an infrastructure choice for the service, not an accuracy gain.</p></div></details>
+
+<details class="qa"><summary>How is gpt-4o's number not just contamination?</summary><div>
+<p>It might be partly: Spider is public, so gpt-4o may have seen it. I say that up front. The result compares two systems on this benchmark; it isn't evidence about unseen schemas. The structural finding holds either way: with the wrong schema, gpt-4o does no better than Qwen (6 vs 7).</p></div></details>
+
+<details class="qa"><summary>Your endpoint runs eval() on model output. Convince me it's safe.</summary><div>
+<p>Layers. An AST allowlist before every eval (names, methods, read-only stages, no <code>$where</code>/<code>$out</code>/<code>$merge</code> at any depth, literal keys only, no <code>.client</code> back-references, no <code>**</code> bombs), with no builtins in the eval. A database allowlist that fails closed. A read-only Atlas user reachable only from one NAT IP. Ingress limited to one IP, an API key, a 500-character limit, rate limiting, 50-row cap, hashed logs. The one I'd trust least alone is the allowlist; that's why it isn't alone.</p></div></details>
+
+<details class="qa"><summary>Why a NAT Gateway?</summary><div>
+<p>A consumption-only Container Apps environment leaves from a shared pool of about 190 IPs used by other tenants. Allowlisting that in Atlas would admit any app in the region. A NAT Gateway on the app's subnet gives one static IP only this app uses. Cost: about $1/day.</p></div></details>
+
+<details class="qa"><summary>Cold starts are 34 seconds. Acceptable?</summary><div>
+<p>For a demo, yes. Scale-to-zero is free when idle; min-replicas 1 removes the cold start but pays around the clock. The cold start is almost all container start (a ~1 GB image with CPU torch); the pipeline is ~2.5 s of it. The cheaper fix is a torch-free (ONNX) embedder to shrink the image.</p></div></details>
+
+<details class="qa"><summary>Why did fine-tuning lose to RAG?</summary><div>
+<p>After fixing an under-training bug it reached 33.9% vs RAG's 46.7%. Fine-tuning teaches the shape of correct queries, which also produces plausible-but-wrong filters: its false-positive rate is 4× RAG's. RAG shows the model real, similar, correct examples every time. And they fail on different questions: the union is 59%.</p></div></details>
+
+<h3>Deep-dive risk: know the detail behind these lines</h3>
+<ul>
+<li>"1,517 cases": the dataset. The oracle grades <b>304</b>. Never say "1,517-case benchmark asserted by an oracle".</li>
+<li>142 vs 143: same RAG run; the aggregate says 142, the re-scored case file 143. One case of oracle noise.</li>
+<li>0.68% trainable: all seven projection matrices in the last 16 of 28 blocks, rank 16.</li>
+<li>~198 for gpt-4o: not bit-reproducible; 0–2 flips per 50 cases.</li>
+</ul>
+
+<h3>Do not say</h3>
+<ul>
+<li>"LoRA outperformed every RAG configuration": reversed.</li>
+<li>"4.9% → 24.6%" or "32.8%": stale, from the confounded setup.</li>
+<li>"Azure Search improved accuracy": it didn't.</li>
+<li>"Production": the service is a deployed demo behind an IP allowlist, with no real users.</li>
+</ul>
+</section>
+
+<!-- =================================================================== FILES -->
+<section class="pane" id="p-files" hidden>
+<h2>Files and glossary</h2>
+<h3>Which file holds which number</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Number</th><th>File</th></tr></thead>
+<tbody>
+<tr><td>Baseline 15/304</td><td><code>rag/data/qwen_baseline_testslice_execution_results_mlx.json</code></td></tr>
+<tr><td>RAG 142 (aggregate)</td><td><code>rag/outputs/rag_vs_baseline_scores_mlx.csv</code></td></tr>
+<tr><td>RAG 143 (case file for paired tests, A0)</td><td><code>rag/data/qwen_rag_fk_k10_execution_results.json</code></td></tr>
+<tr><td>RAG no-FK 141</td><td><code>rag/data/qwen_rag_execution_results_mlx.json</code></td></tr>
+<tr><td>Fine-tuned 103</td><td><code>data/finetuned_full304_23db_1000iter_execution_results.json</code></td></tr>
+<tr><td>Rank-1 149</td><td><code>rag/data/qwen_rag_rank1_k10_execution_results.json</code></td></tr>
+<tr><td>Reranking arms</td><td><code>rag/data/qwen_rag_rerankQ*_execution_results.json</code>, <code>results/retrieval_eval.json</code></td></tr>
+<tr><td>Azure hybrid 148 / 150</td><td><code>rag/data/qwen_rag_azhyb_k10_execution_results.json</code>, <code>…rank1_azhyb_k10…</code></td></tr>
+<tr><td>gpt-4o 198 / 212</td><td><code>rag/data/qwen_rag_aoai_gpt4o_k10_execution_results.json</code>, <code>…aoai_gpt4o_rank1_k10…</code></td></tr>
+<tr><td>Gate 1 / Gate 2</td><td><code>results/retrieval_eval_{faiss,azure-vector,azure-hybrid}.json</code></td></tr>
+<tr><td>Determinism</td><td><code>results/aoai_determinism.json</code></td></tr>
+<tr><td>Service latency, accuracy</td><td><code>results/azure_smoke.json</code>, <code>azure_cold_start.json</code>, <code>azure_appinsights_latency.csv</code></td></tr>
+<tr><td>Audits</td><td><code>outputs/false_positive_audit.csv</code>, <code>outputs/sql_crosscheck.csv</code></td></tr>
+</tbody></table></div>
+<p>Every generated file has a sibling <code>.manifest.json</code>: model, settings, library versions, git SHA, whether the tree was dirty, and a SHA-256 of the file. The manifest is the authority on how a file was made; <code>CANONICAL_ARTIFACTS.md</code> is the authority on which file to read, and lists every superseded one.</p>
+
+<h3>Glossary</h3>
+<div class="tscroll"><table><tbody>
+<tr><td><b>A0</b></td><td>The reference RAG arm: FAISS, K=10, vote, FK on, Qwen on MLX. 143/304 in paired tests.</td></tr>
+<tr><td><b>Arm</b></td><td>One configuration being measured.</td></tr>
+<tr><td><b>Discordant</b></td><td>A question one arm gets right and the other wrong.</td></tr>
+<tr><td><b>Execution oracle</b></td><td>Grading by running the query and comparing rows to the gold rows.</td></tr>
+<tr><td><b>FK annotations</b></td><td>Foreign-key notes in the schema block ("this field joins to that collection").</td></tr>
+<tr><td><b>Gate</b></td><td>A pre-set check that must pass before later results are trusted.</td></tr>
+<tr><td><b>Gold</b></td><td>The verified correct query, and the rows it returns.</td></tr>
+<tr><td><b>G1</b></td><td>gpt-4o on A0's exact prompts.</td></tr>
+<tr><td><b>Manifest</b></td><td>The provenance file next to every generated artifact.</td></tr>
+<tr><td><b>Pool</b></td><td>The 1,213 examples retrieval searches and fine-tuning trains on.</td></tr>
+<tr><td><b>Rank-1 policy</b></td><td>Take the database of the single nearest example.</td></tr>
+<tr><td><b>Schema card</b></td><td>One collection's name, fields and types (+ FK edges), from <code>rag/schema_cards.json</code>.</td></tr>
+<tr><td><b>Sibling databases</b></td><td>Near-identical databases (<code>college_1/2/3</code>, <code>chinook_1</code>/<code>store_1</code>) that embeddings struggle to tell apart.</td></tr>
+<tr><td><b>Vote policy</b></td><td>The most common database among the 10 neighbours (the default).</td></tr>
+</tbody></table></div>
+</section>
+<footer>Written 26 Sep 2026 against branch azure-deploy. Every command, file, number and default in this guide was checked against the repository that day. Sources for deeper reading: CANONICAL_ARTIFACTS.md, docs/FINDING-*.md, docs/AZURE-PLAN.md.</footer>
+</div>
+<script>
+(function(){
+"use strict";
+var KEY="guide.capstone";
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||"{}");}catch(e){return {};}}
+function save(s){try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}}
+
+/* ---- tabs ---- */
+var tabs=[].slice.call(document.querySelectorAll(".tab[data-tab]"));
+function show(name,push){
+  var hit=false;
+  tabs.forEach(function(t){var on=t.dataset.tab===name;if(on)hit=true;t.setAttribute("aria-selected",on?"true":"false");var p=document.getElementById("p-"+t.dataset.tab);if(p)p.hidden=!on;});
+  if(!hit&&tabs.length){return show(tabs[0].dataset.tab,false);}
+  if(push){try{history.replaceState(null,"","#"+name);}catch(e){}}
+  var st=load();st._tab=name;save(st);
+}
+tabs.forEach(function(t){t.addEventListener("click",function(){document.body.classList.remove("showall");show(t.dataset.tab,true);window.scrollTo(0,0);});});
+var all=document.querySelector(".tab.all");
+if(all){all.addEventListener("click",function(){document.body.classList.toggle("showall");all.textContent=document.body.classList.contains("showall")?"Back to tabs":"Show all (search / print)";});}
+var start=(location.hash||"").slice(1)||load()._tab||(tabs[0]&&tabs[0].dataset.tab);
+show(start,false);
+document.addEventListener("click",function(e){var a=e.target.closest("a[data-go]");if(!a)return;e.preventDefault();show(a.dataset.go,true);var t=a.getAttribute("data-anchor");var el=t&&document.getElementById(t);(el||document.body).scrollIntoView();});
+
+/* ---- copy buttons on every <pre> ---- */
+[].forEach.call(document.querySelectorAll("pre"),function(pre){
+  var wrap=document.createElement("div");wrap.className="code";pre.parentNode.insertBefore(wrap,pre);wrap.appendChild(pre);
+  var b=document.createElement("button");b.type="button";b.className="copy";b.textContent="copy";wrap.appendChild(b);
+  b.addEventListener("click",function(){
+    var txt=pre.innerText.split("\n").filter(function(l){return !/^\s*#\s/.test(l)||true;}).join("\n");
+    var done=function(){b.textContent="copied";setTimeout(function(){b.textContent="copy";},1300);};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,function(){sel(pre);b.textContent="select + Cmd-C";});}
+    else{sel(pre);b.textContent="select + Cmd-C";}
+  });
+});
+function sel(el){var r=document.createRange();r.selectNodeContents(el);var s=window.getSelection();s.removeAllRanges();s.addRange(r);}
+
+/* ---- runbook step checkboxes, remembered in this browser ---- */
+var st=load();
+[].forEach.call(document.querySelectorAll(".step"),function(step,i){
+  var id=step.id||("s"+i);var cb=step.querySelector("header input[type=checkbox]");if(!cb)return;
+  cb.checked=!!st[id];step.classList.toggle("done",cb.checked);
+  cb.addEventListener("change",function(){var s=load();s[id]=cb.checked;save(s);step.classList.toggle("done",cb.checked);count();});
+});
+function count(){
+  [].forEach.call(document.querySelectorAll("[data-progress]"),function(el){
+    var pane=document.getElementById(el.getAttribute("data-progress"));if(!pane)return;
+    var boxes=pane.querySelectorAll(".step header input[type=checkbox]");var n=0;[].forEach.call(boxes,function(b){if(b.checked)n++;});
+    el.textContent=n+" of "+boxes.length+" steps ticked (saved in this browser only)";
+  });
+}
+count();
+})();
+</script>
+</body>
+</html>

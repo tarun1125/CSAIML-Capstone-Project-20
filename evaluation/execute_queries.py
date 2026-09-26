@@ -71,7 +71,83 @@ SAFE_PIPELINE_STAGES = {
     "$toInt", "$toDouble", "$toString", "$convert",
     "$toLong", "$toDecimal", "$toBool", "$toDate", "$toObjectId",
     "$cond", "$switch", "$ifNull",
+    # 2026-09-05: both are read-only and both appear in GOLD queries that are
+    # stored in data/gold_results.json with status PASS -- so they executed
+    # once, but were not on this list, which meant execute_gold.py could no
+    # longer regenerate 7 of its own gold results (dk-c2, spider-bike_1-1,
+    # spider-bike_1-53, spider-college_1-74, spider-dog_kennels-69,
+    # spider-formula_1-4, spider-sakila_1-15). Found by re-running
+    # check_query_is_safe() over every stored query. $unionWith reads a second
+    # collection (it is the only way to express SQL's UNION in an aggregation
+    # pipeline); $setWindowFields computes window functions. Neither writes.
+    # A $unionWith sub-pipeline is not walked by _check_pipeline_stages(), but
+    # _check_forbidden_operators() above walks every dict at every depth, so a
+    # $out/$merge/$where hidden inside one is still rejected.
+    "$unionWith", "$setWindowFields",
 }
+
+
+# Operators that execute server-side JavaScript or otherwise escape the
+# read-only contract, wherever they appear. _check_pipeline_stages() below
+# only inspects the top-level stage keys of an aggregate() pipeline, so a
+# $where nested inside a find() FILTER -- db.x.find({"$where": "..."}) --
+# went straight through it: not an aggregate() call, and just a literal dict
+# as far as the outer AST allowlist is concerned. Found by tests/test_scoring.py
+# (2026-09-05). No query in any arm's results uses one of these, so closing
+# the hole changes no published number; it closes it before one does.
+FORBIDDEN_OPERATORS = {"$where", "$function", "$accumulator", "$merge", "$out"}
+
+
+def _check_forbidden_operators(tree) -> tuple[bool, str]:
+    """Reject $where/$function/$accumulator/$merge/$out ANYWHERE in the query
+    -- at any nesting depth, inside a find() filter or an aggregate() pipeline
+    or a $lookup sub-pipeline alike.
+
+    FAILS CLOSED. The first version of this check read only keys that were
+    literal string Constants inside literal ast.Dict nodes, and skipped
+    anything else. That is a hole, not a limitation, because the operator name
+    never has to be written as a literal:
+
+        db.c.aggregate([{"$o" + "ut": "pwned"}])      # BinOp key
+        db.c.aggregate([{f"$merge": {...}}])          # JoinedStr key
+        db.c.aggregate([dict([("$out", "pwned")])])   # no ast.Dict at all
+        db.c.find({"$wh" + "ere": "function(){...}"}) # same trick, find() filter
+
+    All four were verified to pass the old check and hand a real $out/$merge/
+    $where to the driver. Python evaluates the key at runtime, so a checker
+    that only understands literals cannot see them.
+
+    Rather than trying to constant-fold arbitrary expressions -- an endless
+    game against str.join, .replace, %-formatting, chr() and so on -- this
+    refuses anything it cannot statically prove is a safe literal:
+
+      * a dict key that is not a literal string Constant  -> reject
+      * ** unpacking in a dict (key is None)              -> reject
+      * a dict(...) constructor call                      -> reject
+
+    Verified free: across all 20,014 query strings in this repo's result and
+    reference files, zero use a non-literal dict key and zero call dict(),
+    so this rejects nothing that has ever legitimately run."""
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "dict":
+            # dict(...) builds a mapping whose keys never appear as ast.Dict
+            # keys, so no key-based check can see them.
+            return False, "dict() constructor not allowed (operator keys cannot be checked statically)"
+
+        if not isinstance(node, ast.Dict):
+            continue
+
+        for key_node in node.keys:
+            if key_node is None:
+                return False, "dict ** unpacking not allowed (keys cannot be checked statically)"
+            if not (isinstance(key_node, ast.Constant) and isinstance(key_node.value, str)):
+                return False, (
+                    "non-literal dict key not allowed "
+                    f"({type(key_node).__name__} -- keys cannot be checked statically)"
+                )
+            if key_node.value in FORBIDDEN_OPERATORS:
+                return False, f"method not allowed: forbidden operator {key_node.value}"
+    return True, ""
 
 
 def _check_pipeline_stages(tree) -> tuple[bool, str]:
@@ -102,6 +178,22 @@ def _check_pipeline_stages(tree) -> tuple[bool, str]:
     return True, ""
 
 
+# PyMongo back-references. Database.client, Collection.database and
+# Cursor.collection are plain attributes, not method calls, so the
+# ALLOWED_METHODS check never sees them -- and they climb out of the database
+# the query was handed: db.client["other_db"].coll.find({}) passed this check
+# and read another database on the cluster, bypassing the per-database
+# allowlist in demo_ui/live_inference.py. 0 of the 7,727 distinct stored
+# queries use any of these names.
+FORBIDDEN_ATTRIBUTES = {"client", "database", "collection"}
+
+# Arithmetic the query may contain. `*`, `**`, `%` and `<<` can build a huge
+# value in pure Python before Atlas is ever contacted ("a" * 10**12,
+# 9**9**9), which socketTimeoutMS cannot interrupt -- a one-line CPU/memory
+# DoS of whatever process runs eval(). The stored queries use only +, - and /.
+ALLOWED_BINOPS = (ast.Add, ast.Sub, ast.Div)
+
+
 def check_query_is_safe(query: str) -> tuple[bool, str]:
     try:
         tree = ast.parse(query, mode="eval")
@@ -111,6 +203,10 @@ def check_query_is_safe(query: str) -> tuple[bool, str]:
     for node in ast.walk(tree):
         if isinstance(node, ast.Attribute) and node.attr.startswith("_"):
             return False, f"dunder access: {node.attr}"
+        if isinstance(node, ast.Attribute) and node.attr in FORBIDDEN_ATTRIBUTES:
+            return False, f"attribute not allowed: {node.attr}"
+        if isinstance(node, ast.BinOp) and not isinstance(node.op, ALLOWED_BINOPS):
+            return False, f"operator not allowed: {type(node.op).__name__}"
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
             if node.func.attr not in ALLOWED_METHODS:
                 return False, f"method not allowed: {node.func.attr}"
@@ -120,6 +216,11 @@ def check_query_is_safe(query: str) -> tuple[bool, str]:
             "len", "sorted", "list", "dict",
         }:
             return False, f"unexpected name: {node.id}"
+
+    # Forbidden operators, at any depth (find() filters included)
+    ok, reason = _check_forbidden_operators(tree)
+    if not ok:
+        return False, reason
 
     # Finding 7: pipeline-stage content inspection
     ok, reason = _check_pipeline_stages(tree)
@@ -148,6 +249,48 @@ def safe_eval_query(query: str, db):
 # stays scored as a genuine success -- it doesn't get thrown away as a fake
 # FAIL just because the value needs a string form to write to disk.
 # ---------------------------------------------------------------------------
+
+def materialize_result(result):
+    """Turn whatever safe_eval_query() returned into the list-or-scalar shape
+    the scorer compares, WITHOUT destroying it.
+
+    The three call sites (run_model below, execute_gold.py, and the demo UI's
+    execute_against_atlas) all used to open-code this as:
+
+        if isinstance(result, (int, float, str, bool)): pass
+        elif not isinstance(result, list):              result = list(result)
+
+    That is correct for a Cursor and wrong for a dict, which is exactly what
+    find_one() returns:
+
+        list({"_id": 1, "Theme": "Sci-Fi"})  ==  ["_id", "Theme"]
+
+    -- the field NAMES, with every value silently discarded. And when
+    find_one() matches nothing it returns None, where list(None) raises
+    TypeError and the case is recorded as a hard FAIL.
+
+    Measured across this repo's committed execution results before the fix:
+    27 records whose query used find_one -- 6 stored as bare key-lists, 18
+    recorded as 'NoneType object is not iterable' failures, and
+    execution_accuracy True on exactly zero of them. find_one is in
+    ALLOWED_METHODS and normalize.py actively rewrites findOne -> find_one,
+    so the pipeline was deliberately producing queries that could not score.
+
+    No GOLD query uses find_one (0 of 1,517 in data/reference_queries.json),
+    so no stored gold result was ever affected by this -- only model
+    predictions, and only ever downward."""
+    if isinstance(result, (int, float, str, bool)):
+        return result
+    if result is None:
+        # find_one() with no match. The empty ANSWER, not an error.
+        return []
+    if isinstance(result, dict):
+        # find_one() with a match -- one document. Wrap it; never iterate it.
+        return [result]
+    if isinstance(result, list):
+        return result
+    return list(result)  # Cursor / CommandCursor / other iterable
+
 
 def to_json_safe(value, _converted=None):
     if _converted is None:
@@ -288,10 +431,7 @@ def run_model(client: MongoClient, model_name: str, input_file: Path,
 
         try:
             result = safe_eval_query(query, db)
-            if isinstance(result, (int, float, str, bool)):
-                pass
-            elif not isinstance(result, list):
-                result = list(result)
+            result = materialize_result(result)
 
             converted = []
             result = to_json_safe(result, converted)

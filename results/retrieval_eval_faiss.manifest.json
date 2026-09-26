@@ -1,0 +1,23 @@
+{
+  "manifest_schema_version": 1,
+  "generated_at": "2026-09-26T02:19:06Z",
+  "git_sha": "f0750444459644f5a6f5c5fcd2c9c5a12e369484",
+  "git_dirty": true,
+  "git_branch": "azure-deploy",
+  "python_version": "3.12.11",
+  "platform": "Darwin arm64",
+  "mlx_lm_version": "0.31.3",
+  "mlx_version": "0.32.1",
+  "stage": "retrieval evaluation / one retriever",
+  "retriever": "faiss",
+  "score_kind": "cosine similarity (IndexFlatIP over L2-normalised MiniLM vectors)",
+  "faiss_index": "rag/data/fewshot.index",
+  "faiss_index_ntotal": 1213,
+  "faiss_index_type": "IndexFlatIP",
+  "top_n": 50,
+  "n_cases": 304,
+  "script": "rag/eval_retriever.py",
+  "results_file": "results/retrieval_eval_faiss.json",
+  "results_sha256": "1cf7b357aedfe9ebc7264a587a5e02fd46ed4560c93332b226bf0351070bfe9b",
+  "results_bytes": 602165
+}
