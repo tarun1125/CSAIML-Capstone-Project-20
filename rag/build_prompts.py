@@ -169,16 +169,94 @@ def render_numeric_string_note(db_name: str) -> str:
 # equivalently clean fix available.
 
 
+# 2026-09-22: the tie-break in majority_vote_database() below returns the
+# rank-1 neighbor WITHOUT checking that it is one of the tied databases.
+# On neighbors [A, B, B, C, C] the tied set is {B, C} and it returns A -- a
+# database that lost the vote outright. This looks exactly like an
+# off-by-one bug, and the tempting "fix" is to restrict the tie-break to
+# the tied set. That fix was evaluated and REJECTED; the behavior below is
+# intentional and is kept. Reproduce with `python rag/analyze_vote_policies.py`:
+#
+#   current (rank-1 wins outright)   258/304 = 0.8487   <- kept
+#   restricted to the tied set       255/304 = 0.8388
+#   pure rank-1, no vote at all      275/304 = 0.9046
+#
+# Two separate things came out of that measurement.
+#
+# 1. The tie-break question CANNOT be settled by this split. The two
+#    variants differ on exactly 3 of 304 cases. A paired exact test on 3
+#    discordant pairs bottoms out at p=0.25 -- that is the smallest
+#    p-value reachable at n=3, so no outcome here could have been
+#    significant. Picking the "restricted" variant because it looks tidier
+#    would be changing behavior on 3 cases of pure noise. The decision has
+#    to rest on mechanism instead, which is point 2.
+#
+# 2. Rank-1 is a much stronger signal than the vote, and the evidence for
+#    THAT is decisive. Ignoring the vote entirely and always taking the
+#    nearest neighbor's database scores 275/304 against the vote's 258/304
+#    -- better on 20 cases, worse on 3, McNemar exact p=0.0005, bootstrap
+#    95% CI on the gap [+2.6, +8.6] points. Reliability is monotone in how
+#    concentrated the vote is: where the top count is 8+/10 the vote and
+#    rank-1 agree and both are ~94-99% right, but at a top count of 5/10
+#    the vote drops to 0.393 while rank-1 holds 0.643. So the tie-break
+#    below is not a bug that got lucky 3 times -- it is the better rule
+#    surfacing in the one place the code happens to apply it.
+#
+# Why the vote is the weaker aggregator: an unweighted k-NN vote discards
+# similarity MAGNITUDE and keeps only counts. Where two databases are
+# near-degenerate in embedding space -- chinook_1/store_1 and
+# college_1/college_2/college_3, the same families already documented in
+# the chinook_1/store_1 note above and in prepare_data_23db.py's
+# COLLISION_GROUPS -- every pool example from either sibling sits at
+# roughly the same distance from the query, so the expected neighbor count
+# for sibling c is ~ K * N_c / sum(N_sibling): proportional to POOL
+# FREQUENCY, not relevance. argmax over counts degenerates into argmax over
+# pool frequency, and the rarer sibling can never win however close it
+# actually is. Measured, that is total: chinook_1 (33 pool examples) loses
+# all 9 of its cases to store_1 (84), and college_3 (29) loses all 7 to
+# college_1/college_2 (126/125). Rank-1 recovers 3 and 2 of those
+# respectively, because "which single example is closest" is a real
+# similarity comparison rather than a head-count against a prior.
+#
+# The 3 tie-break cases fit that same story rather than contradicting it.
+# All 3 are questions whose surface noun is generic geography -- "How many
+# cities are in Australia?", "...count of cities in each country",
+# "How many customers live in the city of Prague?" -- and in all 3 the tied
+# set is generic-geography databases (world_1, car_1, apartment_rentals)
+# that act as attractors for any question mentioning a city or a country,
+# each pulling only 3 of 10 neighbors. A tie at 3/10 IS the fragmented-vote
+# regime: the tie exists precisely because the counting signal has
+# collapsed, which is exactly when rank-1 should be trusted over it.
+#
+# NOT changed here: swapping the vote for pure rank-1 outright. That is the
+# real finding and it is worth doing, but it changes the predicted database
+# (and therefore the prompt's schema block) on ~17 more cases, which
+# invalidates every downstream artifact -- qwen_rag_*.json, the score CSVs,
+# the cross-arm figures -- none of which can be regenerated without the
+# MLX/Qwen serving stack. It is a re-run, not a docstring fix, and it is
+# left as an explicit follow-up rather than smuggled in here. Note also
+# that database-retrieval accuracy is a diagnostic on step 2, not
+# end-to-end query accuracy; the +17 is a prediction about better schema
+# selection, not a measured end-to-end gain.
+
+
 def majority_vote_database(neighbor_dbs: list[str]) -> str:
     """neighbor_dbs is rank-ordered, nearest first (FAISS search order).
-    Majority wins; a tie is broken by the nearest neighbor (index 0) since
-    it's the single most-trusted signal FAISS gave us."""
+
+    An outright winner of the count wins. On a TIE, the rank-1 neighbor
+    wins OUTRIGHT -- including when rank-1 is not itself one of the tied
+    databases. On [A, B, B, C, C] the tied set is {B, C}, and this returns
+    A. That is deliberate, not an oversight; see the note below before
+    "fixing" it.
+    """
     counts = Counter(neighbor_dbs)
     top_count = max(counts.values())
     tied = [db for db, c in counts.items() if c == top_count]
     if len(tied) == 1:
         return tied[0]
-    return neighbor_dbs[0]  # tie-break: rank-1 neighbor
+    # Tie -> rank-1 wins outright, tied set or not. Rationale in the block
+    # comment above; evidence via `python rag/analyze_vote_policies.py`.
+    return neighbor_dbs[0]
 
 
 def render_schema_block(db_name: str, cards_by_db: dict, include_fk: bool = True) -> str:
