@@ -1,6 +1,6 @@
 # Experiment — does hybrid (BM25 + vector) retrieval on Azure AI Search beat FAISS?
 
-**Status:** pre-registration, signed off by Tarun on **2026-09-24**. Gate 1 run 2026-09-26: **missed the count criterion (298/304 < 300)**; proceeding under the dated deviation in §4. A2 not yet evaluated.
+**Status:** pre-registration, signed off by Tarun on **2026-09-24**. Gate 1 run 2026-09-26: **missed the count criterion (298/304 < 300)**; proceeding under the dated deviation in §4. **A2 run 2026-09-26: 148/304 (vote), 150/304 (rank-1); bar not met, prediction missed.** See [`FINDING-azure-retrieval.md`](FINDING-azure-retrieval.md).
 Nothing in §4–§6 may change after Gate 1 has been run. If something turns out to be wrong, correct
 it in place and mark it **[CORRECTED]** with the reason, as `EXPERIMENT-reranking.md` does.
 
