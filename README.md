@@ -230,6 +230,16 @@ distinguished its arms. Note that plain similarity-sum is *worse* than counting 
 258) — any weighting that sums over members inherits the pool-frequency prior, and a sum
 dominated by its maximum is just rank-1 with extra steps.
 
+**The vote's tie-break was investigated and kept.** `majority_vote_database()` breaks a tie
+by returning the rank-1 neighbour *outright*, without checking it is one of the tied databases:
+on `[A, B, B, C, C]` it returns `A`. `rag/analyze_vote_policies.py` replays every aggregation
+policy over the recorded retrieval, offline. Restricting the tie-break to the tied set changes
+exactly 3 of 304 cases (258 → 255), and a paired exact test on 3 discordant pairs bottoms out at
+p = 0.25, the smallest p reachable at n = 3. Changing it would be fitting noise, so the behaviour
+and its docstring are kept (PR #18). The same replay gives the vote-vs-rank-1 retrieval gap a
+bootstrap 95% CI of **[+2.6, +8.6] points**, and shows the vote's reliability collapsing with
+concentration: at a top count of 5/10 the vote is right 39.3% of the time, rank-1 64.3%.
+
 Full write-up in [`docs/FINDING-rank1-vote.md`](docs/FINDING-rank1-vote.md). **The default
 is unchanged** — this is a flag, and `rag_prompts.json` still rebuilds byte-identically.
 
@@ -421,7 +431,10 @@ Metal memory ~15.4GB.
 - **Database prediction**: majority vote across the top-K retrieved neighbors' source
   database — 258/304 (84.9%) database-retrieval accuracy across the current 23 candidate
   databases (down from 96.7% on the original 6-database slice, as expected for a harder
-  23-way retrieval problem).
+  23-way retrieval problem). The vote's tie-break deliberately lets the rank-1 neighbor
+  win outright; measured against the alternatives, the vote is itself the weakest link
+  here — see *The majority vote is the weakest part of RAG retrieval* above, and
+  `rag/analyze_vote_policies.py`.
 - **Schema scope**: once a database is predicted, its entire schema (every collection)
   is included in the prompt, with FK-relationship annotations included by default
   (A/B tested against omitting them — see above, a null result either way).
