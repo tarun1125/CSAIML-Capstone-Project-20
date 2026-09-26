@@ -345,7 +345,7 @@ but removes the spending limit.
 
 ---
 
-## Phase 4 — Generator arm on Azure OpenAI (Day 8–10) — started 2026-09-26 (Day 2)
+## Phase 4 — Generator arm on Azure OpenAI (Day 8–10) — ✅ closed 2026-09-26 (Day 2)
 
 **Setup (done):** Azure OpenAI resource `rg-capstone-rag` (East US, S0); deployment `gpt-4o`,
 model **gpt-4o 2024-11-20**, **Standard** (pay per token), 50K TPM, **NoAutoUpgrade** (pinned).
@@ -372,6 +372,12 @@ exemplar, 275/304 right vs the vote's 258). **Primary comparison: vs G1-vote (19
 exact, which isolates the database policy with the generator fixed. Secondary: vs Qwen rank-1 (149).
 **Prediction (Tarun): 200+ / 304.** No significance bar set. Noise reference: about ±2 per 50 cases (§2 of
 the finding).
+
+**G1 + rank-1 result: 212/304, vs G1-vote 198: 17 gained / 3 lost, p = 0.0026. Prediction correct.**
+On the 20 cases where rank-1 fixed the database: gpt-4o 5 → 17 (Qwen 6 → 11).
+
+**Phase 4 closed 2026-09-26 (Day 2).** Arms G1 and G1 + rank-1 are done, determinism measured, total
+≈ $3.64. The `gpt-4o` deployment stays for Phase 5; it's pay-per-token, so it costs nothing while idle.
 
 - [ ] Create an Azure OpenAI (Foundry) resource and deploy **one small, cheap chat model**. Model
   availability varies by region, so check the Foundry portal and use any region that has it.

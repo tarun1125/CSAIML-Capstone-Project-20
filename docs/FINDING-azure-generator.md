@@ -1,6 +1,6 @@
 # Finding — a hosted gpt-4o on the same prompts: +55 cases over Qwen 1.5B
 
-**Status:** complete, 2026-09-26. Interpretation in §3 and §6 is marked *(draft — Tarun to confirm)*.
+**Status:** complete, 2026-09-26, including the follow-up arm **G1 + rank-1 (§3.1): 212/304**. Interpretation in §3 and §6 is marked *(draft — Tarun to confirm)*.
 **Arm:** G1 of `docs/AZURE-PLAN.md`, Phase 4. Prediction recorded before the run (commit `88217db`).
 **Follows:** [`FINDING-azure-retrieval.md`](FINDING-azure-retrieval.md) changed retrieval with the
 generator fixed. This changes the generator with retrieval fixed. They are two questions and two numbers.
@@ -29,6 +29,7 @@ Azure hybrid +5 n.s., reranking −2 n.s.).
 | Azure hybrid retrieval (A2) | 148 | 19 / 14 | 0.49 |
 | Rank-1 database policy | 149 | 6 / 0 | 0.031 |
 | **Generator → gpt-4o (G1)** | **198** | **69 / 14** | **6.8 × 10⁻¹⁰** |
+| **gpt-4o + rank-1 policy (§3.1)** | **212** | **80 / 11** | **4.4 × 10⁻¹⁴** |
 
 ---
 
@@ -75,11 +76,39 @@ constraint**. It accounts for **40 of G1's 106 failures (38%)**, up from 39 of Q
 
 That changes the value of the retrieval work. Rank-1 fixed a net 17 database decisions and was worth +6 with
 Qwen, which converts a right schema into a right answer only 53% of the time. With a generator that
-converts at 74%, the same database fixes should be worth more. **This is a hypothesis, not a
-result.** Testing it is one run (G1 + rank-1, about $1.55), and its prediction should be recorded first.
+converts at 74%, the same database fixes should be worth more. That was a hypothesis when written; §3.1
+tests it.
 
 Failure types, A0 → G1: wrong rows 85 → 56, empty result 62 → 46, runtime error 8 → 3, rejected by
 the guard 6 → 1. The 14 losses are all "ran, wrong/empty rows", and 10 of them had the right database.
+
+### 3.1 Tested: gpt-4o + rank-1 = 212/304
+
+Pre-registered before the run (commit `cef5846`): gpt-4o on `rag/data/rag_prompts_rank1_k10.json`
+(the same FAISS exemplars; the database comes from the nearest exemplar), **primary comparison against
+G1-vote (198)**, **prediction 200+**.
+
+| Comparison | from → to | net | gained / lost | McNemar exact p |
+|---|---|---|---|---|
+| **G1-rank1 vs G1-vote (primary)** | 198 → **212** | **+14** | **17 / 3** | **0.0026** |
+| G1-rank1 vs Qwen-rank1 | 149 → 212 | +63 | 76 / 13 | 5.4 × 10⁻¹² |
+| G1-rank1 vs A0 (Qwen, vote) | 143 → 212 | +69 | 80 / 11 | 4.4 × 10⁻¹⁴ |
+
+**Prediction correct (200+).** The mechanism is visible directly. Rank-1 changes the database decision in
+27 cases: it **fixes 20**, breaks 3, and changes 4 from one wrong database to another. On the 20 fixed cases:
+
+| | vote → rank-1 on the 20 fixed cases |
+|---|---|
+| Qwen 1.5B | 6 → 11 (**+5**) |
+| **gpt-4o** | **5 → 17 (+12)** |
+
+**Separating effect from noise:** the other **277 prompts are byte-identical** between the two runs,
+because the database decision didn't change. On those, gpt-4o flipped 8 cases, net +2, which is pure
+run-to-run noise (§2). The +14 is therefore about **+12 from the database fix and about +2 from noise**.
+The same retrieval change was worth +6 with Qwen and about +12 with gpt-4o: **a policy's value depends on
+the generator behind it.**
+
+Cost $1.56 (525,698 in / 24,803 out tokens), p50 1.9 s, 0 errors.
 
 ---
 
@@ -90,6 +119,8 @@ the guard 6 → 1. The 14 losses are all "ran, wrong/empty rows", and 10 of them
 | G1, 304 cases | 520,090 / 24,511 | **$1.55** |
 | determinism, 2 × 50 cases | 168,166 / 8,015 | $0.50 |
 | smoke tests (5 calls) | 9,421 / 517 | $0.03 |
+| G1 + rank-1, 304 cases | 525,698 / 24,803 | $1.56 |
+| **Phase 4 total** | **1,223,375 / 57,846** | **≈ $3.64** |
 
 About **$0.005 per query**, or **$0.008 per correct answer**. Estimates use $2.50 / $10.00 per
 1M input / output tokens. Check them against the invoice in Cost Management; token counts in the
@@ -119,9 +150,11 @@ Mac: about 1.4 s per case).
 - **Generator size is the largest lever measured in this project**, larger than every retrieval
   change combined. For the deployed service, the case for a hosted model is about +18 points at
   about half a cent per query.
-- **The next retrieval work should target the database decision**, now the main failure source for a
-  strong generator. The cheapest test is G1 + rank-1 on existing prompts
-  (`rag/data/rag_prompts_rank1_k10.json`).
+- **Best configuration measured: gpt-4o + FAISS + rank-1 database policy, 212/304 (69.7%).** This is
+  the configuration the deployed service (Phase 5) should serve, with the rank-1 policy, not the vote.
+- **Retrieval work should target the database decision.** With a strong generator, each database fix
+  converts to a correct answer at about 85% (17 of 20), so what's left of the 40 wrong-database failures
+  is the next lever. Exemplar reordering (reranking, hybrid) isn't.
 - **Report hosted-model numbers with their noise.** Unlike the MLX arms, G1 is not bit-reproducible.
 
 ---
@@ -133,6 +166,9 @@ python rag/generate_rag_aoai.py --limit 50 --output rag/data/aoai_gpt4o_k10_det_
 python rag/generate_rag_aoai.py --limit 50 --output rag/data/aoai_gpt4o_k10_det_b.json
 python rag/generate_rag_aoai.py --output rag/data/aoai_gpt4o_k10_results.json
 python rag/score_rerank_arms.py aoai_gpt4o_k10
+python rag/generate_rag_aoai.py --prompts-path rag/data/rag_prompts_rank1_k10.json \
+    --output rag/data/aoai_gpt4o_rank1_k10_results.json          # G1 + rank-1
+python rag/score_rerank_arms.py aoai_gpt4o_rank1_k10
 ```
 Needs `AZURE_OPENAI_*` in `azure.env` and the deployment above. McNemar: `docs/AZURE-PLAN.md`
 Phase 3 step 5, with `qwen_rag_aoai_gpt4o_k10_execution_results.json` as the arm.
