@@ -608,7 +608,11 @@ Do the measurements in **one sitting**: resume at the start (see Cost control) a
 
 ---
 
-## Phase 7 — Teardown (by Day 25)
+## Phase 7 — Teardown (by Day 25) — ✅ done 2026-09-26 (Day 2)
+
+**Status:** exports saved (`results/azure_export/`, redacted), demo recorded, `rg-capstone-rag` and
+`NetworkWatcherRG` deleted (subscription verified empty), Atlas read-only user and NAT IP entry removed.
+Remaining: export the final Cost analysis CSV in 2–3 days, once the last charges are priced.
 
 - [ ] Export whatever you want to keep: App Insights query results, the index definition JSON, screenshots.
 - [ ] `az group delete -n rg-capstone-rag --yes`. This single command is why everything went into one resource group.
