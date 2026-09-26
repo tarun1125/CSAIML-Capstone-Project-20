@@ -20,11 +20,14 @@
 # A harness that cannot reproduce a known result cannot measure a new one --
 # the same job A1 does one level up.
 #
-# GATE 1 (parity), for any non-FAISS retriever: the top-10 row list per case,
+# GATE 1 (parity) is azure-vector ONLY: the top-10 row list per case,
 # compared with FAISS's. Exact KNN on the same vectors should agree everywhere
 # except exact score ties; for each mismatch the report carries both lists
 # and the true cosine of every row in them, which is what separates a tie
 # (equal cosines, swapped order) from a bug (a different set).
+# The same comparison is recorded for hybrid/semantic too, but there it is NOT
+# a gate -- those arms exist to return different lists -- so it is logged as
+# "overlap vs FAISS" and tagged is_gate=false, never as a Gate 1 result.
 
 import argparse
 import json
@@ -166,11 +169,19 @@ def main():
                  len(control["fields"]), PUBLISHED.name)
     else:
         _, _, faiss_rows, _ = build_candidates(args.top_n, FaissRetriever())
-        payload["parity_vs_faiss"] = gate = parity(test_cases, metadata, rows, faiss_rows)
-        log.info("GATE 1 (top-%d vs FAISS): %d/%d identical, %d same set/different order, "
-                 "%d different set; %d mismatches sit on an exact cosine tie",
+        gate = parity(test_cases, metadata, rows, faiss_rows)
+        gate["is_gate"] = args.retriever == "azure-vector"
+        payload["parity_vs_faiss"] = gate
+        overlap = [len(set(r[:PARITY_K]) & set(f[:PARITY_K])) for r, f in zip(rows, faiss_rows)]
+        gate["mean_top10_overlap"] = sum(overlap) / len(overlap)
+        label = ("GATE 1 (top-%d vs FAISS)" if gate["is_gate"]
+                 else "overlap vs FAISS, top-%d -- descriptive, NOT a gate for this arm")
+        log.info(label + ": %d/%d identical, %d same set/different order, "
+                 "%d different set; %d mismatches sit on an exact cosine tie; "
+                 "mean shared exemplars %.1f/%d",
                  gate["k"], gate["n_identical"], gate["n_cases"], gate["n_same_set_diff_order"],
-                 gate["n_diff_set"], gate["n_mismatch_explained_by_tie"])
+                 gate["n_diff_set"], gate["n_mismatch_explained_by_tie"],
+                 gate["mean_top10_overlap"], gate["k"])
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     out = RESULTS_DIR / f"retrieval_eval_{args.retriever}.json"
