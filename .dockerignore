@@ -21,8 +21,18 @@ data/
 fine_tuning/*
 !fine_tuning/generation_utils.py
 outputs/
+# rag/data holds ~50 MB of experiment results; the service needs two files.
+rag/data/*
+!rag/data/fewshot_metadata.json
+!rag/data/fewshot.index
+rag/outputs/
+tests/
+infra/
+demo_ui/
 results/
 docs/
 *.ipynb
 *.pptx
 *.docx
+.pytest_cache/
+atlas-ro-uri.txt

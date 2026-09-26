@@ -1,6 +1,8 @@
 # Secrets
 atlas-credentials.env
 azure.env
+# the read-only Atlas URI, read once by infra/deploy.sh into Key Vault
+atlas-ro-uri.txt
 
 .venv/
 

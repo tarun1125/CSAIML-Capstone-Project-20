@@ -9,8 +9,8 @@
 #   python rag/generate_rag_aoai.py --output rag/data/aoai_gpt4o_k10_results.json
 #   python rag/generate_rag_aoai.py --limit 50 --output rag/data/aoai_gpt4o_k10_det_a.json   # determinism
 #
-# Reads AZURE_OPENAI_ENDPOINT / AZURE_OPENAI_DEPLOYMENT / AZURE_OPENAI_API_KEY
-# from the environment or the gitignored azure.env. Uses Azure's v1 endpoint
+# Reads AZURE_OPENAI_ENDPOINT / AZURE_OPENAI_DEPLOYMENT (+ AZURE_OPENAI_API_KEY, or
+# Entra ID when absent) via rag/aoai_client.py -- the same call the service makes. Uses Azure's v1 endpoint
 # (<endpoint>/openai/v1/), which takes no api-version string.
 #
 # DECODING: temperature 0 and a fixed seed. A hosted model at temperature 0 is
@@ -39,25 +39,11 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "fine_tuning"))
-from atlas_env import load_env_file  # noqa: E402
-from generation_utils import clean  # noqa: E402  the canonical post-processing, MLX-free since ef8f032
+sys.path.insert(0, str(REPO_ROOT / "rag"))
+from aoai_client import AoaiClient, complete, load_aoai_settings  # noqa: E402  shared with the service
 from run_manifest import read_manifest, write_manifest  # noqa: E402
 
 log = logging.getLogger("rag.generate_rag_aoai")
-
-
-def load_settings() -> dict:
-    import os
-    values = {}
-    env_file = REPO_ROOT / "azure.env"
-    if env_file.exists():
-        values = load_env_file(env_file)
-    get = lambda k: os.environ.get(k) or values.get(k)  # noqa: E731
-    cfg = {k: get(k) for k in ("AZURE_OPENAI_ENDPOINT", "AZURE_OPENAI_DEPLOYMENT", "AZURE_OPENAI_API_KEY")}
-    missing = [k for k, v in cfg.items() if not v]
-    if missing:
-        raise SystemExit(f"missing settings: {missing} (environment or azure.env)")
-    return cfg
 
 
 def load_checkpoint(output_path: Path, prompts_rel: str) -> dict:
@@ -94,11 +80,11 @@ def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
-    from openai import BadRequestError, OpenAI  # noqa: PLC0415  only this arm needs the SDK
+    from openai import BadRequestError  # noqa: PLC0415  only this arm needs the SDK
 
-    cfg = load_settings()
-    client = OpenAI(base_url=cfg["AZURE_OPENAI_ENDPOINT"].rstrip("/") + "/openai/v1/",
-                    api_key=cfg["AZURE_OPENAI_API_KEY"], max_retries=6, timeout=60)
+    settings = load_aoai_settings()
+    aoai = AoaiClient(settings)
+    cfg = {"AZURE_OPENAI_ENDPOINT": settings["endpoint"], "AZURE_OPENAI_DEPLOYMENT": settings["deployment"]}
 
     prompts_path = Path(args.prompts_path).resolve()
     prompts_rel = str(prompts_path.relative_to(REPO_ROOT)) if prompts_path.is_relative_to(REPO_ROOT) else str(prompts_path)
@@ -126,22 +112,9 @@ def main():
             "prompts_file": prompts_rel,
         }
         try:
-            r = client.chat.completions.create(
-                model=cfg["AZURE_OPENAI_DEPLOYMENT"],
-                messages=[{"role": "system", "content": case["system_prompt"]},
-                          {"role": "user", "content": case["question"]}],
-                temperature=args.temperature, max_tokens=args.max_tokens, seed=args.seed,
-            )
-            raw = r.choices[0].message.content or ""
-            record.update({
-                "generated_query": clean(raw),
-                "raw_output": raw,
-                "finish_reason": r.choices[0].finish_reason,
-                "model": r.model,
-                "system_fingerprint": r.system_fingerprint,
-                "prompt_tokens": r.usage.prompt_tokens,
-                "completion_tokens": r.usage.completion_tokens,
-            })
+            record.update(complete(aoai, case["system_prompt"], case["question"],
+                                   temperature=args.temperature, seed=args.seed,
+                                   max_tokens=args.max_tokens))
         except BadRequestError as exc:
             # Content-filter refusals and the like. Recorded, not fatal: an empty
             # query scores as a failure, which is what it is.

@@ -82,15 +82,29 @@ log = logging.getLogger("rag.generate_rag_mlx")
 MODEL = "mlx-community/Qwen2.5-Coder-1.5B-Instruct-bf16"  # same model, no adapter -- RAG is a base-model arm
 
 
-def load_checkpoint(output_path: Path) -> dict:
+def load_checkpoint(output_path: Path, prompts_rel: str) -> dict:
+    """Resume state. Records now carry the prompts file they were generated
+    from, and resuming against a DIFFERENT prompts file is refused -- before
+    this, `--output` reused across two arms silently produced one file holding
+    half of each. Records from before that field existed can't be checked, so
+    they are resumed with a warning."""
     if not output_path.exists():
         return {}
     try:
         existing = json.loads(output_path.read_text(encoding="utf-8"))
-        return {r["id"]: r for r in existing}
+        done = {r["id"]: r for r in existing}
     except (json.JSONDecodeError, KeyError):
         log.warning("Could not read existing %s as a valid checkpoint -- starting fresh.", output_path)
         return {}
+    sources = {r.get("prompts_file") for r in existing}
+    if sources - {None} and sources != {prompts_rel}:
+        raise SystemExit(
+            f"{output_path} was generated from {sorted(map(str, sources))}, not {prompts_rel}. "
+            "Refusing to resume into it -- use a fresh --output."
+        )
+    if None in sources:
+        log.warning("%s has records without prompts_file (pre-guard run); resuming unchecked.", output_path)
+    return done
 
 
 def save_checkpoint(output_path: Path, results_by_id: dict, case_order: list):
@@ -206,7 +220,9 @@ def main():
               "database_match %d/%d (%.1f%%) -- generation quality is a separate question from this.",
               db_match, len(cases), db_match / len(cases) * 100 if cases else 0.0)
 
-    done = load_checkpoint(output_path)
+    prompts_rel = (str(prompts_path.resolve().relative_to(REPO_ROOT))
+                   if prompts_path.resolve().is_relative_to(REPO_ROOT) else str(prompts_path))
+    done = load_checkpoint(output_path, prompts_rel)
     if done:
         log.info("Resuming: %d/%d cases already have a saved result in %s -- skipping those.",
                   len(done), len(cases), output_path)
@@ -263,6 +279,7 @@ def main():
             "predicted_database": case["predicted_database"],
             "database_match": case["database_match"],
             "complexity": case.get("complexity"),
+            "prompts_file": prompts_rel,
             **gen_block,
         }
         save_checkpoint(output_path, done, cases)  # write progress after EVERY case

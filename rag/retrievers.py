@@ -101,7 +101,8 @@ class FaissRetriever:
         }
 
 
-def load_azure_settings(require_admin: bool = False, env_file: Path = AZURE_ENV_FILE) -> dict:
+def load_azure_settings(require_admin: bool = False, env_file: Path = AZURE_ENV_FILE,
+                        allow_identity: bool = False) -> dict:
     """Search endpoint, index name and keys: process environment first (the
     deployed container gets them that way), then the gitignored azure.env.
     Never logged -- describe() reports the endpoint and index, not keys."""
@@ -119,7 +120,10 @@ def load_azure_settings(require_admin: bool = False, env_file: Path = AZURE_ENV_
         "query_key": get("AZURE_SEARCH_QUERY_KEY"),
         "admin_key": get("AZURE_SEARCH_ADMIN_KEY"),
     }
-    missing = [k for k in ("endpoint", "admin_key" if require_admin else "query_key") if not cfg[k]]
+    # allow_identity: the deployed service has no key and authenticates with
+    # its managed identity (role "Search Index Data Reader") instead.
+    needed = ["endpoint"] + (["admin_key"] if require_admin else [] if allow_identity else ["query_key"])
+    missing = [k for k in needed if not cfg[k]]
     if missing:
         raise RuntimeError(
             f"Azure Search settings missing: {missing}. Set AZURE_SEARCH_* in the environment "
@@ -163,8 +167,13 @@ class AzureSearchRetriever:
         self.name, self.label = names[mode]
         self.score_kind = self.SCORE_KINDS[mode]
         self.settings = settings or load_azure_settings()
-        self.client = SearchClient(self.settings["endpoint"], self.settings["index"],
-                                   AzureKeyCredential(self.settings["query_key"]))
+        if self.settings.get("query_key"):
+            credential, self.auth_mode = AzureKeyCredential(self.settings["query_key"]), "query_key"
+        else:
+            from azure.identity import DefaultAzureCredential  # noqa: PLC0415
+
+            credential, self.auth_mode = DefaultAzureCredential(), "entra_id"
+        self.client = SearchClient(self.settings["endpoint"], self.settings["index"], credential)
 
     def search(self, question: str, qvec: np.ndarray, k: int) -> list[tuple[int, float]]:
         from azure.search.documents.models import VectorizedQuery  # noqa: PLC0415
@@ -196,6 +205,7 @@ class AzureSearchRetriever:
             "azure_exhaustive_knn": True,
             "azure_hybrid_vector_k": HYBRID_VECTOR_K if self.mode != "vector" else None,
             "azure_sdk_version": sdk.__version__,
+            "azure_auth": self.auth_mode,
         }
 
 
