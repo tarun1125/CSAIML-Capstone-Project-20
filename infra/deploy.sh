@@ -44,7 +44,19 @@ AI_CONN=$(az monitor app-insights component show -g "$RG" -a "$AI" --query conne
 
 say "2. Registry + image (cloud build, no local Docker)"
 exists az acr show -g "$RG" -n "$ACR" || az acr create -g "$RG" -n "$ACR" --sku Basic -l "$LOC" -o none
-az acr build -r "$ACR" -t "capstone-rag:$TAG" -f service/Dockerfile .
+# Build from a CLEAN EXPORT of the committed tree, never the working directory.
+# The first deploy uploaded the working directory (123 MB): .dockerignore kept
+# every secret out of the IMAGE, but `az acr build` only partly applied it to
+# the UPLOAD, so untracked files like atlas-credentials.env could not be ruled
+# out of the build context. `git archive` contains tracked files only, so
+# gitignored secrets never leave this machine. (It also means only committed
+# code is deployed -- commit first.)
+git diff --quiet HEAD -- service rag evaluation fine_tuning/generation_utils.py atlas_env.py normalize.py \
+  || echo "   WARNING: uncommitted changes in service code are NOT in this build (git archive HEAD)"
+BUILD_DIR=$(mktemp -d); trap 'rm -rf "$BUILD_DIR"' EXIT
+git archive HEAD -- .dockerignore service rag evaluation fine_tuning/generation_utils.py \
+  atlas_env.py normalize.py run_manifest.py | tar -x -C "$BUILD_DIR"
+(cd "$BUILD_DIR" && az acr build -r "$ACR" -t "capstone-rag:$TAG" -f service/Dockerfile .)
 
 say "3. Key Vault (RBAC) + secrets"
 exists az keyvault show -g "$RG" -n "$KV" ||
