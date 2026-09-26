@@ -1,7 +1,7 @@
 # Capstone (NL-to-MongoDB) — interview study guide
 
 **Current tag: `D3` — your own work, the most defensible thing in the portfolio.**
-It leads the JPMorgan resume and every F3 (agentic/RAG) application. Study here is
+It leads the resume and every F3 (agentic/RAG) application. Study here is
 consolidation, not rescue: you know this material, but the numbers moved and the headline
 conclusion reversed, so the *story* needs relearning even where the work doesn't.
 
@@ -79,7 +79,7 @@ questions with one story.
 
 ---
 
-## 3. Retrieval, and the reranking null ⭐ the JPMorgan lead
+## 3. Retrieval, and the reranking null ⭐ the resume lead
 
 ### 3.1 The pipeline
 Embed the NL question with all-MiniLM-L6-v2 → FAISS `IndexFlatIP` over L2-normalised vectors
@@ -189,3 +189,39 @@ ablation and it would sharpen every RAG answer you give.
 - ❌ "4.9% → 24.6%" or "32.8%" — stale, from the confounded setup.
 - ❌ Claiming recall@k/MRR were always measured — they were added 2026-09-22, and the honest
   version ("I added ranking metrics and they didn't predict the task") is the better story.
+
+---
+
+## 8. The Azure arms (added 2026-09-26) — what holds the tag
+
+**Tags, confirmed by Tarun 2026-09-26:** the two experiments `D3`, the deployment `D2`. They're now on
+the resume. Holding them means being able to do all of this **without notes**. Re-check before
+every technical round:
+
+**Retrieval (`FINDING-azure-retrieval.md`)**
+- [ ] Why Gate 1 existed, why exhaustive KNN rather than HNSW, and why 298/304 was reported as
+  **missed** even though every mismatch is one exact tie.
+- [ ] How RRF fuses BM25 and vector ranks, and why it doesn't care about score scales.
+- [ ] Why better recall/MRR/nDCG didn't move execution: 26 of 33 flips had the same database, so the
+  change was exemplar churn. This is the third time you've seen that pattern.
+- [ ] The false positive in the gains (`store_1-25`: right row, wrong field). What the oracle can't see.
+
+**Generator (`FINDING-azure-generator.md`)**
+- [ ] Why the prompts file was held byte-identical, and the Colab confound as the reason it mattered.
+- [ ] 136 → 192 of 258 with the right database; 7 vs 6 with the wrong one. Explain why this makes the
+  database decision the binding constraint.
+- [ ] How the +14 for rank-1 splits into about +12 from the database fix and about +2 noise (the 277
+  byte-identical prompts).
+- [ ] Why T = 0 isn't deterministic on a hosted model, and how you reported it (~198 ± a few).
+- [ ] The Spider-contamination caveat, volunteered before you're asked.
+
+**Deployment (README *Deployment on Azure*)**
+- [ ] Draw the diagram from memory: every hop, and the identity it runs as.
+- [ ] Why a NAT Gateway (a static egress IP for the Atlas access list), and what it costs while idle.
+- [ ] Every security control on the `eval()` path, and which one you'd trust least.
+- [ ] Cold start (34.5 s) against `min-replicas 1`: the cost trade-off, with numbers.
+
+**Do not say**
+- ❌ "Azure AI Search improved accuracy." It didn't: 148 vs 143, p = 0.49. It's an infrastructure choice.
+- ❌ "gpt-4o scored 198" as an exact number. Say ~198 ± a few; it isn't bit-reproducible.
+- ❌ "Production." It's a deployed demo service behind an IP allowlist, with no real users.
